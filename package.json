@@ -1,24 +1,26 @@
 {
   "name": "banorte-monorepo",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
+    "build": "turbo run build",
     "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "dev:documind": "turbo run dev --filter=documind",
+    "build:documind": "turbo run build --filter=documind",
+    "dev:sentiment": "turbo run dev --filter=sentiment-analysis",
+    "build:sentiment": "turbo run build --filter=sentiment-analysis",
+    "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
     "turbo": "^2.6.1",
-    "typescript": "5.9.2"
+    "typescript": "^5.4.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.0.0"
   },
-  "packageManager": "npm@10.9.3",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "packageManager": "pnpm@10.22.0"
 }

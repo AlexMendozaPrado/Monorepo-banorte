@@ -1,0 +1,32 @@
+{
+  "analysis": {
+    "id": "test-analysis-123",
+    "clientName": "Cliente de Prueba",
+    "documentName": "test-document.pdf",
+    "overallSentiment": "POSITIVE",
+    "emotionScores": {
+      "joy": 0.85,
+      "sadness": 0.1,
+      "anger": 0.05,
+      "fear": 0.05,
+      "surprise": 0.2,
+      "disgust": 0.02,
+      "trust": 0.8,
+      "anticipation": 0.6
+    },
+    "analysisMetrics": {
+      "wordCount": 250,
+      "sentenceCount": 15,
+      "paragraphCount": 5,
+      "averageWordsPerSentence": 16.7,
+      "readabilityScore": 65.5,
+      "processingTimeMs": 5000,
+      "languageDetected": "es"
+    },
+    "confidence": 0.92,
+    "channel": "Email",
+    "createdAt": "2024-01-20T10:00:00.000Z",
+    "updatedAt": "2024-01-20T10:00:00.000Z"
+  },
+  "processingTimeMs": 5000
+}
