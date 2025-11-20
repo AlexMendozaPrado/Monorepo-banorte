@@ -3,6 +3,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { makeEmbeddingGenerator } from "@/composition/rag-container";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/debug/test-search

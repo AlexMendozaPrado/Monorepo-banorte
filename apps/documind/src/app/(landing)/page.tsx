@@ -1,5 +1,9 @@
+'use client';
+
 import React from 'react';
 import { Header, SecondaryNav, LoginForm, Promotion, ChatBubble, SocialIcons } from '@banorte/landing-page';
+
+export const dynamic = 'force-dynamic';
 
 export default function LandingPage() {
   return (

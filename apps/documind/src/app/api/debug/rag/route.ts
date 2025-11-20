@@ -3,6 +3,7 @@ import { makeEmbeddingGenerator, makeVectorStore } from "@/composition/rag-conta
 import { getSupabaseClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/debug/rag
