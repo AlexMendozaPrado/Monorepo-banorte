@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Header, SecondaryNav, LoginForm, Promotion, ChatBubble, SocialIcons } from '@banorte/landing-page';
 
