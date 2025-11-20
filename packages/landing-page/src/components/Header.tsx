@@ -11,7 +11,7 @@ export function Header() {
       {/* Logo */}
       <div className="flex items-center gap-4 text-white">
         <Image
-          src="/images/logos/LogotipoBanorteFinal.png"
+          src="/images/LogotipoBanorteFinal.png"
           alt="Banorte"
           width={140}
           height={32}
