@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(`[API /analyze] Analysis complete. Found ${result.keywords.length} keywords`);
+    console.log(`[API /analyze] Sentiment analysis: ${result.sentimentAnalysis.sentimentScore}/7 (Confidence: ${result.sentimentAnalysis.confidenceLevel}%)`);
 
     // Step 2: Store document with embeddings for RAG
     try {
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           uploadedAt: new Date().toISOString(),
           mode,
+          sentimentScore: result.sentimentAnalysis.sentimentScore,
         },
       });
 
@@ -84,7 +86,9 @@ export async function POST(request: NextRequest) {
 
       // Return analysis result with document ID for RAG queries
       return NextResponse.json({
-        ...result,
+        keywords: result.keywords,
+        sentimentAnalysis: result.sentimentAnalysis,
+        fullText: result.fullText,
         documentId: storeResult.document.id,
         chunkCount: storeResult.stats.chunkCount,
       });
@@ -92,7 +96,11 @@ export async function POST(request: NextRequest) {
       console.error("[API /analyze] Error storing document for RAG:", storeError);
       // Continue without RAG storage - still return analysis
       console.warn("[API /analyze] Continuing without RAG storage");
-      return NextResponse.json(result);
+      return NextResponse.json({
+        keywords: result.keywords,
+        sentimentAnalysis: result.sentimentAnalysis,
+        fullText: result.fullText,
+      });
     }
   } catch (error) {
     console.error("[API /analyze] Error analyzing PDF:", error);

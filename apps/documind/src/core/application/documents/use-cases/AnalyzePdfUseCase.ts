@@ -1,6 +1,8 @@
 import { DocumentTextExtractorPort } from "@/core/domain/documents/ports/DocumentTextExtractorPort";
 import { KeywordExtractorPort } from "@/core/domain/documents/ports/KeywordExtractorPort";
+import { SentimentExtractorPort } from "@/core/domain/documents/ports/SentimentExtractorPort";
 import { Keyword } from "@/core/domain/documents/Keyword";
+import { SentimentAnalysisResult } from "@/core/domain/documents/SentimentAnalysis";
 
 export interface AnalyzePdfInput {
   bytes: Buffer;
@@ -11,12 +13,14 @@ export interface AnalyzePdfInput {
 export interface AnalyzePdfOutput {
   keywords: Keyword[];
   fullText: string;
+  sentimentAnalysis: SentimentAnalysisResult;
 }
 
 export class AnalyzePdfUseCase {
   constructor(
     private readonly textExtractor: DocumentTextExtractorPort,
-    private readonly keywordExtractor: KeywordExtractorPort
+    private readonly keywordExtractor: KeywordExtractorPort,
+    private readonly sentimentExtractor: SentimentExtractorPort
   ) {}
 
   async execute(input: AnalyzePdfInput): Promise<AnalyzePdfOutput> {
@@ -36,6 +40,15 @@ export class AnalyzePdfUseCase {
       }
     });
 
-    return { keywords, fullText };
+    // 3. Extract sentiment analysis using LLM
+    const sentimentAnalysis = await this.sentimentExtractor.extract({
+      text: fullText,
+      opts: {
+        mode,
+        locale: "es"
+      }
+    });
+
+    return { keywords, fullText, sentimentAnalysis };
   }
 }
