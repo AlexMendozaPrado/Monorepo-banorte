@@ -4,6 +4,7 @@ import { AnalysisMetricsValueObject } from '../../domain/value-objects/AnalysisM
 import { SentimentAnalyzerPort, SentimentAnalysisRequest } from '../../domain/ports/SentimentAnalyzerPort';
 import { TextExtractorPort } from '../../domain/ports/TextExtractorPort';
 import { SentimentAnalysisRepositoryPort } from '../../domain/ports/SentimentAnalysisRepositoryPort';
+import { SentimentAnalysisResult } from '../../domain/value-objects/SentimentAnalysisExtended';
 
 export interface AnalyzeSentimentCommand {
   fileBuffer: Buffer;
@@ -15,13 +16,15 @@ export interface AnalyzeSentimentCommand {
 export interface AnalyzeSentimentResult {
   analysis: SentimentAnalysisEntity;
   processingTimeMs: number;
+  extendedAnalysis?: SentimentAnalysisResult; // NUEVO: Análisis extendido
 }
 
 export class AnalyzeSentimentUseCase {
   constructor(
     private readonly sentimentAnalyzer: SentimentAnalyzerPort,
     private readonly textExtractor: TextExtractorPort,
-    private readonly repository: SentimentAnalysisRepositoryPort
+    private readonly repository: SentimentAnalysisRepositoryPort,
+    private readonly extendedSentimentExtractor?: any // OpenAISentimentExtractor
   ) {}
 
   async execute(command: AnalyzeSentimentCommand): Promise<AnalyzeSentimentResult> {
@@ -104,9 +107,29 @@ export class AnalyzeSentimentUseCase {
         savedAnalysis.updatedAt
       );
 
+      // NUEVO: Ejecutar análisis extendido si el extractor está disponible
+      let extendedAnalysis: SentimentAnalysisResult | undefined;
+      if (this.extendedSentimentExtractor) {
+        try {
+          console.log('[AnalyzeSentimentUseCase] Executing extended analysis...');
+          extendedAnalysis = await this.extendedSentimentExtractor.extract({
+            text: extractedText.content,
+            opts: {
+              mode: 'finance',
+              locale: 'es'
+            }
+          });
+          console.log('[AnalyzeSentimentUseCase] Extended analysis completed');
+        } catch (error) {
+          console.error('[AnalyzeSentimentUseCase] Extended analysis failed:', error);
+          // No fallar el proceso completo si el análisis extendido falla
+        }
+      }
+
       return {
         analysis: resultEntity,
         processingTimeMs,
+        extendedAnalysis,
       };
     } catch (error) {
       const processingTimeMs = Date.now() - startTime;

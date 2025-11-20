@@ -3,6 +3,8 @@ import { PDFTextExtractor } from '../text-extraction/PDFTextExtractor';
 import { InMemorySentimentAnalysisRepository } from '../repositories/InMemorySentimentAnalysisRepository';
 import { CSVExportService } from '../export/CSVExportService';
 import { SentimentAnalyzerFactory, AIProvider } from '../sentiment/SentimentAnalyzerFactory';
+import { OpenAISentimentExtractor } from '../ai/extractors/OpenAISentimentExtractor';
+import OpenAI from 'openai';
 
 import {
   AnalyzeSentimentUseCase,
@@ -44,6 +46,7 @@ export class DIContainer {
   private _textExtractor?: TextExtractorPort;
   private _repository?: SentimentAnalysisRepositoryPort;
   private _exportService?: ExportServicePort;
+  private _extendedSentimentExtractor?: OpenAISentimentExtractor;
 
   // Application Layer 
   private _analyzeSentimentUseCase?: AnalyzeSentimentUseCase;
@@ -110,13 +113,27 @@ export class DIContainer {
     return this._exportService;
   }
 
+  public get extendedSentimentExtractor(): OpenAISentimentExtractor {
+    if (!this._extendedSentimentExtractor) {
+      const openai = new OpenAI({
+        apiKey: this.config.openaiApiKey || process.env.OPENAI_API_KEY,
+      });
+      this._extendedSentimentExtractor = new OpenAISentimentExtractor(
+        openai,
+        this.config.openaiModel || 'gpt-4o-mini'
+      );
+    }
+    return this._extendedSentimentExtractor;
+  }
+
   // Application Layer Getters
   public get analyzeSentimentUseCase(): AnalyzeSentimentUseCase {
     if (!this._analyzeSentimentUseCase) {
       this._analyzeSentimentUseCase = new AnalyzeSentimentUseCase(
         this.sentimentAnalyzer,
         this.textExtractor,
-        this.repository
+        this.repository,
+        this.extendedSentimentExtractor
       );
     }
     return this._analyzeSentimentUseCase;

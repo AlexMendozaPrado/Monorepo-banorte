@@ -104,7 +104,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     console.log('Sentiment analysis completed successfully');
 
     // Convert entity to API response format
-    const analysisResponse: AnalysisResponse = {
+    const analysisResponse: AnalysisResponse & { extendedAnalysis?: any } = {
       id: result.analysis.id,
       clientName: result.analysis.clientName,
       documentName: result.analysis.documentName,
@@ -116,6 +116,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       createdAt: result.analysis.createdAt.toISOString(),
       updatedAt: result.analysis.updatedAt.toISOString(),
       processingTimeMs: result.processingTimeMs,
+      extendedAnalysis: result.extendedAnalysis, // NUEVO: Incluir análisis extendido
     };
 
     return NextResponse.json({

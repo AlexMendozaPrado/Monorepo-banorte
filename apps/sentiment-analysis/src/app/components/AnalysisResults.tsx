@@ -35,10 +35,11 @@ import {
 } from '../../shared/utils/formatters';
 
 interface AnalysisResultsProps {
-  analysis: AnalysisResponse;
+  analysis: AnalysisResponse & { extendedAnalysis?: any };
 }
 
 export function AnalysisResults({ analysis }: AnalysisResultsProps) {
+  const extendedData = analysis.extendedAnalysis;
   // Prepare emotion data for charts
   const validEmotions: Array<keyof EmotionScore> = ['joy', 'sadness', 'anger', 'fear', 'surprise', 'disgust'];
   const emotionData = validEmotions
@@ -280,6 +281,98 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
               </CardContent>
             </Card>
           </Grid>
+
+          {/* Extended Analysis Section */}
+          {extendedData && (
+            <Grid item xs={12}>
+              <Card variant="outlined" sx={{ mt: 3, bgcolor: '#f5f5f5' }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom color="primary">
+                    📊 Análisis Extendido Detallado
+                  </Typography>
+                  <Divider sx={{ my: 2 }} />
+
+                  <Grid container spacing={3}>
+                    {/* Sentimiento Detallado */}
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        Sentimiento Detallado (Escala 1-7)
+                      </Typography>
+                      <Typography variant="h4" color="primary" fontWeight="bold">
+                        {extendedData.sentimentScore}/7
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Confianza: {extendedData.confidenceLevel}%
+                      </Typography>
+                    </Grid>
+
+                    {/* Palabras Clave */}
+                    {extendedData.keywords && extendedData.keywords.length > 0 && (
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                          Palabras Clave Principales
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {extendedData.keywords.slice(0, 6).map((kw: any, idx: number) => (
+                            <Chip
+                              key={idx}
+                              label={`${kw.word} (${kw.frequency})`}
+                              size="small"
+                              color={kw.sentiment >= 5 ? "success" : kw.sentiment >= 4 ? "default" : "error"}
+                            />
+                          ))}
+                        </Box>
+                      </Grid>
+                    )}
+
+                    {/* Alertas */}
+                    {extendedData.alerts && extendedData.alerts.length > 0 && (
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                          ⚠️ Alertas y Recomendaciones
+                        </Typography>
+                        {extendedData.alerts.map((alert: any) => (
+                          <Box
+                            key={alert.id}
+                            sx={{
+                              p: 2,
+                              mb: 1,
+                              bgcolor: alert.priority === 'Alta' ? '#ffebee' : alert.priority === 'Media' ? '#fff3e0' : '#e3f2fd',
+                              borderLeft: 4,
+                              borderColor: alert.priority === 'Alta' ? 'error.main' : alert.priority === 'Media' ? 'warning.main' : 'info.main',
+                            }}
+                          >
+                            <Typography variant="body2" fontWeight="bold">
+                              [{alert.priority}] {alert.message}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {alert.context}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Grid>
+                    )}
+
+                    {/* Timeline */}
+                    {extendedData.timeline && extendedData.timeline.length > 0 && (
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                          📅 Timeline Emocional
+                        </Typography>
+                        {extendedData.timeline.map((point: any, idx: number) => (
+                          <Box key={idx} sx={{ mb: 1 }}>
+                            <Typography variant="body2">
+                              <strong>{point.time}:</strong> Sentimiento {point.sentiment}/7 - {point.context}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Grid>
+                    )}
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+          )}
         </Grid>
       </CardContent>
     </Card>
