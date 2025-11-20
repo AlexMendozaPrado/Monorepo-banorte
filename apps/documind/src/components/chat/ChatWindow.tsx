@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography, Paper, IconButton, Stack, Alert, Button, Divider } from "@mui/material";
 import { Close, Delete, Refresh } from "@mui/icons-material";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 
@@ -42,10 +43,12 @@ export function ChatWindow({ onClose, parentDocumentId }: ChatWindowProps) {
     regenerate,
     setMessages,
   } = useChat({
-    api: "/api/chat",
-    body: {
-      parentDocumentId, // Pass to API for document filtering
-    },
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      body: {
+        parentDocumentId, // Pass to API for document filtering
+      },
+    }),
   });
 
   // Check if chat is loading
@@ -184,16 +187,16 @@ export function ChatWindow({ onClose, parentDocumentId }: ChatWindowProps) {
         {hasMessages &&
           messages.map((message) => {
             // Extract context chunks from headers (if available)
-            const contextChunks = message.metadata?.contextChunks;
+            const contextChunks = (message.metadata as any)?.contextChunks;
 
-            // Convert content to parts format if needed
-            const parts = message.parts || (message.content ? [{ type: "text" as const, text: message.content }] : []);
+            // Get message parts (AI SDK v5 uses parts instead of content)
+            const parts = message.parts || [];
 
             return (
               <ChatMessage
                 key={message.id}
                 role={message.role}
-                parts={parts}
+                parts={parts as any}
                 contextDocuments={contextChunks}
               />
             );

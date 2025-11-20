@@ -38,7 +38,7 @@ export class OpenAIChatService implements ChatServicePort {
         model: openai(model),
         messages: aiMessages,
         temperature,
-        maxTokens,
+        maxOutputTokens: maxTokens,
         maxRetries: 2, // Default retry strategy
       });
 
@@ -57,8 +57,8 @@ export class OpenAIChatService implements ChatServicePort {
         metadata: {
           model,
           totalTokens: result.usage?.totalTokens,
-          promptTokens: result.usage?.promptTokens,
-          completionTokens: result.usage?.completionTokens,
+          promptTokens: result.usage?.inputTokens,
+          completionTokens: result.usage?.outputTokens,
           finishReason: result.finishReason,
         },
       };
@@ -92,7 +92,7 @@ export class OpenAIChatService implements ChatServicePort {
         model: openai(model),
         messages: aiMessages,
         temperature,
-        maxTokens,
+        maxOutputTokens: maxTokens,
         maxRetries: 2,
         // Optional callbacks for monitoring
         onFinish: ({ text, usage, finishReason }) => {

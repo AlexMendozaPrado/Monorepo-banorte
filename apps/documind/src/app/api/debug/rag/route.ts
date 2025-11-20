@@ -56,7 +56,11 @@ export async function GET(request: NextRequest) {
       });
     } else {
       const embeddingCheck = sampleDocs?.map((doc) => {
-        let embeddingInfo = {
+        let embeddingInfo: {
+          hasEmbedding: boolean;
+          dimensions: number;
+          type: string;
+        } = {
           hasEmbedding: false,
           dimensions: 0,
           type: typeof doc.embedding,

@@ -135,7 +135,7 @@ ${item.chunk.content}`;
       model: openai(getChatModel()),
       messages: messagesWithSystem,
       temperature: getChatTemperature(),
-      maxTokens: getChatMaxTokens(),
+      maxOutputTokens: getChatMaxTokens(),
       maxRetries: 2,
       onFinish: ({ text, usage }) => {
         console.log("[API /chat] Stream finished:", {

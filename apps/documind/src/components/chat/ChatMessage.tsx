@@ -6,9 +6,10 @@ import { Person, SmartToy, Description } from "@mui/icons-material";
 
 /**
  * Chat message part (from AI SDK)
+ * Updated for AI SDK v5 which includes reasoning parts
  */
 interface MessagePart {
-  type: "text" | "tool-call" | "tool-result";
+  type: "text" | "tool-call" | "tool-result" | "reasoning";
   text?: string;
   [key: string]: any;
 }
