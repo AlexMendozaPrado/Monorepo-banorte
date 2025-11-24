@@ -17,6 +17,15 @@ import { SentimentAnalyzerPort } from '../../core/domain/ports/SentimentAnalyzer
 import { TextExtractorPort } from '../../core/domain/ports/TextExtractorPort';
 import { SentimentAnalysisRepositoryPort } from '../../core/domain/ports/SentimentAnalysisRepositoryPort';
 import { ExportServicePort } from '../../core/domain/ports/ExportServicePort';
+import { SessionMetricsRepositoryPort } from '../../core/domain/ports/SessionMetricsRepositoryPort';
+import { SessionConclusionRepositoryPort } from '../../core/domain/ports/SessionConclusionRepositoryPort';
+
+import { InMemorySessionMetricsRepository } from '../repositories/InMemorySessionMetricsRepository';
+import { InMemorySessionConclusionRepository } from '../repositories/InMemorySessionConclusionRepository';
+
+import { SessionMetricsService } from '../../core/application/services/SessionMetricsService';
+import { SessionTrendsService } from '../../core/application/services/SessionTrendsService';
+import { SessionConclusionService } from '../../core/application/services/SessionConclusionService';
 
 export interface DIContainerConfig {
   // AI Provider
@@ -47,12 +56,19 @@ export class DIContainer {
   private _repository?: SentimentAnalysisRepositoryPort;
   private _exportService?: ExportServicePort;
   private _extendedSentimentExtractor?: OpenAISentimentExtractor;
+  private _metricsRepository?: SessionMetricsRepositoryPort;
+  private _conclusionRepository?: SessionConclusionRepositoryPort;
 
-  // Application Layer 
+  // Application Layer
   private _analyzeSentimentUseCase?: AnalyzeSentimentUseCase;
   private _getHistoricalAnalysisUseCase?: GetHistoricalAnalysisUseCase;
   private _filterAnalysisUseCase?: FilterAnalysisUseCase;
   private _exportAnalysisUseCase?: ExportAnalysisUseCase;
+
+  // Session Services
+  private _sessionMetricsService?: SessionMetricsService;
+  private _sessionTrendsService?: SessionTrendsService;
+  private _sessionConclusionService?: SessionConclusionService;
 
   private constructor(config: DIContainerConfig) {
     this.config = config;
@@ -126,6 +142,20 @@ export class DIContainer {
     return this._extendedSentimentExtractor;
   }
 
+  public get metricsRepository(): SessionMetricsRepositoryPort {
+    if (!this._metricsRepository) {
+      this._metricsRepository = new InMemorySessionMetricsRepository();
+    }
+    return this._metricsRepository;
+  }
+
+  public get conclusionRepository(): SessionConclusionRepositoryPort {
+    if (!this._conclusionRepository) {
+      this._conclusionRepository = new InMemorySessionConclusionRepository();
+    }
+    return this._conclusionRepository;
+  }
+
   // Application Layer Getters
   public get analyzeSentimentUseCase(): AnalyzeSentimentUseCase {
     if (!this._analyzeSentimentUseCase) {
@@ -165,6 +195,36 @@ export class DIContainer {
       );
     }
     return this._exportAnalysisUseCase;
+  }
+
+  // Session Services Getters
+  public get sessionMetricsService(): SessionMetricsService {
+    if (!this._sessionMetricsService) {
+      this._sessionMetricsService = new SessionMetricsService(
+        this.metricsRepository
+      );
+    }
+    return this._sessionMetricsService;
+  }
+
+  public get sessionTrendsService(): SessionTrendsService {
+    if (!this._sessionTrendsService) {
+      this._sessionTrendsService = new SessionTrendsService(
+        this.repository,
+        this.metricsRepository
+      );
+    }
+    return this._sessionTrendsService;
+  }
+
+  public get sessionConclusionService(): SessionConclusionService {
+    if (!this._sessionConclusionService) {
+      this._sessionConclusionService = new SessionConclusionService(
+        this.conclusionRepository,
+        this.sentimentAnalyzer
+      );
+    }
+    return this._sessionConclusionService;
   }
 
   // Utility methods
