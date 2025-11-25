@@ -103,6 +103,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 
     console.log('Sentiment analysis completed successfully');
 
+    // Calculate session metrics automatically
+    console.log('Calculating session metrics...');
+    const metricsService = container.sessionMetricsService;
+    const metrics = await metricsService.calculateSessionMetrics(result.analysis);
+    console.log('Session metrics calculated successfully');
+
+    // Generate session conclusion
+    console.log('Generating session conclusion...');
+    const conclusionService = container.sessionConclusionService;
+    const conclusion = await conclusionService.generateConclusion(result.analysis, metrics);
+    console.log('Session conclusion generated successfully');
+
     // Convert entity to API response format
     const analysisResponse: AnalysisResponse & { extendedAnalysis?: any } = {
       id: result.analysis.id,
@@ -116,13 +128,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       createdAt: result.analysis.createdAt.toISOString(),
       updatedAt: result.analysis.updatedAt.toISOString(),
       processingTimeMs: result.processingTimeMs,
-      extendedAnalysis: result.extendedAnalysis, // NUEVO: Incluir análisis extendido
+      extendedAnalysis: result.extendedAnalysis,
     };
 
     return NextResponse.json({
       success: true,
       data: analysisResponse,
-      message: 'Analysis completed successfully',
+      message: 'Analysis completed successfully with metrics and conclusion',
     });
 
   } catch (error) {

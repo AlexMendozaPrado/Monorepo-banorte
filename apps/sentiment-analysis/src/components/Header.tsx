@@ -20,11 +20,21 @@ export default function Header() {
       </div>
       <div className="flex flex-1 justify-end gap-6">
         <nav className="flex items-center gap-8">
-          {['Inicio','Análisis','Historial','Ayuda'].map((item) => (
-            <Link key={item} href="#" className="text-sm font-medium leading-normal text-white hover:text-gray-200 transition-colors">
-              {item}
-            </Link>
-          ))}
+          <Link href="/app" className="text-sm font-medium leading-normal text-white hover:text-gray-200 transition-colors">
+            Inicio
+          </Link>
+          <Link href="/app" className="text-sm font-medium leading-normal text-white hover:text-gray-200 transition-colors">
+            Análisis
+          </Link>
+          <Link href="/sessions/trends" className="text-sm font-medium leading-normal text-white hover:text-gray-200 transition-colors">
+            Tendencias
+          </Link>
+          <Link href="#" className="text-sm font-medium leading-normal text-white hover:text-gray-200 transition-colors">
+            Historial
+          </Link>
+          <Link href="#" className="text-sm font-medium leading-normal text-white hover:text-gray-200 transition-colors">
+            Ayuda
+          </Link>
         </nav>
         <div className="flex items-center gap-4">
           {/* Ícono de búsqueda */}

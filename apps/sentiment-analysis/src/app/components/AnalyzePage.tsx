@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -15,12 +15,18 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Divider,
 } from '@mui/material';
-import { Upload as UploadIcon, Analytics as AnalyticsIcon } from '@mui/icons-material';
+import { Upload as UploadIcon, Analytics as AnalyticsIcon, Dashboard as DashboardIcon } from '@mui/icons-material';
 import { FileUploadZone } from './FileUploadZone';
 import { AnalysisResults } from './AnalysisResults';
 import { RecentAnalyses } from './RecentAnalyses';
-import { AnalysisResponse } from '../../shared/types/api';
+import { SessionMetricsCards } from './SessionMetricsCards';
+import { LikertScaleDisplay } from './LikertScaleDisplay';
+import { EmotionalTimeline } from './EmotionalTimeline';
+import { BlockersAchievements } from './BlockersAchievements';
+import { SessionConclusion } from './SessionConclusion';
+import { AnalysisResponse, SessionMetricsResponse, SessionConclusionResponse, ApiResponse } from '../../shared/types/api';
 
 export function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -29,6 +35,11 @@ export function AnalyzePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Session metrics and conclusion
+  const [sessionMetrics, setSessionMetrics] = useState<SessionMetricsResponse | null>(null);
+  const [sessionConclusion, setSessionConclusion] = useState<SessionConclusionResponse | null>(null);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
 
   const channels = [
     'Sucursal',
@@ -90,12 +101,46 @@ export function AnalyzePage() {
     }
   };
 
+  // Fetch session metrics and conclusion when analysis result is available
+  useEffect(() => {
+    if (analysisResult?.id) {
+      fetchSessionData(analysisResult.id);
+    }
+  }, [analysisResult?.id]);
+
+  const fetchSessionData = async (analysisId: string) => {
+    setLoadingMetrics(true);
+    try {
+      // Fetch metrics
+      const metricsResponse = await fetch(`/api/sessions/metrics/${analysisId}`);
+      const metricsData: ApiResponse<SessionMetricsResponse> = await metricsResponse.json();
+
+      if (metricsData.success && metricsData.data) {
+        setSessionMetrics(metricsData.data);
+      }
+
+      // Fetch conclusion
+      const conclusionResponse = await fetch(`/api/sessions/conclusion/${analysisId}`);
+      const conclusionData: ApiResponse<SessionConclusionResponse> = await conclusionResponse.json();
+
+      if (conclusionData.success && conclusionData.data) {
+        setSessionConclusion(conclusionData.data);
+      }
+    } catch (err) {
+      console.error('Error fetching session data:', err);
+    } finally {
+      setLoadingMetrics(false);
+    }
+  };
+
   const handleReset = () => {
     setFile(null);
     setClientName('');
     setChannel('');
     setError(null);
     setAnalysisResult(null);
+    setSessionMetrics(null);
+    setSessionConclusion(null);
   };
 
   return (
@@ -190,6 +235,59 @@ export function AnalyzePage() {
           {analysisResult && (
             <Box sx={{ mt: 3 }}>
               <AnalysisResults analysis={analysisResult} />
+
+              {/* Session Metrics & Conclusion */}
+              {loadingMetrics && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4, mt: 3 }}>
+                  <CircularProgress />
+                  <Typography variant="body1" sx={{ ml: 2 }}>
+                    Cargando métricas de sesión...
+                  </Typography>
+                </Box>
+              )}
+
+              {sessionMetrics && !loadingMetrics && (
+                <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {/* Divider */}
+                  <Divider sx={{ my: 2 }} />
+
+                  {/* Note about Dashboard */}
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    <Alert severity="info" sx={{ maxWidth: 600 }}>
+                      <strong>Dashboard Completo:</strong> Todas las métricas, timeline emocional, blockers, logros y conclusión ejecutiva están disponibles abajo.
+                      El dashboard con tabs de comparación estará disponible cuando se implemente persistencia de datos.
+                    </Alert>
+                  </Box>
+
+                  {/* Likert Scale Display */}
+                  <LikertScaleDisplay
+                    score={analysisResult.overallSentiment === 'POSITIVE' ? 6 : analysisResult.overallSentiment === 'NEUTRAL' ? 4 : 2}
+                    confidence={analysisResult.confidence}
+                    keywords={sessionMetrics.keywords}
+                  />
+
+                  {/* Session Metrics Cards */}
+                  <SessionMetricsCards metrics={sessionMetrics} />
+
+                  {/* Emotional Timeline */}
+                  <EmotionalTimeline timeline={sessionMetrics.emotionalTimeline} />
+
+                  {/* Blockers & Achievements */}
+                  <BlockersAchievements
+                    blockers={sessionMetrics.blockers}
+                    achievements={sessionMetrics.achievements}
+                    actionItems={sessionMetrics.actionItems}
+                  />
+
+                  {/* Session Conclusion */}
+                  {sessionConclusion && (
+                    <Box sx={{ mt: 2 }}>
+                      <SessionConclusion conclusion={sessionConclusion} />
+                    </Box>
+                  )}
+
+                </Box>
+              )}
             </Box>
           )}
         </Grid>
