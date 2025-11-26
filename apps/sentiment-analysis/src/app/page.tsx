@@ -1,5 +1,8 @@
 import { Header, SecondaryNav, LoginForm, Promotion, ChatBubble, SocialIcons } from '@banorte/landing-page';
 
+// Force dynamic rendering to avoid build errors with client components
+export const dynamic = 'force-dynamic';
+
 export default function LandingPage() {
   return (
     <div className="flex flex-col w-full min-h-screen bg-gray-100">

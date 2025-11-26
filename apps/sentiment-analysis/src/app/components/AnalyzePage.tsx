@@ -21,11 +21,11 @@ import {
 } from '@mui/material';
 import { Upload as UploadIcon, Analytics as AnalyticsIcon, Dashboard as DashboardIcon, Assessment as AssessmentIcon, Description as DescriptionIcon } from '@mui/icons-material';
 import { FileUploadZone } from './FileUploadZone';
-import { AnalysisResults } from './AnalysisResults';
+import { AnalysisResultsDynamic } from './AnalysisResultsDynamic';
 import { RecentAnalyses } from './RecentAnalyses';
 import { SessionMetricsCards } from './SessionMetricsCards';
 import { LikertScaleDisplay } from './LikertScaleDisplay';
-import { EmotionalTimeline } from './EmotionalTimeline';
+import { EmotionalTimelineDynamic } from './EmotionalTimelineDynamic';
 import { BlockersAchievements } from './BlockersAchievements';
 import { SessionConclusion } from './SessionConclusion';
 import { AnalysisResponse } from '../../shared/types/api';
@@ -206,7 +206,7 @@ export function AnalyzePage() {
           {/* Analysis Results */}
           {analysisResult && (
             <Box sx={{ mt: 3 }}>
-              <AnalysisResults analysis={analysisResult} />
+              <AnalysisResultsDynamic analysis={analysisResult} />
 
               {/* Session Metrics & Conclusion (now included in analysisResult) */}
               {analysisResult.metrics && (
@@ -258,7 +258,7 @@ export function AnalyzePage() {
                       <SessionMetricsCards metrics={analysisResult.metrics} />
 
                       {/* Emotional Timeline */}
-                      <EmotionalTimeline timeline={analysisResult.metrics.emotionalTimeline} />
+                      <EmotionalTimelineDynamic timeline={analysisResult.metrics.emotionalTimeline} />
 
                       {/* Blockers & Achievements */}
                       <BlockersAchievements

@@ -5,6 +5,10 @@ import { getAIProviderConfig } from '../../../../config/ai-provider.config';
 import { SessionTrends } from '../../../../core/domain/entities/SessionTrends';
 import { AnalysisFilter } from '../../../../core/domain/ports/SentimentAnalysisRepositoryPort';
 
+// Mark as dynamic to prevent static generation errors
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<SessionTrendsResponse>>> {
   try {
     // Parse query parameters

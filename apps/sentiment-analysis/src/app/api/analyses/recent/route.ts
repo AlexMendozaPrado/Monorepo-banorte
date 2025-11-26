@@ -3,6 +3,10 @@ import { DIContainer } from '../../../../infrastructure/di/DIContainer';
 import { ApiResponse, AnalysisResponse } from '../../../../shared/types/api';
 import { getAIProviderConfig, validateAIProviderConfig } from '../../../../config/ai-provider.config';
 
+// Mark as dynamic to prevent static generation errors
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<AnalysisResponse[]>>> {
   try {
     // Validate AI provider configuration

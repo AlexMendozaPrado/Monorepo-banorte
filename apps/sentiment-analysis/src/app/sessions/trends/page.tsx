@@ -19,7 +19,7 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import { SessionTrendsResponse, ApiResponse } from '../../../shared/types/api';
-import { SessionTrends } from '../../components/SessionTrends';
+import { SessionTrendsDynamic } from '../../components/SessionTrendsDynamic';
 
 export default function TrendsPage() {
   const [loading, setLoading] = useState(false);
@@ -179,7 +179,7 @@ export default function TrendsPage() {
       {/* Results */}
       {!loading && trends && (
         <Box>
-          <SessionTrends trends={trends} />
+          <SessionTrendsDynamic trends={trends} />
         </Box>
       )}
 

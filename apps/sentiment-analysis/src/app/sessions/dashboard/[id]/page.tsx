@@ -23,7 +23,7 @@ import {
 import { SessionDashboardResponse, ApiResponse } from '../../../../shared/types/api';
 import { SessionMetricsCards } from '../../../components/SessionMetricsCards';
 import { LikertScaleDisplay } from '../../../components/LikertScaleDisplay';
-import { EmotionalTimeline } from '../../../components/EmotionalTimeline';
+import { EmotionalTimelineDynamic } from '../../../components/EmotionalTimelineDynamic';
 import { BlockersAchievements } from '../../../components/BlockersAchievements';
 import { SessionConclusion } from '../../../components/SessionConclusion';
 import { formatDate, getSentimentColor, formatSentiment } from '../../../../shared/utils/formatters';
@@ -211,7 +211,7 @@ export default function SessionDashboardPage() {
           />
 
           {/* Emotional Timeline */}
-          <EmotionalTimeline timeline={dashboard.metrics.emotionalTimeline} />
+          <EmotionalTimelineDynamic timeline={dashboard.metrics.emotionalTimeline} />
 
           {/* Blockers & Achievements */}
           <BlockersAchievements

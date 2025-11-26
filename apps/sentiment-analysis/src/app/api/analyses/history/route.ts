@@ -4,6 +4,10 @@ import { ApiResponse, HistoricalAnalysisResponse, HistoricalAnalysisRequest } fr
 import { SentimentType } from '../../../../core/domain/value-objects/SentimentType';
 import { getAIProviderConfig, validateAIProviderConfig } from '../../../../config/ai-provider.config';
 
+// Mark as dynamic to prevent static generation errors
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<HistoricalAnalysisResponse>>> {
   try {
     // Validate AI provider configuration
