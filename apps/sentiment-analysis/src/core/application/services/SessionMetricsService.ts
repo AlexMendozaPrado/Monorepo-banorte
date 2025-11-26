@@ -11,12 +11,149 @@ import {
 } from '../../domain/entities/SessionMetrics';
 import { SentimentType } from '../../domain/value-objects/SentimentType';
 import { SessionMetricsRepositoryPort } from '../../domain/ports/SessionMetricsRepositoryPort';
+import { SessionAnalysisPort } from '../../domain/ports/SessionAnalysisPort';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Servicio de aplicación para cálculo de métricas de sesión
+ *
+ * Estrategia: AI-first con fallback a reglas determinísticas
+ * - Si aiAnalyzer está disponible, usa análisis de IA
+ * - Si falla o no está disponible, usa lógica basada en reglas
+ */
 export class SessionMetricsService {
-  constructor(private metricsRepository: SessionMetricsRepositoryPort) {}
+  constructor(
+    private metricsRepository: SessionMetricsRepositoryPort,
+    private aiAnalyzer?: SessionAnalysisPort
+  ) {}
 
+  /**
+   * Calcula métricas de sesión usando AI o fallback a reglas
+   */
   async calculateSessionMetrics(analysis: SentimentAnalysis): Promise<SessionMetrics> {
+    // Estrategia AI-first con graceful degradation
+    if (this.aiAnalyzer) {
+      try {
+        const aiMetrics = await this.generateWithAI(analysis);
+        return await this.metricsRepository.save(aiMetrics);
+      } catch (error) {
+        console.warn('AI metrics analysis failed, falling back to rule-based approach:', error);
+        // Continue to rule-based approach
+      }
+    }
+
+    // Fallback: Rule-based metrics
+    const ruleBasedMetrics = await this.generateWithRules(analysis);
+    return await this.metricsRepository.save(ruleBasedMetrics);
+  }
+
+  /**
+   * Genera métricas usando análisis de IA (LLM)
+   */
+  private async generateWithAI(analysis: SentimentAnalysis): Promise<SessionMetrics> {
+    if (!this.aiAnalyzer) {
+      throw new Error('AI analyzer not available');
+    }
+
+    const response = await this.aiAnalyzer.analyzeMetrics({
+      transcript: analysis.documentContent,
+      overallSentiment: analysis.overallSentiment,
+      confidence: analysis.confidence,
+      clientName: analysis.clientName,
+      documentName: analysis.documentName,
+      metadata: {
+        channel: analysis.channel,
+        wordCount: analysis.analysisMetrics.wordCount,
+      },
+    });
+
+    // Mapear respuesta de IA a SessionMetrics entity
+    return this.mapAIResponseToMetrics(analysis.id, response);
+  }
+
+  /**
+   * Mapea la respuesta de IA a SessionMetrics entity
+   */
+  private mapAIResponseToMetrics(
+    analysisId: string,
+    response: any
+  ): SessionMetrics {
+    // Mapear topics (ya vienen en formato correcto)
+    const topicsDiscussed: TopicAnalysis[] = response.topics.map((t: any) => ({
+      category: t.category,
+      topic: t.topic,
+      timeSpent: t.timePercentage, // API usa timePercentage, entity usa timeSpent
+      sentiment: t.sentiment,
+      mentions: t.mentions,
+    }));
+
+    // Mapear blockers con IDs y timestamps
+    const blockers: BlockerItem[] = response.blockers.map((b: any) => ({
+      id: `blocker-${uuidv4()}`,
+      description: b.description,
+      priority: b.priority,
+      status: b.status,
+      mentions: b.mentions,
+      firstMentioned: new Date(),
+      lastMentioned: new Date(),
+      context: b.context,
+    }));
+
+    // Mapear achievements con IDs
+    const achievements: AchievementItem[] = response.achievements.map((a: any) => ({
+      id: `achievement-${uuidv4()}`,
+      description: a.description,
+      metric: a.metric,
+      value: a.value,
+      sentiment: a.sentiment,
+      impact: a.impact,
+    }));
+
+    // Mapear action items con IDs y parsear deadlines
+    const actionItems: ActionItem[] = response.actionItems.map((item: any) => ({
+      id: `action-${uuidv4()}`,
+      description: item.description,
+      assignee: item.assignee,
+      deadline: item.deadline ? new Date(item.deadline) : undefined,
+      status: 'pending' as const,
+      priority: item.priority,
+    }));
+
+    // Mapear keywords (formato correcto)
+    const keywords: KeywordFrequency[] = response.keywords;
+
+    // Mapear timeline (formato correcto)
+    const emotionalTimeline: TimelinePoint[] = response.emotionalTimeline;
+
+    // Crear entity con datos mapeados
+    return new SessionMetricsEntity(
+      `metrics-${uuidv4()}`,
+      analysisId,
+      response.durationMinutes,
+      response.participants.length,
+      topicsDiscussed,
+      response.timeDistribution.problemsPercentage,
+      response.timeDistribution.achievementsPercentage,
+      response.timeDistribution.coordinationPercentage,
+      response.scores.productivity,
+      response.scores.effectiveness,
+      response.scores.resolutionRate,
+      response.scores.engagement,
+      blockers,
+      achievements,
+      actionItems,
+      keywords,
+      emotionalTimeline,
+      new Date(),
+      new Date()
+    );
+  }
+
+  /**
+   * Genera métricas usando lógica basada en reglas (fallback)
+   * Mantiene la lógica determinística original
+   */
+  private async generateWithRules(analysis: SentimentAnalysis): Promise<SessionMetrics> {
     const duration = this.estimateDuration(analysis.analysisMetrics.wordCount);
     const participantCount = this.detectParticipants(analysis.documentContent);
     const topicsDiscussed = this.analyzeTopics(analysis.documentContent, analysis.overallSentiment);
@@ -33,7 +170,7 @@ export class SessionMetricsService {
     const keywords = this.extractKeywords(analysis.documentContent, analysis.overallSentiment);
     const emotionalTimeline = this.generateEmotionalTimeline(analysis);
 
-    const metrics = new SessionMetricsEntity(
+    return new SessionMetricsEntity(
       `metrics-${uuidv4()}`,
       analysis.id,
       duration,
@@ -54,8 +191,6 @@ export class SessionMetricsService {
       new Date(),
       new Date()
     );
-
-    return await this.metricsRepository.save(metrics);
   }
 
   private estimateDuration(wordCount: number): number {

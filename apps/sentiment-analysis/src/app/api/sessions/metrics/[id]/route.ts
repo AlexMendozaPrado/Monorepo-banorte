@@ -6,10 +6,14 @@ import { SessionMetrics } from '../../../../../core/domain/entities/SessionMetri
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ): Promise<NextResponse<ApiResponse<SessionMetricsResponse>>> {
   try {
-    const { id } = params;
+    // Await params if it's a Promise (Next.js 15+)
+    const resolvedParams = params instanceof Promise ? await params : params;
+    const { id } = resolvedParams;
+
+    console.log(`[API] GET /api/sessions/metrics/${id}`);
 
     if (!id) {
       return NextResponse.json(
@@ -25,8 +29,10 @@ export async function GET(
     const container = DIContainer.getInstance(getAIProviderConfig());
     const metricsService = container.sessionMetricsService;
 
+    console.log('[API] Getting metrics from service...');
     // Get metrics by analysis ID
     const metrics = await metricsService.getMetricsByAnalysisId(id);
+    console.log(`[API] Metrics result: ${metrics ? 'found' : 'not found'}`);
 
     if (!metrics) {
       return NextResponse.json(
@@ -104,7 +110,7 @@ function convertMetricsToResponse(metrics: SessionMetrics): SessionMetricsRespon
       id: action.id,
       description: action.description,
       assignee: action.assignee,
-      deadline: action.deadline,
+      deadline: action.deadline?.toISOString(),
       status: action.status,
       priority: action.priority,
     })),

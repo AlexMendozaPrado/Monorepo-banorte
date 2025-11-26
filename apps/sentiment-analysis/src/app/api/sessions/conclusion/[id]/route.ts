@@ -6,10 +6,14 @@ import { SessionConclusion } from '../../../../../core/domain/value-objects/Sess
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> | { id: string } }
 ): Promise<NextResponse<ApiResponse<SessionConclusionResponse>>> {
   try {
-    const { id } = params;
+    // Await params if it's a Promise (Next.js 15+)
+    const resolvedParams = params instanceof Promise ? await params : params;
+    const { id } = resolvedParams;
+
+    console.log(`[API] GET /api/sessions/conclusion/${id}`);
 
     if (!id) {
       return NextResponse.json(
@@ -25,8 +29,10 @@ export async function GET(
     const container = DIContainer.getInstance(getAIProviderConfig());
     const conclusionService = container.sessionConclusionService;
 
+    console.log('[API] Getting conclusion from service...');
     // Get conclusion by analysis ID
     const conclusion = await conclusionService.getConclusionByAnalysisId(id);
+    console.log(`[API] Conclusion result: ${conclusion ? 'found' : 'not found'}`);
 
     if (!conclusion) {
       return NextResponse.json(
@@ -88,7 +94,7 @@ function convertConclusionToResponse(conclusion: SessionConclusion): SessionConc
         id: action.id,
         description: action.description,
         assignee: action.assignee,
-        deadline: action.deadline,
+        deadline: action.deadline?.toISOString(),
         priority: action.priority,
         status: action.status,
       })),
@@ -96,7 +102,7 @@ function convertConclusionToResponse(conclusion: SessionConclusion): SessionConc
         id: action.id,
         description: action.description,
         assignee: action.assignee,
-        deadline: action.deadline,
+        deadline: action.deadline?.toISOString(),
         priority: action.priority,
         status: action.status,
       })),
@@ -104,7 +110,7 @@ function convertConclusionToResponse(conclusion: SessionConclusion): SessionConc
         id: action.id,
         description: action.description,
         assignee: action.assignee,
-        deadline: action.deadline,
+        deadline: action.deadline?.toISOString(),
         priority: action.priority,
         status: action.status,
       })),

@@ -4,12 +4,22 @@ import {
   SessionMetricsFilter,
 } from '../../core/domain/ports/SessionMetricsRepositoryPort';
 
+// Use globalThis to persist data across Next.js hot reloads in development
+const getMetricsStore = (): Map<string, SessionMetrics> => {
+  if (!(globalThis as any).__sessionMetricsStore) {
+    (globalThis as any).__sessionMetricsStore = new Map<string, SessionMetrics>();
+    console.log('[MetricsRepo] Initialized new global metrics store');
+  }
+  return (globalThis as any).__sessionMetricsStore;
+};
+
 export class InMemorySessionMetricsRepository implements SessionMetricsRepositoryPort {
-  private metrics: Map<string, SessionMetrics> = new Map();
 
   async save(metrics: SessionMetrics): Promise<SessionMetrics> {
     try {
-      this.metrics.set(metrics.id, metrics);
+      const store = getMetricsStore();
+      store.set(metrics.id, metrics);
+      console.log(`[MetricsRepo] Saved metrics for analysis ${metrics.analysisId}, total in cache: ${store.size}`);
       return metrics;
     } catch (error) {
       throw new Error(
@@ -20,7 +30,10 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async findById(id: string): Promise<SessionMetrics | null> {
     try {
-      return this.metrics.get(id) || null;
+      const store = getMetricsStore();
+      const result = store.get(id) || null;
+      console.log(`[MetricsRepo] Find by ID ${id}: ${result ? 'found' : 'not found'}`);
+      return result;
     } catch (error) {
       throw new Error(
         `Failed to find session metrics by ID: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -30,8 +43,11 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async findByAnalysisId(analysisId: string): Promise<SessionMetrics | null> {
     try {
-      const metricsArray = Array.from(this.metrics.values());
-      return metricsArray.find(m => m.analysisId === analysisId) || null;
+      const store = getMetricsStore();
+      const metricsArray = Array.from(store.values());
+      const result = metricsArray.find(m => m.analysisId === analysisId) || null;
+      console.log(`[MetricsRepo] Find by analysis ID ${analysisId}: ${result ? 'found' : 'not found'}, total in cache: ${store.size}`);
+      return result;
     } catch (error) {
       throw new Error(
         `Failed to find session metrics by analysis ID: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -41,7 +57,8 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async findByAnalysisIds(analysisIds: string[]): Promise<SessionMetrics[]> {
     try {
-      const metricsArray = Array.from(this.metrics.values());
+      const store = getMetricsStore();
+      const metricsArray = Array.from(store.values());
       return metricsArray.filter(m => analysisIds.includes(m.analysisId));
     } catch (error) {
       throw new Error(
@@ -52,7 +69,8 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async findByDateRange(from: Date, to: Date): Promise<SessionMetrics[]> {
     try {
-      const metricsArray = Array.from(this.metrics.values());
+      const store = getMetricsStore();
+      const metricsArray = Array.from(store.values());
       return metricsArray.filter(m => m.createdAt >= from && m.createdAt <= to);
     } catch (error) {
       throw new Error(
@@ -63,7 +81,8 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async findAll(filter?: SessionMetricsFilter): Promise<SessionMetrics[]> {
     try {
-      let metricsArray = Array.from(this.metrics.values());
+      const store = getMetricsStore();
+      let metricsArray = Array.from(store.values());
 
       if (filter) {
         metricsArray = this.applyFilters(metricsArray, filter);
@@ -79,7 +98,8 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async deleteById(id: string): Promise<boolean> {
     try {
-      return this.metrics.delete(id);
+      const store = getMetricsStore();
+      return store.delete(id);
     } catch (error) {
       throw new Error(
         `Failed to delete session metrics: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -89,13 +109,14 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   async update(id: string, updates: Partial<SessionMetrics>): Promise<SessionMetrics | null> {
     try {
-      const existing = this.metrics.get(id);
+      const store = getMetricsStore();
+      const existing = store.get(id);
       if (!existing) {
         return null;
       }
 
       const updated = { ...existing, ...updates, updatedAt: new Date() };
-      this.metrics.set(id, updated);
+      store.set(id, updated);
       return updated;
     } catch (error) {
       throw new Error(
@@ -105,7 +126,8 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
   }
 
   async count(): Promise<number> {
-    return this.metrics.size;
+    const store = getMetricsStore();
+    return store.size;
   }
 
   private applyFilters(metricsArray: SessionMetrics[], filter: SessionMetricsFilter): SessionMetrics[] {
@@ -143,6 +165,7 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
 
   // Utility methods for testing and development
   async clear(): Promise<void> {
-    this.metrics.clear();
+    const store = getMetricsStore();
+    store.clear();
   }
 }

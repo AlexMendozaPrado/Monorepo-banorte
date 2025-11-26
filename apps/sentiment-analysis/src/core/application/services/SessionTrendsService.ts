@@ -136,7 +136,7 @@ export class SessionTrendsService {
 
   private calculateVelocityEvolution(metrics: SessionMetrics[]): MetricEvolution[] {
     return metrics.map((metric, index) => {
-      const value = metric.achievementsCount || 0;
+      const value = metric.achievements.length || 0;
       const prevValue = index > 0 ? metrics[index - 1].achievements.length : value;
       const change = prevValue > 0 ? ((value - prevValue) / prevValue) * 100 : 0;
 

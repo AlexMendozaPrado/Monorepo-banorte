@@ -19,9 +19,11 @@ import { SentimentAnalysisRepositoryPort } from '../../core/domain/ports/Sentime
 import { ExportServicePort } from '../../core/domain/ports/ExportServicePort';
 import { SessionMetricsRepositoryPort } from '../../core/domain/ports/SessionMetricsRepositoryPort';
 import { SessionConclusionRepositoryPort } from '../../core/domain/ports/SessionConclusionRepositoryPort';
+import { SessionAnalysisPort } from '../../core/domain/ports/SessionAnalysisPort';
 
 import { InMemorySessionMetricsRepository } from '../repositories/InMemorySessionMetricsRepository';
 import { InMemorySessionConclusionRepository } from '../repositories/InMemorySessionConclusionRepository';
+import { SessionAnalyzerFactory } from '../session-analysis/SessionAnalyzerFactory';
 
 import { SessionMetricsService } from '../../core/application/services/SessionMetricsService';
 import { SessionTrendsService } from '../../core/application/services/SessionTrendsService';
@@ -58,6 +60,7 @@ export class DIContainer {
   private _extendedSentimentExtractor?: OpenAISentimentExtractor;
   private _metricsRepository?: SessionMetricsRepositoryPort;
   private _conclusionRepository?: SessionConclusionRepositoryPort;
+  private _sessionAnalyzer?: SessionAnalysisPort;
 
   // Application Layer
   private _analyzeSentimentUseCase?: AnalyzeSentimentUseCase;
@@ -156,6 +159,39 @@ export class DIContainer {
     return this._conclusionRepository;
   }
 
+  public get sessionAnalyzer(): SessionAnalysisPort | undefined {
+    if (this._sessionAnalyzer !== undefined) {
+      return this._sessionAnalyzer;
+    }
+
+    try {
+      // Intenta crear el analyzer desde variables de entorno
+      this._sessionAnalyzer = SessionAnalyzerFactory.create({
+        provider: this.config.aiProvider || 'openai',
+        openaiApiKey: this.config.openaiApiKey,
+        openaiModel: this.config.openaiModel || 'gpt-4o',
+        maxTokens: this.config.maxTokens || 16000,
+        temperature: this.config.temperature || 0.3,
+      });
+
+      const modelInfo = this._sessionAnalyzer.getModelInfo();
+      console.log(
+        `[DI] Session analyzer initialized: ${modelInfo.provider}/${modelInfo.name}`
+      );
+
+      return this._sessionAnalyzer;
+    } catch (error) {
+      // Graceful degradation: si falla, retorna undefined
+      // Los services automáticamente usarán lógica basada en reglas
+      console.warn(
+        '[DI] Session analyzer not available, services will use rule-based approach:',
+        error instanceof Error ? error.message : error
+      );
+      this._sessionAnalyzer = undefined;
+      return undefined;
+    }
+  }
+
   // Application Layer Getters
   public get analyzeSentimentUseCase(): AnalyzeSentimentUseCase {
     if (!this._analyzeSentimentUseCase) {
@@ -201,7 +237,8 @@ export class DIContainer {
   public get sessionMetricsService(): SessionMetricsService {
     if (!this._sessionMetricsService) {
       this._sessionMetricsService = new SessionMetricsService(
-        this.metricsRepository
+        this.metricsRepository,
+        this.sessionAnalyzer  // Pasar el session analyzer (opcional)
       );
     }
     return this._sessionMetricsService;
@@ -221,7 +258,7 @@ export class DIContainer {
     if (!this._sessionConclusionService) {
       this._sessionConclusionService = new SessionConclusionService(
         this.conclusionRepository,
-        this.sentimentAnalyzer
+        this.sessionAnalyzer  // Usar session analyzer en lugar de sentiment analyzer
       );
     }
     return this._sessionConclusionService;

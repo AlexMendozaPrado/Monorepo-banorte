@@ -10,7 +10,7 @@ import {
   TeamClimate,
 } from '../../domain/value-objects/SessionConclusion';
 import { SessionConclusionRepositoryPort } from '../../domain/ports/SessionConclusionRepositoryPort';
-import { SentimentAnalyzerPort } from '../../domain/ports/SentimentAnalyzerPort';
+import { SessionAnalysisPort } from '../../domain/ports/SessionAnalysisPort';
 import { SentimentType } from '../../domain/value-objects/SentimentType';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -38,23 +38,34 @@ interface ConclusionAIResponse {
   nextSteps: string[];
 }
 
+/**
+ * Servicio de aplicación para generación de conclusiones de sesión
+ *
+ * Estrategia: AI-first con fallback a reglas determinísticas
+ * - Si aiAnalyzer está disponible, usa análisis de IA
+ * - Si falla o no está disponible, usa lógica basada en reglas
+ */
 export class SessionConclusionService {
   constructor(
     private conclusionRepository: SessionConclusionRepositoryPort,
-    private aiAnalyzer?: SentimentAnalyzerPort
+    private aiAnalyzer?: SessionAnalysisPort
   ) {}
 
+  /**
+   * Genera conclusión de sesión usando AI o fallback a reglas
+   */
   async generateConclusion(
     analysis: SentimentAnalysis,
     metrics: SessionMetrics
   ): Promise<SessionConclusion> {
     let aiResponse: ConclusionAIResponse;
 
+    // Estrategia AI-first con graceful degradation
     if (this.aiAnalyzer) {
       try {
         aiResponse = await this.generateWithAI(analysis, metrics);
       } catch (error) {
-        console.warn('AI generation failed, using rule-based approach:', error);
+        console.warn('AI conclusion generation failed, falling back to rule-based approach:', error);
         aiResponse = this.generateWithRules(analysis, metrics);
       }
     } else {
@@ -65,15 +76,38 @@ export class SessionConclusionService {
     return await this.conclusionRepository.save(conclusion);
   }
 
+  /**
+   * Genera conclusión usando análisis de IA (LLM)
+   */
   private async generateWithAI(
     analysis: SentimentAnalysis,
     metrics: SessionMetrics
   ): Promise<ConclusionAIResponse> {
-    const prompt = this.buildAIPrompt(analysis, metrics);
+    if (!this.aiAnalyzer) {
+      throw new Error('AI analyzer not available');
+    }
 
-    // Nota: Esta llamada requiere implementación específica según el SentimentAnalyzerPort
-    // Por ahora, usamos enfoque basado en reglas
-    return this.generateWithRules(analysis, metrics);
+    const response = await this.aiAnalyzer.analyzeConclusion({
+      transcript: analysis.documentContent,
+      overallSentiment: analysis.overallSentiment,
+      confidence: analysis.confidence,
+      metrics: metrics,
+      clientName: analysis.clientName,
+      documentName: analysis.documentName,
+    });
+
+    // Mapear respuesta de IA a ConclusionAIResponse (ya está en el formato correcto)
+    return {
+      executiveSummary: response.executiveSummary,
+      risks: response.risks,
+      opportunities: response.opportunities,
+      actionPlan: response.actionPlan,
+      insights: response.insights,
+      teamClimate: response.teamClimate,
+      satisfactionScore: response.satisfactionScore,
+      recommendations: response.recommendations,
+      nextSteps: response.nextSteps,
+    };
   }
 
   private generateWithRules(
@@ -343,30 +377,6 @@ export class SessionConclusionService {
     nextSteps.push('Agendar siguiente sesión de seguimiento');
 
     return nextSteps;
-  }
-
-  private buildAIPrompt(analysis: SentimentAnalysis, metrics: SessionMetrics): string {
-    return `
-Eres un analista experto en análisis de sesiones de trabajo. Genera una conclusión ejecutiva para stakeholders.
-
-**Análisis de Sentimientos:**
-- Sentimiento: ${analysis.overallSentiment}
-- Confianza: ${(analysis.confidence * 100).toFixed(1)}%
-- Emociones: ${JSON.stringify(analysis.emotionScores)}
-
-**Métricas de Sesión:**
-- Productividad: ${metrics.productivityScore}/100
-- Efectividad: ${metrics.effectivenessScore}/100
-- Blockers: ${metrics.blockers.length}
-- Logros: ${metrics.achievements.length}
-- Duración: ${metrics.duration} minutos
-- Participantes: ${metrics.participantCount}
-
-**Contenido (primeros 2000 caracteres):**
-${analysis.documentContent.substring(0, 2000)}
-
-Genera un JSON con la estructura ConclusionAIResponse.
-    `;
   }
 
   private buildConclusion(analysisId: string, aiResponse: ConclusionAIResponse): SessionConclusion {

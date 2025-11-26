@@ -27,6 +27,7 @@ import { EmotionalTimeline } from '../../../components/EmotionalTimeline';
 import { BlockersAchievements } from '../../../components/BlockersAchievements';
 import { SessionConclusion } from '../../../components/SessionConclusion';
 import { formatDate, getSentimentColor, formatSentiment } from '../../../../shared/utils/formatters';
+import { SentimentType } from '../../../../core/domain/value-objects/SentimentType';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -204,7 +205,7 @@ export default function SessionDashboardPage() {
 
           {/* Likert Scale */}
           <LikertScaleDisplay
-            score={dashboard.analysis.overallSentiment === 'POSITIVE' ? 6 : dashboard.analysis.overallSentiment === 'NEUTRAL' ? 4 : 2}
+            score={dashboard.analysis.overallSentiment === SentimentType.POSITIVE ? 6 : dashboard.analysis.overallSentiment === SentimentType.NEUTRAL ? 4 : 2}
             confidence={dashboard.analysis.confidence}
             keywords={dashboard.metrics.keywords}
           />

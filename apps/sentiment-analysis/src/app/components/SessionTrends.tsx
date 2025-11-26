@@ -45,6 +45,13 @@ interface SessionTrendsProps {
 }
 
 export function SessionTrends({ trends }: SessionTrendsProps) {
+  // Map API trend values to display trend values
+  const mapTrendValue = (trend: 'increasing' | 'decreasing' | 'stable'): 'improving' | 'declining' | 'stable' => {
+    if (trend === 'increasing') return 'improving';
+    if (trend === 'decreasing') return 'declining';
+    return 'stable';
+  };
+
   const getTrendIcon = (trend: 'improving' | 'declining' | 'stable') => {
     if (trend === 'improving') return <TrendingUpIcon sx={{ color: '#6CC04A' }} />;
     if (trend === 'declining') return <TrendingDownIcon sx={{ color: '#EB0029' }} />;
@@ -295,9 +302,9 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
                         </TableCell>
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                            {getTrendIcon(topic.trend)}
-                            <Typography variant="caption" sx={{ color: getTrendColor(topic.trend) }}>
-                              {topic.trend === 'improving' ? 'Mejorando' : topic.trend === 'declining' ? 'Declinando' : 'Estable'}
+                            {getTrendIcon(mapTrendValue(topic.trend))}
+                            <Typography variant="caption" sx={{ color: getTrendColor(mapTrendValue(topic.trend)) }}>
+                              {topic.trend === 'increasing' ? 'Aumentando' : topic.trend === 'decreasing' ? 'Disminuyendo' : 'Estable'}
                             </Typography>
                           </Box>
                         </TableCell>

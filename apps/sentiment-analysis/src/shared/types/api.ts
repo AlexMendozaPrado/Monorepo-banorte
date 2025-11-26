@@ -28,6 +28,9 @@ export interface AnalysisResponse {
   createdAt: string;
   updatedAt: string;
   processingTimeMs: number;
+  // Session data included in single response (for Vercel serverless compatibility)
+  metrics?: SessionMetricsResponse;
+  conclusion?: SessionConclusionResponse;
 }
 
 export interface HistoricalAnalysisRequest {
