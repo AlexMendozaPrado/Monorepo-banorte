@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('https://db.onlinewebfonts.com/t/0016f77f50d636d6eb6336a8a9d5d3d5.eot');
+  src: url('https://db.onlinewebfonts.com/t/0016f77f50d636d6eb6336a8a9d5d3d5.eot?#iefix') format('embedded-opentype'),
+       url('https://db.onlinewebfonts.com/t/0016f77f50d636d6eb6336a8a9d5d3d5.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/0016f77f50d636d6eb6336a8a9d5d3d5.woff') format('woff'),
+       url('https://db.onlinewebfonts.com/t/0016f77f50d636d6eb6336a8a9d5d3d5.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('https://db.onlinewebfonts.com/t/3a47f5f06b7994097394f6ed1a2c9a9c.eot');
+  src: url('https://db.onlinewebfonts.com/t/3a47f5f06b7994097394f6ed1a2c9a9c.eot?#iefix') format('embedded-opentype'),
+       url('https://db.onlinewebfonts.com/t/3a47f5f06b7994097394f6ed1a2c9a9c.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/3a47f5f06b7994097394f6ed1a2c9a9c.woff') format('woff'),
+       url('https://db.onlinewebfonts.com/t/3a47f5f06b7994097394f6ed1a2c9a9c.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: url('https://db.onlinewebfonts.com/t/5b08d0f71a12bd1824d6c4797a673e64.eot');
+  src: url('https://db.onlinewebfonts.com/t/5b08d0f71a12bd1824d6c4797a673e64.eot?#iefix') format('embedded-opentype'),
+       url('https://db.onlinewebfonts.com/t/5b08d0f71a12bd1824d6c4797a673e64.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/5b08d0f71a12bd1824d6c4797a673e64.woff') format('woff'),
+       url('https://db.onlinewebfonts.com/t/5b08d0f71a12bd1824d6c4797a673e64.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 215 20.2% 65.1%;
+    --radius: 0.5rem;
+    /* Banorte Design System */
+    --rojo-banorte: #EB0029;
+    --rojo-hover: #E30028;
+    --gris-banorte: #5B6670;
+    --gris-oscuro: #323E48;
+    --blanco: #FFFFFF;
+    --fondo: #EBF0F2;
+    --fondo-2: #F4F7F8;
+    --font-primary: 'Gotham', sans-serif;
+    --font-secondary: 'Roboto', sans-serif;
+  }
+
+  :root[class~="dark"] {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 216 34% 17%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: var(--font-primary);
+  }
+}

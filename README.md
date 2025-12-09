@@ -7,13 +7,25 @@ Monorepo oficial de Banorte administrado con Turborepo, que contiene aplicacione
 ```
 banorte-monorepo/
 ├── apps/
-│   └── documind/          # Aplicación principal de análisis de documentos
+│   ├── landing/           # 🆕 Landing Principal - Portal de Aplicaciones
+│   │   ├── src/
+│   │   │   ├── app/       # Next.js App Router
+│   │   │   └── components/
+│   │   └── package.json
+│   │
+│   ├── documind/          # Aplicación de análisis de documentos
+│   │   ├── src/
+│   │   │   ├── app/       # Next.js App Router
+│   │   │   ├── components/
+│   │   │   ├── core/      # Clean Architecture - Domain
+│   │   │   └── infrastructure/
+│   │   ├── public/
+│   │   └── package.json
+│   │
+│   └── sentiment-analysis/ # Aplicación de análisis de sentimientos
 │       ├── src/
-│       │   ├── app/       # Next.js App Router
-│       │   ├── components/
-│       │   ├── core/      # Clean Architecture - Domain
-│       │   └── infrastructure/
-│       ├── public/
+│       │   ├── app/
+│       │   └── components/
 │       └── package.json
 │
 ├── packages/

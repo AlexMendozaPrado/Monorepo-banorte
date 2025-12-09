@@ -8,6 +8,8 @@
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "dev:landing": "turbo run dev --filter=landing",
+    "build:landing": "turbo run build --filter=landing",
     "dev:documind": "turbo run dev --filter=documind",
     "build:documind": "turbo run build --filter=documind",
     "dev:sentiment": "turbo run dev --filter=sentiment-analysis",
