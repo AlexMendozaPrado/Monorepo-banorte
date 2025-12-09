@@ -1,0 +1,69 @@
+# ============================================
+# .dockerignore para Monorepo Banorte
+# Contexto: Raíz del monorepo
+# ============================================
+
+# Dependencies en todas las apps
+**/node_modules
+**/.pnpm-store
+**/npm-debug.log*
+**/yarn-debug.log*
+**/pnpm-debug.log*
+
+# Build artifacts
+**/.next
+**/out
+**/.turbo
+**/dist
+**/build
+**/coverage
+
+# Testing
+**/__tests__
+**/cypress
+**/cypress.config.ts
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/.nyc_output
+**/cypress/screenshots
+**/cypress/videos
+
+# Environment variables (sensibles)
+**/.env
+**/.env.local
+**/.env*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+**/.git
+
+# IDEs
+.vscode
+.idea
+**/.vscode
+**/.idea
+
+# OS
+.DS_Store
+**/.DS_Store
+*.pem
+
+# Documentation
+*.md
+!README.md
+
+# TypeScript
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Vercel
+.vercel
+**/.vercel
+
+# Otros
+**/scripts
+**/.eslintcache

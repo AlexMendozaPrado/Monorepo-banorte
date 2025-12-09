@@ -1,0 +1,160 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-analysis
+  namespace: banorte-apps
+  labels:
+    app: sentiment-analysis
+    version: v1
+    tier: frontend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: sentiment-analysis
+  template:
+    metadata:
+      labels:
+        app: sentiment-analysis
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      # Security Context para OpenShift
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      
+      containers:
+      - name: sentiment-analysis
+        image: image-registry.openshift-image-registry.svc:5000/banorte-apps/sentiment-analysis:latest
+        imagePullPolicy: Always
+        
+        ports:
+        - containerPort: 3001
+          protocol: TCP
+          name: http
+        
+        # Variables de entorno
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3001"
+        - name: NEXT_TELEMETRY_DISABLED
+          value: "1"
+        
+        # Secrets desde OpenShift Secret
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sentiment-analysis-secrets
+              key: openai-api-key
+        
+        # ConfigMap
+        - name: AI_PROVIDER
+          valueFrom:
+            configMapKeyRef:
+              name: sentiment-analysis-config
+              key: ai-provider
+        
+        - name: DEFAULT_MODEL
+          valueFrom:
+            configMapKeyRef:
+              name: sentiment-analysis-config
+              key: default-model
+        
+        - name: MAX_FILE_SIZE
+          valueFrom:
+            configMapKeyRef:
+              name: sentiment-analysis-config
+              key: max-file-size
+        
+        # PostgreSQL connection (si usas base de datos)
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: sentiment-analysis-secrets
+              key: database-url
+              optional: true
+        
+        # Recursos
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        
+        # Liveness Probe
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # Readiness Probe
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # Startup Probe (para cold starts lentos)
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+            scheme: HTTP
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 30
+        
+        # Volume mounts (si necesitas persistent storage)
+        volumeMounts:
+        - name: uploads
+          mountPath: /opt/app-root/src/uploads
+        - name: tmp
+          mountPath: /tmp
+      
+      volumes:
+      - name: uploads
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      
+      # Affinity para distribución en nodos
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - sentiment-analysis
+              topologyKey: kubernetes.io/hostname
+

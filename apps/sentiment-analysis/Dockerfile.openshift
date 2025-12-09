@@ -1,0 +1,95 @@
+# ============================================
+# Dockerfile optimizado para OpenShift
+# Compatible con UID aleatorio y restricciones de seguridad
+# ============================================
+
+# ============================================
+# Stage 1: Dependencies
+# ============================================
+FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS deps
+
+USER 0
+
+WORKDIR /opt/app-root/src
+
+# Instalar pnpm
+RUN npm install -g pnpm@10.22.0
+
+# Copiar archivos de configuración del monorepo
+COPY --chown=1001:0 pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY --chown=1001:0 apps/sentiment-analysis/package.json ./apps/sentiment-analysis/
+COPY --chown=1001:0 packages/landing-page/package.json ./packages/landing-page/
+COPY --chown=1001:0 packages/typescript-config/package.json ./packages/typescript-config/
+COPY --chown=1001:0 packages/eslint-config/package.json ./packages/eslint-config/
+
+# Instalar dependencias
+RUN pnpm install --frozen-lockfile --prod
+
+# ============================================
+# Stage 2: Builder
+# ============================================
+FROM registry.access.redhat.com/ubi9/nodejs-20:latest AS builder
+
+USER 0
+
+WORKDIR /opt/app-root/src
+
+RUN npm install -g pnpm@10.22.0
+
+# Copiar archivos de configuración
+COPY --chown=1001:0 pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY --chown=1001:0 turbo.json ./
+
+# Copiar package.json de workspaces
+COPY --chown=1001:0 apps/sentiment-analysis/package.json ./apps/sentiment-analysis/
+COPY --chown=1001:0 packages/landing-page/package.json ./packages/landing-page/
+COPY --chown=1001:0 packages/typescript-config/package.json ./packages/typescript-config/
+COPY --chown=1001:0 packages/eslint-config/package.json ./packages/eslint-config/
+
+# Instalar todas las dependencias
+RUN pnpm install --frozen-lockfile
+
+# Copiar código fuente
+COPY --chown=1001:0 apps/sentiment-analysis ./apps/sentiment-analysis
+COPY --chown=1001:0 packages ./packages
+
+# Build
+WORKDIR /opt/app-root/src/apps/sentiment-analysis
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+RUN pnpm build
+
+# ============================================
+# Stage 3: Runner (Producción)
+# ============================================
+FROM registry.access.redhat.com/ubi9/nodejs-20-minimal:latest AS runner
+
+WORKDIR /opt/app-root/src
+
+# Copiar archivos necesarios
+COPY --from=builder --chown=1001:0 /opt/app-root/src/apps/sentiment-analysis/public ./public
+COPY --from=builder --chown=1001:0 /opt/app-root/src/apps/sentiment-analysis/.next/standalone ./
+COPY --from=builder --chown=1001:0 /opt/app-root/src/apps/sentiment-analysis/.next/static ./.next/static
+
+# Crear directorios necesarios con permisos para grupo
+RUN mkdir -p /opt/app-root/src/uploads /tmp && \
+    chgrp -R 0 /opt/app-root/src && \
+    chmod -R g=u /opt/app-root/src && \
+    chmod -R g=u /tmp
+
+# OpenShift asigna UID aleatorio, pero siempre grupo 0
+USER 1001
+
+EXPOSE 3001
+
+ENV PORT=3001
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Health check (OpenShift usa readiness/liveness probes en vez de HEALTHCHECK)
+# Ver deployment.yaml para configuración
+# Endpoint disponible en: /api/health
+
+CMD ["node", "server.js"]
+

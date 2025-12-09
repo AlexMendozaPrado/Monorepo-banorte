@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable standalone output for Docker deployments
+  // This creates a minimal .next/standalone folder with only required files
+  output: 'standalone',
+
   // Disable static page generation errors
   staticPageGenerationTimeout: 1000,
 

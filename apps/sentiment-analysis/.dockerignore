@@ -1,0 +1,78 @@
+# ============================================
+# .dockerignore para sentiment-analysis
+# Excluye archivos innecesarios del contexto Docker
+# ============================================
+
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store
+
+# Testing
+coverage
+.nyc_output
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+cypress
+cypress.config.ts
+jest.config.js
+jest.setup.js
+
+# Next.js
+.next
+out
+.turbo
+
+# Production
+dist
+build
+
+# Misc
+.DS_Store
+*.pem
+.vscode
+.idea
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+CHANGELOG.md
+*.md
+!package.json
+
+# Screenshots
+cypress/screenshots
+cypress/videos
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Scripts
+scripts

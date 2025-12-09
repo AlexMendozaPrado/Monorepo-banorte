@@ -493,8 +493,85 @@ La aplicación incluye métricas detalladas:
 - Manejo seguro de errores sin exposición de detalles internos
 - Logs estructurados para auditoría
 
+## 🐳 Docker y Deployment
+
+### Construcción de Imagen Docker
+
+Esta aplicación está optimizada para deployment en contenedores Docker/OpenShift:
+
+```bash
+# Construcción desde la raíz del monorepo
+cd ../..
+docker build -t sentiment-analysis:latest -f apps/sentiment-analysis/Dockerfile.openshift .
+```
+
+### Pruebas Locales de la Imagen
+
+#### Linux/macOS
+```bash
+cd apps/sentiment-analysis
+./docker-test.sh
+```
+
+#### Windows (PowerShell)
+```powershell
+cd apps\sentiment-analysis
+.\docker-test.ps1
+```
+
+Estos scripts automatizan:
+- ✅ Verificación de Docker
+- ✅ Construcción de la imagen
+- ✅ Ejecución del contenedor
+- ✅ Pruebas de health check
+- ✅ Validación de endpoints
+
+### Variables de Entorno para Docker
+
+```bash
+# Requeridas
+OPENAI_API_KEY=sk-xxx
+NODE_ENV=production
+PORT=3001
+
+# Opcionales
+AI_PROVIDER=openai
+DEFAULT_MODEL=gpt-4
+MAX_FILE_SIZE=10485760
+NEXT_TELEMETRY_DISABLED=1
+```
+
+### Health Check Endpoint
+
+El contenedor expone un endpoint de salud para Kubernetes/OpenShift:
+
+```bash
+GET /api/health
+
+Response:
+{
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 123.45,
+  "environment": "production",
+  "version": "1.0.0",
+  "service": "sentiment-analysis"
+}
+```
+
+### Deployment en OpenShift
+
+Los manifiestos de OpenShift están disponibles en `openshift/`:
+- `deployment.yaml` - Configuración del deployment
+- `service.yaml` - Servicio interno
+- `route.yaml` - Exposición externa
+- `configmap.yaml` - Configuración de la app
+
+Ver [DOCKER.md](./DOCKER.md) para documentación técnica detallada sobre la imagen Docker.
+
 ## 📝 Documentación Adicional
 
+- [DOCKER.md](./DOCKER.md) - Documentación técnica de Docker y deployment
 - [INSTALLATION.md](./INSTALLATION.md) - Guía detallada de instalación y configuración
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - Documentación completa de la arquitectura
 - [API.md](./API.md) - Documentación detallada de todos los endpoints (futuro)
