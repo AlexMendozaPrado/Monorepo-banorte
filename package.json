@@ -14,6 +14,8 @@
     "build:documind": "turbo run build --filter=documind",
     "dev:sentiment": "turbo run dev --filter=sentiment-analysis",
     "build:sentiment": "turbo run build --filter=sentiment-analysis",
+    "dev:financial": "turbo run dev --filter=banorte-financial-app",
+    "build:financial": "turbo run build --filter=banorte-financial-app",
     "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
