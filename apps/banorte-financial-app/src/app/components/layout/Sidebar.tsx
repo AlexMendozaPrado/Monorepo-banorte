@@ -1,89 +1,109 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { Home, TrendingUp, CreditCard, Target, Wallet, Settings, HelpCircle, LogOut } from 'lucide-react';
+import React from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import {
+  LayoutDashboard,
+  PieChart,
+  PiggyBank,
+  CreditCard,
+  TrendingDown,
+  Shield,
+  BookOpen,
+  MessageCircle,
+  X,
+  LogOut,
+} from 'lucide-react'
 
-export interface SidebarProps {
-  className?: string;
-  activeTab?: string;
-  onNavigate?: (tab: string) => void;
+interface SidebarProps {
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
 }
 
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
-  href: string;
-}
+export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+  const pathname = usePathname()
 
-export const Sidebar: React.FC<SidebarProps> = ({ className = '', activeTab = 'dashboard', onNavigate }) => {
-  const navItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, href: '/' },
-    { id: 'presupuestos', label: 'Presupuestos', icon: <Wallet size={20} />, href: '/budget' },
-    { id: 'investments', label: 'Inversiones', icon: <TrendingUp size={20} />, href: '/investments' },
-    { id: 'credit', label: 'Créditos', icon: <CreditCard size={20} />, href: '/credit' },
-    { id: 'goals', label: 'Metas', icon: <Target size={20} />, href: '/goals' },
-  ];
-
-  const bottomItems: NavItem[] = [
-    { id: 'settings', label: 'Configuración', icon: <Settings size={20} />, href: '/settings' },
-    { id: 'help', label: 'Ayuda', icon: <HelpCircle size={20} />, href: '/help' },
-  ];
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+    { id: 'presupuestos', label: 'Presupuestos', icon: PieChart, href: '/presupuestos' },
+    { id: 'ahorros', label: 'Ahorros', icon: PiggyBank, href: '/ahorros' },
+    { id: 'tarjetas', label: 'Tarjetas', icon: CreditCard, href: '/tarjetas' },
+    { id: 'deudas', label: 'Deudas', icon: TrendingDown, href: '/deudas' },
+    { id: 'seguros', label: 'Seguros', icon: Shield, href: '/seguros' },
+    { id: 'educacion', label: 'Educación', icon: BookOpen, href: '/educacion' },
+    { id: 'asesor', label: 'Asesor IA', icon: MessageCircle, href: '/asesor' },
+  ]
 
   return (
-    <aside className={`w-64 bg-white shadow-card h-screen flex flex-col ${className}`}>
-      {/* Logo */}
-      <div className="p-6 border-b">
-        <h1 className="text-2xl font-bold text-banorte-red">Banorte</h1>
-        <p className="text-sm text-banorte-gray">Financial Advisor</p>
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsOpen(false)}
+      />
 
-      {/* Main Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => {
-          const isActive = activeTab === item.id;
-          const handleClick = (e: React.MouseEvent) => {
-            if (onNavigate) {
-              e.preventDefault();
-              onNavigate(item.id);
-            }
-          };
-
-          return (
-            <a
-              key={item.id}
-              href={item.href}
-              onClick={handleClick}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
-                isActive
-                  ? 'bg-banorte-red text-white'
-                  : 'text-banorte-dark hover:bg-banorte-bg'
-              }`}
+      {/* Sidebar Container */}
+      <aside
+        className={`
+          fixed top-0 left-0 z-50 h-screen w-64 bg-white shadow-xl transition-transform duration-300 ease-in-out
+          lg:translate-x-0 lg:static lg:shadow-none border-r border-gray-200
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo Area */}
+          <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-banorte-red rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">B</span>
+              </div>
+              <span className="font-display font-bold text-xl text-banorte-red tracking-tight">
+                BANORTE
+              </span>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden text-gray-500"
             >
-              {item.icon}
-              <span className="font-medium">{item.label}</span>
-            </a>
-          );
-        })}
-      </nav>
+              <X size={24} />
+            </button>
+          </div>
 
-      {/* Bottom Navigation */}
-      <div className="p-4 border-t space-y-1">
-        {bottomItems.map((item) => (
-          <a
-            key={item.id}
-            href={item.href}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-banorte-gray hover:bg-banorte-bg transition-colors duration-200"
-          >
-            {item.icon}
-            <span className="font-medium">{item.label}</span>
-          </a>
-        ))}
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-banorte-gray hover:bg-red-50 hover:text-banorte-red transition-colors duration-200 w-full">
-          <LogOut size={20} />
-          <span className="font-medium">Cerrar Sesión</span>
-        </button>
-      </div>
-    </aside>
-  );
-};
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href || (pathname === '/' && item.href === '/dashboard')
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+                    ${isActive ? 'bg-red-50 text-banorte-red font-bold shadow-sm' : 'text-banorte-gray hover:bg-gray-50 hover:text-banorte-dark font-medium'}
+                  `}
+                >
+                  <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                  <span className="text-sm">{item.label}</span>
+                  {isActive && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-banorte-red" />
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* User Profile / Footer */}
+          <div className="p-4 border-t border-gray-100">
+            <button className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-gray-50 text-banorte-gray transition-colors">
+              <LogOut size={20} />
+              <span className="text-sm font-medium">Cerrar Sesión</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  )
+}
