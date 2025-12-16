@@ -1,104 +1,196 @@
 import { IDebtStrategyPort, DebtRecommendation } from '@/core/domain/ports/ai-services/IDebtStrategyPort';
 import { Debt } from '@/core/domain/entities/debt/Debt';
+import { BaseOpenAIService } from './BaseOpenAIService';
+import { DEBT_STRATEGY_SYSTEM_PROMPT } from '../../prompts';
 
-export class OpenAIDebtStrategy implements IDebtStrategyPort {
+interface DebtPortfolioOutput {
+  totalDebt: number;
+  debtToIncomeRatio: number;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  recommendations: Array<{
+    type: 'CONSOLIDATION' | 'REFINANCE' | 'EXTRA_PAYMENT' | 'PRIORITY_CHANGE';
+    priority: 'HIGH' | 'MEDIUM' | 'LOW';
+    title: string;
+    description: string;
+    potentialSavings: number;
+    actionItems: string[];
+    estimatedTimeframe: string;
+  }>;
+}
+
+interface ConsolidationOutput {
+  recommended: boolean;
+  potentialNewLoan: {
+    amount: number;
+    rate: number;
+    term: number;
+  };
+  monthlySavings: number;
+  totalSavings: number;
+  reasoning: string;
+}
+
+interface ExtraPaymentOutput {
+  allocations: Array<{
+    debtId: string;
+    amount: number;
+    reasoning: string;
+    interestSaved: number;
+  }>;
+  totalInterestSaved: number;
+}
+
+export class OpenAIDebtStrategy extends BaseOpenAIService implements IDebtStrategyPort {
   async analyzeDebtPortfolio(
     debts: Debt[],
     monthlyIncome: number,
     monthlyExpenses: number
   ) {
-    const totalDebt = debts.reduce((sum, debt) => sum + debt.currentBalance, 0);
-    const debtToIncomeRatio = (totalDebt / monthlyIncome) * 100;
+    const debtsData = debts.map(d => ({
+      id: d.id,
+      name: d.name,
+      type: d.type,
+      currentBalance: d.currentBalance,
+      interestRate: d.interestRate,
+      minimumPayment: d.minimumPayment,
+    }));
 
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    if (debtToIncomeRatio < 36) riskLevel = 'LOW';
-    else if (debtToIncomeRatio < 50) riskLevel = 'MEDIUM';
-    else if (debtToIncomeRatio < 80) riskLevel = 'HIGH';
-    else riskLevel = 'CRITICAL';
+    const totalDebt = debts.reduce((sum, d) => sum + d.currentBalance, 0);
 
-    const recommendations = this.generateRecommendations(debts, debtToIncomeRatio);
+    const userPrompt = `Analiza este portafolio de deudas.
 
-    return {
-      totalDebt,
-      debtToIncomeRatio,
-      riskLevel,
-      recommendations,
-    };
+Contexto:
+- Ingreso mensual: $${monthlyIncome.toLocaleString('es-MX')}
+- Gastos mensuales: $${monthlyExpenses.toLocaleString('es-MX')}
+- Disponible para deudas: $${(monthlyIncome - monthlyExpenses).toLocaleString('es-MX')}
+
+Deudas:
+${JSON.stringify(debtsData, null, 2)}
+
+Calcula:
+1. Deuda total
+2. Ratio deuda-ingreso (deuda total / ingreso anual * 100)
+3. Nivel de riesgo (LOW <36%, MEDIUM 36-50%, HIGH 50-80%, CRITICAL >80%)
+4. Recomendaciones priorizadas
+
+Responde en JSON:
+{
+  "totalDebt": suma_total,
+  "debtToIncomeRatio": ratio_calculado,
+  "riskLevel": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+  "recommendations": [
+    {
+      "type": "CONSOLIDATION" | "REFINANCE" | "EXTRA_PAYMENT" | "PRIORITY_CHANGE",
+      "priority": "HIGH" | "MEDIUM" | "LOW",
+      "title": "título",
+      "description": "descripción detallada",
+      "potentialSavings": ahorro_estimado,
+      "actionItems": ["acción 1", "acción 2"],
+      "estimatedTimeframe": "tiempo estimado"
+    }
+  ]
+}`;
+
+    const result = await this.callOpenAI<DebtPortfolioOutput>({
+      systemPrompt: DEBT_STRATEGY_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.2,
+      responseFormat: 'json_object',
+    });
+
+    return result.data;
   }
 
   async suggestConsolidation(debts: Debt[]) {
-    const totalDebt = debts.reduce((sum, debt) => sum + debt.currentBalance, 0);
-    const avgRate = debts.reduce((sum, d) => sum + d.interestRate, 0) / debts.length;
+    const debtsData = debts.map(d => ({
+      name: d.name,
+      balance: d.currentBalance,
+      rate: d.interestRate,
+      minimumPayment: d.minimumPayment,
+    }));
 
-    return {
-      recommended: avgRate > 15 && debts.length >= 3,
-      potentialNewLoan: {
-        amount: totalDebt,
-        rate: avgRate * 0.7,
-        term: 60,
-      },
-      monthlySavings: 500,
-      totalSavings: 30000,
-      reasoning: 'La consolidación puede reducir tu tasa promedio y simplificar pagos',
-    };
+    const userPrompt = `Evalúa si la consolidación es recomendable para estas deudas.
+
+Deudas:
+${JSON.stringify(debtsData, null, 2)}
+
+Considera:
+- ¿Hay 3+ deudas?
+- ¿La tasa promedio es >25%?
+- ¿La consolidación reduciría pagos mensuales?
+- ¿El ahorro en intereses justifica la consolidación?
+
+Si es recomendable, calcula:
+- Monto total a consolidar
+- Tasa nueva estimada (70-80% de tasa promedio actual)
+- Plazo sugerido (60 meses típico)
+- Ahorro mensual
+- Ahorro total en intereses
+
+Responde en JSON:
+{
+  "recommended": true/false,
+  "potentialNewLoan": {
+    "amount": monto_total,
+    "rate": tasa_estimada,
+    "term": plazo_meses
+  },
+  "monthlySavings": ahorro_mensual,
+  "totalSavings": ahorro_total_intereses,
+  "reasoning": "explicación detallada"
+}`;
+
+    const result = await this.callOpenAI<ConsolidationOutput>({
+      systemPrompt: DEBT_STRATEGY_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.2,
+      responseFormat: 'json_object',
+    });
+
+    return result.data;
   }
 
   async optimizeExtraPayments(debts: Debt[], extraAmount: number) {
-    const sortedDebts = [...debts].sort((a, b) => b.interestRate - a.interestRate);
-
-    const allocations = sortedDebts.map((debt, index) => ({
-      debtId: debt.id,
-      amount: index === 0 ? extraAmount : 0,
-      reasoning: index === 0 
-        ? 'Mayor tasa de interés - máximo ahorro'
-        : 'Mantener pagos mínimos',
-      interestSaved: index === 0 ? 1000 : 0,
+    const debtsData = debts.map(d => ({
+      id: d.id,
+      name: d.name,
+      balance: d.currentBalance,
+      rate: d.interestRate,
+      minimumPayment: d.minimumPayment,
     }));
 
-    return {
-      allocations,
-      totalInterestSaved: 1000,
-    };
-  }
+    const userPrompt = `Optimiza la distribución de $${extraAmount.toLocaleString('es-MX')} extra mensual entre estas deudas.
 
-  private generateRecommendations(
-    debts: Debt[],
-    debtToIncomeRatio: number
-  ): DebtRecommendation[] {
-    const recommendations: DebtRecommendation[] = [];
+Deudas:
+${JSON.stringify(debtsData, null, 2)}
 
-    if (debtToIncomeRatio > 50) {
-      recommendations.push({
-        type: 'CONSOLIDATION',
-        priority: 'HIGH',
-        title: 'Considera consolidar tus deudas',
-        description: 'Tu ratio deuda-ingreso es alto. La consolidación puede ayudar.',
-        potentialSavings: 5000,
-        actionItems: [
-          'Explora opciones de préstamos de consolidación',
-          'Compara tasas con tu banco',
-        ],
-        estimatedTimeframe: '1-3 meses',
-      });
+Usa estrategia Avalancha (prioriza mayor tasa de interés).
+
+Para cada deuda, calcula:
+- Cuánto del pago extra asignar
+- Razonamiento (ej: "Mayor tasa = máximo ahorro")
+- Interés ahorrado estimado
+
+Responde en JSON:
+{
+  "allocations": [
+    {
+      "debtId": "id",
+      "amount": cantidad_asignada,
+      "reasoning": "por qué esta asignación",
+      "interestSaved": interés_ahorrado_estimado
     }
+  ],
+  "totalInterestSaved": suma_total_ahorrada
+}`;
 
-    const highInterestDebts = debts.filter(d => d.interestRate > 20);
-    if (highInterestDebts.length > 0) {
-      recommendations.push({
-        type: 'REFINANCE',
-        priority: 'HIGH',
-        title: 'Refinancia deudas con alta tasa',
-        description: `Tienes ${highInterestDebts.length} deuda(s) con tasas >20%`,
-        potentialSavings: 3000,
-        actionItems: [
-          'Busca opciones de refinanciamiento',
-          'Mejora tu score crediticio',
-        ],
-        estimatedTimeframe: '2-4 meses',
-      });
-    }
+    const result = await this.callOpenAI<ExtraPaymentOutput>({
+      systemPrompt: DEBT_STRATEGY_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.1, // Muy bajo para cálculos precisos
+      responseFormat: 'json_object',
+    });
 
-    return recommendations;
+    return result.data;
   }
 }
-

@@ -1,126 +1,167 @@
-import OpenAI from 'openai';
-import { 
-  IExpenseAnalyzerPort, 
-  AntExpenseDetection, 
-  AnalysisContext, 
-  CategorySuggestion, 
-  SpendingPattern 
+import {
+  IExpenseAnalyzerPort,
+  AntExpenseDetection,
+  AnalysisContext,
+  CategorySuggestion,
+  SpendingPattern
 } from '@/core/domain/ports/external-services/IExpenseAnalyzerPort';
 import { Transaction } from '@/core/domain/entities/financial/Transaction';
 import { BudgetCategory } from '@/core/domain/entities/financial/BudgetCategory';
 import { Budget } from '@/core/domain/entities/financial/Budget';
 import { Money } from '@/core/domain/value-objects/financial/Money';
 import { TimeFrame } from '@/core/domain/value-objects/common/TimeFrame';
-import { AIServiceException } from '@/core/domain/exceptions';
-import { OpenAIConfig } from './OpenAIConfig';
+import { BaseOpenAIService } from './BaseOpenAIService';
+import { EXPENSE_ANALYZER_SYSTEM_PROMPT } from '../../prompts';
 
-export class OpenAIExpenseAnalyzer implements IExpenseAnalyzerPort {
-  private openai: OpenAI | null = null;
-  private config: ReturnType<OpenAIConfig['getConfig']>;
-
-  constructor() {
-    const configInstance = OpenAIConfig.getInstance();
-    this.config = configInstance.getConfig();
-    
-    if (this.config.apiKey) {
-      this.openai = new OpenAI({ apiKey: this.config.apiKey });
-    }
-  }
-
+export class OpenAIExpenseAnalyzer extends BaseOpenAIService implements IExpenseAnalyzerPort {
   async detectAntExpenses(
     transactions: Transaction[],
     context: AnalysisContext
   ): Promise<AntExpenseDetection[]> {
-    if (!this.openai) {
-      console.warn('OpenAI not configured, returning mock data');
-      return this.getMockAntExpenses();
-    }
+    const expenseTransactions = transactions
+      .filter(t => t.isExpense())
+      .slice(0, 100);
 
-    try {
-      const prompt = this.buildAntExpensesPrompt(transactions, context);
-      const response = await this.openai.chat.completions.create({
-        model: this.config.model,
-        messages: [
-          { role: 'system', content: this.getSystemPrompt() },
-          { role: 'user', content: prompt },
-        ],
-        temperature: this.config.temperature,
-        max_tokens: this.config.maxTokens,
-        response_format: { type: 'json_object' },
-      });
+    const transactionsData = expenseTransactions.map(t => ({
+      description: t.description,
+      amount: t.amount.amount,
+      merchant: t.merchant || 'Desconocido',
+      date: t.date.toISOString().split('T')[0],
+    }));
 
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new AIServiceException('Empty response from OpenAI', 'OpenAI');
-      }
-      
-      const parsed = JSON.parse(content);
-      return this.parseAntExpensesResponse(parsed, transactions);
-    } catch (error) {
-      console.error('Error detecting ant expenses:', error);
-      // Fallback to mock data on error
-      return this.getMockAntExpenses();
+    const userPrompt = `Analiza estas ${transactionsData.length} transacciones de los últimos ${context.timeFrame.value} ${context.timeFrame.unit.toLowerCase()}.
+
+Transacciones:
+${JSON.stringify(transactionsData, null, 2)}
+
+Responde en JSON con este formato:
+{
+  "detections": [
+    {
+      "category": "nombre categoría",
+      "description": "descripción del patrón",
+      "frequency": número_de_ocurrencias,
+      "averageAmount": monto_promedio,
+      "monthlyImpact": impacto_mensual,
+      "annualImpact": impacto_anual,
+      "confidence": 0.0-1.0,
+      "examples": [
+        {"merchant": "nombre", "amount": monto, "date": "YYYY-MM-DD"}
+      ],
+      "recommendation": "recomendación específica con ahorro estimado"
     }
+  ]
+}`;
+
+    const result = await this.callOpenAI<{ detections: any[] }>({
+      systemPrompt: EXPENSE_ANALYZER_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.2,
+      responseFormat: 'json_object',
+    });
+
+    return this.parseAntExpensesResponse(result.data, transactions);
   }
 
   async categorizeTransaction(
     transaction: Transaction,
     availableCategories: BudgetCategory[]
   ): Promise<CategorySuggestion> {
-    if (!this.openai || availableCategories.length === 0) {
+    if (availableCategories.length === 0) {
       return {
-        categoryId: availableCategories[0]?.id || 'default',
-        categoryName: availableCategories[0]?.name || 'Otros',
+        categoryId: 'default',
+        categoryName: 'Otros',
         confidence: 0.5,
-        reasoning: 'OpenAI no configurado o sin categorías disponibles',
+        reasoning: 'Sin categorías disponibles',
       };
     }
 
-    try {
-      const prompt = `Categoriza esta transacción: "${transaction.description}" (${transaction.merchant || 'sin comercio'}) en una de estas categorías: ${availableCategories.map(c => c.name).join(', ')}. Responde en JSON con formato: {"categoryName": "...", "confidence": 0.0-1.0, "reasoning": "..."}`;
-      
-      const response = await this.openai.chat.completions.create({
-        model: this.config.model,
-        messages: [
-          { role: 'system', content: 'Eres un experto en categorización de gastos financieros.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 200,
-        response_format: { type: 'json_object' },
-      });
+    const userPrompt = `Categoriza esta transacción: "${transaction.description}" (${transaction.merchant || 'sin comercio'})
 
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new AIServiceException('Empty response from OpenAI', 'OpenAI');
-      }
+Categorías disponibles:
+${availableCategories.map(c => `- ${c.name}`).join('\n')}
 
-      const parsed = JSON.parse(content);
-      const category = availableCategories.find(c => c.name === parsed.categoryName) || availableCategories[0];
+Responde en JSON:
+{
+  "categoryName": "nombre exacto de la categoría",
+  "confidence": 0.0-1.0,
+  "reasoning": "por qué esta categoría"
+}`;
 
-      return {
-        categoryId: category.id,
-        categoryName: category.name,
-        confidence: parsed.confidence || 0.5,
-        reasoning: parsed.reasoning || 'Categorización automática',
-      };
-    } catch (error) {
-      console.error('Error categorizing transaction:', error);
-      return {
-        categoryId: availableCategories[0].id,
-        categoryName: availableCategories[0].name,
-        confidence: 0.3,
-        reasoning: 'Error en categorización automática',
-      };
-    }
+    const result = await this.callOpenAI<{
+      categoryName: string;
+      confidence: number;
+      reasoning: string;
+    }>({
+      systemPrompt: 'Eres un experto en categorización de gastos financieros.',
+      userPrompt,
+      temperature: 0.2,
+      maxTokens: 200,
+      responseFormat: 'json_object',
+    });
+
+    const category = availableCategories.find(c => c.name === result.data.categoryName) || availableCategories[0];
+
+    return {
+      categoryId: category.id,
+      categoryName: category.name,
+      confidence: result.data.confidence || 0.5,
+      reasoning: result.data.reasoning || 'Categorización automática',
+    };
   }
 
   async analyzeSpendingPatterns(
     transactions: Transaction[],
     context: AnalysisContext
   ): Promise<SpendingPattern[]> {
-    // Simplified implementation - can be expanded
-    return [];
+    const groupedByCategory = this.groupTransactionsByCategory(transactions);
+
+    const categoryData = Object.entries(groupedByCategory).map(([category, txs]) => ({
+      category,
+      count: txs.length,
+      total: txs.reduce((sum, t) => sum + t.amount.amount, 0),
+      average: txs.reduce((sum, t) => sum + t.amount.amount, 0) / txs.length,
+    }));
+
+    const userPrompt = `Analiza patrones de gasto por categoría en los últimos ${context.timeFrame.value} ${context.timeFrame.unit}.
+
+Datos por categoría:
+${JSON.stringify(categoryData, null, 2)}
+
+Para cada categoría, determina:
+- Tendencia (INCREASING si está creciendo, DECREASING si disminuye, STABLE si es constante)
+- Cambio porcentual estimado
+- Predicción para el próximo período
+
+Responde en JSON:
+{
+  "patterns": [
+    {
+      "category": "nombre",
+      "trend": "INCREASING" | "DECREASING" | "STABLE",
+      "percentageChange": número,
+      "averageMonthly": monto_promedio_mensual,
+      "prediction": predicción_próximo_mes,
+      "confidence": 0.0-1.0
+    }
+  ]
+}`;
+
+    const result = await this.callOpenAI<{ patterns: any[] }>({
+      systemPrompt: EXPENSE_ANALYZER_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.2,
+      responseFormat: 'json_object',
+    });
+
+    return result.data.patterns.map((p: any) => ({
+      category: p.category,
+      trend: p.trend,
+      percentageChange: p.percentageChange,
+      averageMonthly: Money.fromAmount(p.averageMonthly),
+      prediction: Money.fromAmount(p.prediction),
+      confidence: p.confidence,
+    }));
   }
 
   async predictFutureExpenses(
@@ -131,11 +172,51 @@ export class OpenAIExpenseAnalyzer implements IExpenseAnalyzerPort {
     confidence: number;
     breakdown: { category: string; amount: Money }[];
   }> {
-    // Simplified implementation - can be expanded
+    const groupedByCategory = this.groupTransactionsByCategory(historicalTransactions);
+
+    const historicalData = Object.entries(groupedByCategory).map(([category, txs]) => ({
+      category,
+      monthlyAverage: txs.reduce((sum, t) => sum + t.amount.amount, 0) / timeFrame.value,
+      transactionCount: txs.length,
+    }));
+
+    const userPrompt = `Predice gastos futuros para los próximos ${timeFrame.value} ${timeFrame.unit}.
+
+Datos históricos:
+${JSON.stringify(historicalData, null, 2)}
+
+Genera predicción considerando:
+- Patrones históricos
+- Estacionalidad potencial
+- Variabilidad de cada categoría
+
+Responde en JSON:
+{
+  "predicted": total_predicho,
+  "confidence": 0.0-1.0,
+  "breakdown": [
+    {"category": "nombre", "amount": monto_predicho}
+  ]
+}`;
+
+    const result = await this.callOpenAI<{
+      predicted: number;
+      confidence: number;
+      breakdown: Array<{ category: string; amount: number }>;
+    }>({
+      systemPrompt: EXPENSE_ANALYZER_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.2,
+      responseFormat: 'json_object',
+    });
+
     return {
-      predicted: Money.zero(),
-      confidence: 0,
-      breakdown: [],
+      predicted: Money.fromAmount(result.data.predicted),
+      confidence: result.data.confidence,
+      breakdown: result.data.breakdown.map(b => ({
+        category: b.category,
+        amount: Money.fromAmount(b.amount),
+      })),
     };
   }
 
@@ -153,66 +234,76 @@ export class OpenAIExpenseAnalyzer implements IExpenseAnalyzerPort {
       priority: 'HIGH' | 'MEDIUM' | 'LOW';
     }[];
   }> {
-    // Simplified implementation - can be expanded
-    return {
-      potentialSavings: Money.zero(),
-      recommendations: [],
-    };
-  }
+    const spendingByCategory = this.calculateSpendingByCategory(transactions, budget);
 
-  private getSystemPrompt(): string {
-    return `Eres un analista financiero experto especializado en detectar "gastos hormiga" (pequeños gastos recurrentes que impactan el presupuesto).
+    const userPrompt = `Analiza el presupuesto actual y genera optimizaciones.
 
-Analiza las transacciones considerando:
-- Frecuencia de compras similares
-- Montos pequeños pero recurrentes (típicamente < $100 MXN)
-- Categorías como cafeterías, snacks, apps de delivery, suscripciones pequeñas
-- Patrones de gasto que pueden optimizarse
+Ingreso total: $${budget.totalIncome.amount}
 
-Responde SIEMPRE en formato JSON válido.`;
-  }
+Gasto actual por categoría:
+${JSON.stringify(spendingByCategory, null, 2)}
 
-  private buildAntExpensesPrompt(transactions: Transaction[], context: AnalysisContext): string {
-    const expenseTransactions = transactions
-      .filter(t => t.isExpense())
-      .slice(0, 100); // Limit to avoid token limits
+Identifica categorías donde el usuario puede reducir gastos y sugiere límites realistas.
 
-    const transactionsData = expenseTransactions.map(t => ({
-      description: t.description,
-      amount: t.amount.amount,
-      merchant: t.merchant || 'Desconocido',
-      date: t.date.toISOString().split('T')[0],
-    }));
-
-    const prompt = `Analiza estas ${transactionsData.length} transacciones de los últimos ${context.timeFrame.value} ${context.timeFrame.unit.toLowerCase()} y detecta gastos hormiga.
-
-Transacciones:
-${JSON.stringify(transactionsData, null, 2)}
-
-Responde en JSON con este formato exacto:
+Responde en JSON:
 {
-  "detections": [
+  "potentialSavings": ahorro_total_estimado,
+  "recommendations": [
     {
-      "category": "nombre de categoría",
-      "description": "descripción del patrón detectado",
-      "frequency": número de ocurrencias,
-      "averageAmount": monto promedio,
-      "monthlyImpact": impacto mensual estimado,
-      "annualImpact": impacto anual estimado,
-      "confidence": 0.0-1.0,
-      "examples": [
-        {
-          "merchant": "nombre del comercio",
-          "amount": monto,
-          "date": "YYYY-MM-DD"
-        }
-      ],
-      "recommendation": "recomendación específica en español"
+      "category": "nombre",
+      "currentSpend": gasto_actual,
+      "suggestedLimit": límite_sugerido,
+      "reasoning": "por qué esta reducción es factible",
+      "priority": "HIGH" | "MEDIUM" | "LOW"
     }
   ]
 }`;
 
-    return prompt;
+    const result = await this.callOpenAI<{
+      potentialSavings: number;
+      recommendations: Array<{
+        category: string;
+        currentSpend: number;
+        suggestedLimit: number;
+        reasoning: string;
+        priority: 'HIGH' | 'MEDIUM' | 'LOW';
+      }>;
+    }>({
+      systemPrompt: EXPENSE_ANALYZER_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.3,
+      responseFormat: 'json_object',
+    });
+
+    return {
+      potentialSavings: Money.fromAmount(result.data.potentialSavings),
+      recommendations: result.data.recommendations.map(r => ({
+        category: r.category,
+        currentSpend: Money.fromAmount(r.currentSpend),
+        suggestedLimit: Money.fromAmount(r.suggestedLimit),
+        reasoning: r.reasoning,
+        priority: r.priority,
+      })),
+    };
+  }
+
+  // Helper methods
+  private groupTransactionsByCategory(transactions: Transaction[]): Record<string, Transaction[]> {
+    return transactions.reduce((acc, t) => {
+      const category = t.category || 'Sin categoría';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(t);
+      return acc;
+    }, {} as Record<string, Transaction[]>);
+  }
+
+  private calculateSpendingByCategory(transactions: Transaction[], budget: Budget): any[] {
+    const grouped = this.groupTransactionsByCategory(transactions);
+    return Object.entries(grouped).map(([category, txs]) => ({
+      category,
+      spent: txs.reduce((sum, t) => sum + t.amount.amount, 0),
+      budgeted: budget.categories.find(c => c.name === category)?.allocatedAmount.amount || 0,
+    }));
   }
 
   private parseAntExpensesResponse(parsed: any, transactions: Transaction[]): AntExpenseDetection[] {
@@ -237,49 +328,4 @@ Responde en JSON con este formato exacto:
       recommendation: d.recommendation || 'Considera reducir este tipo de gastos',
     }));
   }
-
-  private getMockAntExpenses(): AntExpenseDetection[] {
-    return [
-      {
-        category: 'Cafeterías',
-        description: 'Compras frecuentes en cafeterías y coffee shops',
-        frequency: 12,
-        averageAmount: Money.fromAmount(45),
-        monthlyImpact: Money.fromAmount(540),
-        annualImpact: Money.fromAmount(6480),
-        confidence: 0.85,
-        examples: [
-          {
-            merchant: 'Starbucks',
-            amount: Money.fromAmount(50),
-            date: new Date()
-          },
-          {
-            merchant: 'Café Punta del Cielo',
-            amount: Money.fromAmount(42),
-            date: new Date(Date.now() - 86400000 * 2)
-          },
-        ],
-        recommendation: 'Considera preparar café en casa 3 días a la semana. Ahorro potencial: $360/mes',
-      },
-      {
-        category: 'Apps de Delivery',
-        description: 'Pedidos frecuentes de comida a domicilio',
-        frequency: 8,
-        averageAmount: Money.fromAmount(180),
-        monthlyImpact: Money.fromAmount(1440),
-        annualImpact: Money.fromAmount(17280),
-        confidence: 0.78,
-        examples: [
-          {
-            merchant: 'Uber Eats',
-            amount: Money.fromAmount(195),
-            date: new Date()
-          },
-        ],
-        recommendation: 'Limita los pedidos a domicilio a 2 veces por semana. Ahorro potencial: $720/mes',
-      },
-    ];
-  }
 }
-

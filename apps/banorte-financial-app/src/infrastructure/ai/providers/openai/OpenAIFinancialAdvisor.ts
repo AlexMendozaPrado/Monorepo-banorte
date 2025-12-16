@@ -1,136 +1,188 @@
 import { IFinancialAdvisorPort, FinancialContext } from '@/core/domain/ports/ai-services/IFinancialAdvisorPort';
 import { Message } from '@/core/domain/entities/advisor/Message';
 import { FinancialInsight, InsightType, InsightPriority } from '@/core/domain/entities/advisor/FinancialInsight';
+import { BaseOpenAIService } from './BaseOpenAIService';
+import {
+  FINANCIAL_ADVISOR_SYSTEM_PROMPT,
+  buildConversationContext,
+  buildConversationHistory,
+} from '../../prompts';
 
-export class OpenAIFinancialAdvisor implements IFinancialAdvisorPort {
+interface GenerateResponseOutput {
+  response: string;
+  suggestedQuestions: string[];
+  relatedInsights?: string[];
+}
+
+interface FinancialInsightsOutput {
+  insights: Array<{
+    type: 'SPENDING_ALERT' | 'DEBT_WARNING' | 'SAVINGS_OPPORTUNITY' | 'BUDGET_RECOMMENDATION';
+    priority: 'HIGH' | 'MEDIUM' | 'LOW';
+    title: string;
+    description: string;
+    actionableSteps: string[];
+    potentialImpact: string;
+  }>;
+}
+
+interface SpendingAnalysisOutput {
+  patterns: Array<{
+    category: string;
+    trend: 'INCREASING' | 'DECREASING' | 'STABLE';
+    recommendation: string;
+  }>;
+  overallHealth: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'CRITICAL';
+}
+
+interface PersonalizedAdviceOutput {
+  advice: string;
+  reasoning: string;
+  nextSteps: string[];
+}
+
+export class OpenAIFinancialAdvisor extends BaseOpenAIService implements IFinancialAdvisorPort {
   async generateResponse(
     userMessage: string,
     conversationHistory: Message[],
     context: FinancialContext
-  ) {
-    // Mock response - In production this would call OpenAI
-    return this.getMockResponse(userMessage, context);
+  ): Promise<{
+    response: string;
+    suggestedQuestions: string[];
+    relatedInsights?: string[];
+  }> {
+    const contextStr = buildConversationContext(context);
+    const historyStr = buildConversationHistory(conversationHistory);
+
+    const userPrompt = `${contextStr}${historyStr}
+
+Usuario pregunta: "${userMessage}"
+
+Responde en JSON con este formato:
+{
+  "response": "tu respuesta conversacional (máximo 200 palabras)",
+  "suggestedQuestions": ["pregunta 1", "pregunta 2", "pregunta 3"],
+  "relatedInsights": ["insight relevante 1", "insight 2"]
+}`;
+
+    const result = await this.callOpenAI<GenerateResponseOutput>({
+      systemPrompt: FINANCIAL_ADVISOR_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.7, // Más creativo para conversación
+      responseFormat: 'json_object',
+    });
+
+    return result.data;
   }
 
   async generateFinancialInsights(context: FinancialContext): Promise<FinancialInsight[]> {
-    const insights: FinancialInsight[] = [];
+    const contextStr = buildConversationContext(context);
 
-    // Insight: High spending
-    if (context.monthlyExpenses && context.monthlyIncome) {
-      const spendingRatio = (context.monthlyExpenses / context.monthlyIncome) * 100;
-      if (spendingRatio > 80) {
-        insights.push(
-          FinancialInsight.create({
-            userId: context.userId,
-            type: InsightType.SPENDING_ALERT,
-            priority: InsightPriority.HIGH,
-            title: 'Gastos elevados este mes',
-            description: `Estás gastando ${spendingRatio.toFixed(0)}% de tu ingreso mensual`,
-            actionableSteps: [
-              'Revisa tu presupuesto en detalle',
-              'Identifica gastos no esenciales',
-              'Establece límites por categoría',
-            ],
-            potentialImpact: `Reducir gastos en 20% te ahorraría $${((context.monthlyExpenses * 0.2).toFixed(0))} mensuales`,
-          })
-        );
-      }
+    const userPrompt = `${contextStr}
+
+Analiza la situación financiera del usuario y genera insights accionables.
+
+Enfócate en:
+1. Gastos vs ingreso (si gasto >80% del ingreso → SPENDING_ALERT)
+2. Nivel de deuda (si deuda >50% ingreso anual → DEBT_WARNING)
+3. Oportunidades de ahorro (si ahorros <3 meses gastos → SAVINGS_OPPORTUNITY)
+4. Recomendaciones de presupuesto
+
+Responde en JSON:
+{
+  "insights": [
+    {
+      "type": "SPENDING_ALERT" | "DEBT_WARNING" | "SAVINGS_OPPORTUNITY" | "BUDGET_RECOMMENDATION",
+      "priority": "HIGH" | "MEDIUM" | "LOW",
+      "title": "título corto",
+      "description": "descripción clara del problema/oportunidad",
+      "actionableSteps": ["paso 1", "paso 2", "paso 3"],
+      "potentialImpact": "impacto estimado en pesos o porcentaje"
     }
+  ]
+}`;
 
-    // Insight: Debt warning
-    if (context.totalDebt && context.totalDebt > 0 && context.monthlyIncome) {
-      const debtToIncome = (context.totalDebt / (context.monthlyIncome * 12)) * 100;
-      if (debtToIncome > 50) {
-        insights.push(
-          FinancialInsight.create({
-            userId: context.userId,
-            type: InsightType.DEBT_WARNING,
-            priority: InsightPriority.HIGH,
-            title: 'Nivel de deuda alto',
-            description: 'Tu deuda representa más del 50% de tu ingreso anual',
-            actionableSteps: [
-              'Evalúa opciones de consolidación',
-              'Prioriza deudas con mayor interés',
-              'Crea un plan de pago acelerado',
-            ],
-            potentialImpact: 'Reducir deudas mejorará tu score crediticio',
-          })
-        );
-      }
-    }
+    const result = await this.callOpenAI<FinancialInsightsOutput>({
+      systemPrompt: FINANCIAL_ADVISOR_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.3,
+      responseFormat: 'json_object',
+    });
 
-    return insights;
+    // Convertir a entidades de dominio
+    return result.data.insights.map(insight =>
+      FinancialInsight.create({
+        userId: context.userId,
+        type: InsightType[insight.type],
+        priority: InsightPriority[insight.priority],
+        title: insight.title,
+        description: insight.description,
+        actionableSteps: insight.actionableSteps,
+        potentialImpact: insight.potentialImpact,
+      })
+    );
   }
 
   async analyzeSpendingPattern(transactions: any[], budget: any) {
-    return {
-      patterns: [
-        {
-          category: 'Alimentos',
-          trend: 'STABLE' as const,
-          recommendation: 'Tu gasto en alimentos se mantiene estable',
-        },
-      ],
-      overallHealth: 'GOOD' as const,
-    };
+    const transactionsData = transactions.slice(0, 50).map(t => ({
+      category: t.category || 'Sin categoría',
+      amount: t.amount,
+      date: t.date,
+    }));
+
+    const userPrompt = `Analiza estos ${transactionsData.length} transacciones y el presupuesto.
+
+Transacciones:
+${JSON.stringify(transactionsData, null, 2)}
+
+Presupuesto total: $${budget?.totalIncome || 'N/A'}
+
+Identifica patrones de gasto por categoría y evalúa salud financiera general.
+
+Responde en JSON:
+{
+  "patterns": [
+    {
+      "category": "nombre categoría",
+      "trend": "INCREASING" | "DECREASING" | "STABLE",
+      "recommendation": "recomendación específica"
+    }
+  ],
+  "overallHealth": "EXCELLENT" | "GOOD" | "WARNING" | "CRITICAL"
+}`;
+
+    const result = await this.callOpenAI<SpendingAnalysisOutput>({
+      systemPrompt: FINANCIAL_ADVISOR_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.3,
+      responseFormat: 'json_object',
+    });
+
+    return result.data;
   }
 
   async generatePersonalizedAdvice(question: string, context: FinancialContext) {
-    return {
-      advice: 'Basado en tu situación financiera actual, te recomiendo...',
-      reasoning: 'Considerando tu perfil e historial...',
-      nextSteps: [
-        'Paso 1: Analiza tu presupuesto',
-        'Paso 2: Define metas claras',
-        'Paso 3: Automatiza ahorros',
-      ],
-    };
-  }
+    const contextStr = buildConversationContext(context);
 
-  private getMockResponse(userMessage: string, context: FinancialContext) {
-    const lowerMessage = userMessage.toLowerCase();
-    
-    if (lowerMessage.includes('gastos') || lowerMessage.includes('gasto')) {
-      return {
-        response: `He analizado tus gastos del mes. Estás gastando aproximadamente $${context.monthlyExpenses?.toLocaleString() || '18,500'} de un ingreso de $${context.monthlyIncome?.toLocaleString() || '35,000'}. Esto representa un 53% de tu ingreso, lo cual está dentro de un rango saludable. Sin embargo, noté algunos gastos hormiga que podrías optimizar.`,
-        suggestedQuestions: [
-          '¿Qué gastos hormiga detectaste?',
-          '¿Cómo puedo reducir mis gastos?',
-          'Muéstrame mi presupuesto',
-        ],
-      };
-    }
+    const userPrompt = `${contextStr}
 
-    if (lowerMessage.includes('ahorro') || lowerMessage.includes('ahorrar')) {
-      return {
-        response: `¡Excelente pregunta! Basándome en tu perfil, tienes $${context.totalSavings?.toLocaleString() || '45,000'} en ahorros. Recomiendo que mantengas al menos 6 meses de gastos como fondo de emergencia ($90,000 en tu caso). Podrías automatizar un ahorro mensual del 10% de tu ingreso.`,
-        suggestedQuestions: [
-          '¿Cómo automatizo mis ahorros?',
-          '¿Qué metas de ahorro debería tener?',
-          'Muéstrame mis metas actuales',
-        ],
-      };
-    }
+Pregunta específica del usuario: "${question}"
 
-    if (lowerMessage.includes('deuda') || lowerMessage.includes('deudas')) {
-      return {
-        response: `Actualmente tienes $${context.totalDebt?.toLocaleString() || '125,000'} en deudas. Te sugiero usar la estrategia "Avalancha" para pagar primero las deudas con mayor interés. Esto te ahorrará dinero a largo plazo en intereses.`,
-        suggestedQuestions: [
-          '¿Qué es la estrategia Avalancha?',
-          '¿Cuánto debería pagar mensualmente?',
-          'Muéstrame mis deudas',
-        ],
-      };
-    }
+Proporciona consejo personalizado basado en su situación financiera.
 
-    return {
-      response: `Entiendo tu pregunta sobre: "${userMessage}". Basándome en tu situación financiera, te recomiendo revisar tu presupuesto mensual y establecer metas claras de ahorro. ¿Te gustaría que analicemos algún aspecto específico de tus finanzas?`,
-      suggestedQuestions: [
-        '¿Cómo puedo mejorar mi presupuesto?',
-        '¿Cuánto debería ahorrar?',
-        '¿Qué hago con mis deudas?',
-      ],
-    };
+Responde en JSON:
+{
+  "advice": "consejo principal (2-3 párrafos)",
+  "reasoning": "por qué este consejo es apropiado para su situación",
+  "nextSteps": ["acción concreta 1", "acción concreta 2", "acción concreta 3"]
+}`;
+
+    const result = await this.callOpenAI<PersonalizedAdviceOutput>({
+      systemPrompt: FINANCIAL_ADVISOR_SYSTEM_PROMPT,
+      userPrompt,
+      temperature: 0.5,
+      responseFormat: 'json_object',
+    });
+
+    return result.data;
   }
 }
-

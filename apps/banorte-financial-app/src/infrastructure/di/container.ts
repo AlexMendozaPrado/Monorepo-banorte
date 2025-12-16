@@ -42,6 +42,22 @@ export class DIContainer {
     this.services.clear();
     this.singletons.clear();
   }
+
+  has(name: string): boolean {
+    return this.services.has(name);
+  }
+
+  list(): string[] {
+    return Array.from(this.services.keys());
+  }
+
+  validate(requiredServices: string[]): void {
+    const missing = requiredServices.filter(s => !this.has(s));
+    if (missing.length > 0) {
+      throw new Error(`Missing required services: ${missing.join(', ')}`);
+    }
+    console.log('✅ All required services registered');
+  }
 }
 
 export const container = new DIContainer();
