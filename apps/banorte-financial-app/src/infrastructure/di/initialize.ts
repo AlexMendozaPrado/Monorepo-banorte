@@ -1,6 +1,7 @@
 import { container } from './container';
 import { registerBudgetModule } from './modules/budgetModule';
 import { registerDebtModule } from './modules/debtModule';
+import { registerInsuranceModule } from './modules/insuranceModule';
 
 let isInitialized = false;
 
@@ -15,6 +16,7 @@ export function initializeDI(): void {
   // Register all modules
   registerBudgetModule(container);
   registerDebtModule(container);
+  registerInsuranceModule(container);
 
   isInitialized = true;
   console.log('✅ DI Container initialized successfully');
