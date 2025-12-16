@@ -1,55 +1,53 @@
-'use client';
-
 import React from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Calendar, Download, Plus } from 'lucide-react';
 
-export interface BudgetHeaderProps {
+interface BudgetHeaderProps {
   currentMonth: string;
-  onMonthChange: (direction: 'prev' | 'next') => void;
+  onMonthChange: (month: string) => void;
   onAddCategory: () => void;
 }
 
-export const BudgetHeader: React.FC<BudgetHeaderProps> = ({
+export function BudgetHeader({
   currentMonth,
   onMonthChange,
   onAddCategory,
-}) => {
+}: BudgetHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-200">
-      <div className="flex items-center gap-4">
-        <h1 className="text-3xl font-bold text-banorte-dark">Presupuesto</h1>
-        <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm px-3 py-2">
-          <button
-            onClick={() => onMonthChange('prev')}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
-            aria-label="Mes anterior"
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div>
+        <h1 className="text-2xl font-display font-bold text-banorte-dark mb-1">
+          Presupuestos
+        </h1>
+        <div className="flex items-center gap-2 text-banorte-gray text-sm">
+          <Calendar size={16} />
+          <select
+            value={currentMonth}
+            onChange={(e) => onMonthChange(e.target.value)}
+            className="bg-transparent border-none font-medium focus:ring-0 cursor-pointer hover:text-banorte-red transition-colors"
           >
-            <ChevronLeft size={20} className="text-banorte-gray" />
-          </button>
-          <span className="text-base font-semibold text-banorte-dark min-w-[140px] text-center capitalize">
-            {currentMonth}
-          </span>
-          <button
-            onClick={() => onMonthChange('next')}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
-            aria-label="Mes siguiente"
-          >
-            <ChevronRight size={20} className="text-banorte-gray" />
-          </button>
+            <option value="Octubre 2024">Octubre 2024</option>
+            <option value="Septiembre 2024">Septiembre 2024</option>
+            <option value="Agosto 2024">Agosto 2024</option>
+          </select>
         </div>
       </div>
-      
-      <Button
-        variant="primary"
-        size="md"
-        onClick={onAddCategory}
-        className="flex items-center gap-2"
-      >
-        <Plus size={20} />
-        <span>Agregar Categoría</span>
-      </Button>
+
+      <div className="flex gap-3 w-full md:w-auto">
+        <Button variant="outline" size="sm" className="flex-1 md:flex-none">
+          <Download size={16} className="mr-2" />
+          Exportar
+        </Button>
+        <Button
+          onClick={onAddCategory}
+          size="sm"
+          className="flex-1 md:flex-none"
+        >
+          <Plus size={16} className="mr-2" />
+          Crear Categoría
+        </Button>
+      </div>
     </div>
   );
-};
+}
 

@@ -2,31 +2,29 @@
 
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
-export interface ModalProps {
+interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
+  title: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  showCloseButton?: boolean;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export const Modal: React.FC<ModalProps> = ({
+export function Modal({
   isOpen,
   onClose,
   title,
   children,
-  size = 'md',
-  showCloseButton = true,
-}) => {
+  maxWidth = 'md',
+}: ModalProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -34,51 +32,37 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const sizeStyles = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+  const maxWidthClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
   };
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div
+        className={`
+          bg-white rounded-card shadow-2xl w-full ${maxWidthClasses[maxWidth]}
+          transform transition-all animate-in zoom-in-95 duration-200
+          flex flex-col max-h-[90vh]
+        `}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <h3 className="text-lg font-display font-bold text-banorte-dark">
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-banorte-red transition-colors p-1 rounded-full hover:bg-gray-50"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 animate-in"
-      onClick={handleBackdropClick}
-    >
-      <div className={`bg-white rounded-card shadow-hover w-full ${sizeStyles[size]} max-h-[90vh] overflow-hidden flex flex-col`}>
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b">
-            {title && <h2 className="text-2xl font-bold text-banorte-dark">{title}</h2>}
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="text-banorte-gray hover:text-banorte-dark transition-colors"
-              >
-                <X size={24} />
-              </button>
-            )}
-          </div>
-        )}
-        <div className="p-6 overflow-y-auto flex-1">{children}</div>
+        <div className="p-6 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
-};
-
-export const ModalFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className = '',
-}) => {
-  return (
-    <div className={`flex items-center justify-end gap-3 p-6 border-t bg-gray-50 ${className}`}>
-      {children}
-    </div>
-  );
-};
+}

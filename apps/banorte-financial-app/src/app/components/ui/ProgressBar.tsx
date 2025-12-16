@@ -1,57 +1,54 @@
 import React from 'react';
 
-export interface ProgressBarProps {
+interface ProgressBarProps {
   value: number;
   max?: number;
+  color?: 'primary' | 'success' | 'warning' | 'alert' | 'secondary';
+  height?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
   label?: string;
-  showPercentage?: boolean;
-  color?: 'primary' | 'success' | 'warning' | 'alert';
-  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({
+export function ProgressBar({
   value,
   max = 100,
-  label,
-  showPercentage = true,
   color = 'primary',
-  size = 'md',
+  height = 'md',
+  showLabel = false,
+  label,
   className = '',
-}) => {
+}: ProgressBarProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
-  const colorStyles = {
+  const colors = {
     primary: 'bg-banorte-red',
     success: 'bg-status-success',
     warning: 'bg-status-warning',
     alert: 'bg-status-alert',
+    secondary: 'bg-banorte-gray',
   };
 
-  const sizeStyles = {
-    sm: 'h-1',
-    md: 'h-2',
-    lg: 'h-3',
+  const heights = {
+    sm: 'h-1.5',
+    md: 'h-2.5',
+    lg: 'h-4',
   };
 
   return (
-    <div className={className}>
-      {(label || showPercentage) && (
-        <div className="flex justify-between items-center mb-2">
-          {label && <span className="text-sm font-medium text-banorte-dark">{label}</span>}
-          {showPercentage && (
-            <span className="text-sm font-medium text-banorte-gray">
-              {percentage.toFixed(0)}%
-            </span>
-          )}
+    <div className={`w-full ${className}`}>
+      {showLabel && (
+        <div className="flex justify-between items-center mb-2 text-sm">
+          <span className="text-banorte-gray">{label}</span>
+          <span className="font-bold text-banorte-dark">{percentage.toFixed(0)}%</span>
         </div>
       )}
-      <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizeStyles[size]}`}>
+      <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${heights[height]}`}>
         <div
-          className={`${colorStyles[color]} ${sizeStyles[size]} rounded-full transition-all duration-300 ease-out`}
+          className={`${colors[color]} ${heights[height]} rounded-full transition-all duration-500 ease-out`}
           style={{ width: `${percentage}%` }}
         />
       </div>
     </div>
   );
-};
+}

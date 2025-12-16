@@ -1,73 +1,68 @@
-'use client';
-
 import React from 'react';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Card } from '../ui/Card';
+import { ProgressBar } from '../ui/ProgressBar';
 
-export interface BudgetSummaryProps {
+interface BudgetSummaryProps {
   income: number;
   spent: number;
   available: number;
-  currency?: string;
 }
 
-export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
+export function BudgetSummary({
   income,
   spent,
   available,
-  currency = 'MXN',
-}) => {
-  const percentageSpent = income > 0 ? (spent / income) * 100 : 0;
-  const isOverBudget = spent > income;
+}: BudgetSummaryProps) {
+  const percentage = Math.round((spent / income) * 100);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const getStatusColor = (pct: number): 'primary' | 'success' | 'warning' | 'alert' | 'secondary' => {
+    if (pct < 70) return 'success';
+    if (pct < 90) return 'warning';
+    return 'alert';
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Income Card */}
-      <div className="bg-white rounded-card shadow-card p-6 border-l-4 border-status-success">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-banorte-gray">Ingresos</span>
-          <TrendingUp size={20} className="text-status-success" />
+    <Card className="mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+          <p className="text-sm text-banorte-gray mb-1">Ingreso Esperado</p>
+          <p className="text-2xl font-bold text-banorte-dark">
+            ${income.toLocaleString()}
+          </p>
         </div>
-        <p className="text-3xl font-bold text-banorte-dark">{formatCurrency(income)}</p>
-        <p className="text-xs text-banorte-gray mt-1">Total del mes</p>
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+          <p className="text-sm text-banorte-gray mb-1">Gastado</p>
+          <p className="text-2xl font-bold text-banorte-dark">
+            ${spent.toLocaleString()}
+          </p>
+        </div>
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <p className="text-sm text-blue-600 mb-1">Disponible</p>
+          <p className="text-2xl font-bold text-blue-700">
+            ${available.toLocaleString()}
+          </p>
+        </div>
       </div>
 
-      {/* Spent Card */}
-      <div className={`bg-white rounded-card shadow-card p-6 border-l-4 ${isOverBudget ? 'border-status-alert' : 'border-status-warning'}`}>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-banorte-gray">Gastado</span>
-          <TrendingDown size={20} className={isOverBudget ? 'text-status-alert' : 'text-status-warning'} />
+      <div>
+        <div className="flex justify-between items-end mb-2">
+          <span className="text-sm font-medium text-banorte-dark">
+            Progreso General
+          </span>
+          <span
+            className={`text-sm font-bold ${percentage > 90 ? 'text-status-alert' : 'text-banorte-gray'}`}
+          >
+            {percentage}% utilizado
+          </span>
         </div>
-        <p className={`text-3xl font-bold ${isOverBudget ? 'text-status-alert' : 'text-banorte-dark'}`}>
-          {formatCurrency(spent)}
-        </p>
-        <p className="text-xs text-banorte-gray mt-1">
-          {percentageSpent.toFixed(1)}% del presupuesto
-        </p>
+        <ProgressBar
+          value={spent}
+          max={income}
+          color={getStatusColor(percentage)}
+          height="lg"
+        />
       </div>
-
-      {/* Available Card */}
-      <div className={`bg-white rounded-card shadow-card p-6 border-l-4 ${available < 0 ? 'border-status-alert' : 'border-banorte-red'}`}>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-banorte-gray">Disponible</span>
-          <Wallet size={20} className={available < 0 ? 'text-status-alert' : 'text-banorte-red'} />
-        </div>
-        <p className={`text-3xl font-bold ${available < 0 ? 'text-status-alert' : 'text-banorte-dark'}`}>
-          {formatCurrency(available)}
-        </p>
-        <p className="text-xs text-banorte-gray mt-1">
-          {available < 0 ? 'Sobre presupuesto' : 'Para gastar'}
-        </p>
-      </div>
-    </div>
+    </Card>
   );
-};
+}
 

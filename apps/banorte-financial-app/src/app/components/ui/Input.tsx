@@ -1,52 +1,46 @@
 import React from 'react';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
-  helperText?: string;
   icon?: React.ReactNode;
-  fullWidth?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({
+export function Input({
   label,
   error,
-  helperText,
   icon,
-  fullWidth = false,
   className = '',
   ...props
-}) => {
-  const baseStyles = 'px-4 py-2 border rounded-input transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-banorte-red';
-  const errorStyles = error
-    ? 'border-status-alert focus:ring-status-alert'
-    : 'border-gray-300 focus:border-banorte-red';
-  const widthStyle = fullWidth ? 'w-full' : '';
-
+}: InputProps) {
   return (
-    <div className={`${fullWidth ? 'w-full' : ''}`}>
+    <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-banorte-dark mb-1">
+        <label className="block text-sm font-medium text-banorte-gray mb-1">
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
             {icon}
           </div>
         )}
         <input
-          className={`${baseStyles} ${errorStyles} ${widthStyle} ${icon ? 'pl-10' : ''} ${className}`}
+          className={`
+            w-full h-50px rounded-input border border-gray-300 bg-white
+            text-banorte-dark placeholder-gray-400
+            focus:outline-none focus:ring-2 focus:ring-banorte-red focus:border-transparent
+            disabled:bg-gray-100 disabled:text-gray-500
+            transition-colors duration-200
+            ${icon ? 'pl-10' : 'pl-4'}
+            ${error ? 'border-status-alert ring-1 ring-status-alert' : ''}
+            ${className}
+          `}
           {...props}
         />
       </div>
-      {error && (
-        <p className="mt-1 text-sm text-status-alert">{error}</p>
-      )}
-      {helperText && !error && (
-        <p className="mt-1 text-sm text-banorte-gray">{helperText}</p>
-      )}
+      {error && <p className="mt-1 text-xs text-status-alert">{error}</p>}
     </div>
   );
-};
+}

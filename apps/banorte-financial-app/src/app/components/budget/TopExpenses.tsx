@@ -1,153 +1,83 @@
-'use client';
-
 import React from 'react';
-import { Receipt, TrendingUp } from 'lucide-react';
+import { Card } from '../ui/Card';
+import { ArrowUpRight } from 'lucide-react';
 
-export interface Transaction {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: string;
-  merchant?: string;
-}
-
-export interface TopExpensesProps {
-  transactions?: Transaction[];
-  currency?: string;
-}
-
-export const TopExpenses: React.FC<TopExpensesProps> = ({
-  transactions = [],
-  currency = 'MXN',
-}) => {
-  // Mock data if no transactions provided
-  const mockTransactions: Transaction[] = [
+export function TopExpenses() {
+  const expenses = [
     {
-      id: '1',
-      description: 'Supermercado',
-      amount: 1250,
-      category: 'Alimentos',
-      date: new Date().toISOString(),
-      merchant: 'Walmart',
+      name: 'Renta Departamento',
+      amount: 8500,
+      date: '01 Oct',
+      category: 'Hogar',
     },
     {
-      id: '2',
-      description: 'Gasolina',
-      amount: 800,
+      name: 'Supermercado Walmart',
+      amount: 2450,
+      date: '05 Oct',
+      category: 'Alimentos',
+    },
+    {
+      name: 'Seguro de Auto',
+      amount: 1800,
+      date: '12 Oct',
+      category: 'Seguros',
+    },
+    {
+      name: 'Cena Restaurante',
+      amount: 1200,
+      date: '14 Oct',
+      category: 'Ocio',
+      unusual: true,
+    },
+    {
+      name: 'Gasolina',
+      amount: 950,
+      date: '08 Oct',
       category: 'Transporte',
-      date: new Date(Date.now() - 86400000).toISOString(),
-      merchant: 'Pemex',
-    },
-    {
-      id: '3',
-      description: 'Restaurante',
-      amount: 650,
-      category: 'Alimentos',
-      date: new Date(Date.now() - 172800000).toISOString(),
-      merchant: 'Sanborns',
-    },
-    {
-      id: '4',
-      description: 'Streaming',
-      amount: 199,
-      category: 'Entretenimiento',
-      date: new Date(Date.now() - 259200000).toISOString(),
-      merchant: 'Netflix',
-    },
-    {
-      id: '5',
-      description: 'Farmacia',
-      amount: 450,
-      category: 'Salud',
-      date: new Date(Date.now() - 345600000).toISOString(),
-      merchant: 'Farmacias del Ahorro',
     },
   ];
 
-  const displayTransactions = transactions.length > 0 ? transactions : mockTransactions;
-  const topTransactions = displayTransactions.slice(0, 5);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Hoy';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Ayer';
-    } else {
-      return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      'Alimentos': 'bg-green-100 text-green-800',
-      'Transporte': 'bg-blue-100 text-blue-800',
-      'Entretenimiento': 'bg-purple-100 text-purple-800',
-      'Salud': 'bg-red-100 text-red-800',
-      'Servicios': 'bg-yellow-100 text-yellow-800',
-      'Hogar': 'bg-orange-100 text-orange-800',
-    };
-    return colors[category] || 'bg-gray-100 text-gray-800';
-  };
-
   return (
-    <div className="bg-white rounded-card shadow-card p-5">
+    <Card>
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Receipt size={20} className="text-banorte-red" />
-          <h3 className="text-lg font-bold text-banorte-dark">Gastos Recientes</h3>
-        </div>
-        <TrendingUp size={18} className="text-banorte-gray" />
+        <h3 className="font-bold text-banorte-dark">Gastos más fuertes</h3>
+        <span className="text-xs text-banorte-gray bg-gray-100 px-2 py-1 rounded">
+          Octubre
+        </span>
       </div>
 
-      <div className="space-y-3">
-        {topTransactions.map((transaction) => (
-          <div
-            key={transaction.id}
-            className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="font-semibold text-banorte-dark truncate">
-                  {transaction.merchant || transaction.description}
-                </p>
+      <div className="space-y-4">
+        {expenses.map((expense, idx) => (
+          <div key={idx} className="flex items-center justify-between group">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-50 text-banorte-red flex items-center justify-center">
+                <ArrowUpRight size={16} />
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoryColor(transaction.category)}`}>
-                  {transaction.category}
-                </span>
-                <span className="text-xs text-banorte-gray">
-                  {formatDate(transaction.date)}
-                </span>
+              <div>
+                <p className="text-sm font-bold text-banorte-dark">
+                  {expense.name}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span>{expense.category}</span>
+                  <span>•</span>
+                  <span>{expense.date}</span>
+                </div>
               </div>
             </div>
-            <div className="text-right ml-3">
-              <p className="font-bold text-banorte-dark">
-                {formatCurrency(transaction.amount)}
+            <div className="text-right">
+              <p className="text-sm font-bold text-banorte-dark">
+                -${expense.amount.toLocaleString()}
               </p>
+              {expense.unusual && (
+                <span className="text-[10px] text-status-warning bg-orange-50 px-1.5 py-0.5 rounded font-medium">
+                  Inusual
+                </span>
+              )}
             </div>
           </div>
         ))}
       </div>
-
-      <button className="w-full mt-4 text-sm font-medium text-banorte-red hover:text-red-700 transition-colors text-center py-2 border-t border-gray-100">
-        Ver todos los gastos →
-      </button>
-    </div>
+    </Card>
   );
-};
+}
 
