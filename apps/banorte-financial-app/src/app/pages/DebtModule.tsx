@@ -1,50 +1,50 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
 import { DebtDashboard } from '../components/debt/DebtDashboard';
 import { DebtCard } from '../components/debt/DebtCard';
 import { PaymentStrategy } from '../components/debt/PaymentStrategy';
-import { DebtDetailModal } from '../components/debt/DebtDetailModal';
 import { PaymentSimulator } from '../components/debt/PaymentSimulator';
 import { NormaRecommendations } from '../components/debt/NormaRecommendations';
 import { CreditHealthScore } from '../components/debt/CreditHealthScore';
 import { PaymentAlerts } from '../components/debt/PaymentAlerts';
+import { DebtDetailModal } from '../components/debt/DebtDetailModal';
 import { AddDebtModal } from '../components/debt/AddDebtModal';
+import { Button } from '../components/ui/Button';
+import { Plus } from 'lucide-react';
 
-export default function DebtModule() {
+export function DebtModule() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-banorte-dark font-display">Mis Deudas</h1>
-            <p className="text-banorte-gray">Gestiona y optimiza tus pagos</p>
-          </div>
-          <button
-            onClick={() => setIsAddOpen(true)}
-            className="flex items-center gap-2 bg-banorte-red text-white px-4 py-2.5 rounded-xl font-medium hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
-          >
-            <Plus size={20} />
-            Agregar Deuda
-          </button>
+    <div className="p-6 max-w-[1440px] mx-auto space-y-6 animate-in fade-in duration-500">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-banorte-dark">
+            Gestión de Deudas
+          </h1>
+          <p className="text-banorte-gray">
+            Toma el control y libérate de deudas más rápido
+          </p>
         </div>
+        <Button size="sm" onClick={() => setIsAddOpen(true)}>
+          <Plus size={16} className="mr-2" />
+          Registrar Deuda
+        </Button>
+      </div>
 
-        {/* Dashboard Summary */}
-        <DebtDashboard />
+      <DebtDashboard />
 
-        {/* Strategy Section */}
-        <PaymentStrategy />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Main Content - Strategy & List */}
+        <div className="lg:col-span-8 space-y-8">
+          <PaymentStrategy />
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Debt Cards - Main Column */}
-          <div className="lg:col-span-8 space-y-6">
-            <h2 className="text-lg font-bold text-banorte-dark">Tus Deudas</h2>
+          <div>
+            <h2 className="text-lg font-bold text-banorte-dark mb-4">
+              Tus Deudas Priorizadas
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <DebtCard
                 type="credit"
@@ -52,9 +52,9 @@ export default function DebtModule() {
                 amount={12450}
                 rate={42}
                 minPayment={450}
-                recPayment={800}
-                dueDate="22 Nov"
-                progress={38}
+                recPayment={1200}
+                dueDate="15 Nov"
+                progress={35}
                 priority="high"
                 onViewDetails={() => setIsDetailOpen(true)}
               />
@@ -64,10 +64,10 @@ export default function DebtModule() {
                 amount={9550}
                 rate={35}
                 minPayment={350}
-                recPayment={500}
-                dueDate="28 Nov"
-                progress={36}
-                priority="medium"
+                recPayment={800}
+                dueDate="25 Nov"
+                progress={20}
+                priority="high"
                 onViewDetails={() => setIsDetailOpen(true)}
               />
               <DebtCard
@@ -76,8 +76,8 @@ export default function DebtModule() {
                 amount={18000}
                 rate={28}
                 minPayment={850}
-                recPayment={1200}
-                dueDate="17 Nov"
+                recPayment={1500}
+                dueDate="10 Nov"
                 progress={40}
                 priority="high"
                 onViewDetails={() => setIsDetailOpen(true)}
@@ -95,21 +95,21 @@ export default function DebtModule() {
                 onViewDetails={() => setIsDetailOpen(true)}
               />
             </div>
-
-            <PaymentSimulator />
           </div>
 
-          {/* Sidebar - Recommendations & Alerts */}
-          <div className="lg:col-span-4 space-y-6">
-            <NormaRecommendations />
-            <PaymentAlerts />
-            <CreditHealthScore />
-          </div>
+          <PaymentSimulator />
         </div>
 
-        <DebtDetailModal isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} />
-        <AddDebtModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
+        {/* Sidebar - Recommendations & Alerts */}
+        <div className="lg:col-span-4 space-y-6">
+          <NormaRecommendations />
+          <PaymentAlerts />
+          <CreditHealthScore />
+        </div>
       </div>
+
+      <DebtDetailModal isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} />
+      <AddDebtModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
     </div>
   );
 }

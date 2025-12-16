@@ -1,37 +1,43 @@
+'use client';
+
 import React from 'react';
 import { Card } from '../ui/Card';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, Scissors, ArrowRight } from 'lucide-react';
 
 export function NormaRecommendations() {
   return (
-    <Card className="bg-gradient-to-br from-banorte-red/5 to-red-50 border-banorte-red/20">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-banorte-red text-white rounded-full">
-          <Sparkles size={20} />
+    <Card className="mb-6 border-l-4 border-l-banorte-red">
+      <div className="flex items-start gap-4">
+        <div className="p-3 bg-red-50 text-banorte-red rounded-full">
+          <Sparkles size={24} />
         </div>
-        <div>
-          <h3 className="font-bold text-banorte-dark">Norma sugiere</h3>
-          <p className="text-xs text-gray-500">Recomendaciones personalizadas</p>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="p-3 bg-white rounded-lg border border-gray-100 hover:border-banorte-red/30 transition-colors cursor-pointer group">
-          <p className="text-sm text-banorte-dark mb-1">
-            <strong>Consolida tus tarjetas</strong> en un préstamo personal al 18% y ahorra $8,500 en intereses.
+        <div className="flex-1">
+          <h3 className="font-bold text-banorte-dark mb-1">Recomendación de Norma</h3>
+          <p className="text-sm text-banorte-gray mb-4">
+            He analizado tus gastos y encontré una oportunidad para liberar{' '}
+            <strong className="text-banorte-dark">$1,200 mensuales</strong> que podrías destinar a tu deuda de Banorte Oro.
           </p>
-          <span className="text-xs text-banorte-red font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-            Ver opciones <ArrowRight size={12} />
-          </span>
-        </div>
 
-        <div className="p-3 bg-white rounded-lg border border-gray-100 hover:border-banorte-red/30 transition-colors cursor-pointer group">
-          <p className="text-sm text-banorte-dark mb-1">
-            <strong>Paga $200 extra</strong> a Banorte Oro este mes y reduce 2 meses tu plazo.
-          </p>
-          <span className="text-xs text-banorte-red font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-            Aplicar ahora <ArrowRight size={12} />
-          </span>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Scissors size={16} className="text-gray-400" />
+                <span>Recortar gastos hormiga</span>
+              </div>
+              <span className="font-bold text-green-600">+$450</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm">
+                <Scissors size={16} className="text-gray-400" />
+                <span>Reducir salidas a restaurantes</span>
+              </div>
+              <span className="font-bold text-green-600">+$750</span>
+            </div>
+          </div>
+
+          <button className="text-sm font-bold text-banorte-red flex items-center gap-1 hover:underline">
+            Aplicar recomendaciones a presupuesto <ArrowRight size={16} />
+          </button>
         </div>
       </div>
     </Card>
