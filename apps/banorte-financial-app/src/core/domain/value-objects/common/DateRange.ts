@@ -26,6 +26,17 @@ export class DateRange {
     return new DateRange(startDate, endDate);
   }
 
+  static fromDays(days: number): DateRange {
+    return DateRange.createFromDays(days);
+  }
+
+  static thisMonth(): DateRange {
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return new DateRange(startDate, endDate);
+  }
+
   getDurationInDays(): number {
     const diffTime = Math.abs(this.endDate.getTime() - this.startDate.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));

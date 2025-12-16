@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Home, TrendingUp, CreditCard, Target, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Home, TrendingUp, CreditCard, Target, Wallet, Settings, HelpCircle, LogOut } from 'lucide-react';
 
 export interface SidebarProps {
   className?: string;
+  activeTab?: string;
+  onNavigate?: (tab: string) => void;
 }
 
 interface NavItem {
@@ -14,9 +16,10 @@ interface NavItem {
   href: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ className = '', activeTab = 'dashboard', onNavigate }) => {
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <Home size={20} />, href: '/' },
+    { id: 'presupuestos', label: 'Presupuestos', icon: <Wallet size={20} />, href: '/budget' },
     { id: 'investments', label: 'Inversiones', icon: <TrendingUp size={20} />, href: '/investments' },
     { id: 'credit', label: 'Créditos', icon: <CreditCard size={20} />, href: '/credit' },
     { id: 'goals', label: 'Metas', icon: <Target size={20} />, href: '/goals' },
@@ -37,16 +40,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
 
       {/* Main Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
-          <a
-            key={item.id}
-            href={item.href}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-banorte-dark hover:bg-banorte-bg transition-colors duration-200"
-          >
-            {item.icon}
-            <span className="font-medium">{item.label}</span>
-          </a>
-        ))}
+        {navItems.map((item) => {
+          const isActive = activeTab === item.id;
+          const handleClick = (e: React.MouseEvent) => {
+            if (onNavigate) {
+              e.preventDefault();
+              onNavigate(item.id);
+            }
+          };
+
+          return (
+            <a
+              key={item.id}
+              href={item.href}
+              onClick={handleClick}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
+                isActive
+                  ? 'bg-banorte-red text-white'
+                  : 'text-banorte-dark hover:bg-banorte-bg'
+              }`}
+            >
+              {item.icon}
+              <span className="font-medium">{item.label}</span>
+            </a>
+          );
+        })}
       </nav>
 
       {/* Bottom Navigation */}
