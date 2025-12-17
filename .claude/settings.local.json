@@ -1,9 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)"
-    ],
-    "deny": [],
-    "ask": []
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm type-check:*)",
+      "WebSearch",
+      "WebFetch(domain:ai-sdk.dev)",
+      "Bash(curl:*)",
+      "Bash(pnpm build:financial:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)"
+    ]
   }
 }
