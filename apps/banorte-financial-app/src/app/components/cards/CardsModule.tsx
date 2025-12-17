@@ -79,14 +79,25 @@ export default function CardsModule() {
             cutDate={activeCard.cutDate || '30 Oct'}
             onPay={() => setIsPaymentModalOpen(true)}
           />
-          <SmartRecommendations />
+          <SmartRecommendations
+            userId="user-demo"
+            cardId={activeCard.id}
+            cardName={activeCard.name}
+          />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <UsageStrategy />
             <BenefitsSection />
           </div>
         </>
       ) : (
-        <DebitCardDetail available={activeCard?.balance || 0} accountName="Cuenta de Nómina" />
+        <>
+          <DebitCardDetail available={activeCard?.balance || 0} accountName="Cuenta de Nómina" />
+          <SmartRecommendations
+            userId="user-demo"
+            cardId={activeCard?.id}
+            cardName={activeCard?.name || 'tu tarjeta'}
+          />
+        </>
       )}
 
       <TransactionList />

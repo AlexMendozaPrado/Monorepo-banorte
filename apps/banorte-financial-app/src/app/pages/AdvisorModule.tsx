@@ -8,22 +8,31 @@ import { QuickReplyOptions } from '../components/chat/QuickReplyOptions'
 import { ChatInput } from '../components/chat/ChatInput'
 import { TypingIndicator } from '../components/chat/TypingIndicator'
 import { ChatHistoryModal } from '../components/chat/ChatHistoryModal'
-import { History, Settings, Sparkles } from 'lucide-react'
+import { History, Settings, Sparkles, AlertCircle } from 'lucide-react'
+import { useAdvisor } from '../hooks/useAdvisor'
 
 export function AdvisorModule() {
-  const [messages, setMessages] = useState<any[]>([
+  const userId = 'user-demo'
+  const { messages: apiMessages, loading, error, suggestedQuestions, sendMessage } = useAdvisor(userId)
+
+  const [localMessages, setLocalMessages] = useState<any[]>([
     {
       type: 'text',
       message:
-        '¡Hola María! 👋 Soy Norma, tu asesora financiera personal. He estado analizando tus finanzas y tengo algunas recomendaciones.',
+        '¡Hola! 👋 Soy Norma, tu asesora financiera personal. He estado analizando tus finanzas y tengo algunas recomendaciones. ¿En qué puedo ayudarte hoy?',
       sender: 'norma',
-      timestamp: '10:30 AM',
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       sentiment: 'positive',
     },
   ])
-  const [isTyping, setIsTyping] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Merge API messages with local messages
+  const messages = apiMessages.length > 0 ? apiMessages : localMessages
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
@@ -33,13 +42,12 @@ export function AdvisorModule() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages, isTyping])
+  }, [messages, loading])
 
-  const handleSend = (text: string) => {
-    // Add user message
-    setMessages((prev) => [
-      ...prev,
-      {
+  const handleSend = async (text: string) => {
+    try {
+      // Add user message to local state immediately
+      const userMessage = {
         type: 'text',
         message: text,
         sender: 'user',
@@ -47,81 +55,53 @@ export function AdvisorModule() {
           hour: '2-digit',
           minute: '2-digit',
         }),
-      },
-    ])
-
-    // Simulate Norma thinking
-    setIsTyping(true)
-    setTimeout(() => {
-      setIsTyping(false)
-      // Mock response logic
-      if (text.toLowerCase().includes('gastos')) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            type: 'comparison',
-            title: 'Análisis de Gastos Mensuales',
-            currentMonth: {
-              label: 'Noviembre',
-              value: 12450,
-            },
-            previousMonth: {
-              label: 'Octubre',
-              value: 14200,
-            },
-            insight:
-              '¡Excelente! Has reducido tus gastos un 12% comparado con el mes anterior. Principalmente en la categoría de Restaurantes.',
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          },
-        ])
-      } else if (
-        text.toLowerCase().includes('ahorro') ||
-        text.toLowerCase().includes('ahorrar')
-      ) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            type: 'insight',
-            title: 'Oportunidad de Ahorro Detectada',
-            description:
-              'He notado que tienes $5,000 en tu cuenta de nómina que no has utilizado en 3 meses.',
-            data: [
-              {
-                label: 'Saldo inactivo',
-                value: '$5,000',
-              },
-              {
-                label: 'Rendimiento potencial',
-                value: '$450/año',
-              },
-            ],
-            recommendation:
-              'Mueve este saldo a tu Pagaré Banorte para generar rendimientos sin riesgo.',
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          },
-        ])
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            type: 'text',
-            message:
-              'Entiendo. Para darte una mejor respuesta, ¿podrías darme más detalles o elegir una de las opciones sugeridas?',
-            sender: 'norma',
-            timestamp: new Date().toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          },
-        ])
       }
-    }, 1500)
+      setLocalMessages((prev) => [...prev, userMessage])
+
+      // Send message to OpenAI via API with financial context
+      const context = {
+        currentBudget: {
+          totalIncome: 30000,
+          spent: 12450,
+          budget: 20000,
+          categories: [
+            { name: 'Alimentos', spent: 3200, budget: 6000 },
+            { name: 'Transporte', spent: 1800, budget: 2500 },
+            { name: 'Ocio', spent: 800, budget: 1500 },
+            { name: 'Hogar', spent: 5500, budget: 8500 },
+            { name: 'Servicios', spent: 1150, budget: 2000 },
+          ],
+        },
+        debts: [
+          { creditor: 'Banorte Oro', amount: 12450, rate: 42, type: 'credit' },
+          { creditor: 'Liverpool', amount: 9550, rate: 35, type: 'store' },
+          { creditor: 'BBVA Personal', amount: 18000, rate: 28, type: 'personal' },
+          { creditor: 'Santander Auto', amount: 45000, rate: 12, type: 'auto' },
+        ],
+        savingsGoals: [
+          { name: 'Fondo de Emergencia', current: 15000, target: 90000, priority: 'high' },
+          { name: 'Vacaciones', current: 5000, target: 25000, priority: 'medium' },
+        ],
+      }
+
+      await sendMessage(text, context)
+    } catch (err) {
+      console.error('Error sending message:', err)
+      // Add error message to local state
+      setLocalMessages((prev) => [
+        ...prev,
+        {
+          type: 'text',
+          message: 'Lo siento, tuve un problema al procesar tu mensaje. Por favor, intenta de nuevo.',
+          sender: 'norma',
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          sentiment: 'neutral',
+        },
+      ])
+    }
   }
 
   return (
@@ -168,25 +148,35 @@ export function AdvisorModule() {
             }
             return <ChatMessage key={idx} {...msg} />
           })}
-          {isTyping && <TypingIndicator />}
+          {loading && <TypingIndicator />}
+          {error && (
+            <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-100 rounded-lg text-red-600">
+              <AlertCircle size={20} />
+              <p className="text-sm">Error: {error}</p>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Quick Replies */}
-        {!isTyping && (
+        {!loading && (
           <QuickReplyOptions
-            options={[
-              '¿Cómo van mis gastos?',
-              'Sugerencias de ahorro',
-              'Analizar mis deudas',
-              'Revisar presupuesto',
-            ]}
+            options={
+              suggestedQuestions.length > 0
+                ? suggestedQuestions
+                : [
+                    '¿Cómo van mis gastos?',
+                    'Sugerencias de ahorro',
+                    'Analizar mis deudas',
+                    'Revisar presupuesto',
+                  ]
+            }
             onSelect={handleSend}
           />
         )}
 
         {/* Input */}
-        <ChatInput onSend={handleSend} isTyping={isTyping} />
+        <ChatInput onSend={handleSend} isTyping={loading} />
       </div>
 
       <ChatHistoryModal

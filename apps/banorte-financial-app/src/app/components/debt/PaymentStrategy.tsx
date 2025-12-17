@@ -2,10 +2,46 @@
 
 import React, { useState } from 'react';
 import { Card } from '../ui/Card';
-import { Snowflake, TrendingDown, Check, Info } from 'lucide-react';
+import { Snowflake, TrendingDown, Check, Info, Loader2 } from 'lucide-react';
+import { useDebtStrategy } from '../../hooks/useDebtStrategy';
 
-export function PaymentStrategy() {
+interface PaymentStrategyProps {
+  userId?: string;
+  availableMonthly?: number;
+}
+
+export function PaymentStrategy({ userId = 'user-demo', availableMonthly = 3000 }: PaymentStrategyProps) {
   const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>('avalanche');
+  const { comparison, loading, error } = useDebtStrategy(userId, availableMonthly);
+
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <div className="flex items-center justify-center p-8">
+          <Loader2 size={32} className="animate-spin text-banorte-red" />
+          <span className="ml-3 text-banorte-gray">Calculando estrategias de pago...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !comparison) {
+    return (
+      <div className="mb-8">
+        <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+          <p className="text-sm text-red-600">
+            {error || 'No se pudo calcular la estrategia de pago. Asegúrate de tener deudas registradas.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { snowball, avalanche, savingsDifference, monthsDifference, recommendedStrategy } = comparison;
+
+  if (!snowball || !avalanche) {
+    return null;
+  }
 
   return (
     <div className="mb-8">
@@ -40,17 +76,21 @@ export function PaymentStrategy() {
           </div>
 
           <p className="text-sm text-banorte-gray mb-4">
-            Paga primero las deudas más pequeñas para ganar impulso y motivación con victorias rápidas.
+            {snowball.reasoning}
           </p>
 
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Ahorro en intereses</span>
-              <span className="font-medium text-banorte-dark">$10,200</span>
+              <span className="font-medium text-banorte-dark">
+                ${snowball.totalInterestSaved.toLocaleString('es-MX')}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Tiempo total</span>
-              <span className="font-medium text-banorte-dark">41 meses</span>
+              <span className="font-medium text-banorte-dark">
+                {snowball.totalMonthsToPayoff} meses
+              </span>
             </div>
           </div>
 
@@ -85,17 +125,31 @@ export function PaymentStrategy() {
           </div>
 
           <p className="text-sm text-banorte-gray mb-4">
-            Paga primero las deudas con mayor interés para minimizar el costo total y salir antes.
+            {avalanche.reasoning}
           </p>
 
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Ahorro en intereses</span>
-              <span className="font-bold text-green-600">$12,450 (+$2,250)</span>
+              <span className="font-bold text-green-600">
+                ${avalanche.totalInterestSaved.toLocaleString('es-MX')}
+                {savingsDifference > 0 && (
+                  <span className="ml-1">
+                    (+${savingsDifference.toLocaleString('es-MX')})
+                  </span>
+                )}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Tiempo total</span>
-              <span className="font-bold text-green-600">38 meses (-3 meses)</span>
+              <span className="font-bold text-green-600">
+                {avalanche.totalMonthsToPayoff} meses
+                {monthsDifference > 0 && (
+                  <span className="ml-1">
+                    (-{monthsDifference} meses)
+                  </span>
+                )}
+              </span>
             </div>
           </div>
 
@@ -108,15 +162,20 @@ export function PaymentStrategy() {
         </Card>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
-        <Info className="text-blue-600 mt-0.5" size={20} />
-        <div>
-          <p className="text-sm font-bold text-blue-800">Recomendación de Norma</p>
-          <p className="text-sm text-blue-600">
-            Basado en tus altas tasas de interés (42% en Banorte Oro), el método <strong>Avalancha</strong> te ahorrará $2,250 y te liberará 3 meses antes.
-          </p>
+      {recommendedStrategy && (
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+          <Info className="text-blue-600 mt-0.5" size={20} />
+          <div>
+            <p className="text-sm font-bold text-blue-800">Recomendación de Norma</p>
+            <p className="text-sm text-blue-600">
+              El método <strong>{recommendedStrategy === 'AVALANCHE' ? 'Avalancha' : 'Bola de Nieve'}</strong> es el más recomendado para tu situación.
+              {recommendedStrategy === 'AVALANCHE' && savingsDifference > 0 && (
+                <> Te ahorrará ${savingsDifference.toLocaleString('es-MX')} y te liberará {monthsDifference} meses antes.</>
+              )}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

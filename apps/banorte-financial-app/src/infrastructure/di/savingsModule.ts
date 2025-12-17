@@ -3,6 +3,7 @@ import { CreateSavingsGoalUseCase } from '@/core/application/use-cases/savings/C
 import { CreateSavingsRuleUseCase } from '@/core/application/use-cases/savings/CreateSavingsRuleUseCase';
 import { SimulateSavingsImpactUseCase } from '@/core/application/use-cases/savings/SimulateSavingsImpactUseCase';
 import { CalculateEmergencyFundUseCase } from '@/core/application/use-cases/savings/CalculateEmergencyFundUseCase';
+import { OptimizeSavingsStrategyUseCase } from '@/core/application/use-cases/savings/OptimizeSavingsStrategyUseCase';
 import { InMemorySavingsGoalRepository } from '@/infrastructure/repositories/in-memory/InMemorySavingsGoalRepository';
 import { InMemorySavingsRuleRepository } from '@/infrastructure/repositories/in-memory/InMemorySavingsRuleRepository';
 import { OpenAISavingsOptimizer } from '@/infrastructure/ai/providers/openai/OpenAISavingsOptimizer';
@@ -40,6 +41,14 @@ export function registerSavingsModule(container: DIContainer): void {
 
   container.register('CalculateEmergencyFundUseCase', () => {
     return new CalculateEmergencyFundUseCase();
+  });
+
+  container.register('OptimizeSavingsStrategyUseCase', () => {
+    return new OptimizeSavingsStrategyUseCase(
+      container.resolve('ISavingsGoalRepository'),
+      container.resolve('ISavingsRuleRepository'),
+      container.resolve('ISavingsOptimizerPort')
+    );
   });
 
   console.log('✅ Savings Module registered');

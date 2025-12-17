@@ -152,9 +152,7 @@ export function BudgetModule() {
         </div>
 
         <div className="lg:col-span-4 space-y-6">
-          {!antExpensesLoading && antExpenses && antExpenses.detections.length > 0 && (
-            <SmallExpensesAlert userId={userId} />
-          )}
+          <SmallExpensesAlert userId={userId} />
           <TopExpenses />
         </div>
       </div>

@@ -10,6 +10,8 @@ import { SavingRuleWizard } from '../components/savings/SavingRuleWizard';
 import { GoalModal } from '../components/savings/GoalModal';
 import { SavingsHistory } from '../components/savings/SavingsHistory';
 import { CelebrationModal } from '../components/savings/CelebrationModal';
+import { SavingsOptimizationCard } from '../components/savings/SavingsOptimizationCard';
+import { SmartRuleSuggestions } from '../components/savings/SmartRuleSuggestions';
 import { Button } from '../components/ui/Button';
 import { Plus, Plane, Car, Home } from 'lucide-react';
 
@@ -61,6 +63,15 @@ export function SavingsModule() {
       {/* Hero Section */}
       <EmergencyFundHero saved={45000} target={60000} monthlyContribution={3200} />
 
+      {/* AI Optimization Section */}
+      {goals.length > 0 && (
+        <SavingsOptimizationCard
+          userId={userId}
+          monthlyIncome={30000}
+          monthlyExpenses={18000}
+        />
+      )}
+
       {/* Savings Goals Section */}
       <div>
         <div className="flex justify-between items-center mb-4">
@@ -99,6 +110,19 @@ export function SavingsModule() {
           </div>
         )}
       </div>
+
+      {/* Smart Rule Suggestions */}
+      {goals.length > 0 && (
+        <SmartRuleSuggestions
+          userId={userId}
+          monthlyIncome={30000}
+          monthlyExpenses={18000}
+          onCreateRule={(type, name, description) => {
+            console.log('Create rule:', { type, name, description });
+            setIsWizardOpen(true);
+          }}
+        />
+      )}
 
       {/* Saving Rules Section */}
       <div>

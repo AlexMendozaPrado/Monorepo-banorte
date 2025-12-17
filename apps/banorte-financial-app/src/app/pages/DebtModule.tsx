@@ -16,6 +16,8 @@ import { Plus } from 'lucide-react';
 export function DebtModule() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const userId = 'user-demo';
+  const availableMonthly = 3000;
 
   return (
     <div className="p-6 max-w-[1440px] mx-auto space-y-6 animate-in fade-in duration-500">
@@ -39,7 +41,7 @@ export function DebtModule() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Content - Strategy & List */}
         <div className="lg:col-span-8 space-y-8">
-          <PaymentStrategy />
+          <PaymentStrategy userId={userId} availableMonthly={availableMonthly} />
 
           <div>
             <h2 className="text-lg font-bold text-banorte-dark mb-4">
@@ -102,7 +104,7 @@ export function DebtModule() {
 
         {/* Sidebar - Recommendations & Alerts */}
         <div className="lg:col-span-4 space-y-6">
-          <NormaRecommendations />
+          <NormaRecommendations userId={userId} />
           <PaymentAlerts />
           <CreditHealthScore />
         </div>
