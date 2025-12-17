@@ -7,7 +7,11 @@
       "Bash(pnpm type-check:*)",
       "WebSearch",
       "WebFetch(domain:ai-sdk.dev)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(pnpm build:financial:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)"
     ]
   }
 }

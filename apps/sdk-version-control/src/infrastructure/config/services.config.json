@@ -1,0 +1,179 @@
+{
+  "$schema": "./services.schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2024-12-16T00:00:00Z",
+  "services": [
+    {
+      "id": "incode",
+      "name": "Incode",
+      "category": "Identity",
+      "description": "SDK de verificación de identidad biométrica",
+      "documentationUrl": "https://docs.incode.com",
+      "logoUrl": "/logos/incode.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "5.2.1",
+          "status": "current"
+        },
+        "ios": {
+          "currentVersion": "5.1.0",
+          "status": "warning"
+        },
+        "android": {
+          "currentVersion": "4.9.2",
+          "status": "outdated"
+        }
+      }
+    },
+    {
+      "id": "firebase",
+      "name": "Firebase",
+      "category": "Analytics",
+      "description": "Plataforma de desarrollo de Google para analytics, push y más",
+      "documentationUrl": "https://firebase.google.com/docs",
+      "logoUrl": "/logos/firebase.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "10.7.0",
+          "status": "current"
+        },
+        "ios": {
+          "currentVersion": "10.20.0",
+          "status": "current"
+        },
+        "android": {
+          "currentVersion": "32.7.0",
+          "status": "warning"
+        }
+      }
+    },
+    {
+      "id": "segment",
+      "name": "Segment",
+      "category": "Analytics",
+      "description": "Customer Data Platform para unificar datos de clientes",
+      "documentationUrl": "https://segment.com/docs",
+      "logoUrl": "/logos/segment.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "4.15.3",
+          "status": "current"
+        },
+        "ios": {
+          "currentVersion": "2.0.5",
+          "status": "warning"
+        },
+        "android": {
+          "currentVersion": "1.14.0",
+          "status": "outdated"
+        }
+      }
+    },
+    {
+      "id": "appsflyer",
+      "name": "AppsFlyer",
+      "category": "Attribution",
+      "description": "Plataforma de atribución y analytics móvil",
+      "documentationUrl": "https://dev.appsflyer.com",
+      "logoUrl": "/logos/appsflyer.svg",
+      "versions": {
+        "ios": {
+          "currentVersion": "6.12.0",
+          "status": "current"
+        },
+        "android": {
+          "currentVersion": "6.12.2",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "dynatrace",
+      "name": "Dynatrace",
+      "category": "Monitoring",
+      "description": "Plataforma de observabilidad y APM",
+      "documentationUrl": "https://docs.dynatrace.com",
+      "logoUrl": "/logos/dynatrace.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "1.251.0",
+          "status": "warning"
+        },
+        "ios": {
+          "currentVersion": "8.251.0",
+          "status": "current"
+        },
+        "android": {
+          "currentVersion": "8.249.0",
+          "status": "warning"
+        }
+      }
+    },
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "category": "Payments",
+      "description": "Plataforma de pagos y procesamiento de transacciones",
+      "documentationUrl": "https://stripe.com/docs",
+      "logoUrl": "/logos/stripe.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "2.2.0",
+          "status": "current"
+        },
+        "ios": {
+          "currentVersion": "23.18.0",
+          "status": "warning"
+        },
+        "android": {
+          "currentVersion": "20.35.0",
+          "status": "current"
+        }
+      }
+    },
+    {
+      "id": "braze",
+      "name": "Braze",
+      "category": "Engagement",
+      "description": "Plataforma de customer engagement y marketing automation",
+      "documentationUrl": "https://www.braze.com/docs",
+      "logoUrl": "/logos/braze.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "5.1.0",
+          "status": "current"
+        },
+        "ios": {
+          "currentVersion": "7.5.0",
+          "status": "warning"
+        },
+        "android": {
+          "currentVersion": "28.0.0",
+          "status": "outdated"
+        }
+      }
+    },
+    {
+      "id": "contentful",
+      "name": "Contentful",
+      "category": "CMS",
+      "description": "Headless CMS para gestión de contenido",
+      "documentationUrl": "https://www.contentful.com/developers/docs",
+      "logoUrl": "/logos/contentful.svg",
+      "versions": {
+        "web": {
+          "currentVersion": "10.6.0",
+          "status": "current"
+        },
+        "ios": {
+          "currentVersion": "5.5.0",
+          "status": "current"
+        },
+        "android": {
+          "currentVersion": "10.6.0",
+          "status": "current"
+        }
+      }
+    }
+  ]
+}

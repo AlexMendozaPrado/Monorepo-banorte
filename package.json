@@ -16,6 +16,8 @@
     "build:sentiment": "turbo run build --filter=sentiment-analysis",
     "dev:financial": "turbo run dev --filter=banorte-financial-app",
     "build:financial": "turbo run build --filter=banorte-financial-app",
+    "dev:sdk-control": "turbo run dev --filter=sdk-version-control",
+    "build:sdk-control": "turbo run build --filter=sdk-version-control",
     "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
