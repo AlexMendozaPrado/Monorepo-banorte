@@ -20,14 +20,23 @@ export function BudgetModule() {
   const { budget, loading: budgetLoading, error: budgetError, createBudget } = useBudget(userId, currentMonth);
   const { analysis: antExpenses, loading: antExpensesLoading } = useAntExpenses(userId);
 
-  const handleMonthChange = (direction: 'prev' | 'next') => {
-    const newMonth = new Date(currentMonth);
-    if (direction === 'prev') {
-      newMonth.setMonth(newMonth.getMonth() - 1);
-    } else {
-      newMonth.setMonth(newMonth.getMonth() + 1);
+  const handleMonthChange = (monthString: string) => {
+    // Parse month string like "Octubre 2024" to Date
+    const monthNames: Record<string, number> = {
+      'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
+      'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
+      'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+    };
+    const parts = monthString.toLowerCase().split(' ');
+    const monthName = parts[0];
+    const yearStr = parts[1];
+    if (monthName && yearStr) {
+      const monthIndex = monthNames[monthName];
+      const year = parseInt(yearStr, 10);
+      if (monthIndex !== undefined && !isNaN(year)) {
+        setCurrentMonth(new Date(year, monthIndex, 1));
+      }
     }
-    setCurrentMonth(newMonth);
   };
 
   const handleCreateBudget = async () => {

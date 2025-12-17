@@ -1,7 +1,7 @@
 import { ISavingsGoalRepository } from '@/core/domain/ports/repositories/ISavingsGoalRepository';
 import { ISavingsRuleRepository } from '@/core/domain/ports/repositories/ISavingsRuleRepository';
 import { ISavingsOptimizerPort, SavingsOptimization } from '@/core/domain/ports/ai-services/ISavingsOptimizerPort';
-import { Money } from '@/core/domain/value-objects/financial/Money';
+import { Money, Currency } from '@/core/domain/value-objects/financial/Money';
 
 export interface OptimizeSavingsDTO {
   userId: string;
@@ -41,13 +41,13 @@ export class OptimizeSavingsStrategyUseCase {
   ) {}
 
   async execute(dto: OptimizeSavingsDTO): Promise<OptimizeSavingsResultDTO> {
-    const currency = dto.currency || 'MXN';
+    const currency = (dto.currency || 'MXN') as Currency;
 
     // Get user's savings goals
-    const goals = await this.savingsGoalRepository.findByUserId(dto.userId);
+    const goals = await this.savingsGoalRepository.findByUser(dto.userId);
 
     // Get user's current savings rules
-    const rules = await this.savingsRuleRepository.findByUserId(dto.userId);
+    const rules = await this.savingsRuleRepository.findByUser(dto.userId);
 
     // If no goals, return empty optimization with suggestions to create goals
     if (goals.length === 0) {
@@ -83,7 +83,7 @@ export class OptimizeSavingsStrategyUseCase {
         alternativeStrategies: s.alternativeStrategies?.map(alt => ({
           name: alt.name,
           monthlyContribution: alt.monthlyContribution.toJSON(),
-          completionMonths: alt.completionMonths,
+          completionMonths: Math.ceil((alt.completionDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30)),
         })),
       })),
       suggestedRules: optimization.suggestedRules.map(r => ({

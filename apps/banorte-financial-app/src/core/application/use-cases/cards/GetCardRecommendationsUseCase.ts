@@ -43,21 +43,12 @@ export class GetCardRecommendationsUseCase {
 
         // Get optimization for each card
         // TODO: Fetch real transactions from repository
-        const mockTransactions = [
-          { amount: 1200, category: 'Restaurantes', merchant: 'Starbucks', date: new Date() },
-          { amount: 850, category: 'Supermercado', merchant: 'Walmart', date: new Date() },
-          { amount: 2500, category: 'Gasolina', merchant: 'Shell', date: new Date() },
-          { amount: 450, category: 'Entretenimiento', merchant: 'Netflix', date: new Date() },
-          { amount: 3200, category: 'Compras', merchant: 'Amazon', date: new Date() },
-        ];
-
         const context = {
           card,
-          recentTransactions: mockTransactions,
-          averageMonthlySpending: { amount: 15000, currency: 'MXN' },
+          recentTransactions: 5, // Number of recent transactions
+          averageMonthlySpending: 15000,
           paymentHistory: 95,
           accountAgeMonths: 24,
-          monthlyIncome: { amount: 30000, currency: 'MXN' },
         };
 
         const optimization = await this.cardOptimizer.getCardRecommendations(context);

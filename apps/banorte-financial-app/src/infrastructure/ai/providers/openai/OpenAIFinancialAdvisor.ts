@@ -112,8 +112,8 @@ Responde en JSON:
     return result.data.insights.map(insight =>
       FinancialInsight.create({
         userId: context.userId,
-        type: InsightType[insight.type],
-        priority: InsightPriority[insight.priority],
+        type: (InsightType as Record<string, InsightType>)[insight.type] || InsightType.SAVING_OPPORTUNITY,
+        priority: (InsightPriority as Record<string, InsightPriority>)[insight.priority] || InsightPriority.MEDIUM,
         title: insight.title,
         description: insight.description,
         actionableSteps: insight.actionableSteps,

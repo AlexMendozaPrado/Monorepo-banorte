@@ -10,18 +10,20 @@ interface CategoryModalProps {
   category?: {
     id: string;
     name: string;
-    budget: number;
+    budgeted?: { amount: number };
   } | null;
+  onSave?: (data: { name: string; budget: number }) => void;
 }
 
 export function CategoryModal({
   isOpen,
   onClose,
   category,
+  onSave,
 }: CategoryModalProps) {
   const [formData, setFormData] = useState({
     name: category?.name || '',
-    budget: category?.budget || '',
+    budget: category?.budgeted?.amount || '',
     alertThreshold: 80,
     notes: '',
   });

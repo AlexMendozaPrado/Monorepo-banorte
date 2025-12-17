@@ -102,9 +102,12 @@ Responde en JSON:
 
     const category = availableCategories.find(c => c.name === result.data.categoryName) || availableCategories[0];
 
+    const defaultCategory = { id: 'otros', name: 'Otros' };
+    const finalCategory = category || defaultCategory;
+
     return {
-      categoryId: category.id,
-      categoryName: category.name,
+      categoryId: finalCategory.id,
+      categoryName: finalCategory.name,
       confidence: result.data.confidence || 0.5,
       reasoning: result.data.reasoning || 'Categorización automática',
     };
@@ -290,7 +293,7 @@ Responde en JSON:
   // Helper methods
   private groupTransactionsByCategory(transactions: Transaction[]): Record<string, Transaction[]> {
     return transactions.reduce((acc, t) => {
-      const category = t.category || 'Sin categoría';
+      const category = t.categoryId || 'Sin categoría';
       if (!acc[category]) acc[category] = [];
       acc[category].push(t);
       return acc;
@@ -302,7 +305,7 @@ Responde en JSON:
     return Object.entries(grouped).map(([category, txs]) => ({
       category,
       spent: txs.reduce((sum, t) => sum + t.amount.amount, 0),
-      budgeted: budget.categories.find(c => c.name === category)?.allocatedAmount.amount || 0,
+      budgeted: budget.categories.find(c => c.name === category)?.budgeted.amount || 0,
     }));
   }
 

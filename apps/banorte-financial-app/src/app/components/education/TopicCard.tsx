@@ -48,7 +48,7 @@ export function TopicCard({
           <span>{progress}% completado</span>
           <span>{lessonsCount} lecciones</span>
         </div>
-        <ProgressBar value={progress} color="success" showPercentage={false} />
+        <ProgressBar value={progress} color="success" showLabel={false} />
       </div>
     </Card>
   );

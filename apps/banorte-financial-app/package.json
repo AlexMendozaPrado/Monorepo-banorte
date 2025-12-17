@@ -30,6 +30,7 @@
     "@banorte/typescript-config": "workspace:*",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "@types/uuid": "^9.0.0",
     "autoprefixer": "^10.4.0",
     "eslint": "^8.56.0",

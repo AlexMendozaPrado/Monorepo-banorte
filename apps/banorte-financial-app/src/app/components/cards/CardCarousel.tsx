@@ -26,7 +26,8 @@ export function CardCarousel({ cards, activeCardIndex, onCardChange }: CardCarou
     if (activeCardIndex < cards.length - 1) onCardChange(activeCardIndex + 1);
   };
 
-  if (cards.length === 0) return null;
+  const activeCard = cards[activeCardIndex];
+  if (cards.length === 0 || !activeCard) return null;
 
   return (
     <div className="relative w-full max-w-md mx-auto mb-8">
@@ -41,7 +42,7 @@ export function CardCarousel({ cards, activeCardIndex, onCardChange }: CardCarou
 
         <div className="w-72 h-44 perspective-1000 relative">
           <div
-            className={`w-full h-full rounded-xl shadow-xl p-6 text-white relative overflow-hidden transition-all duration-500 transform ${cards[activeCardIndex].color}`}
+            className={`w-full h-full rounded-xl shadow-xl p-6 text-white relative overflow-hidden transition-all duration-500 transform ${activeCard.color}`}
           >
             <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full -ml-10 -mb-10 blur-xl" />
@@ -50,7 +51,7 @@ export function CardCarousel({ cards, activeCardIndex, onCardChange }: CardCarou
               <div className="flex justify-between items-start">
                 <span className="font-bold text-lg tracking-wider">BANORTE</span>
                 <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded backdrop-blur-sm">
-                  {cards[activeCardIndex].type === 'credit' ? 'Crédito' : 'Débito'}
+                  {activeCard.type === 'credit' ? 'Crédito' : 'Débito'}
                 </span>
               </div>
 
@@ -63,7 +64,7 @@ export function CardCarousel({ cards, activeCardIndex, onCardChange }: CardCarou
 
               <div>
                 <p className="font-mono text-xl tracking-widest mb-1 shadow-sm">
-                  {cards[activeCardIndex].number}
+                  {activeCard.number}
                 </p>
                 <div className="flex justify-between items-end">
                   <div>
@@ -71,7 +72,7 @@ export function CardCarousel({ cards, activeCardIndex, onCardChange }: CardCarou
                     <p className="text-sm font-medium tracking-wide">MARÍA GONZÁLEZ</p>
                   </div>
                   <div className="font-bold italic text-lg opacity-90">
-                    {cards[activeCardIndex].network === 'visa' ? 'VISA' : 'Mastercard'}
+                    {activeCard.network === 'visa' ? 'VISA' : 'Mastercard'}
                   </div>
                 </div>
               </div>

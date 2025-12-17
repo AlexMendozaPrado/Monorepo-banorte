@@ -58,7 +58,7 @@ interface SpendingPatternsOutput {
 
 export class OpenAICardOptimizer extends BaseOpenAIService implements ICardOptimizerPort {
   async getCardRecommendations(context: CardUsageContext): Promise<CardOptimizationResult> {
-    const { card, recentTransactions, monthlyIncome } = context;
+    const { card, recentTransactions, averageMonthlySpending, paymentHistory, accountAgeMonths } = context;
 
     const cardData = {
       id: card.id,
@@ -72,21 +72,15 @@ export class OpenAICardOptimizer extends BaseOpenAIService implements ICardOptim
       benefits: card.benefits.map(b => ({ id: b.id, name: b.name, value: b.value })),
     };
 
-    const transactionsData = (recentTransactions || []).slice(0, 50).map(t => ({
-      amount: t.amount,
-      category: t.category,
-      merchant: t.merchant,
-    }));
-
     const userPrompt = `Analiza esta tarjeta y genera recomendaciones personalizadas.
 
 Tarjeta:
 ${JSON.stringify(cardData, null, 2)}
 
-Transacciones recientes (últimas 50):
-${JSON.stringify(transactionsData, null, 2)}
-
-Ingreso mensual: $${monthlyIncome?.amount || 'N/A'}
+Transacciones recientes: ${recentTransactions}
+Gasto mensual promedio: $${averageMonthlySpending}
+Historial de pagos: ${paymentHistory}%
+Antigüedad de cuenta: ${accountAgeMonths} meses
 
 Genera:
 1. Recomendaciones (warnings para riesgos, opportunities para oportunidades de cashback, savings para ahorro en intereses, promos para MSI)

@@ -70,9 +70,9 @@ export class OpenAISavingsOptimizer extends BaseOpenAIService implements ISaving
     }));
 
     const rulesData = currentRules.map(r => ({
-      type: r.trigger.type,
-      isActive: r.isActive,
-      estimatedMonthlySavings: r.estimatedMonthlySavings?.amount || 0,
+      type: r.type,
+      isActive: r.active,
+      totalSaved: r.totalSaved?.amount || 0,
     }));
 
     const userPrompt = `Optimiza la estrategia de ahorro para este usuario.
@@ -135,10 +135,11 @@ Responde en JSON:
         goalName: s.goalName,
         recommendedMonthlyContribution: Money.fromAmount(s.recommendedMonthlyContribution),
         estimatedCompletionDate: this.calculateCompletionDate(s.estimatedCompletionMonths),
-        alternativeStrategies: (s.alternativeStrategies || []).map(alt => ({
+        alternativeStrategies: (s.alternativeStrategies || []).map((alt: any) => ({
           name: alt.name,
           monthlyContribution: Money.fromAmount(alt.monthlyContribution),
-          completionMonths: alt.completionMonths,
+          completionDate: this.calculateCompletionDate(alt.completionMonths || 12),
+          tradeoffs: alt.tradeoffs || 'Sin información de trade-offs',
         })),
         reasoning: s.reasoning,
       })),
@@ -268,11 +269,18 @@ Responde en JSON:
       return date;
     };
 
+    const priorityMap: Record<string, 'HIGH' | 'MEDIUM' | 'LOW'> = {
+      'CRITICAL': 'HIGH',
+      'HIGH': 'HIGH',
+      'MEDIUM': 'MEDIUM',
+      'LOW': 'LOW',
+    };
+
     return {
       suggestions: result.data.suggestions.map(s => ({
         name: s.name,
         targetAmount: Money.fromAmount(s.targetAmount),
-        priority: s.priority,
+        priority: priorityMap[s.priority] || 'MEDIUM',
         reasoning: s.reasoning,
         recommendedDeadline: recommendedDeadline(s.recommendedDeadlineMonths),
       })),

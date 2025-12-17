@@ -91,28 +91,28 @@ const DashboardView = () => (
               <span className="text-sm font-medium">Domain Layer</span>
               <span className="text-sm text-status-success">Completado</span>
             </div>
-            <ProgressBar value={100} color="success" size="sm" showPercentage={false} />
+            <ProgressBar value={100} color="success" height="sm" showLabel={false} />
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Application Layer</span>
               <span className="text-sm text-status-success">Completado</span>
             </div>
-            <ProgressBar value={100} color="success" size="sm" showPercentage={false} />
+            <ProgressBar value={100} color="success" height="sm" showLabel={false} />
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Infrastructure Layer</span>
               <span className="text-sm text-status-success">Completado</span>
             </div>
-            <ProgressBar value={100} color="success" size="sm" showPercentage={false} />
+            <ProgressBar value={100} color="success" height="sm" showLabel={false} />
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Presentation Layer</span>
               <span className="text-sm text-status-success">Completado</span>
             </div>
-            <ProgressBar value={100} color="success" size="sm" showPercentage={false} />
+            <ProgressBar value={100} color="success" height="sm" showLabel={false} />
           </div>
         </div>
       </CardContent>
@@ -151,6 +151,7 @@ const DashboardView = () => (
 
 export function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -171,9 +172,9 @@ export function App() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans text-gray-900">
-      <Sidebar activeTab={activeTab} onNavigate={setActiveTab} />
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header />
+        <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-6">{renderContent()}</main>
       </div>
     </div>

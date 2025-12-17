@@ -55,7 +55,7 @@ export class OpenAIInsuranceRecommender extends BaseOpenAIService implements IIn
     const existingCoverage = existingInsurance.map(i => ({
       type: i.type,
       coverageAmount: i.coverageAmount.amount,
-      monthlyPremium: i.monthlyPremium.amount,
+      monthlyPremium: i.premium.amount,
     }));
 
     const userPrompt = `Evalúa las necesidades de seguro para este perfil.
@@ -122,13 +122,21 @@ Responde en JSON:
       considerations: r.considerations,
     }));
 
+    const statusMap: Record<string, 'EXCELLENT' | 'ADEQUATE' | 'INSUFFICIENT' | 'CRITICAL'> = {
+      'EXCELLENT': 'EXCELLENT',
+      'ADEQUATE': 'ADEQUATE',
+      'INSUFFICIENT': 'INSUFFICIENT',
+      'CRITICAL': 'CRITICAL',
+      'PARTIAL': 'INSUFFICIENT',
+      'NONE': 'CRITICAL',
+    };
     const gapAnalysis: InsuranceGapAnalysis[] = result.data.gapAnalysis.map(g => ({
       type: InsuranceType[g.type],
       currentCoverage: Money.fromAmount(g.currentCoverage),
       recommendedCoverage: Money.fromAmount(g.recommendedCoverage),
       gap: Money.fromAmount(g.gap),
       adequacyPercentage: g.adequacyPercentage,
-      status: g.status,
+      status: statusMap[g.status] || 'INSUFFICIENT',
     }));
 
     return {
