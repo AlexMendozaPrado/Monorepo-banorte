@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import { Bell, Search, Menu } from 'lucide-react'
+import BanorteLogo from './BanorteLogo'
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -10,45 +12,73 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, userName = 'María González' }: HeaderProps) {
   return (
-    <header className="h-16 bg-white border-b border-gray-200 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30">
+    <header
+      className="h-16 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30"
+      style={{ backgroundColor: '#EB0029' }}
+    >
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 text-banorte-gray hover:bg-gray-100 rounded-md"
+          className="lg:hidden p-2 text-white hover:bg-white/10 rounded-md transition-colors"
         >
           <Menu size={24} />
         </button>
 
-        <div className="hidden md:flex items-center text-banorte-gray text-sm">
-          <span className="font-display font-medium text-banorte-dark">
-            Hola, {userName}
-          </span>
-          <span className="mx-2 text-gray-300">|</span>
-          <span>Último acceso: Hoy, 10:30 AM</span>
-        </div>
+        <BanorteLogo
+          variant="white"
+          height={40}
+          width={160}
+          useOfficialLogo={true}
+          className="hidden lg:block"
+        />
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4">
-        <div className="relative hidden md:block">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Buscar transacciones..."
-            className="h-10 pl-10 pr-4 rounded-full bg-gray-50 border-none text-sm focus:ring-2 focus:ring-banorte-red w-64"
-          />
-        </div>
+      <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
+        <Link href="/dashboard" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Dashboard
+        </Link>
+        <Link href="/presupuesto" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Presupuesto
+        </Link>
+        <Link href="/ahorros" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Ahorros
+        </Link>
+        <Link href="/deudas" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Deudas
+        </Link>
+        <Link href="/tarjetas" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Tarjetas
+        </Link>
+        <Link href="/educacion" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Educación
+        </Link>
+        <Link href="/asesor" className="text-sm font-medium text-white hover:text-gray-200 transition-colors">
+          Asesor
+        </Link>
+      </nav>
 
-        <button className="relative p-2 text-banorte-gray hover:bg-gray-100 rounded-full transition-colors">
-          <Bell size={22} />
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-banorte-red rounded-full border-2 border-white animate-pulse"></span>
+      <div className="flex items-center gap-2 md:gap-4">
+        <button
+          className="flex size-10 items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+          aria-label="Buscar"
+        >
+          <Search size={20} />
         </button>
 
-        <div className="flex items-center gap-3 pl-2 border-l border-gray-200">
-          <div className="w-9 h-9 bg-banorte-red/10 rounded-full flex items-center justify-center text-banorte-red font-bold border border-banorte-red/20">
-            MG
+        <button
+          className="relative flex size-10 items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
+          aria-label="Notificaciones"
+        >
+          <Bell size={20} />
+          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-white rounded-full border-2 border-banorte-red animate-pulse"></span>
+        </button>
+
+        <div className="flex items-center gap-2 pl-2 border-l border-white/20">
+          <span className="hidden md:block text-sm font-medium text-white">
+            {userName.split(' ')[0]}
+          </span>
+          <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center text-white font-bold border border-white/30">
+            {userName.split(' ').map(n => n[0]).join('')}
           </div>
         </div>
       </div>

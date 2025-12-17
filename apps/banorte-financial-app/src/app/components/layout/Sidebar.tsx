@@ -52,19 +52,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         `}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Area */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-banorte-red rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">B</span>
-              </div>
-              <span className="font-display font-bold text-xl text-banorte-red tracking-tight">
-                BANORTE
-              </span>
-            </div>
+          {/* Mobile Close Button */}
+          <div className="h-16 flex items-center justify-end px-6 border-b border-gray-100 lg:border-0">
             <button
               onClick={() => setIsOpen(false)}
-              className="lg:hidden text-gray-500"
+              className="lg:hidden text-gray-500 hover:text-banorte-red transition-colors"
             >
               <X size={24} />
             </button>
