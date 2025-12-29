@@ -11,7 +11,10 @@
     "clean": "rm -rf .next .turbo node_modules/.cache"
   },
   "dependencies": {
+    "@banorte/ui": "workspace:*",
     "@ai-sdk/openai": "^2.0.68",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.0",
     "@ai-sdk/react": "^2.0.94",
     "ai": "^5.0.94",
     "axios": "^1.6.0",

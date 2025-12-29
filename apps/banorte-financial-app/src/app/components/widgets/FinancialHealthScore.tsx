@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card } from '../ui/Card'
+import { Card } from '@banorte/ui'
 import { TrendingUp, Info } from 'lucide-react'
 
 interface FinancialHealthScoreProps {

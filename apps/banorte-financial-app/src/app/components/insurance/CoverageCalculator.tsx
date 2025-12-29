@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { Calculator, ArrowRight } from 'lucide-react';
 
 export function CoverageCalculator() {

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Card, Button } from '@banorte/ui';
 import { Calculator, ArrowRight, CheckCircle } from 'lucide-react';
 
 export function PaymentSimulator() {

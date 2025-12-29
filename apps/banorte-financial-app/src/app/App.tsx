@@ -4,9 +4,7 @@ import React, { useState } from 'react';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { BudgetModule } from './pages/BudgetModule';
-import { Card, CardHeader, CardTitle, CardContent } from './components/ui/Card';
-import { ProgressBar } from './components/ui/ProgressBar';
-import { Button } from './components/ui/Button';
+import { Button, Card, CardHeader, CardTitle, CardContent, ProgressBar } from '@banorte/ui';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
 const PlaceholderView = ({ title }: { title: string }) => (

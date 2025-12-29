@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { Sparkles, Scissors, ArrowRight, Loader2 } from 'lucide-react';
 import { useAntExpenses } from '../../hooks/useAntExpenses';
 import { useDebts } from '../../hooks/useDebts';

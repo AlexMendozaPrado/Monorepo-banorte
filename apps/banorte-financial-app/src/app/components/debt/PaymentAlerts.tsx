@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { Calendar, Bell, AlertCircle } from 'lucide-react';
 
 export function PaymentAlerts() {

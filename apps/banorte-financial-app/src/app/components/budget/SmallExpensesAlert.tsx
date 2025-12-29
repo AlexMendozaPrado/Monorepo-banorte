@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Card, Button } from '@banorte/ui';
 import { AlertTriangle, Coffee, ShoppingBag, Smartphone, Loader2 } from 'lucide-react';
 import { useAntExpenses } from '../../hooks/useAntExpenses';
 

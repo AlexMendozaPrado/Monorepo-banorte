@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { ProgressBar } from '../ui/ProgressBar';
+import { Card, ProgressBar } from '@banorte/ui';
 import { Gift, Star, Tag } from 'lucide-react';
 
 export function BenefitsSection() {

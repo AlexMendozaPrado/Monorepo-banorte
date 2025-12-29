@@ -9,7 +9,7 @@ import { CategoryCard } from '../components/budget/CategoryCard';
 import { SmallExpensesAlert } from '../components/budget/SmallExpensesAlert';
 import { TopExpenses } from '../components/budget/TopExpenses';
 import { CategoryModal } from '../components/budget/CategoryModal';
-import { Button } from '../components/ui/Button';
+import { Button } from '@banorte/ui';
 
 export function BudgetModule() {
   const [currentMonth, setCurrentMonth] = useState(new Date());

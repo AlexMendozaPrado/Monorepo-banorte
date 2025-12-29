@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import { Stepper } from '../ui/Stepper';
-import { Input } from '../ui/Input';
+import { Modal, Button, Stepper, Input } from '@banorte/ui';
 import {
   Coins,
   Percent,

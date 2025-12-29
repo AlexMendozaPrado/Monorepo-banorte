@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { Shield } from 'lucide-react';
 
 export function CreditHealthScore() {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { TrendingDown, Calendar, DollarSign, ArrowDown } from 'lucide-react';
 
 export function DebtDashboard() {

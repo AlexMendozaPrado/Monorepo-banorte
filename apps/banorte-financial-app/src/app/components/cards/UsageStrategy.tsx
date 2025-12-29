@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 
 export function UsageStrategy() {
   const days = Array.from({ length: 7 }, (_, i) => i + 10);

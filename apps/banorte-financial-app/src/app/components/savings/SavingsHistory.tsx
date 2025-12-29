@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { TrendingUp, Award, Calendar } from 'lucide-react';
 
 export function SavingsHistory() {

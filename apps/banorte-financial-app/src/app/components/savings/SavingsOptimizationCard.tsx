@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { Sparkles, TrendingUp, Calendar, Loader2, Info, Target } from 'lucide-react';
 import { useSavingsOptimization } from '../../hooks/useSavingsOptimization';
 
