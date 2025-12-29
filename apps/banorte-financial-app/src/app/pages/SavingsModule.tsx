@@ -12,7 +12,7 @@ import { SavingsHistory } from '../components/savings/SavingsHistory';
 import { CelebrationModal } from '../components/savings/CelebrationModal';
 import { SavingsOptimizationCard } from '../components/savings/SavingsOptimizationCard';
 import { SmartRuleSuggestions } from '../components/savings/SmartRuleSuggestions';
-import { Button } from '../components/ui/Button';
+import { Button } from '@banorte/ui';
 import { Plus, Plane, Car, Home } from 'lucide-react';
 
 export function SavingsModule() {

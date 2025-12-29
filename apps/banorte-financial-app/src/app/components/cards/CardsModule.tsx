@@ -12,7 +12,7 @@ import { BenefitsSection } from './BenefitsSection';
 import { PaymentModal } from './PaymentModal';
 import { TransactionList } from './TransactionList';
 import { CardHealthScore } from './CardHealthScore';
-import { Button } from '../ui/Button';
+import { Button } from '@banorte/ui';
 
 export default function CardsModule() {
   const { cards, activeCard, activeCardIndex, setActiveCardIndex, isLoading, error } = useCards();

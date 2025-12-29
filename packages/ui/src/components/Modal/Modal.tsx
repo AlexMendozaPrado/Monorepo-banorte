@@ -3,14 +3,15 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { cn } from '../../utils/cn';
+import type { ModalProps } from './Modal.types';
 
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
-}
+const maxWidthClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+};
 
 export function Modal({
   isOpen,
@@ -32,21 +33,18 @@ export function Modal({
 
   if (!isOpen) return null;
 
-  const maxWidthClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-  };
+  // Check if we're in a browser environment
+  if (typeof document === 'undefined') return null;
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className={`
-          bg-white rounded-card shadow-2xl w-full ${maxWidthClasses[maxWidth]}
-          transform transition-all animate-in zoom-in-95 duration-200
-          flex flex-col max-h-[90vh]
-        `}
+        className={cn(
+          'bg-white rounded-card shadow-2xl w-full',
+          maxWidthClasses[maxWidth],
+          'transform transition-all animate-in zoom-in-95 duration-200',
+          'flex flex-col max-h-[90vh]'
+        )}
       >
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h3 className="text-lg font-display font-bold text-banorte-dark">
@@ -63,6 +61,6 @@ export function Modal({
         <div className="p-6 overflow-y-auto">{children}</div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

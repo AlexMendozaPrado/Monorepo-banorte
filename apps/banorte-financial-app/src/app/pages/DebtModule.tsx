@@ -10,7 +10,7 @@ import { CreditHealthScore } from '../components/debt/CreditHealthScore';
 import { PaymentAlerts } from '../components/debt/PaymentAlerts';
 import { DebtDetailModal } from '../components/debt/DebtDetailModal';
 import { AddDebtModal } from '../components/debt/AddDebtModal';
-import { Button } from '../components/ui/Button';
+import { Button } from '@banorte/ui';
 import { Plus } from 'lucide-react';
 
 export function DebtModule() {

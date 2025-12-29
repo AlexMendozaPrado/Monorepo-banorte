@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { ProgressBar } from '../ui/ProgressBar';
+import { Card, ProgressBar } from '@banorte/ui';
 import { CreditCard, Car, Briefcase, ShoppingBag, AlertCircle } from 'lucide-react';
 
 interface DebtCardProps {

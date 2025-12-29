@@ -9,7 +9,7 @@ import { CoverageCalculator } from '../components/insurance/CoverageCalculator';
 import { EducationSection } from '../components/insurance/EducationSection';
 import { NormaInsuranceRecommendation } from '../components/insurance/NormaInsuranceRecommendation';
 import { QuoteModal } from '../components/insurance/QuoteModal';
-import { Button } from '../components/ui/Button';
+import { Button } from '@banorte/ui';
 import { Plus, Car, Activity } from 'lucide-react';
 
 export function InsuranceModule() {

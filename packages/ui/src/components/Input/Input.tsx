@@ -1,16 +1,12 @@
 import React from 'react';
-
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  icon?: React.ReactNode;
-}
+import { cn } from '../../utils/cn';
+import type { InputProps } from './Input.types';
 
 export function Input({
   label,
   error,
   icon,
-  className = '',
+  className,
   ...props
 }: InputProps) {
   return (
@@ -27,16 +23,16 @@ export function Input({
           </div>
         )}
         <input
-          className={`
-            w-full h-50px rounded-input border border-gray-300 bg-white
-            text-banorte-dark placeholder-gray-400
-            focus:outline-none focus:ring-2 focus:ring-banorte-red focus:border-transparent
-            disabled:bg-gray-100 disabled:text-gray-500
-            transition-colors duration-200
-            ${icon ? 'pl-10' : 'pl-4'}
-            ${error ? 'border-status-alert ring-1 ring-status-alert' : ''}
-            ${className}
-          `}
+          className={cn(
+            'w-full h-[50px] rounded-input border border-gray-300 bg-white',
+            'text-banorte-dark placeholder-gray-400',
+            'focus:outline-none focus:ring-2 focus:ring-banorte-red focus:border-transparent',
+            'disabled:bg-gray-100 disabled:text-gray-500',
+            'transition-colors duration-200',
+            icon ? 'pl-10' : 'pl-4',
+            error && 'border-status-alert ring-1 ring-status-alert',
+            className
+          )}
           {...props}
         />
       </div>

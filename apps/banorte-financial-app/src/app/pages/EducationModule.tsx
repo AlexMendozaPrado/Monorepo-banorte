@@ -6,7 +6,7 @@ import { TopicCard } from '../components/education/TopicCard';
 import { ContentCard } from '../components/education/ContentCard';
 import { LearningPath } from '../components/education/LearningPath';
 import { Quiz } from '../components/education/Quiz';
-import { Button } from '../components/ui/Button';
+import { Button } from '@banorte/ui';
 import {
   Search,
   Filter,

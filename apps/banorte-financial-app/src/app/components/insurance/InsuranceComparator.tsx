@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Card, Button } from '@banorte/ui';
 import { Check, X, Star } from 'lucide-react';
 
 export function InsuranceComparator() {

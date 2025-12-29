@@ -1,7 +1,5 @@
 import React from 'react'
-import { Card } from '../ui/Card'
-import { ProgressBar } from '../ui/ProgressBar'
-import { Button } from '../ui/Button'
+import { Card, ProgressBar, Button } from '@banorte/ui'
 import { ShieldCheck, Plus } from 'lucide-react'
 
 interface EmergencyFundWidgetProps {

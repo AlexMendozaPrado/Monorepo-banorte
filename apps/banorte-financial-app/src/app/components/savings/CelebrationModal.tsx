@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
+import { Modal, Button } from '@banorte/ui';
 import { Share2, Trophy } from 'lucide-react';
 
 interface CelebrationModalProps {

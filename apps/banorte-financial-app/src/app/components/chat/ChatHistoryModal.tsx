@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal } from '../ui/Modal'
+import { Modal } from '@banorte/ui'
 import { Search } from 'lucide-react'
 
 interface ChatHistoryModalProps {

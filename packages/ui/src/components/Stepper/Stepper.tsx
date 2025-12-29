@@ -1,10 +1,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
-
-interface StepperProps {
-  steps: string[];
-  currentStep: number;
-}
+import { cn } from '../../utils/cn';
+import type { StepperProps } from './Stepper.types';
 
 export function Stepper({ steps, currentStep }: StepperProps) {
   return (
@@ -20,31 +17,31 @@ export function Stepper({ steps, currentStep }: StepperProps) {
             {/* Connector Line */}
             {index < steps.length - 1 && (
               <div
-                className={`
-                  absolute top-4 left-1/2 w-full h-0.5 -z-10
-                  ${index < currentStep ? 'bg-banorte-red' : 'bg-gray-200'}
-                `}
+                className={cn(
+                  'absolute top-4 left-1/2 w-full h-0.5 -z-10',
+                  index < currentStep ? 'bg-banorte-red' : 'bg-gray-200'
+                )}
               />
             )}
 
             {/* Step Circle */}
             <div
-              className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-2 transition-colors duration-300
-                ${isCompleted ? 'bg-banorte-red text-white' : ''}
-                ${isCurrent ? 'bg-white border-2 border-banorte-red text-banorte-red' : ''}
-                ${!isCompleted && !isCurrent ? 'bg-gray-100 text-gray-400' : ''}
-              `}
+              className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-2 transition-colors duration-300',
+                isCompleted && 'bg-banorte-red text-white',
+                isCurrent && 'bg-white border-2 border-banorte-red text-banorte-red',
+                !isCompleted && !isCurrent && 'bg-gray-100 text-gray-400'
+              )}
             >
               {isCompleted ? <Check size={16} /> : index + 1}
             </div>
 
             {/* Step Label */}
             <span
-              className={`
-                text-xs font-medium text-center transition-colors duration-300
-                ${isCurrent ? 'text-banorte-red' : 'text-gray-500'}
-              `}
+              className={cn(
+                'text-xs font-medium text-center transition-colors duration-300',
+                isCurrent ? 'text-banorte-red' : 'text-gray-500'
+              )}
             >
               {step}
             </span>

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
+import { Modal, Button } from '@banorte/ui';
 import { CreditCard, Download, Calendar, DollarSign } from 'lucide-react';
 
 interface DebtDetailModalProps {

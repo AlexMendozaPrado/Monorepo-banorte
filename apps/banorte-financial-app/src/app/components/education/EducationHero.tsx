@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Card, Button } from '@banorte/ui';
 import { Trophy, ArrowRight } from 'lucide-react';
 
 export function EducationHero() {

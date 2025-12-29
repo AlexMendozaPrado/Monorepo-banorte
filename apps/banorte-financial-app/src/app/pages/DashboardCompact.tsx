@@ -4,8 +4,7 @@ import React from 'react'
 import { FinancialHealthScore } from '../components/widgets/FinancialHealthScore'
 import { EmergencyFundWidget } from '../components/widgets/EmergencyFundWidget'
 import { QuickActionsGrid } from '../components/widgets/QuickActionsGrid'
-import { Card } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
+import { Card, Button } from '@banorte/ui'
 import {
   AlertCircle,
   CreditCard,

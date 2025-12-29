@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card } from '../ui/Card';
+import { Card } from '@banorte/ui';
 import { Edit2, Coins, Percent, Calendar, Sparkles } from 'lucide-react';
 
 interface SavingRuleCardProps {

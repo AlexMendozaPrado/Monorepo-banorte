@@ -1,6 +1,5 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
+import { Card, Button } from '@banorte/ui';
 import { AlertCircle, Calendar } from 'lucide-react';
 
 interface CreditCardDetailProps {

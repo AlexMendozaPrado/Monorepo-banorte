@@ -1,7 +1,5 @@
 import React from 'react';
-import { Modal } from '../ui/Modal';
-import { Input } from '../ui/Input';
-import { Button } from '../ui/Button';
+import { Modal, Input, Button } from '@banorte/ui';
 import { Image, Calculator } from 'lucide-react';
 
 interface GoalModalProps {
