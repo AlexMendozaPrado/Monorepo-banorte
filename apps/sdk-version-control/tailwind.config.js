@@ -1,40 +1,20 @@
+const { banortePreset } = require('@banorte/ui/tailwind/preset');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
+  presets: [banortePreset],
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx}",
+    "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        banorte: {
-          red: "#EB0029",
-          "red-hover": "#E30028",
-          gray: "#5B6670",
-          dark: "#323E48",
-          bg: "#EBF0F2",
-          light: "#F4F7F8",
-          white: "#FCFCFC",
-        },
+        // Extensiones adicionales específicas de esta app
         status: {
-          success: "#6CC04A",
-          warning: "#FFA400",
-          alert: "#FF671B",
           critical: "#EB0029",
         }
-      },
-      fontFamily: {
-        sans: ['Roboto', 'system-ui', 'sans-serif'],
-        display: ['Gotham', 'Montserrat', 'sans-serif'],
-      },
-      borderRadius: {
-        'btn': '4px',
-        'input': '6px',
-        'card': '8px',
-      },
-      boxShadow: {
-        'card': '0 3px 6px rgba(0,0,0,0.16)',
-        'hover': '0 6px 12px rgba(0,0,0,0.20)',
       },
       keyframes: {
         "fade-in": {
