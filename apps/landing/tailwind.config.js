@@ -1,7 +1,11 @@
+const { banortePreset } = require('@banorte/ui/tailwind/preset');
+
 module.exports = {
   darkMode: "selector",
+  presets: [banortePreset],
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     container: {
