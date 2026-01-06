@@ -9,6 +9,8 @@ import {
   RefreshCw,
   Info,
   Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { ServiceDTO, PlatformVersionDTO } from '@/core/application/dtos/ServiceDTO';
 import { PlatformType } from '@/core/domain/value-objects/PlatformType';
@@ -19,6 +21,8 @@ interface ServiceCardProps {
   compareMode: boolean;
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
+  onEdit?: (service: ServiceDTO) => void;
+  onDelete?: (service: ServiceDTO) => void;
 }
 
 const platformIcons = {
@@ -74,6 +78,8 @@ export function ServiceCard({
   compareMode,
   isSelected,
   onToggleSelect,
+  onEdit,
+  onDelete,
 }: ServiceCardProps) {
   return (
     <div
@@ -173,6 +179,24 @@ export function ServiceCard({
               >
                 <Info size={16} />
               </button>
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(service)}
+                  className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title="Editar servicio"
+                >
+                  <Pencil size={16} />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(service)}
+                  className="p-1.5 text-gray-400 hover:text-banorte-red hover:bg-red-50 rounded transition-colors"
+                  title="Eliminar servicio"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
               {!compareMode && (
                 <button
                   onClick={() => onToggleSelect(service.id)}

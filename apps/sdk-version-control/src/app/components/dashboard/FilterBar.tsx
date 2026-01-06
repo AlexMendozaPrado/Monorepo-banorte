@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, Download, GitCompare } from 'lucide-react';
+import { Search, Download, GitCompare, Plus } from 'lucide-react';
 import { ServiceFilters } from '@/core/domain/ports/repositories/IServiceRepository';
 import { VersionStatus } from '@/core/domain/value-objects/VersionStatus';
 
@@ -11,6 +11,7 @@ interface FilterBarProps {
   compareMode: boolean;
   onToggleCompare: () => void;
   selectedCount: number;
+  onAddService?: () => void;
 }
 
 const statusFilters: { id: string; label: string; status?: VersionStatus }[] = [
@@ -26,6 +27,7 @@ export function FilterBar({
   compareMode,
   onToggleCompare,
   selectedCount,
+  onAddService,
 }: FilterBarProps) {
   const activeFilter = filters.status || 'all';
 
@@ -57,6 +59,16 @@ export function FilterBar({
         </div>
 
         <div className="flex items-center gap-3">
+          {onAddService && (
+            <button
+              onClick={onAddService}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors shadow-sm"
+            >
+              <Plus size={18} />
+              <span className="font-medium hidden sm:inline">Agregar Servicio</span>
+            </button>
+          )}
+
           <button
             onClick={onToggleCompare}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors border ${

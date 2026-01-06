@@ -1,18 +1,34 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useServices } from '@/app/hooks/useServices';
 import { useComparison } from '@/app/hooks/useComparison';
+import { useServiceMutations, CreateServiceData, UpdateServiceData } from '@/app/hooks/useServiceMutations';
 import { ServiceFilters } from '@/core/domain/ports/repositories/IServiceRepository';
+import { ServiceDTO } from '@/core/application/dtos/ServiceDTO';
 import { FilterBar } from './FilterBar';
 import { SummaryStats } from './SummaryStats';
 import { ServiceCard } from './ServiceCard';
 import { FloatingActionBar } from './FloatingActionBar';
 import { ComparisonPanel } from './ComparisonPanel';
+import { ServiceFormModal, ServiceFormData } from './ServiceFormModal';
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 export function DashboardPage() {
-  // Filters state
+  // Filters state - lo que el usuario ve/escribe
   const [filters, setFilters] = useState<ServiceFilters>({});
+
+  // Debounced filters - lo que se envía al servidor
+  const [debouncedFilters, setDebouncedFilters] = useState<ServiceFilters>({});
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilters(filters);
+    }, 300); // 300ms de delay
+
+    return () => clearTimeout(timer);
+  }, [filters]);
 
   // Compare mode state
   const [compareMode, setCompareMode] = useState(false);
@@ -21,8 +37,25 @@ export function DashboardPage() {
   // Comparison panel state
   const [showComparisonPanel, setShowComparisonPanel] = useState(false);
 
-  // Fetch services
-  const { services, statistics, loading, error, refetch } = useServices(filters);
+  // Modal states
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [editingService, setEditingService] = useState<ServiceDTO | undefined>(undefined);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingService, setDeletingService] = useState<ServiceDTO | undefined>(undefined);
+
+  // Fetch services con filtros debounced
+  const { services, statistics, loading, error, refetch } = useServices(debouncedFilters);
+
+  // Mutations hook
+  const {
+    createService,
+    updateService,
+    deleteService,
+    loading: mutationLoading,
+    error: mutationError,
+    clearError: clearMutationError,
+  } = useServiceMutations();
 
   // Comparison hook
   const { comparison, loading: comparisonLoading, compareServices } = useComparison();
@@ -77,6 +110,84 @@ export function DashboardPage() {
     setFilters(newFilters);
   }, []);
 
+  // CRUD Handlers
+  const handleAddService = useCallback(() => {
+    setFormMode('create');
+    setEditingService(undefined);
+    clearMutationError();
+    setShowFormModal(true);
+  }, [clearMutationError]);
+
+  const handleEditService = useCallback((service: ServiceDTO) => {
+    setFormMode('edit');
+    setEditingService(service);
+    clearMutationError();
+    setShowFormModal(true);
+  }, [clearMutationError]);
+
+  const handleDeleteService = useCallback((service: ServiceDTO) => {
+    setDeletingService(service);
+    clearMutationError();
+    setShowDeleteModal(true);
+  }, [clearMutationError]);
+
+  const handleFormClose = useCallback(() => {
+    setShowFormModal(false);
+    setEditingService(undefined);
+    clearMutationError();
+  }, [clearMutationError]);
+
+  const handleDeleteClose = useCallback(() => {
+    setShowDeleteModal(false);
+    setDeletingService(undefined);
+    clearMutationError();
+  }, [clearMutationError]);
+
+  const handleFormSubmit = useCallback(async (data: ServiceFormData): Promise<boolean> => {
+    if (formMode === 'create') {
+      const createData: CreateServiceData = {
+        name: data.name,
+        category: data.category,
+        description: data.description,
+        documentationUrl: data.documentationUrl,
+        logoUrl: data.logoUrl || undefined,
+        versions: {
+          web: data.versions.web || undefined,
+          ios: data.versions.ios || undefined,
+          android: data.versions.android || undefined,
+        },
+      };
+      const result = await createService(createData);
+      return result !== null;
+    } else {
+      if (!editingService) return false;
+      const updateData: UpdateServiceData = {
+        name: data.name,
+        category: data.category,
+        description: data.description,
+        documentationUrl: data.documentationUrl,
+        logoUrl: data.logoUrl,
+        versions: data.versions,
+      };
+      const result = await updateService(editingService.id, updateData);
+      return result !== null;
+    }
+  }, [formMode, editingService, createService, updateService]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deletingService) return;
+    const success = await deleteService(deletingService.id);
+    if (success) {
+      setShowDeleteModal(false);
+      setDeletingService(undefined);
+      refetch();
+    }
+  }, [deletingService, deleteService, refetch]);
+
+  const handleFormSuccess = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   if (error) {
     return (
       <div className="min-h-screen bg-banorte-bg p-6">
@@ -106,6 +217,7 @@ export function DashboardPage() {
           compareMode={compareMode}
           onToggleCompare={handleToggleCompareMode}
           selectedCount={selectedServices.size}
+          onAddService={handleAddService}
         />
 
         {/* Summary Stats */}
@@ -156,6 +268,8 @@ export function DashboardPage() {
                 compareMode={compareMode}
                 isSelected={selectedServices.has(service.id)}
                 onToggleSelect={handleToggleSelect}
+                onEdit={handleEditService}
+                onDelete={handleDeleteService}
               />
             ))}
           </div>
@@ -174,6 +288,27 @@ export function DashboardPage() {
           onClose={handleCloseComparison}
           comparison={comparison}
           loading={comparisonLoading}
+        />
+
+        {/* Service Form Modal */}
+        <ServiceFormModal
+          isOpen={showFormModal}
+          onClose={handleFormClose}
+          onSuccess={handleFormSuccess}
+          mode={formMode}
+          service={editingService}
+          onSubmit={handleFormSubmit}
+          loading={mutationLoading}
+          error={mutationError}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteClose}
+          onConfirm={handleConfirmDelete}
+          serviceName={deletingService?.name || ''}
+          loading={mutationLoading}
         />
       </div>
     </div>

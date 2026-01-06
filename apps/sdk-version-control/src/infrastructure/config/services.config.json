@@ -9,7 +9,7 @@
       "category": "Identity",
       "description": "SDK de verificación de identidad biométrica",
       "documentationUrl": "https://docs.incode.com",
-      "logoUrl": "/logos/incode.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=incode.com&sz=128",
       "versions": {
         "web": {
           "currentVersion": "5.2.1",
@@ -31,7 +31,7 @@
       "category": "Analytics",
       "description": "Plataforma de desarrollo de Google para analytics, push y más",
       "documentationUrl": "https://firebase.google.com/docs",
-      "logoUrl": "/logos/firebase.svg",
+      "logoUrl": "https://cdn.simpleicons.org/firebase/FFCA28",
       "versions": {
         "web": {
           "currentVersion": "10.7.0",
@@ -53,7 +53,7 @@
       "category": "Analytics",
       "description": "Customer Data Platform para unificar datos de clientes",
       "documentationUrl": "https://segment.com/docs",
-      "logoUrl": "/logos/segment.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=segment.com&sz=128",
       "versions": {
         "web": {
           "currentVersion": "4.15.3",
@@ -75,7 +75,7 @@
       "category": "Attribution",
       "description": "Plataforma de atribución y analytics móvil",
       "documentationUrl": "https://dev.appsflyer.com",
-      "logoUrl": "/logos/appsflyer.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=appsflyer.com&sz=128",
       "versions": {
         "ios": {
           "currentVersion": "6.12.0",
@@ -93,7 +93,7 @@
       "category": "Monitoring",
       "description": "Plataforma de observabilidad y APM",
       "documentationUrl": "https://docs.dynatrace.com",
-      "logoUrl": "/logos/dynatrace.svg",
+      "logoUrl": "https://cdn.simpleicons.org/dynatrace/1496FF",
       "versions": {
         "web": {
           "currentVersion": "1.251.0",
@@ -115,7 +115,7 @@
       "category": "Payments",
       "description": "Plataforma de pagos y procesamiento de transacciones",
       "documentationUrl": "https://stripe.com/docs",
-      "logoUrl": "/logos/stripe.svg",
+      "logoUrl": "https://cdn.simpleicons.org/stripe/635BFF",
       "versions": {
         "web": {
           "currentVersion": "2.2.0",
@@ -137,7 +137,7 @@
       "category": "Engagement",
       "description": "Plataforma de customer engagement y marketing automation",
       "documentationUrl": "https://www.braze.com/docs",
-      "logoUrl": "/logos/braze.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=braze.com&sz=128",
       "versions": {
         "web": {
           "currentVersion": "5.1.0",
@@ -159,7 +159,7 @@
       "category": "CMS",
       "description": "Headless CMS para gestión de contenido",
       "documentationUrl": "https://www.contentful.com/developers/docs",
-      "logoUrl": "/logos/contentful.svg",
+      "logoUrl": "https://cdn.simpleicons.org/contentful/2478CC",
       "versions": {
         "web": {
           "currentVersion": "10.6.0",

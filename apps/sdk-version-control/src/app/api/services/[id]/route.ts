@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDIContainer } from '@/infrastructure/di/initialize';
 import { GetServiceByIdUseCase } from '@/core/application/use-cases/GetServiceByIdUseCase';
 import { UpdateServiceVersionUseCase } from '@/core/application/use-cases/UpdateServiceVersionUseCase';
+import { UpdateServiceUseCase, UpdateServiceInput } from '@/core/application/use-cases/UpdateServiceUseCase';
+import { DeleteServiceUseCase } from '@/core/application/use-cases/DeleteServiceUseCase';
 import { PlatformType, isValidPlatform } from '@/core/domain/value-objects/PlatformType';
 
 interface RouteParams {
@@ -116,6 +118,105 @@ export async function PATCH(
         error: {
           code: 'INTERNAL_ERROR',
           message: error instanceof Error ? error.message : 'Failed to update service',
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PUT /api/services/[id]
+ *
+ * Actualiza todos los campos de un servicio
+ *
+ * Body:
+ * - name: Nombre del servicio (opcional)
+ * - category: Categoría (opcional)
+ * - description: Descripción (opcional)
+ * - documentationUrl: URL de documentación (opcional)
+ * - logoUrl: URL del logo (opcional)
+ * - versions: Versiones por plataforma (opcional, null para eliminar plataforma)
+ */
+export async function PUT(
+  request: NextRequest,
+  context: RouteParams
+) {
+  try {
+    const { id } = await context.params;
+    const body = await request.json();
+
+    const container = getDIContainer();
+    const useCase = container.resolve<UpdateServiceUseCase>('UpdateServiceUseCase');
+
+    const input: UpdateServiceInput = {
+      serviceId: id,
+      name: body.name,
+      category: body.category,
+      description: body.description,
+      documentationUrl: body.documentationUrl,
+      logoUrl: body.logoUrl,
+      versions: body.versions,
+    };
+
+    const result = await useCase.execute(input);
+
+    if (!result.success) {
+      const status =
+        result.error?.code === 'SERVICE_NOT_FOUND' ? 404 :
+        result.error?.code === 'SERVICE_ALREADY_EXISTS' ? 409 :
+        result.error?.code === 'VALIDATION_ERROR' ? 400 :
+        500;
+      return NextResponse.json(result, { status });
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('[API /services/[id] PUT] Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to update service',
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/services/[id]
+ *
+ * Elimina un servicio
+ */
+export async function DELETE(
+  request: NextRequest,
+  context: RouteParams
+) {
+  try {
+    const { id } = await context.params;
+
+    const container = getDIContainer();
+    const useCase = container.resolve<DeleteServiceUseCase>('DeleteServiceUseCase');
+
+    const result = await useCase.execute({ serviceId: id });
+
+    if (!result.success) {
+      const status = result.error?.code === 'SERVICE_NOT_FOUND' ? 404 : 500;
+      return NextResponse.json(result, { status });
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('[API /services/[id] DELETE] Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to delete service',
         },
       },
       { status: 500 }
