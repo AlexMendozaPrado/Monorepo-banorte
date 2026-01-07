@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { useBudget } from '../hooks/useBudget';
 import { useAntExpenses } from '../hooks/useAntExpenses';
+import { useModuleInsights } from '../hooks/useModuleInsights';
 import { BudgetHeader } from '../components/budget/BudgetHeader';
 import { BudgetSummary } from '../components/budget/BudgetSummary';
 import { CategoryCard } from '../components/budget/CategoryCard';
 import { SmallExpensesAlert } from '../components/budget/SmallExpensesAlert';
 import { TopExpenses } from '../components/budget/TopExpenses';
 import { CategoryModal } from '../components/budget/CategoryModal';
+import { ModuleInsightsSection } from '../components/insights';
 import { Button } from '@banorte/ui';
 
 export function BudgetModule() {
@@ -19,6 +21,23 @@ export function BudgetModule() {
   const userId = 'user-demo';
   const { budget, loading: budgetLoading, error: budgetError, createBudget } = useBudget(userId, currentMonth);
   const { analysis: antExpenses, loading: antExpensesLoading } = useAntExpenses(userId);
+
+  // Insights proactivos de IA para presupuesto
+  const {
+    insights: budgetInsights,
+    loading: insightsLoading,
+    error: insightsError,
+    refetch: refetchInsights,
+    dismissInsight,
+  } = useModuleInsights({
+    userId,
+    domain: 'BUDGET',
+    monthlyIncome: budget?.totalIncome?.amount,
+    monthlyExpenses: budget?.totalSpent?.amount,
+    autoRefresh: true,
+    refreshInterval: 300000, // 5 minutos
+    enabled: !!budget,
+  });
 
   const handleMonthChange = (monthString: string) => {
     // Parse month string like "Octubre 2024" to Date
@@ -139,6 +158,23 @@ export function BudgetModule() {
         income={budget.totalIncome.amount}
         spent={budget.totalSpent.amount}
         available={budget.available.amount}
+      />
+
+      {/* Insights Proactivos de Norma */}
+      <ModuleInsightsSection
+        domain="BUDGET"
+        insights={budgetInsights}
+        loading={insightsLoading}
+        error={insightsError}
+        title="Lo que Norma detectó"
+        subtitle="Oportunidades de mejora en tu presupuesto"
+        maxVisible={3}
+        onDismiss={dismissInsight}
+        onRefresh={refetchInsights}
+        onInsightAction={(insightId, action) => {
+          console.log('Insight action:', insightId, action);
+          // TODO: Implement action handling (navigate, api-call, modal)
+        }}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

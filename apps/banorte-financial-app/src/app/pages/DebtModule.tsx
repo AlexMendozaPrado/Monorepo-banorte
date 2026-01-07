@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useModuleInsights } from '../hooks/useModuleInsights';
 import { DebtDashboard } from '../components/debt/DebtDashboard';
 import { DebtCard } from '../components/debt/DebtCard';
 import { PaymentStrategy } from '../components/debt/PaymentStrategy';
@@ -10,6 +11,7 @@ import { CreditHealthScore } from '../components/debt/CreditHealthScore';
 import { PaymentAlerts } from '../components/debt/PaymentAlerts';
 import { DebtDetailModal } from '../components/debt/DebtDetailModal';
 import { AddDebtModal } from '../components/debt/AddDebtModal';
+import { ModuleInsightsSection } from '../components/insights';
 import { Button } from '@banorte/ui';
 import { Plus } from 'lucide-react';
 
@@ -18,6 +20,21 @@ export function DebtModule() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const userId = 'user-demo';
   const availableMonthly = 3000;
+
+  // Insights proactivos de IA para deudas
+  const {
+    insights: debtInsights,
+    loading: insightsLoading,
+    error: insightsError,
+    refetch: refetchInsights,
+    dismissInsight,
+  } = useModuleInsights({
+    userId,
+    domain: 'DEBT',
+    autoRefresh: true,
+    refreshInterval: 300000, // 5 minutos
+    enabled: true,
+  });
 
   return (
     <div className="p-6 max-w-[1440px] mx-auto space-y-6 animate-in fade-in duration-500">
@@ -104,6 +121,24 @@ export function DebtModule() {
 
         {/* Sidebar - Recommendations & Alerts */}
         <div className="lg:col-span-4 space-y-6">
+          {/* Insights Proactivos de Norma */}
+          <ModuleInsightsSection
+            domain="DEBT"
+            insights={debtInsights}
+            loading={insightsLoading}
+            error={insightsError}
+            title="Alertas y Oportunidades"
+            subtitle="Estrategias para liberarte de deudas más rápido"
+            maxVisible={3}
+            variant="compact"
+            onDismiss={dismissInsight}
+            onRefresh={refetchInsights}
+            onInsightAction={(insightId, action) => {
+              console.log('Debt insight action:', insightId, action);
+              // TODO: Implement action handling
+            }}
+          />
+
           <NormaRecommendations userId={userId} />
           <PaymentAlerts />
           <CreditHealthScore />

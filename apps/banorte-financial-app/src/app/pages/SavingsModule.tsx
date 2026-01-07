@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useSavings } from '../hooks/useSavings';
 import { useSavingsRules } from '../hooks/useSavingsRules';
+import { useModuleInsights } from '../hooks/useModuleInsights';
 import { EmergencyFundHero } from '../components/savings/EmergencyFundHero';
 import { SavingsGoalCard } from '../components/savings/SavingsGoalCard';
 import { SavingRuleCard } from '../components/savings/SavingRuleCard';
@@ -12,6 +13,7 @@ import { SavingsHistory } from '../components/savings/SavingsHistory';
 import { CelebrationModal } from '../components/savings/CelebrationModal';
 import { SavingsOptimizationCard } from '../components/savings/SavingsOptimizationCard';
 import { SmartRuleSuggestions } from '../components/savings/SmartRuleSuggestions';
+import { ModuleInsightsSection } from '../components/insights';
 import { Button } from '@banorte/ui';
 import { Plus, Plane, Car, Home } from 'lucide-react';
 
@@ -22,8 +24,28 @@ export function SavingsModule() {
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
 
   const userId = 'user-demo';
+  const monthlyIncome = 30000; // TODO: Obtener de contexto financiero real
+  const monthlyExpenses = 18000;
+
   const { goals, loading, error, createGoal } = useSavings(userId);
   const { rules } = useSavingsRules(userId);
+
+  // Insights proactivos de IA para ahorro
+  const {
+    insights: savingsInsights,
+    loading: insightsLoading,
+    error: insightsError,
+    refetch: refetchInsights,
+    dismissInsight,
+  } = useModuleInsights({
+    userId,
+    domain: 'SAVINGS',
+    monthlyIncome,
+    monthlyExpenses,
+    autoRefresh: true,
+    refreshInterval: 300000, // 5 minutos
+    enabled: true,
+  });
 
   // Mock toggle handler
   const handleToggle = () => {};
@@ -62,6 +84,23 @@ export function SavingsModule() {
 
       {/* Hero Section */}
       <EmergencyFundHero saved={45000} target={60000} monthlyContribution={3200} />
+
+      {/* Insights Proactivos de Norma */}
+      <ModuleInsightsSection
+        domain="SAVINGS"
+        insights={savingsInsights}
+        loading={insightsLoading}
+        error={insightsError}
+        title="Optimizaciones de Norma"
+        subtitle="Sugerencias personalizadas para tus metas"
+        maxVisible={3}
+        onDismiss={dismissInsight}
+        onRefresh={refetchInsights}
+        onInsightAction={(insightId, action) => {
+          console.log('Savings insight action:', insightId, action);
+          // TODO: Implement action handling
+        }}
+      />
 
       {/* AI Optimization Section */}
       {goals.length > 0 && (
