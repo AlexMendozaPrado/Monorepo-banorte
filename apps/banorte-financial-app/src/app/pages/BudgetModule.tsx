@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useFinancialContext } from '../context/FinancialContext';
 import { useBudget } from '../hooks/useBudget';
 import { useAntExpenses } from '../hooks/useAntExpenses';
 import { useModuleInsights } from '../hooks/useModuleInsights';
@@ -18,7 +19,8 @@ export function BudgetModule() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const userId = 'user-demo';
+  // Usar contexto financiero global
+  const { userId, monthlyIncome } = useFinancialContext();
   const { budget, loading: budgetLoading, error: budgetError, createBudget } = useBudget(userId, currentMonth);
   const { analysis: antExpenses, loading: antExpensesLoading } = useAntExpenses(userId);
 
@@ -60,15 +62,17 @@ export function BudgetModule() {
 
   const handleCreateBudget = async () => {
     try {
+      // Calcular categorías basadas en el ingreso mensual
+      const income = monthlyIncome || 30000;
       await createBudget({
         month: currentMonth,
-        totalIncome: 30000,
+        totalIncome: income,
         categories: [
-          { name: 'Alimentos', budgeted: 6000, icon: '🍔', color: '#6CC04A' },
-          { name: 'Transporte', budgeted: 2500, icon: '🚗', color: '#5B6670' },
-          { name: 'Ocio', budgeted: 1500, icon: '☕', color: '#FFA400' },
-          { name: 'Hogar', budgeted: 8500, icon: '🏠', color: '#EB0029' },
-          { name: 'Servicios', budgeted: 2000, icon: '⚡', color: '#323E48' },
+          { name: 'Alimentos', budgeted: Math.round(income * 0.20), icon: '🍔', color: '#6CC04A' },
+          { name: 'Transporte', budgeted: Math.round(income * 0.08), icon: '🚗', color: '#5B6670' },
+          { name: 'Ocio', budgeted: Math.round(income * 0.05), icon: '☕', color: '#FFA400' },
+          { name: 'Hogar', budgeted: Math.round(income * 0.28), icon: '🏠', color: '#EB0029' },
+          { name: 'Servicios', budgeted: Math.round(income * 0.07), icon: '⚡', color: '#323E48' },
         ],
       });
       setIsModalOpen(false);

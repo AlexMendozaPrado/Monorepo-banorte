@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useSavings } from '../hooks/useSavings';
+import { useFinancialContext } from '../context/FinancialContext';
 import { useSavingsRules } from '../hooks/useSavingsRules';
 import { useModuleInsights } from '../hooks/useModuleInsights';
 import { EmergencyFundHero } from '../components/savings/EmergencyFundHero';
@@ -23,11 +23,16 @@ export function SavingsModule() {
   const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
 
-  const userId = 'user-demo';
-  const monthlyIncome = 30000; // TODO: Obtener de contexto financiero real
-  const monthlyExpenses = 18000;
+  // Usar contexto financiero global
+  const {
+    userId,
+    monthlyIncome,
+    monthlyExpenses,
+    savingsGoals: goals,
+    savingsLoading: loading,
+    emergencyFund,
+  } = useFinancialContext();
 
-  const { goals, loading, error, createGoal } = useSavings(userId);
   const { rules } = useSavingsRules(userId);
 
   // Insights proactivos de IA para ahorro
@@ -83,7 +88,11 @@ export function SavingsModule() {
       </div>
 
       {/* Hero Section */}
-      <EmergencyFundHero saved={45000} target={60000} monthlyContribution={3200} />
+      <EmergencyFundHero
+        saved={emergencyFund.current}
+        target={emergencyFund.target}
+        monthlyContribution={Math.round(monthlyIncome * 0.1)}
+      />
 
       {/* Insights Proactivos de Norma */}
       <ModuleInsightsSection
@@ -106,8 +115,8 @@ export function SavingsModule() {
       {goals.length > 0 && (
         <SavingsOptimizationCard
           userId={userId}
-          monthlyIncome={30000}
-          monthlyExpenses={18000}
+          monthlyIncome={monthlyIncome}
+          monthlyExpenses={monthlyExpenses}
         />
       )}
 
@@ -154,8 +163,8 @@ export function SavingsModule() {
       {goals.length > 0 && (
         <SmartRuleSuggestions
           userId={userId}
-          monthlyIncome={30000}
-          monthlyExpenses={18000}
+          monthlyIncome={monthlyIncome}
+          monthlyExpenses={monthlyExpenses}
           onCreateRule={(type, name, description) => {
             console.log('Create rule:', { type, name, description });
             setIsWizardOpen(true);

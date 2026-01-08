@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useFinancialContext } from '../context/FinancialContext';
 import { useModuleInsights } from '../hooks/useModuleInsights';
 import { DebtDashboard } from '../components/debt/DebtDashboard';
 import { DebtCard } from '../components/debt/DebtCard';
@@ -13,13 +14,42 @@ import { DebtDetailModal } from '../components/debt/DebtDetailModal';
 import { AddDebtModal } from '../components/debt/AddDebtModal';
 import { ModuleInsightsSection } from '../components/insights';
 import { Button } from '@banorte/ui';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
+
+// Helper to map debt type to card type (DebtCard only supports 4 types)
+const debtTypeToCardType = (type: string): 'credit' | 'personal' | 'auto' | 'store' => {
+  const mapping: Record<string, 'credit' | 'personal' | 'auto' | 'store'> = {
+    'CREDIT_CARD': 'credit',
+    'PERSONAL_LOAN': 'personal',
+    'AUTO_LOAN': 'auto',
+    'STORE_CREDIT': 'store',
+    'MORTGAGE': 'personal', // Map to personal since mortgage not supported
+    'STUDENT_LOAN': 'personal', // Map to personal since student not supported
+    'OTHER': 'personal',
+  };
+  return mapping[type] || 'personal';
+};
+
+// Helper to determine priority based on interest rate and amount
+const calculatePriority = (rate: number, balance: number): 'high' | 'medium' | 'low' => {
+  if (rate > 30 || balance > 50000) return 'high';
+  if (rate > 15 || balance > 20000) return 'medium';
+  return 'low';
+};
 
 export function DebtModule() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const userId = 'user-demo';
-  const availableMonthly = 3000;
+
+  // Usar contexto financiero global
+  const {
+    userId,
+    debts,
+    debtsLoading,
+    totalDebt,
+    availableForDebt,
+    averageInterestRate,
+  } = useFinancialContext();
 
   // Insights proactivos de IA para deudas
   const {
@@ -58,62 +88,47 @@ export function DebtModule() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Content - Strategy & List */}
         <div className="lg:col-span-8 space-y-8">
-          <PaymentStrategy userId={userId} availableMonthly={availableMonthly} />
+          <PaymentStrategy userId={userId} availableMonthly={availableForDebt} />
 
           <div>
             <h2 className="text-lg font-bold text-banorte-dark mb-4">
               Tus Deudas Priorizadas
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DebtCard
-                type="credit"
-                creditor="Banorte Oro"
-                amount={12450}
-                rate={42}
-                minPayment={450}
-                recPayment={1200}
-                dueDate="15 Nov"
-                progress={35}
-                priority="high"
-                onViewDetails={() => setIsDetailOpen(true)}
-              />
-              <DebtCard
-                type="store"
-                creditor="Liverpool"
-                amount={9550}
-                rate={35}
-                minPayment={350}
-                recPayment={800}
-                dueDate="25 Nov"
-                progress={20}
-                priority="high"
-                onViewDetails={() => setIsDetailOpen(true)}
-              />
-              <DebtCard
-                type="personal"
-                creditor="BBVA Personal"
-                amount={18000}
-                rate={28}
-                minPayment={850}
-                recPayment={1500}
-                dueDate="10 Nov"
-                progress={40}
-                priority="high"
-                onViewDetails={() => setIsDetailOpen(true)}
-              />
-              <DebtCard
-                type="auto"
-                creditor="Santander Auto"
-                amount={45000}
-                rate={12}
-                minPayment={1800}
-                recPayment={2000}
-                dueDate="20 Nov"
-                progress={60}
-                priority="medium"
-                onViewDetails={() => setIsDetailOpen(true)}
-              />
-            </div>
+            {debtsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-banorte-red animate-spin" />
+              </div>
+            ) : debts.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                <p className="text-banorte-gray">No tienes deudas registradas</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {debts.map((debt) => {
+                  const dueDate = debt.dueDate
+                    ? new Date(debt.dueDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+                    : 'Sin fecha';
+                  // Calculate recommended payment (minimum + 30% or available amount)
+                  const recPayment = Math.round(debt.minimumPayment * 1.3);
+
+                  return (
+                    <DebtCard
+                      key={debt.id}
+                      type={debtTypeToCardType(debt.type)}
+                      creditor={debt.name}
+                      amount={debt.balance}
+                      rate={debt.interestRate}
+                      minPayment={debt.minimumPayment}
+                      recPayment={recPayment}
+                      dueDate={dueDate}
+                      progress={30} // Would need original amount to calculate
+                      priority={calculatePriority(debt.interestRate, debt.balance)}
+                      onViewDetails={() => setIsDetailOpen(true)}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <PaymentSimulator />

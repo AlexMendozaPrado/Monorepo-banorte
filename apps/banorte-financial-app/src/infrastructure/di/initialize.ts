@@ -5,6 +5,7 @@ import { registerInsuranceModule } from './modules/insuranceModule';
 import { registerAdvisorModule } from './modules/advisorModule';
 import { registerSavingsModule } from './savingsModule';
 import { registerProactiveInsightsModule } from './modules/proactiveInsightsModule';
+import { registerPaymentAlertsModule } from './modules/paymentAlertsModule';
 import { OpenAIConfig } from '../ai/providers/openai/OpenAIConfig';
 
 let isInitialized = false;
@@ -34,6 +35,8 @@ export function initializeDI(): void {
   registerAdvisorModule(container);
   // ProactiveInsights depends on Budget, Savings, and Debt modules - register last
   registerProactiveInsightsModule(container);
+  // PaymentAlerts depends on Debt module
+  registerPaymentAlertsModule(container);
 
   // Validate that all critical services are registered
   container.validate([
@@ -44,6 +47,7 @@ export function initializeDI(): void {
     'SendMessageUseCase',
     'DetectAntExpensesUseCase',
     'GenerateProactiveInsightsUseCase',
+    'GetPaymentAlertsUseCase',
   ]);
 
   isInitialized = true;
