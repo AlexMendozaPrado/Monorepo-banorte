@@ -11,7 +11,7 @@ const nextConfig = {
     ],
   },
   // Configuración para deployment en Vercel
-  output: 'standalone',
+  // output: 'standalone', // Disabled for Windows development - enable for production deployment
 
   // Webpack config para módulos externos del backend
   webpack: (config) => {

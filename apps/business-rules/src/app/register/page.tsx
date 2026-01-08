@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, MenuItem, Alert } from '@mui/material';
+import { Box, Typography, TextField, Button, MenuItem, Alert, FormControlLabel, Checkbox } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Image from 'next/image';
 import { useNavigation } from '@/hooks/useNavigation';
@@ -12,6 +12,16 @@ const COUNTRIES = [
   'México', 'Estados Unidos', 'España', 'Argentina', 'Colombia', 'Chile', 'Perú', 'Otro'
 ];
 
+// Password validation regex patterns
+const PASSWORD_RULES = {
+  minLength: /.{8,}/,
+  hasUppercase: /[A-Z]/,
+  hasLowercase: /[a-z]/,
+  hasNumber: /[0-9]/,
+  hasSpecial: /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\;'/`~]/,
+  noWhitespace: /^\S*$/
+};
+
 const RegisterPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { goToLogin } = useNavigation();
@@ -21,30 +31,61 @@ const RegisterPage = () => {
     email: '',
     password: '',
     username: '',
-    country: ''
+    country: '',
+    acceptPromotions: false
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const validatePassword = (password: string): string | null => {
+    if (!password) {
+      return 'La contraseña es requerida';
+    }
+    if (!PASSWORD_RULES.minLength.test(password)) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (!PASSWORD_RULES.hasUppercase.test(password)) {
+      return 'La contraseña debe incluir al menos una letra mayúscula';
+    }
+    if (!PASSWORD_RULES.hasLowercase.test(password)) {
+      return 'La contraseña debe incluir al menos una letra minúscula';
+    }
+    if (!PASSWORD_RULES.hasNumber.test(password)) {
+      return 'La contraseña debe incluir al menos un número';
+    }
+    if (!PASSWORD_RULES.hasSpecial.test(password)) {
+      return 'La contraseña debe incluir al menos un carácter especial (!@#$%^&*...)';
+    }
+    if (!PASSWORD_RULES.noWhitespace.test(password)) {
+      return 'La contraseña no debe contener espacios en blanco';
+    }
+    return null;
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    // Email validation
     if (!formData.email) {
       newErrors.email = 'El correo es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Correo inválido';
     }
 
-    if (!formData.password) {
-      newErrors.password = 'La contraseña es requerida';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    // Password validation with full rules
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      newErrors.password = passwordError;
     }
 
+    // Username validation
     if (!formData.username) {
       newErrors.username = 'El usuario es requerido';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'El usuario debe tener al menos 3 caracteres';
     }
 
+    // Country validation
     if (!formData.country) {
       newErrors.country = 'El país es requerido';
     }
@@ -54,8 +95,11 @@ const RegisterPage = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
     // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -77,7 +121,7 @@ const RegisterPage = () => {
 
       if (result.success) {
         showSuccess(result.message);
-        setFormData({ email: '', password: '', username: '', country: '' });
+        setFormData({ email: '', password: '', username: '', country: '', acceptPromotions: false });
 
         setTimeout(() => {
           goToLogin();
@@ -218,8 +262,9 @@ const RegisterPage = () => {
                   }
                 }}
               />
-              <Typography sx={{ fontSize: '12px', color: '#666', lineHeight: '1.3', marginBottom: '15px' }}>
-                Mínimo 8 caracteres, incluir mayúscula, minúscula, número y carácter especial.
+              <Typography sx={{ fontSize: '12px', color: '#666', lineHeight: '1.4', marginBottom: '15px' }}>
+                La contraseña debe contener al menos 8 caracteres, incluir una letra mayúscula,
+                una letra minúscula, un número y un carácter especial. No debe contener espacios en blanco.
               </Typography>
             </Box>
 
@@ -251,7 +296,7 @@ const RegisterPage = () => {
             </Box>
 
             {/* Country */}
-            <Box sx={{ textAlign: 'left', marginBottom: '30px' }}>
+            <Box sx={{ textAlign: 'left', marginBottom: '20px' }}>
               <Typography sx={{ marginBottom: '8px', fontSize: '14px', color: '#333', fontWeight: '500' }}>
                 País*
               </Typography>
@@ -279,6 +324,30 @@ const RegisterPage = () => {
                   <MenuItem key={country} value={country}>{country}</MenuItem>
                 ))}
               </TextField>
+            </Box>
+
+            {/* Promotions Checkbox */}
+            <Box sx={{ textAlign: 'left', marginBottom: '25px' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="acceptPromotions"
+                    checked={formData.acceptPromotions}
+                    onChange={handleInputChange}
+                    sx={{
+                      color: '#EB0029',
+                      '&.Mui-checked': { color: '#EB0029' }
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{ fontSize: '14px', color: '#666', lineHeight: '1.4' }}>
+                    Deseo recibir información sobre promociones, ofertas y novedades de Banorte
+                    por correo electrónico y otros medios digitales.
+                  </Typography>
+                }
+                sx={{ alignItems: 'flex-start', margin: 0 }}
+              />
             </Box>
 
             {/* Submit Button */}
