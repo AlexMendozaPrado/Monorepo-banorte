@@ -5,7 +5,7 @@ import { AppCard } from './AppCard'
 import { AppCardHorizontal } from './AppCardHorizontal'
 import { AppCardMinimal } from './AppCardMinimal'
 import { AppCardBold } from './AppCardBold'
-import { FileText, BarChart2, FileCode } from 'lucide-react'
+import { FileText, BarChart2, FileCode, GitCompare } from 'lucide-react'
 
 export type DesignVariant = 'cards' | 'horizontal' | 'minimal' | 'bold'
 
@@ -40,6 +40,13 @@ export const AppGrid: React.FC<AppGridProps> = ({ variant }) => {
       description:
         'Generación automática de reglas de negocio basadas en regulaciones',
       route: process.env.NEXT_PUBLIC_BUSINESS_RULES_URL || '/business-rules',
+    },
+    {
+      icon: <GitCompare size={60} color="#EB0029" />,
+      title: 'SDK Version Control',
+      description:
+        'Monitoreo y control de versiones de SDKs para homologación entre plataformas',
+      route: process.env.NEXT_PUBLIC_SDK_VERSION_CONTROL_URL || '/sdk-version-control',
     },
   ]
 
