@@ -38,7 +38,6 @@ import {
   Error as ErrorIcon,
   Warning as WarningIcon,
   ExpandMore as ExpandMoreIcon,
-  Download as DownloadIcon,
   Refresh as RefreshIcon,
   AutoFixHigh as AutoFixHighIcon,
   Rule as RuleIcon
@@ -46,9 +45,8 @@ import {
 
 import validationRulesService from '../services/validationRules.service';
 import ruleValidationService from '../services/ruleValidation.service';
-import txtGeneratorService from '../services/txtGenerator.service';
-import type { RegistroValidacion, Validaciones, SugerenciaIA } from '../types/xmlValidation.types';
-import type { NominaMapeada, MappedEmpleado } from '../services/mapeoAltamira.service';
+import type { RegistroValidacion, Validaciones } from '../types/xmlValidation.types';
+import type { MappedEmpleado } from '../services/mapeoAltamira.service';
 
 // Type definitions
 interface BusinessRule {
@@ -61,9 +59,9 @@ interface BusinessRule {
 interface ValidationModalProps {
   open: boolean;
   onClose: () => void;
-  data: RegistroValidacion[] | NominaMapeada | null;
-  tipoOperacion: 'proveedores' | 'nomina';
-  onGenerateTXT: (content: string) => void;
+  registros: RegistroValidacion[] | MappedEmpleado[];
+  tipoOperacion: 'proveedores' | 'nomina' | null;
+  onConfirm: (registrosValidados: RegistroValidacion[] | MappedEmpleado[]) => void;
 }
 
 interface ValidationState {
@@ -71,21 +69,27 @@ interface ValidationState {
   isValidated: boolean;
   validationErrors: string[];
   validationWarnings: string[];
-  validatedData: RegistroValidacion[] | MappedEmpleado[];
+  validatedData: (RegistroValidacion | MappedEmpleado)[];
+}
+
+interface AISuggestion {
+  campo: string;
+  sugerencia: string;
+  valorSugerido?: string;
 }
 
 interface AIValidationState {
   isValidating: boolean;
-  suggestions: SugerenciaIA[];
+  suggestions: AISuggestion[];
   error: string | null;
 }
 
 const ValidationModal: React.FC<ValidationModalProps> = ({
   open,
   onClose,
-  data,
+  registros,
   tipoOperacion,
-  onGenerateTXT
+  onConfirm
 }) => {
   // State
   const [validationState, setValidationState] = useState<ValidationState>({
@@ -130,13 +134,9 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
 
   // Get records to validate
   const getRecords = useCallback((): RegistroValidacion[] | MappedEmpleado[] => {
-    if (!data) return [];
-
-    if (tipoOperacion === 'nomina') {
-      return (data as NominaMapeada).empleados || [];
-    }
-    return data as RegistroValidacion[];
-  }, [data, tipoOperacion]);
+    if (!registros || registros.length === 0) return [];
+    return registros;
+  }, [registros]);
 
   // Validate all records
   const handleValidation = useCallback(async (): Promise<void> => {
@@ -166,27 +166,27 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
           const provRecord = record as RegistroValidacion;
 
           // Validate account length
-          const cuentaResult = validationRulesService.validarCuenta(
+          const cuentaResult = validationRulesService.validateCuenta(
             provRecord.cuentaDestino,
             provRecord.tipoOperacion === '04' ? 18 : 10
           );
-          validations.longitudCuenta = cuentaResult.valido;
-          if (!cuentaResult.valido) {
-            errors.push(`Registro ${i + 1}: ${cuentaResult.mensaje}`);
+          validations.longitudCuenta = cuentaResult.isValid;
+          if (!cuentaResult.isValid) {
+            errors.push(`Registro ${i + 1}: ${cuentaResult.error}`);
           }
 
           // Validate amount
-          const importeResult = validationRulesService.validarImporte(provRecord.importe);
-          validations.rangoImporte = importeResult.valido;
-          if (!importeResult.valido) {
-            errors.push(`Registro ${i + 1}: ${importeResult.mensaje}`);
+          const importeResult = validationRulesService.validateImporte(provRecord.importe);
+          validations.rangoImporte = importeResult.isValid;
+          if (!importeResult.isValid) {
+            errors.push(`Registro ${i + 1}: ${importeResult.error}`);
           }
 
           // Validate date
-          const fechaResult = validationRulesService.validarFecha(provRecord.fechaEjecucion);
-          validations.formatoFecha = fechaResult.valido;
-          if (!fechaResult.valido) {
-            warnings.push(`Registro ${i + 1}: ${fechaResult.mensaje}`);
+          const fechaResult = validationRulesService.validateFecha(provRecord.fechaEjecucion);
+          validations.formatoFecha = fechaResult.isValid;
+          if (!fechaResult.isValid) {
+            warnings.push(`Registro ${i + 1}: ${fechaResult.error}`);
           }
 
           // Validate required fields
@@ -208,24 +208,24 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
           const empRecord = record as MappedEmpleado;
 
           // Validate CLABE
-          const clabeResult = validationRulesService.validarCLABE(empRecord.clabe);
-          validations.longitudCuenta = clabeResult.valido;
-          if (!clabeResult.valido) {
-            errors.push(`Empleado ${i + 1}: ${clabeResult.mensaje}`);
+          const clabeResult = validationRulesService.validateCLABE(empRecord.clabe);
+          validations.longitudCuenta = clabeResult.isValid;
+          if (!clabeResult.isValid) {
+            errors.push(`Empleado ${i + 1}: ${clabeResult.error}`);
           }
 
           // Validate salary
-          const salarioResult = validationRulesService.validarImporte(empRecord.salario);
-          validations.rangoImporte = salarioResult.valido;
-          if (!salarioResult.valido) {
-            errors.push(`Empleado ${i + 1}: ${salarioResult.mensaje}`);
+          const salarioResult = validationRulesService.validateImporte(empRecord.salario);
+          validations.rangoImporte = salarioResult.isValid;
+          if (!salarioResult.isValid) {
+            errors.push(`Empleado ${i + 1}: ${salarioResult.error}`);
           }
 
           // Validate RFC if present
           if (empRecord.rfc) {
-            const rfcResult = validationRulesService.validarRFC(empRecord.rfc);
-            if (!rfcResult.valido) {
-              warnings.push(`Empleado ${i + 1}: ${rfcResult.mensaje}`);
+            const rfcResult = validationRulesService.validateRFC(empRecord.rfc);
+            if (!rfcResult.isValid) {
+              warnings.push(`Empleado ${i + 1}: ${rfcResult.error}`);
             }
           }
 
@@ -302,29 +302,16 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
     setSelectedRule(event.target.value as number | '');
   };
 
-  // Generate TXT file
-  const handleGenerateTXT = (): void => {
-    try {
-      let result;
+  // Confirm validation and pass records back to parent
+  const handleConfirm = (): void => {
+    // Use validated data if available, otherwise use original records
+    const recordsToConfirm = validationState.validatedData.length > 0
+      ? validationState.validatedData
+      : registros;
 
-      if (tipoOperacion === 'nomina') {
-        result = txtGeneratorService.generarTXT(data as NominaMapeada, 'nomina');
-      } else {
-        const records = validationState.validatedData.length > 0
-          ? validationState.validatedData as RegistroValidacion[]
-          : data as RegistroValidacion[];
-        result = txtGeneratorService.generarTXT(records, 'proveedores');
-      }
-
-      if (result.success && result.content) {
-        onGenerateTXT(result.content);
-        txtGeneratorService.descargarTXT(result.content, tipoOperacion);
-      } else {
-        console.error('TXT generation errors:', result.errors);
-      }
-    } catch (error) {
-      console.error('Error generating TXT:', error);
-    }
+    console.log('✅ ValidationModal: Confirmando', recordsToConfirm.length, 'registros');
+    // Cast to expected type - we know the array is homogeneous based on tipoOperacion
+    onConfirm(recordsToConfirm as RegistroValidacion[] | MappedEmpleado[]);
   };
 
   // Handle accordion change
@@ -348,10 +335,14 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
     return <Chip icon={<ErrorIcon />} label="Errores" color="error" size="small" />;
   };
 
-  // Check if can generate TXT
-  const canGenerateTXT = (): boolean => {
-    if (!validationState.isValidated) return false;
-    return validationState.validationErrors.length === 0;
+  // Check if can confirm (validation passed or skipped)
+  const canConfirm = (): boolean => {
+    // Allow confirmation if validated with no errors, or if not validated yet (user skips validation)
+    if (validationState.isValidated) {
+      return validationState.validationErrors.length === 0;
+    }
+    // Allow confirmation even without validation (user can skip)
+    return registros.length > 0;
   };
 
   // Get records for display
@@ -384,8 +375,10 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
           <Alert severity="info">
             <Typography variant="body2">
               Se encontraron <strong>{displayRecords.length}</strong> registros para validar.
-              {tipoOperacion === 'nomina' && data && (
-                <> Total a dispersar: <strong>${(data as NominaMapeada).totalImporte?.toLocaleString('es-MX')}</strong></>
+              {tipoOperacion === 'nomina' && displayRecords.length > 0 && (
+                <> Total a dispersar: <strong>
+                  ${(displayRecords as MappedEmpleado[]).reduce((sum, emp) => sum + (emp.salario || 0), 0).toLocaleString('es-MX')}
+                </strong></>
               )}
             </Typography>
           </Alert>
@@ -615,12 +608,14 @@ const ValidationModal: React.FC<ValidationModalProps> = ({
         </Button>
         <Button
           variant="contained"
-          color="primary"
-          onClick={handleGenerateTXT}
-          disabled={!canGenerateTXT()}
-          startIcon={<DownloadIcon />}
+          onClick={handleConfirm}
+          disabled={!canConfirm()}
+          sx={{
+            backgroundColor: '#EB0029',
+            '&:hover': { backgroundColor: '#c70023' }
+          }}
         >
-          Generar TXT
+          Confirmar y Generar TXT
         </Button>
       </DialogActions>
     </Dialog>

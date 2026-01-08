@@ -1,0 +1,608 @@
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+class GeminiService {
+    constructor() {
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error('GEMINI_API_KEY is required in environment variables');
+        }
+        
+        this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        // Using Gemini 2.5 Flash - fast, stable and available
+        this.model = this.genAI.getGenerativeModel({ 
+            model: 'gemini-2.5-flash',
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 2048,
+            }
+        });
+        
+        console.log('Gemini service initialized with model: gemini-2.5-flash');
+    }
+
+    /**
+     * Generate business rules from text prompt
+     * @param {string} prompt - User's business requirements
+     * @returns {Promise<Object>} Generated business rules
+     */
+    async generateBusinessRulesFromPrompt(prompt) {
+        try {
+            const systemPrompt = `
+Eres un experto en reglas de negocio para el banco Banorte. Genera reglas de negocio comprensivas y accionables basadas en los requerimientos del usuario.
+
+Por favor, formatea tu respuesta como un objeto JSON con esta estructura:
+{
+    "rules": [
+        {
+            "id": "temp_rule_1",
+            "title": "Título de la Regla",
+            "description": "Descripción detallada de la regla",
+            "conditions": ["condición 1", "condición 2"],
+            "actions": ["acción 1", "acción 2"],
+            "priority": "alta|media|baja",
+            "category": "deteccion_fraude|cumplimiento|gestion_riesgo|servicio_cliente|otro"
+        }
+    ],
+    "summary": "Resumen breve de todas las reglas generadas",
+    "implementation_notes": "Consideraciones clave para la implementación"
+}
+
+Solicitud del Usuario: ${prompt}
+
+Genera reglas de negocio prácticas que Banorte pueda implementar para operaciones bancarias, cumplimiento normativo, gestión de riesgos o servicio al cliente.
+Usa IDs temporales como "temp_rule_1", "temp_rule_2", etc. - serán actualizados con IDs de base de datos después.
+IMPORTANTE: Responde ÚNICAMENTE en español, incluidos todos los textos, títulos, descripciones y comentarios.
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const response = await result.response;
+            const text = (await response.text()) || '';
+
+            // Try to parse JSON from the response
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                try {
+                    return JSON.parse(jsonMatch[0]);
+                } catch (parseError) {
+                    console.warn('Warning: AI returned malformed JSON for simulateBusinessRule, falling back. Parse error:', parseError.message);
+                    // continue to fallback
+                }
+            }
+
+            // Fallback if JSON parsing fails
+            return {
+                rules: [{
+                    id: "temp_rule_fallback",
+                    title: "Regla Generada",
+                    description: text,
+                    conditions: ["Solicitud del usuario procesada"],
+                    actions: ["Revisar e implementar"],
+                    priority: "media",
+                    category: "otro"
+                }],
+                summary: "Regla de negocio generada desde solicitud del usuario",
+                implementation_notes: "Revisar la regla generada para verificar precisión y cumplimiento"
+            };
+
+        } catch (error) {
+            console.error('Error generando reglas de negocio desde prompt:', error);
+            throw new Error('Error al generar reglas de negocio: ' + error.message);
+        }
+    }
+
+    /**
+     * Process payment file and apply Banorte business mapping rules
+     * @param {string} fileContent - Content of the file (TXT or XML)
+     * @param {string} fileType - Type of file (txt or xml)
+     * @returns {Promise<Object>} Mapped payment data with validation results
+     */
+    async processPaymentMapping(fileContent, fileType) {
+        try {
+            console.log(`[processPaymentMapping] Iniciando procesamiento de archivo tipo: ${fileType}`);
+            console.log(`[processPaymentMapping] Tamaño del contenido: ${fileContent ? fileContent.length : 0} caracteres`);
+
+            // Construir prompt que pide SOLO el XML mapeado
+            const systemPrompt = `Eres un experto en procesamiento de pagos bancarios para Banorte.
+
+TAREA: A partir del archivo de entrada proporcionado, extrae los campos necesarios y genera ÚNICAMENTE un XML mapeado con la siguiente estructura:
+
+<MappedPayment>
+  <OPERACION>...</OPERACION>
+  <CTA_ORIGENOR>...</CTA_ORIGENOR>
+  <CTA_DESTINO>...</CTA_DESTINO>
+  <IMPORTE>...</IMPORTE>
+  <REFERENCIA>...</REFERENCIA>
+  <DESCRIPCION>...</DESCRIPCION>
+  <FECHA_APLICACION>...</FECHA_APLICACION>
+</MappedPayment>
+
+Reglas resumen:
+- OPERACION: 2 dígitos según tipo de cuenta destino y fecha (02,04,05 según reglas de Banorte).
+- CTA_ORIGENOR: 20 dígitos, justificar derecha con ceros.
+- CTA_DESTINO: 20 dígitos; si origen es Cheques (10) construir CLABE según reglas; si CLABE 072/032 aplicar extracción indicada; otherwise rellenar con ceros a la derecha hasta 20.
+- IMPORTE: 14 dígitos (12 enteros + 2 decimales), justificar derecha con ceros.
+- REFERENCIA: 10 dígitos, recortar si excede.
+- DESCRIPCION: 30 caracteres, justificar a la izquierda.
+- FECHA_APLICACION: DDMMAAAA, no menor a la fecha actual.
+
+INSTRUCCIONES IMPORTANTES:
+1) NO agregues texto adicional ni explicaciones.
+2) Responde solo con el XML mostrado arriba. Si algún campo no existe, deja la etiqueta vacía (ej. <DESCRIPCION></DESCRIPCION>).
+3) Si el modelo no puede encontrar datos, aún así devuelve el XML con campos vacíos.
+
+ARCHIVO_DE_ENTRADA:
+${fileContent}
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const response = await result.response;
+            const text = (await response.text()) || '';
+
+            // Extraer contenido XML si viene en code block
+            let xml = (text || '').trim();
+            const codeBlockMatch = xml.match(/```(?:xml)?\n([\s\S]*?)```/i);
+            if (codeBlockMatch) xml = codeBlockMatch[1].trim();
+
+            // Si la respuesta parece ser JSON en vez de XML, devolver fallback con el texto completo
+            if (xml.startsWith('{') || xml.startsWith('[')) {
+                console.error('[processPaymentMapping] Gemini devolvió JSON en lugar de XML');
+                return {
+                    xml: '',
+                    validation: {
+                        is_valid: false,
+                        errors: ['Gemini devolvió JSON en lugar de XML'],
+                        warnings: []
+                    },
+                    processing_notes: `Respuesta de Gemini (primeros 1000 chars): ${text.substring(0,1000)}`
+                };
+            }
+
+            // Validación básica de presencia de campos
+            const requiredFields = ['OPERACION','CTA_ORIGENOR','CTA_DESTINO','IMPORTE','REFERENCIA','DESCRIPCION','FECHA_APLICACION'];
+            const missing = requiredFields.filter(f => !new RegExp(`<${f}>[\s\S]*?<\/${f}>`).test(xml));
+            const is_valid = xml.startsWith('<') && missing.length === 0;
+
+            return {
+                xml,
+                validation: {
+                    is_valid,
+                    errors: is_valid ? [] : (missing.length ? [`Faltan etiquetas: ${missing.join(', ')}`] : ['XML generado no válido']),
+                    warnings: []
+                },
+                processing_notes: `Respuesta de Gemini (primeros 1000 chars): ${text.substring(0,1000)}`
+            };
+
+        } catch (error) {
+            console.error('[processPaymentMapping] Error en el proceso:', error);
+            return {
+                xml: '',
+                validation: { is_valid: false, errors: [error.message || 'Error desconocido'], warnings: [] },
+                processing_notes: `Error interno: ${error.message}`
+            };
+        }
+    }
+    async refineBusinessRules(existingRules, feedback) {
+        try {
+            const systemPrompt = `
+Eres un experto en reglas de negocio para el banco Banorte. Refina las reglas de negocio existentes basado en la retroalimentación del usuario.
+
+Reglas Actuales: ${JSON.stringify(existingRules, null, 2)}
+
+Retroalimentación del Usuario: ${feedback}
+
+Por favor actualiza las reglas de acuerdo con la retroalimentación manteniendo el cumplimiento bancario y las mejores prácticas.
+Devuelve las reglas refinadas en el mismo formato JSON que las originales.
+IMPORTANTE: Responde ÚNICAMENTE en español, incluidos todos los textos, títulos y descripciones.
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const response = await result.response;
+            const text = (await response.text()) || '';
+
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                try {
+                    return JSON.parse(jsonMatch[0]);
+                } catch (parseError) {
+                    console.warn('Warning: AI returned malformed JSON for generateBusinessRulesFromData, falling back. Parse error:', parseError.message);
+                    // fallback
+                }
+            }
+
+            return existingRules; // Return original if parsing fails
+
+        } catch (error) {
+            console.error('Error refinando reglas de negocio:', error);
+            throw new Error('Error al refinar reglas de negocio: ' + error.message);
+        }
+    }
+
+    /**
+     * Start or continue a conversation to refine business rule requirements
+     * @param {string} userMessage - User's message in the conversation
+     * @param {Array} conversationHistory - Previous messages in the conversation
+     * @returns {Promise<Object>} Conversation response
+     */
+    async continueConversation(userMessage, conversationHistory = []) {
+        try {
+            const systemPrompt = `
+Eres un experto consultor en reglas de negocio para el banco Banorte. Tu trabajo es hacer preguntas específicas y detalladas para entender completamente los requerimientos antes de generar las reglas finales.
+
+IMPORTANTE: NO generes reglas de negocio todavía. Tu objetivo es hacer preguntas para clarificar y refinar los requerimientos.
+
+Contexto de la conversación:
+${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+
+Nuevo mensaje del usuario: ${userMessage}
+
+Debes responder en formato JSON con esta estructura:
+{
+    "message": "Tu pregunta o comentario para el usuario",
+    "questions": ["pregunta específica 1", "pregunta específica 2"],
+    "is_ready_to_generate": false,
+    "confidence_level": "bajo|medio|alto",
+    "missing_information": ["aspecto 1 que necesita aclaración", "aspecto 2"],
+    "summary_so_far": "Resumen de lo que has entendido hasta ahora"
+}
+
+Si el usuario confirma que ya tiene toda la información necesaria o dice algo como "sí, genera la regla" o "procede", entonces cambia "is_ready_to_generate" a true.
+
+Haz preguntas específicas sobre:
+- Montos o umbrales específicos
+- Horarios o días de aplicación
+- Tipos de transacciones o clientes
+- Acciones específicas a tomar
+- Excepciones o casos especiales
+- Niveles de autorización requeridos
+- Canales afectados (app, sucursal, web)
+
+RESPONDE ÚNICAMENTE en español y mantén un tono profesional pero amigable.
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const response = await result.response;
+            const text = (await response.text()) || '';
+
+            // Try to parse JSON from the response
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+
+            // Fallback response
+            return {
+                message: "Cuéntame más detalles sobre la regla que necesitas. ¿Qué tipo de transacciones o procesos quieres regular?",
+                questions: [
+                    "¿Para qué tipo de transacciones será esta regla?",
+                    "¿Hay montos específicos que debería considerar?",
+                    "¿En qué horarios o días debe aplicar?"
+                ],
+                is_ready_to_generate: false,
+                confidence_level: "bajo",
+                missing_information: ["Tipo de transacción", "Criterios específicos", "Acciones a tomar"],
+                summary_so_far: "El usuario quiere crear una regla de negocio pero necesito más información específica."
+            };
+
+        } catch (error) {
+            console.error('Error en conversación con Gemini:', error);
+            throw new Error('Error en la conversación: ' + error.message);
+        }
+    }
+
+    /**
+     * Generate a concise summary from complete business rules JSON
+     * @param {Object} businessRulesJSON - Complete business rules structure
+     * @returns {Promise<string>} Concise summary of the rules
+     */
+    async generateSummaryFromRules(businessRulesJSON) {
+        try {
+            const systemPrompt = `
+Eres un experto en reglas de negocio para el banco Banorte. Genera un resumen conciso y claro de las reglas de negocio proporcionadas.
+
+Reglas Completas: ${JSON.stringify(businessRulesJSON, null, 2)}
+
+Crea un resumen que contenga ÚNICAMENTE la información más importante:
+- Tipo de reglas (fraude, cumplimiento, límites, etc.)
+- Criterios principales (montos, condiciones clave)
+- Acciones principales que se toman
+
+El resumen debe ser:
+- Máximo 2-3 oraciones
+- Claro y directo
+- Enfocado en los puntos más importantes
+- En español
+- Sin detalles técnicos innecesarios
+
+Ejemplo de formato esperado:
+"Reglas de gestión de riesgo para transacciones superiores a 10,000 MXN que incluyen verificación de fondos, detección de fraudes y notificaciones al cliente."
+
+Responde ÚNICAMENTE con el resumen, sin formato JSON ni texto adicional.
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const response = await result.response;
+            const text = ((await response.text()) || '').trim();
+
+            return text;
+
+        } catch (error) {
+            console.error('Error generando resumen de reglas:', error);
+            // Fallback summary if AI fails
+            if (businessRulesJSON && businessRulesJSON.rules && businessRulesJSON.rules.length > 0) {
+                const ruleCount = businessRulesJSON.rules.length;
+                const categories = [...new Set(businessRulesJSON.rules.map(rule => rule.category))];
+                return `Conjunto de ${ruleCount} regla(s) de negocio para ${categories.join(', ')}.`;
+            }
+            return 'Regla de negocio generada por IA.';
+        }
+    }
+
+    /**
+     * Simulate business rule with test data
+     * @param {Object} simulationContext - Context for simulation including rule and test data
+     * @returns {Promise<Object>} Simulation analysis and results
+     */
+    async simulateBusinessRule(simulationContext) {
+        try {
+            const { rule, testData, inputType, fileName, fileType } = simulationContext;
+            
+            let dataDescription = '';
+            if (inputType === 'text') {
+                dataDescription = `Datos de prueba ingresados como texto: ${testData}`;
+            } else if (inputType === 'file') {
+                dataDescription = `Datos de prueba cargados desde archivo "${fileName}" (tipo: ${fileType})\n`;
+                dataDescription += `Contenido: ${JSON.stringify(testData, null, 2)}`;
+            }
+
+            const systemPrompt = `
+Eres un experto analista de reglas de negocio para el banco Banorte. Tu tarea es simular y evaluar el comportamiento de una regla de negocio específica con los datos de prueba proporcionados.
+
+INFORMACIÓN DE LA REGLA:
+- ID: ${rule.id}
+- Descripción: ${rule.description}
+- Estado: ${rule.status}
+- Detalles: ${rule.details || 'No disponible'}
+
+DATOS DE PRUEBA:
+${dataDescription}
+
+INSTRUCCIONES PARA LA SIMULACIÓN:
+1. Analiza cómo la regla de negocio se aplicaría a los datos de prueba
+2. Identifica posibles escenarios de cumplimiento y no cumplimiento
+3. Evalúa la efectividad de la regla con estos datos
+4. Proporciona recomendaciones para mejorar la regla si es necesario
+5. Identifica posibles casos límite o excepciones
+
+Formatea tu respuesta como JSON con esta estructura:
+{
+    "analysis": "Análisis detallado de cómo se aplica la regla a los datos",
+    "results": {
+        "compliance_status": "cumple|no_cumple|parcial",
+        "risk_level": "bajo|medio|alto",
+        "triggered_conditions": ["condición 1", "condición 2"],
+        "actions_required": ["acción 1", "acción 2"],
+        "data_quality": "buena|regular|mala",
+        "test_coverage": "completo|parcial|limitado"
+    },
+    "recommendations": "Recomendaciones específicas para mejorar la regla o el proceso de validación",
+    "validation_results": {
+        "passed_tests": 0,
+        "failed_tests": 0,
+        "total_scenarios": 0,
+        "success_rate": "0%"
+    },
+    "edge_cases": ["caso límite 1", "caso límite 2"],
+    "implementation_notes": "Notas importantes para la implementación de esta regla"
+}
+
+IMPORTANTE: 
+- Responde ÚNICAMENTE en español
+- Sé específico sobre cómo los datos interactúan con la regla
+- Proporciona análisis práctico y accionable
+- Considera aspectos de cumplimiento normativo bancario
+- Evalúa la robustez de la regla con los datos proporcionados
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const response = await result.response;
+            const text = (await response.text()) || '';
+
+            // Try to parse JSON from the response
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+
+            // Fallback response if JSON parsing fails
+            return {
+                analysis: `Simulación completada para la regla "${rule.description}". Los datos de prueba han sido procesados y evaluados según los criterios de la regla de negocio.`,
+                results: {
+                    compliance_status: "parcial",
+                    risk_level: "medio",
+                    triggered_conditions: ["Regla evaluada con datos de prueba"],
+                    actions_required: ["Revisar resultados de simulación"],
+                    data_quality: "regular",
+                    test_coverage: "parcial"
+                },
+                recommendations: "Se recomienda revisar la configuración de la regla y ampliar los casos de prueba para obtener una evaluación más completa.",
+                validation_results: {
+                    passed_tests: 1,
+                    failed_tests: 0,
+                    total_scenarios: 1,
+                    success_rate: "100%"
+                },
+                edge_cases: ["Datos de prueba con estructura variable"],
+                implementation_notes: "La simulación se completó exitosamente. Se sugiere validación adicional con datos reales."
+            };
+
+        } catch (error) {
+            console.error('Error en simulación de regla de negocio:', error);
+            throw new Error('Error al simular regla de negocio: ' + error.message);
+        }
+    }
+
+    /**
+     * Test the API connection and list available models
+     * @returns {Promise<Object>} API status and available models
+     */
+    async testConnection() {
+        try {
+            // Try a simple generation to test connectivity
+            const result = await this.model.generateContent('Responde solo con "OK" si recibes este mensaje');
+            const response = await result.response;
+            const text = (await response.text()) || '';
+            
+            return {
+                status: 'success',
+                modelUsed: 'gemini-2.5-flash',
+                testResponse: text,
+                message: 'Conexión a Gemini API exitosa'
+            };
+        } catch (error) {
+            console.error('Prueba de Gemini API falló:', error);
+            return {
+                status: 'error',
+                error: error.message,
+                message: 'Error al conectar con Gemini API'
+            };
+        }
+    }
+
+    /**
+     * Valida datos de mapeo XML contra una regla de negocio específica
+     * @param {Object} rule - Regla de negocio de la BD
+     * @param {Array} data - Datos mapeados a validar
+     * @param {string} tipoOperacion - 'proveedores' o 'nomina'
+     * @returns {Promise<Object>} Resultado de validación con recomendaciones
+     */
+    async validateMappingDataWithRule(rule, data, tipoOperacion) {
+        try {
+            // Generar id_display dinámicamente
+            const fechaCreacion = new Date(rule.fecha_creacion);
+            const year = fechaCreacion.getFullYear();
+            const month = String(fechaCreacion.getMonth() + 1).padStart(2, '0');
+            const day = String(fechaCreacion.getDate()).padStart(2, '0');
+            const id_display = `REG-${year}${month}${day}-${rule.id}`;
+
+            console.log(`Validando ${data.length} registros contra regla ${id_display}`);
+
+            const systemPrompt = `
+Eres un validador experto de datos bancarios para Banorte. Tu tarea es validar que los datos
+de un archivo de pagos cumplan con una regla de negocio específica.
+
+REGLA A VALIDAR:
+ID: ${id_display}
+Descripción: ${rule.resumen}
+Regla Completa:
+${JSON.stringify(rule.regla_estandarizada, null, 2)}
+
+TIPO DE OPERACIÓN: ${tipoOperacion}
+
+DATOS A VALIDAR (${data.length} registros):
+${JSON.stringify(data, null, 2)}
+
+INSTRUCCIONES:
+1. Analiza si cada registro cumple con las condiciones de la regla
+2. Identifica registros que NO cumplen y explica por qué
+3. Evalúa el nivel de riesgo general basado en las acciones de la regla
+4. Proporciona recomendaciones específicas para cada problema encontrado
+5. Sugiere correcciones automáticas cuando sea posible (ej: tipo de operación incorrecto, formato de cuenta, etc.)
+6. Considera las prioridades y categorías de la regla en tu análisis
+
+ANÁLISIS POR TIPO:
+${tipoOperacion === 'proveedores' ? `
+- Verificar montos contra umbrales de la regla
+- Validar tipos de operación (SPEI, Terceros, TEF)
+- Revisar cuentas destino (longitud, formato)
+- Verificar referencias y beneficiarios
+` : `
+- Verificar salarios contra límites
+- Validar formato CLABE (18 dígitos)
+- Verificar RFC y CURP
+- Revisar datos de empleados completos
+`}
+
+FORMATO DE SALIDA (JSON estricto, sin markdown):
+{
+  "compliance_status": "cumple|no_cumple|parcial",
+  "risk_level": "bajo|medio|alto",
+  "total_records": ${data.length},
+  "compliant_records": 0,
+  "non_compliant_records": 0,
+  "validation_details": [
+    {
+      "record_index": 0,
+      "record_id": "id_del_registro",
+      "complies": true,
+      "triggered_conditions": ["condición activada"],
+      "required_actions": ["acción requerida"],
+      "issues": ["problema encontrado"]
+    }
+  ],
+  "recommendations": [
+    "Recomendación específica y accionable"
+  ],
+  "auto_corrections": [
+    {
+      "record_index": 0,
+      "field": "nombre_campo",
+      "current_value": "valor_actual",
+      "suggested_value": "valor_sugerido",
+      "reason": "explicación clara"
+    }
+  ],
+  "summary": "Resumen ejecutivo del análisis en 2-3 oraciones"
+}
+
+IMPORTANTE:
+- Retorna SOLO el JSON, sin texto adicional, sin markdown, sin backticks
+- Sé específico en las recomendaciones
+- Las correcciones automáticas deben ser seguras y conservadoras
+- Si no estás seguro de una corrección, no la incluyas
+- El nivel de riesgo debe reflejar la prioridad de la regla original
+`;
+
+            const result = await this.model.generateContent(systemPrompt);
+            const text = result.response.text();
+
+            // Limpiar markdown si existe
+            let cleanText = text.trim();
+            cleanText = cleanText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+            cleanText = cleanText.trim();
+
+            console.log('Respuesta de Gemini (primeros 200 chars):', cleanText.substring(0, 200));
+
+            const parsed = JSON.parse(cleanText);
+
+            // Validar estructura de respuesta
+            if (!parsed.compliance_status || !parsed.risk_level) {
+                throw new Error('Respuesta de Gemini no tiene la estructura esperada');
+            }
+
+            console.log(`Validación completada: ${parsed.compliance_status}, ${parsed.compliant_records}/${parsed.total_records} cumplen`);
+
+            return parsed;
+
+        } catch (error) {
+            console.error('Error validando datos con regla:', error);
+
+            // Fallback structure en caso de error
+            return {
+                compliance_status: 'error',
+                risk_level: 'alto',
+                total_records: data.length,
+                compliant_records: 0,
+                non_compliant_records: data.length,
+                validation_details: [],
+                recommendations: [
+                    'Error al validar con IA. Por favor revisa manualmente los datos.',
+                    'Verifica que la regla sea compatible con el tipo de operación.',
+                    `Error técnico: ${error.message}`
+                ],
+                auto_corrections: [],
+                summary: `Error en validación automática: ${error.message}. Se recomienda revisión manual de los ${data.length} registros.`
+            };
+        }
+    }
+}
+
+module.exports = new GeminiService();

@@ -175,6 +175,45 @@ class AuthService {
     return localStorage.getItem('isLoggedIn') === 'true' && localStorage.getItem('user') !== null;
   }
 
+  // Forgot password - request password reset
+  async forgotPassword(email: string): Promise<AuthResponse> {
+    try {
+      console.log('🔐 Frontend forgot password attempt for email:', email);
+      console.log('🌐 API URL:', `${this.baseURL}/auth/forgot-password`);
+
+      const response = await fetch(`${this.baseURL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          correo: email
+        }),
+      });
+
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+
+      const data = await response.json();
+      console.log('📦 Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al solicitar recuperación de contraseña');
+      }
+
+      return {
+        success: true,
+        message: data.message || 'Se ha enviado un correo con instrucciones para recuperar tu contraseña'
+      };
+    } catch (error: any) {
+      console.error('❌ Forgot password error:', error);
+      return {
+        success: false,
+        message: error.message || 'Error de conexión'
+      };
+    }
+  }
+
   // Change password for current user
   async changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse> {
     try {

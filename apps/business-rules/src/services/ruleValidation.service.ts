@@ -64,6 +64,65 @@ type TipoOperacion = 'proveedores' | 'nomina';
 
 class RuleValidationService {
   /**
+   * Gets all active business rules (estado = 'activa')
+   */
+  async getActiveRules(): Promise<BusinessRule[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/rules/list`);
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const rules = await response.json();
+      // Filter only active rules
+      return rules.filter((rule: BusinessRule & { estado?: string }) =>
+        rule.estado?.toLowerCase() === 'activa'
+      );
+    } catch (error) {
+      console.error('Error getting active rules:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Validates data with a business rule - wrapper for validateDataWithRule
+   * Returns result with suggestions format expected by ValidationModal
+   */
+  async validateWithRule(
+    ruleId: number,
+    data: unknown[],
+    tipoOperacion: TipoOperacion
+  ): Promise<{ suggestions: Array<{ campo: string; sugerencia: string; valorSugerido?: string }> }> {
+    try {
+      const result = await this.validateDataWithRule(ruleId, data as (RegistroValidacion[] | EmpleadoNomina[]), tipoOperacion);
+
+      // Transform validation result to suggestions format
+      const suggestions = (result.recommendations || []).map((rec: string, index: number) => ({
+        campo: `Registro ${index + 1}`,
+        sugerencia: rec,
+        valorSugerido: undefined
+      }));
+
+      // Add auto-corrections as suggestions
+      if (result.auto_corrections) {
+        result.auto_corrections.forEach((correction: AutoCorrection) => {
+          suggestions.push({
+            campo: correction.field,
+            sugerencia: `Valor sugerido para registro ${correction.record_index + 1}`,
+            valorSugerido: String(correction.suggested_value)
+          });
+        });
+      }
+
+      return { suggestions };
+    } catch (error) {
+      console.error('Error validating with rule:', error);
+      return { suggestions: [] };
+    }
+  }
+
+  /**
    * Validates mapping data against a business rule using Gemini
    */
   async validateDataWithRule(

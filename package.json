@@ -16,6 +16,9 @@
     "build:sentiment": "turbo run build --filter=sentiment-analysis",
     "dev:business": "turbo run dev --filter=business-rules",
     "build:business": "turbo run build --filter=business-rules",
+    "dev:business-api": "turbo run dev --filter=business-rules-api",
+    "start:business-api": "turbo run start --filter=business-rules-api",
+    "dev:business-full": "turbo run dev --filter=business-rules --filter=business-rules-api",
     "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {

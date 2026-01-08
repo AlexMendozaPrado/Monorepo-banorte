@@ -42,7 +42,7 @@ class ValidationRulesService {
       };
     }
 
-    const tiposValidos = Object.values(TIPOS_OPERACION);
+    const tiposValidos = Object.values(TIPOS_OPERACION) as string[];
     if (!tiposValidos.includes(tipoOperacion)) {
       return {
         isValid: false,

@@ -35,7 +35,14 @@
     "ALLOWED_FILE_TYPES",
     "AI_PROVIDER",
     "OLLAMA_BASE_URL",
-    "OLLAMA_MODEL"
+    "OLLAMA_MODEL",
+    "DB_USER",
+    "DB_HOST",
+    "DB_NAME",
+    "DB_PASSWORD",
+    "DB_PORT",
+    "GEMINI_API_KEY",
+    "PORT"
   ],
   "globalDependencies": [
     "**/.env.*local"

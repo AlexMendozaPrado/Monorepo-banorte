@@ -365,14 +365,14 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
                       </ListItemIcon>
                       <ListItemText primary="Mi Perfil" />
                     </ListItem>
-                    <ListItem button>
+                    <ListItemButton>
                       <ListItemIcon>
                         <KeyIcon />
                       </ListItemIcon>
                       <ListItemText primary="Cambiar Contraseña" />
-                    </ListItem>
+                    </ListItemButton>
                     <Divider />
-                    <ListItem button onClick={handleLogout}>
+                    <ListItemButton onClick={handleLogout}>
                       <ListItemIcon>
                         <ExitToAppIcon sx={{ color: '#EB0029' }} />
                       </ListItemIcon>
@@ -380,7 +380,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
                         primary="Cerrar Sesión"
                         primaryTypographyProps={{ color: '#EB0029' }}
                       />
-                    </ListItem>
+                    </ListItemButton>
                   </List>
                 </Box>
               </ClickAwayListener>
