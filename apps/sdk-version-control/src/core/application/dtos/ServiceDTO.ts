@@ -2,6 +2,9 @@ import { Service, ServiceCategory } from '../../domain/entities/Service';
 import { SDKVersion } from '../../domain/entities/SDKVersion';
 import { PlatformType } from '../../domain/value-objects/PlatformType';
 import { VersionStatus } from '../../domain/value-objects/VersionStatus';
+import { ProjectStatus } from '../../domain/value-objects/ProjectStatus';
+import { EntityType } from '../../domain/value-objects/EntityType';
+import { ResponsiblePerson } from '../../domain/value-objects/ResponsiblePerson';
 
 /**
  * DTO para versión de plataforma
@@ -38,6 +41,17 @@ export interface ServiceDTO {
   lastCheckedAt?: string;
   createdAt: string;
   updatedAt: string;
+  // Campos Banorte
+  projectStatus: ProjectStatus;
+  entity: EntityType;
+  hasASM: boolean;
+  implementationDate: string;
+  dateConfirmed: boolean;
+  formattedImplementationDate: string;
+  responsibleBusiness: string;
+  responsibleIT: string;
+  responsibleERN: string;
+  responsibles: ResponsiblePerson[];
 }
 
 /**
@@ -92,6 +106,17 @@ export function toServiceDTO(service: Service): ServiceDTO {
     lastCheckedAt: service.lastCheckedAt?.toISOString(),
     createdAt: service.createdAt.toISOString(),
     updatedAt: service.updatedAt.toISOString(),
+    // Campos Banorte
+    projectStatus: service.projectStatus,
+    entity: service.entity,
+    hasASM: service.hasASM,
+    implementationDate: service.implementationDate,
+    dateConfirmed: service.dateConfirmed,
+    formattedImplementationDate: service.getFormattedImplementationDate(),
+    responsibleBusiness: service.responsibleBusiness,
+    responsibleIT: service.responsibleIT,
+    responsibleERN: service.responsibleERN,
+    responsibles: service.getResponsibles(),
   };
 }
 

@@ -1,9 +1,11 @@
 'use client';
 
 import React from 'react';
-import { X, Download, FileText, Check, AlertTriangle, AlertCircle } from 'lucide-react';
+import { X, Download, FileText, Check, AlertTriangle, AlertCircle, Calendar, Building2, Home, CheckCircle2 } from 'lucide-react';
 import { ComparisonDTO } from '@/core/application/dtos/ComparisonDTO';
 import { VersionStatus } from '@/core/domain/value-objects/VersionStatus';
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/value-objects/ProjectStatus';
+import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS } from '@/core/domain/value-objects/EntityType';
 
 interface ComparisonPanelProps {
   isOpen: boolean;
@@ -106,6 +108,106 @@ export function ComparisonPanel({
                   </tr>
                 </thead>
                 <tbody className="text-sm">
+                  {/* PROJECT INFORMATION SECTION */}
+                  <tr className="bg-gray-50">
+                    <td
+                      className="p-3 font-bold text-banorte-dark border-b-2 border-gray-300 uppercase tracking-wide"
+                      colSpan={comparison.services.length + 1}
+                    >
+                      Informacion del Proyecto
+                    </td>
+                  </tr>
+                  {/* Project Status */}
+                  <tr>
+                    <td className="p-4 font-medium text-banorte-gray border-b border-gray-100">
+                      Estado del Proyecto
+                    </td>
+                    {comparison.services.map((service) => (
+                      <td key={service.id} className="p-4 border-b border-gray-100">
+                        <span
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold text-white"
+                          style={{ backgroundColor: PROJECT_STATUS_COLORS[service.projectStatus] }}
+                        >
+                          {PROJECT_STATUS_LABELS[service.projectStatus]}
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Entity */}
+                  <tr>
+                    <td className="p-4 font-medium text-banorte-gray border-b border-gray-100">
+                      Entidad
+                    </td>
+                    {comparison.services.map((service) => (
+                      <td key={service.id} className="p-4 border-b border-gray-100">
+                        <span
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold text-white"
+                          style={{ backgroundColor: ENTITY_TYPE_COLORS[service.entity] }}
+                        >
+                          {service.entity === 'banco' ? <Building2 size={10} /> : <Home size={10} />}
+                          {ENTITY_TYPE_LABELS[service.entity]}
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* ASM */}
+                  <tr>
+                    <td className="p-4 font-medium text-banorte-gray border-b border-gray-100">
+                      ASM
+                    </td>
+                    {comparison.services.map((service) => (
+                      <td key={service.id} className="p-4 border-b border-gray-100">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                            service.hasASM ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {service.hasASM && <CheckCircle2 size={10} />}
+                          {service.hasASM ? 'Si' : 'No'}
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Implementation Date */}
+                  <tr>
+                    <td className="p-4 font-medium text-banorte-gray border-b border-gray-100">
+                      Fecha Implementacion
+                    </td>
+                    {comparison.services.map((service) => (
+                      <td key={service.id} className="p-4 border-b border-gray-100">
+                        <div className="flex items-center gap-1 text-banorte-dark">
+                          <Calendar size={12} />
+                          <span className="font-medium">
+                            {service.formattedImplementationDate || 'Por confirmar'}
+                          </span>
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Responsibles */}
+                  <tr>
+                    <td className="p-4 font-medium text-banorte-gray border-b-2 border-gray-300">
+                      Responsables
+                    </td>
+                    {comparison.services.map((service) => (
+                      <td key={service.id} className="p-4 border-b-2 border-gray-300">
+                        <div className="space-y-1 text-xs">
+                          {service.responsibles?.map((person, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <span className="font-bold text-banorte-gray uppercase w-12">
+                                {person.role}:
+                              </span>
+                              <span className="text-banorte-dark truncate">
+                                {person.name || '-'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+
+                  {/* PLATFORM SECTIONS */}
                   {comparison.matrix.map((row) => (
                     <React.Fragment key={row.platform}>
                       {/* Platform Header */}

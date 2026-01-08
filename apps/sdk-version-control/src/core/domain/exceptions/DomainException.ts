@@ -37,6 +37,15 @@ export class ServiceNotFoundException extends DomainException {
 }
 
 /**
+ * Excepción cuando ya existe un servicio con el mismo nombre
+ */
+export class ServiceAlreadyExistsException extends DomainException {
+  constructor(serviceName: string) {
+    super(`Service already exists with name: ${serviceName}`);
+  }
+}
+
+/**
  * Excepción para errores de scraping
  */
 export class ScrapingException extends DomainException {

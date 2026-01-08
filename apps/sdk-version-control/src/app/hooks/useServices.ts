@@ -39,13 +39,16 @@ const defaultStatistics: ServiceStatistics = {
 
 /**
  * Hook para gestionar la lista de servicios
+ * Responde a cambios en los filtros en tiempo real
  */
-export function useServices(initialFilters?: ServiceFilters): UseServicesReturn {
+export function useServices(filters: ServiceFilters = {}): UseServicesReturn {
   const [services, setServices] = useState<ServiceDTO[]>([]);
   const [statistics, setStatistics] = useState<ServiceStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ServiceFilters>(initialFilters || {});
+
+  // Serializar filtros para usar como dependencia
+  const filtersKey = JSON.stringify(filters);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -78,7 +81,8 @@ export function useServices(initialFilters?: ServiceFilters): UseServicesReturn 
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersKey]);
 
   useEffect(() => {
     fetchServices();
@@ -90,7 +94,7 @@ export function useServices(initialFilters?: ServiceFilters): UseServicesReturn 
     loading,
     error,
     filters,
-    setFilters,
+    setFilters: () => {}, // Los filtros ahora son controlados externamente
     refetch: fetchServices,
   };
 }

@@ -1,6 +1,8 @@
 import { Service, ServiceCategory, ServiceVersions } from '../../entities/Service';
 import { PlatformType } from '../../value-objects/PlatformType';
 import { VersionStatus } from '../../value-objects/VersionStatus';
+import { ProjectStatus } from '../../value-objects/ProjectStatus';
+import { EntityType } from '../../value-objects/EntityType';
 
 /**
  * Filtros para búsqueda de servicios
@@ -10,6 +12,10 @@ export interface ServiceFilters {
   platform?: PlatformType;
   status?: VersionStatus;
   search?: string;
+  // Filtros Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
 }
 
 /**
@@ -60,6 +66,15 @@ export interface IServiceRepository {
     logoUrl: string;
     versions: ServiceVersions;
     lastCheckedAt: Date;
+    // Campos Banorte
+    projectStatus: ProjectStatus;
+    entity: EntityType;
+    hasASM: boolean;
+    implementationDate: string;
+    dateConfirmed: boolean;
+    responsibleBusiness: string;
+    responsibleIT: string;
+    responsibleERN: string;
   }>): Promise<Service>;
 
   /**
