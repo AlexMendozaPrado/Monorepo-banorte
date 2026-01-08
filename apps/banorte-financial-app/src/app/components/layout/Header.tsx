@@ -2,15 +2,17 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Bell, Search, Menu } from 'lucide-react'
+import { Search, Menu } from 'lucide-react'
 import BanorteLogo from './BanorteLogo'
+import { NotificationBell } from '@/app/components/notifications'
 
 interface HeaderProps {
   onMenuClick: () => void
+  onNotificationHubOpen?: () => void
   userName?: string
 }
 
-export function Header({ onMenuClick, userName = 'María González' }: HeaderProps) {
+export function Header({ onMenuClick, onNotificationHubOpen, userName = 'María González' }: HeaderProps) {
   return (
     <header
       className="h-16 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30"
@@ -65,13 +67,7 @@ export function Header({ onMenuClick, userName = 'María González' }: HeaderPro
           <Search size={20} />
         </button>
 
-        <button
-          className="relative flex size-10 items-center justify-center text-white hover:bg-white/10 rounded-full transition-colors"
-          aria-label="Notificaciones"
-        >
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-white rounded-full border-2 border-banorte-red animate-pulse"></span>
-        </button>
+        <NotificationBell onViewAllClick={onNotificationHubOpen} />
 
         <div className="flex items-center gap-2 pl-2 border-l border-white/20">
           <span className="hidden md:block text-sm font-medium text-white">

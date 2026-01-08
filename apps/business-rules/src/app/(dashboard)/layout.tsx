@@ -41,7 +41,7 @@ import {
   Circle as CircleIcon,
 } from '@mui/icons-material';
 import { useNavigation } from '@/hooks/useNavigation';
-import { useGlobalNotifications } from '@/contexts/NotificationsContext';
+import { NotificationsProvider, useGlobalNotifications } from '@/contexts/NotificationsContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -49,7 +49,8 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+// Inner layout component that uses the notifications context
+function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -364,14 +365,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       </ListItemIcon>
                       <ListItemText primary="Mi Perfil" />
                     </ListItem>
-                    <ListItem button>
+                    <ListItemButton>
                       <ListItemIcon>
                         <KeyIcon />
                       </ListItemIcon>
                       <ListItemText primary="Cambiar Contraseña" />
-                    </ListItem>
+                    </ListItemButton>
                     <Divider />
-                    <ListItem button onClick={handleLogout}>
+                    <ListItemButton onClick={handleLogout}>
                       <ListItemIcon>
                         <ExitToAppIcon sx={{ color: '#EB0029' }} />
                       </ListItemIcon>
@@ -379,7 +380,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         primary="Cerrar Sesión"
                         primaryTypographyProps={{ color: '#EB0029' }}
                       />
-                    </ListItem>
+                    </ListItemButton>
                   </List>
                 </Box>
               </ClickAwayListener>
@@ -452,5 +453,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {children}
       </Box>
     </Box>
+  );
+}
+
+// Main export that wraps the layout with NotificationsProvider
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  return (
+    <NotificationsProvider>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </NotificationsProvider>
   );
 }

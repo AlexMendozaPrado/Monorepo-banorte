@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AppLayout } from './components/layout/AppLayout'
+import { FinancialProvider } from './context/FinancialContext'
+import { PaymentAlertsProvider } from './context/PaymentAlertsContext'
 
 export const metadata: Metadata = {
   title: 'Banorte Financial Advisor',
@@ -15,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <AppLayout>{children}</AppLayout>
+        <FinancialProvider>
+          <PaymentAlertsProvider>
+            <AppLayout>{children}</AppLayout>
+          </PaymentAlertsProvider>
+        </FinancialProvider>
       </body>
     </html>
   )

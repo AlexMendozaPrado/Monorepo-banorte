@@ -9,51 +9,79 @@ export class InMemoryDebtRepository implements IDebtRepository {
   }
 
   private seedDemoData(): void {
+    const userId = 'user-1'; // Main user for demo
+
     const demoDebts = [
+      // CRITICAL: Overdue - past due date
       Debt.create({
-        userId: 'user-demo',
+        userId,
         type: DebtType.CREDIT_CARD,
         name: 'Banorte Oro',
         originalAmount: 20000,
         currentBalance: 12450,
         interestRate: 42,
-        minimumPayment: 450,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        minimumPayment: 3450,
+        dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
       }),
+      // CRITICAL: Due today
       Debt.create({
-        userId: 'user-demo',
+        userId,
         type: DebtType.STORE_CREDIT,
         name: 'Liverpool',
         originalAmount: 15000,
         currentBalance: 9550,
         interestRate: 35,
-        minimumPayment: 350,
-        dueDate: new Date(Date.now() + 17 * 24 * 60 * 60 * 1000),
+        minimumPayment: 1850,
+        dueDate: new Date(), // Today
       }),
+      // HIGH: Due in 2 days
       Debt.create({
-        userId: 'user-demo',
+        userId,
         type: DebtType.PERSONAL_LOAN,
         name: 'BBVA Personal',
         originalAmount: 30000,
         currentBalance: 18000,
         interestRate: 28,
-        minimumPayment: 850,
+        minimumPayment: 2850,
         dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
       }),
+      // MEDIUM: Due in 7 days
       Debt.create({
-        userId: 'user-demo',
+        userId,
         type: DebtType.AUTO_LOAN,
         name: 'Santander Auto',
         originalAmount: 120000,
         currentBalance: 45000,
         interestRate: 12,
-        minimumPayment: 1800,
-        dueDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+        minimumPayment: 4800,
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      }),
+      // MEDIUM: Due in 15 days
+      Debt.create({
+        userId,
+        type: DebtType.MORTGAGE,
+        name: 'Hipoteca Infonavit',
+        originalAmount: 500000,
+        currentBalance: 320000,
+        interestRate: 10,
+        minimumPayment: 8500,
+        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      }),
+      // MEDIUM: Due in 20 days
+      Debt.create({
+        userId,
+        type: DebtType.STUDENT_LOAN,
+        name: 'Crédito Educativo',
+        originalAmount: 80000,
+        currentBalance: 55000,
+        interestRate: 8,
+        minimumPayment: 1200,
+        dueDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
       }),
     ];
 
     demoDebts.forEach(debt => this.debts.set(debt.id, debt));
-    console.log(`📦 InMemoryDebtRepository: Seeded ${demoDebts.length} demo debts`);
+    console.log(`📦 InMemoryDebtRepository: Seeded ${demoDebts.length} demo debts for user ${userId}`);
   }
 
   async save(debt: Debt): Promise<void> {

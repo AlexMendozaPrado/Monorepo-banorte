@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useFinancialContext } from '../context/FinancialContext';
 import { useBudget } from '../hooks/useBudget';
 import { useAntExpenses } from '../hooks/useAntExpenses';
+import { useModuleInsights } from '../hooks/useModuleInsights';
 import { BudgetHeader } from '../components/budget/BudgetHeader';
 import { BudgetSummary } from '../components/budget/BudgetSummary';
 import { CategoryCard } from '../components/budget/CategoryCard';
 import { SmallExpensesAlert } from '../components/budget/SmallExpensesAlert';
 import { TopExpenses } from '../components/budget/TopExpenses';
 import { CategoryModal } from '../components/budget/CategoryModal';
+import { ModuleInsightsSection } from '../components/insights';
 import { Button } from '@banorte/ui';
 
 export function BudgetModule() {
@@ -16,9 +19,27 @@ export function BudgetModule() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const userId = 'user-demo';
+  // Usar contexto financiero global
+  const { userId, monthlyIncome } = useFinancialContext();
   const { budget, loading: budgetLoading, error: budgetError, createBudget } = useBudget(userId, currentMonth);
   const { analysis: antExpenses, loading: antExpensesLoading } = useAntExpenses(userId);
+
+  // Insights proactivos de IA para presupuesto
+  const {
+    insights: budgetInsights,
+    loading: insightsLoading,
+    error: insightsError,
+    refetch: refetchInsights,
+    dismissInsight,
+  } = useModuleInsights({
+    userId,
+    domain: 'BUDGET',
+    monthlyIncome: budget?.totalIncome?.amount,
+    monthlyExpenses: budget?.totalSpent?.amount,
+    autoRefresh: true,
+    refreshInterval: 300000, // 5 minutos
+    enabled: !!budget,
+  });
 
   const handleMonthChange = (monthString: string) => {
     // Parse month string like "Octubre 2024" to Date
@@ -41,15 +62,17 @@ export function BudgetModule() {
 
   const handleCreateBudget = async () => {
     try {
+      // Calcular categorías basadas en el ingreso mensual
+      const income = monthlyIncome || 30000;
       await createBudget({
         month: currentMonth,
-        totalIncome: 30000,
+        totalIncome: income,
         categories: [
-          { name: 'Alimentos', budgeted: 6000, icon: '🍔', color: '#6CC04A' },
-          { name: 'Transporte', budgeted: 2500, icon: '🚗', color: '#5B6670' },
-          { name: 'Ocio', budgeted: 1500, icon: '☕', color: '#FFA400' },
-          { name: 'Hogar', budgeted: 8500, icon: '🏠', color: '#EB0029' },
-          { name: 'Servicios', budgeted: 2000, icon: '⚡', color: '#323E48' },
+          { name: 'Alimentos', budgeted: Math.round(income * 0.20), icon: '🍔', color: '#6CC04A' },
+          { name: 'Transporte', budgeted: Math.round(income * 0.08), icon: '🚗', color: '#5B6670' },
+          { name: 'Ocio', budgeted: Math.round(income * 0.05), icon: '☕', color: '#FFA400' },
+          { name: 'Hogar', budgeted: Math.round(income * 0.28), icon: '🏠', color: '#EB0029' },
+          { name: 'Servicios', budgeted: Math.round(income * 0.07), icon: '⚡', color: '#323E48' },
         ],
       });
       setIsModalOpen(false);
@@ -139,6 +162,23 @@ export function BudgetModule() {
         income={budget.totalIncome.amount}
         spent={budget.totalSpent.amount}
         available={budget.available.amount}
+      />
+
+      {/* Insights Proactivos de Norma */}
+      <ModuleInsightsSection
+        domain="BUDGET"
+        insights={budgetInsights}
+        loading={insightsLoading}
+        error={insightsError}
+        title="Lo que Norma detectó"
+        subtitle="Oportunidades de mejora en tu presupuesto"
+        maxVisible={3}
+        onDismiss={dismissInsight}
+        onRefresh={refetchInsights}
+        onInsightAction={(insightId, action) => {
+          console.log('Insight action:', insightId, action);
+          // TODO: Implement action handling (navigate, api-call, modal)
+        }}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

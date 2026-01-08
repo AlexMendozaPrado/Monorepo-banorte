@@ -25,7 +25,11 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel
+  InputLabel,
+  InputAdornment,
+  Divider,
+  Card,
+  CardContent
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -35,6 +39,14 @@ import {
   Cancel as CancelIcon,
   Refresh as RefreshIcon,
   Download as DownloadIcon,
+  Person as PersonIcon,
+  Email as EmailIcon,
+  Business as BusinessIcon,
+  AttachMoney as MoneyIcon,
+  Public as RegionIcon,
+  Category as CategoryIcon,
+  Rule as RuleIcon,
+  Info as InfoIcon
 } from '@mui/icons-material';
 import { useNotification } from '@/hooks/useNotification';
 import { useGlobalNotifications } from '@/contexts/NotificationsContext';
@@ -50,6 +62,14 @@ interface BusinessRule {
   estado: string;
   fecha_creacion: string;
   usuario_id: number;
+  // Extended fields
+  usuario?: string;
+  email?: string;
+  empresa?: string;
+  monto_minimo?: number;
+  monto_maximo?: number;
+  region?: string;
+  tipo_transaccion?: string;
 }
 
 export default function ReglasPage() {
@@ -322,8 +342,10 @@ export default function ReglasPage() {
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>ID</TableCell>
                     <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Descripción</TableCell>
+                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Usuario</TableCell>
+                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Empresa</TableCell>
                     <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Estado</TableCell>
-                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Fecha Creación</TableCell>
+                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Fecha</TableCell>
                     <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5', textAlign: 'center' }}>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
@@ -337,11 +359,29 @@ export default function ReglasPage() {
                         '&:hover': { bgcolor: '#f9f9f9' },
                         cursor: 'pointer'
                       }}
+                      onClick={() => handleViewDetails(rule)}
                     >
-                      <TableCell>{rule.id_display || rule.id_regla}</TableCell>
-                      <TableCell sx={{ maxWidth: 300 }}>
+                      <TableCell>
+                        <Chip
+                          label={rule.id_display || rule.id_regla}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 250 }}>
                         <Typography variant="body2" noWrap>
                           {rule.descripcion || 'Sin descripción'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {rule.usuario || '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {rule.empresa || '-'}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -356,7 +396,7 @@ export default function ReglasPage() {
                         <Tooltip title="Ver detalles">
                           <IconButton
                             size="small"
-                            onClick={() => handleViewDetails(rule)}
+                            onClick={(e) => { e.stopPropagation(); handleViewDetails(rule); }}
                             sx={{ color: '#EB0029' }}
                           >
                             <VisibilityIcon fontSize="small" />
@@ -420,48 +460,227 @@ export default function ReglasPage() {
         <DialogContent sx={{ mt: 2 }}>
           {selectedRule && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <TextField
-                label="ID"
-                value={selectedRule.id_display || selectedRule.id_regla}
-                disabled
-                fullWidth
-              />
-              <TextField
-                label="Descripción"
-                value={isEditing ? editedRule.descripcion || '' : selectedRule.descripcion}
-                onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                disabled={!isEditing}
-                multiline
-                rows={2}
-                fullWidth
-              />
-              <FormControl fullWidth disabled={!isEditing}>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  value={isEditing ? editedRule.estado || '' : selectedRule.estado}
-                  onChange={(e) => handleInputChange('estado', e.target.value)}
-                  label="Estado"
-                >
-                  <MenuItem value="activa">Activa</MenuItem>
-                  <MenuItem value="inactiva">Inactiva</MenuItem>
-                  <MenuItem value="simulacion">Simulación</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                label="Regla Generada"
-                value={isEditing ? editedRule.regla_generada || '' : selectedRule.regla_generada}
-                onChange={(e) => handleInputChange('regla_generada', e.target.value)}
-                disabled={!isEditing}
-                multiline
-                rows={4}
-                fullWidth
-              />
-              <TextField
-                label="Fecha de Creación"
-                value={formatDate(selectedRule.fecha_creacion)}
-                disabled
-                fullWidth
-              />
+              {/* Sección: Información General */}
+              <Card variant="outlined" sx={{ bgcolor: '#fafafa' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <InfoIcon sx={{ color: '#EB0029' }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Información General
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="ID"
+                        value={selectedRule.id_display || selectedRule.id_regla}
+                        disabled
+                        sx={{ flex: 1 }}
+                      />
+                      <FormControl sx={{ flex: 1 }} disabled={!isEditing}>
+                        <InputLabel>Estado</InputLabel>
+                        <Select
+                          value={isEditing ? editedRule.estado || '' : selectedRule.estado}
+                          onChange={(e) => handleInputChange('estado', e.target.value)}
+                          label="Estado"
+                        >
+                          <MenuItem value="activa">Activa</MenuItem>
+                          <MenuItem value="inactiva">Inactiva</MenuItem>
+                          <MenuItem value="simulacion">Simulación</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <TextField
+                      label="Fecha de Creación"
+                      value={formatDate(selectedRule.fecha_creacion)}
+                      disabled
+                      fullWidth
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Sección: Detalles del Usuario */}
+              <Card variant="outlined" sx={{ bgcolor: '#fafafa' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <PersonIcon sx={{ color: '#EB0029' }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Detalles del Usuario
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="Usuario"
+                        value={isEditing ? editedRule.usuario || '' : selectedRule.usuario || ''}
+                        onChange={(e) => handleInputChange('usuario', e.target.value)}
+                        disabled={!isEditing}
+                        sx={{ flex: 1 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <PersonIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                      <TextField
+                        label="Email"
+                        value={isEditing ? editedRule.email || '' : selectedRule.email || ''}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        disabled={!isEditing}
+                        sx={{ flex: 1 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <EmailIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
+                    <TextField
+                      label="Empresa"
+                      value={isEditing ? editedRule.empresa || '' : selectedRule.empresa || ''}
+                      onChange={(e) => handleInputChange('empresa', e.target.value)}
+                      disabled={!isEditing}
+                      fullWidth
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <BusinessIcon fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Sección: Descripción de la Regla */}
+              <Card variant="outlined" sx={{ bgcolor: '#fafafa' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <RuleIcon sx={{ color: '#EB0029' }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Descripción de la Regla
+                    </Typography>
+                  </Box>
+                  <TextField
+                    label="Descripción"
+                    value={isEditing ? editedRule.descripcion || '' : selectedRule.descripcion}
+                    onChange={(e) => handleInputChange('descripcion', e.target.value)}
+                    disabled={!isEditing}
+                    multiline
+                    rows={3}
+                    fullWidth
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Sección: Configuración Adicional */}
+              <Card variant="outlined" sx={{ bgcolor: '#fafafa' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <CategoryIcon sx={{ color: '#EB0029' }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Configuración Adicional
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="Monto Mínimo"
+                        type="number"
+                        value={isEditing ? editedRule.monto_minimo || '' : selectedRule.monto_minimo || ''}
+                        onChange={(e) => handleInputChange('monto_minimo', parseFloat(e.target.value) || 0)}
+                        disabled={!isEditing}
+                        sx={{ flex: 1 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <MoneyIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                      <TextField
+                        label="Monto Máximo"
+                        type="number"
+                        value={isEditing ? editedRule.monto_maximo || '' : selectedRule.monto_maximo || ''}
+                        onChange={(e) => handleInputChange('monto_maximo', parseFloat(e.target.value) || 0)}
+                        disabled={!isEditing}
+                        sx={{ flex: 1 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <MoneyIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="Región"
+                        value={isEditing ? editedRule.region || '' : selectedRule.region || ''}
+                        onChange={(e) => handleInputChange('region', e.target.value)}
+                        disabled={!isEditing}
+                        sx={{ flex: 1 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <RegionIcon fontSize="small" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                      <FormControl sx={{ flex: 1 }} disabled={!isEditing}>
+                        <InputLabel>Tipo Transacción</InputLabel>
+                        <Select
+                          value={isEditing ? editedRule.tipo_transaccion || '' : selectedRule.tipo_transaccion || ''}
+                          onChange={(e) => handleInputChange('tipo_transaccion', e.target.value)}
+                          label="Tipo Transacción"
+                        >
+                          <MenuItem value="">Sin especificar</MenuItem>
+                          <MenuItem value="transferencia">Transferencia</MenuItem>
+                          <MenuItem value="pago">Pago</MenuItem>
+                          <MenuItem value="nomina">Nómina</MenuItem>
+                          <MenuItem value="proveedores">Proveedores</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Sección: Regla Generada */}
+              <Card variant="outlined" sx={{ bgcolor: '#fafafa' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <RuleIcon sx={{ color: '#EB0029' }} />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      Regla Generada por IA
+                    </Typography>
+                  </Box>
+                  <TextField
+                    label="Contenido de la Regla"
+                    value={isEditing ? editedRule.regla_generada || '' : selectedRule.regla_generada}
+                    onChange={(e) => handleInputChange('regla_generada', e.target.value)}
+                    disabled={!isEditing}
+                    multiline
+                    rows={5}
+                    fullWidth
+                    sx={{
+                      '& .MuiInputBase-root': {
+                        fontFamily: 'monospace',
+                        fontSize: '0.875rem'
+                      }
+                    }}
+                  />
+                </CardContent>
+              </Card>
             </Box>
           )}
         </DialogContent>
