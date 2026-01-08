@@ -1,4 +1,14 @@
 require('dotenv').config();
+
+// Debug: Log environment variables (without sensitive values)
+console.log('=== Environment Variables Debug ===');
+console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
+console.log('DB_HOST exists:', !!process.env.DB_HOST);
+console.log('DB_USER exists:', !!process.env.DB_USER);
+console.log('PORT:', process.env.PORT);
+console.log('All env keys:', Object.keys(process.env).filter(k => k.startsWith('DB_') || k.startsWith('GEMINI') || k === 'PORT'));
+console.log('===================================');
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
