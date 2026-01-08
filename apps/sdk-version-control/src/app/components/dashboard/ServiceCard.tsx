@@ -11,9 +11,12 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Calendar,
 } from 'lucide-react';
 import { ServiceDTO, PlatformVersionDTO } from '@/core/application/dtos/ServiceDTO';
 import { PlatformType } from '@/core/domain/value-objects/PlatformType';
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/value-objects/ProjectStatus';
+import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS } from '@/core/domain/value-objects/EntityType';
 import { StatusBadge } from './StatusBadge';
 
 interface ServiceCardProps {
@@ -109,9 +112,9 @@ export function ServiceCard({
 
       <div className={`p-5 ${compareMode ? 'pl-12' : ''}`}>
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-lg">
+            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-lg flex-shrink-0">
               {service.logoUrl ? (
                 <img
                   src={service.logoUrl}
@@ -133,6 +136,31 @@ export function ServiceCard({
           </div>
         </div>
 
+        {/* Badges Strip - ProjectStatus, Entity, ASM */}
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span
+            className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full text-white"
+            style={{ backgroundColor: PROJECT_STATUS_COLORS[service.projectStatus] }}
+          >
+            {PROJECT_STATUS_LABELS[service.projectStatus]}
+          </span>
+          <span
+            className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full text-white"
+            style={{ backgroundColor: ENTITY_TYPE_COLORS[service.entity] }}
+          >
+            {ENTITY_TYPE_LABELS[service.entity]}
+          </span>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
+              service.hasASM
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            ASM: {service.hasASM ? 'Si' : 'No'}
+          </span>
+        </div>
+
         {/* Platform Grid */}
         <div className="grid grid-cols-3 gap-2 mb-5">
           <PlatformCell type="web" data={service.versions.web} />
@@ -140,29 +168,50 @@ export function ServiceCard({
           <PlatformCell type="android" data={service.versions.android} />
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-gray-400 uppercase tracking-wide">
-              Última verificación
-            </span>
-            <span className="text-xs font-medium text-banorte-gray">
-              {service.lastCheckedAt
-                ? new Date(service.lastCheckedAt).toLocaleDateString('es-MX', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                : 'No verificado'}
-            </span>
+        {/* Footer with avatars, date, and actions */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          {/* Left: Overlapping avatar circles + date */}
+          <div className="flex items-center gap-3">
+            {/* Avatars */}
+            {service.responsibles && service.responsibles.length > 0 && (
+              <div className="flex -space-x-2">
+                {service.responsibles.slice(0, 3).map((person, idx) => {
+                  const colors = ['bg-[#EC0029]', 'bg-[#3B82F6]', 'bg-[#6B7280]'];
+                  const initials = person.name
+                    .split(' ')
+                    .slice(0, 2)
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase();
+                  return (
+                    <div
+                      key={idx}
+                      className={`w-7 h-7 rounded-full ${colors[idx]} text-white text-xs font-bold flex items-center justify-center border-2 border-white`}
+                      title={`${person.role.toUpperCase()}: ${person.name}`}
+                    >
+                      {initials || '?'}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Implementation date */}
+            <div className="flex items-center gap-1 text-xs text-banorte-gray">
+              <Calendar size={12} />
+              <span className="font-medium">
+                {service.formattedImplementationDate || 'Por confirmar'}
+              </span>
+            </div>
           </div>
 
+          {/* Right: Actions */}
           <div className="flex items-center gap-2">
             <a
               href={service.documentationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-medium text-banorte-red hover:text-banorte-red-hover hover:underline mr-2"
+              className="text-xs font-medium text-banorte-red hover:text-banorte-red-hover hover:underline"
             >
               Ver docs
             </a>
@@ -171,13 +220,13 @@ export function ServiceCard({
                 className="p-1.5 text-gray-400 hover:text-banorte-red hover:bg-red-50 rounded transition-colors"
                 title="Verificar actualizaciones"
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={14} />
               </button>
               <button
                 className="p-1.5 text-gray-400 hover:text-banorte-dark hover:bg-gray-100 rounded transition-colors"
                 title="Ver detalles"
               >
-                <Info size={16} />
+                <Info size={14} />
               </button>
               {onEdit && (
                 <button
@@ -185,7 +234,7 @@ export function ServiceCard({
                   className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                   title="Editar servicio"
                 >
-                  <Pencil size={16} />
+                  <Pencil size={14} />
                 </button>
               )}
               {onDelete && (
@@ -194,7 +243,7 @@ export function ServiceCard({
                   className="p-1.5 text-gray-400 hover:text-banorte-red hover:bg-red-50 rounded transition-colors"
                   title="Eliminar servicio"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               )}
               {!compareMode && (
@@ -203,7 +252,7 @@ export function ServiceCard({
                   className="p-1.5 text-gray-400 hover:text-banorte-red hover:bg-red-50 rounded transition-colors"
                   title="Añadir a comparar"
                 >
-                  <Plus size={16} />
+                  <Plus size={14} />
                 </button>
               )}
             </div>

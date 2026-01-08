@@ -156,6 +156,15 @@ export function DashboardPage() {
           ios: data.versions.ios || undefined,
           android: data.versions.android || undefined,
         },
+        // Campos Banorte
+        projectStatus: data.projectStatus,
+        entity: data.entity,
+        hasASM: data.hasASM,
+        implementationDate: data.implementationDate,
+        dateConfirmed: data.dateConfirmed,
+        responsibleBusiness: data.responsibleBusiness,
+        responsibleIT: data.responsibleIT,
+        responsibleERN: data.responsibleERN,
       };
       const result = await createService(createData);
       return result !== null;
@@ -168,6 +177,15 @@ export function DashboardPage() {
         documentationUrl: data.documentationUrl,
         logoUrl: data.logoUrl,
         versions: data.versions,
+        // Campos Banorte
+        projectStatus: data.projectStatus,
+        entity: data.entity,
+        hasASM: data.hasASM,
+        implementationDate: data.implementationDate,
+        dateConfirmed: data.dateConfirmed,
+        responsibleBusiness: data.responsibleBusiness,
+        responsibleIT: data.responsibleIT,
+        responsibleERN: data.responsibleERN,
       };
       const result = await updateService(editingService.id, updateData);
       return result !== null;

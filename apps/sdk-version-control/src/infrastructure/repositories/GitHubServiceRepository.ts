@@ -12,6 +12,8 @@ import { ServiceNotFoundException } from '@/core/domain/exceptions/DomainExcepti
 import { GitHubApiClient } from '../services/GitHubApiClient';
 import { PlatformType, ALL_PLATFORMS } from '@/core/domain/value-objects/PlatformType';
 import { SDKVersion } from '@/core/domain/entities/SDKVersion';
+import { ProjectStatus } from '@/core/domain/value-objects/ProjectStatus';
+import { EntityType } from '@/core/domain/value-objects/EntityType';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ServiceConfigJSON {
@@ -33,6 +35,15 @@ interface ServiceJSON {
     ios?: { currentVersion: string; status?: string };
     android?: { currentVersion: string; status?: string };
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 /**
@@ -159,6 +170,15 @@ export class GitHubServiceRepository implements IServiceRepository {
       versions,
       createdAt: new Date(),
       updatedAt: new Date(),
+      // Campos Banorte
+      projectStatus: data.projectStatus,
+      entity: data.entity,
+      hasASM: data.hasASM,
+      implementationDate: data.implementationDate,
+      dateConfirmed: data.dateConfirmed,
+      responsibleBusiness: data.responsibleBusiness,
+      responsibleIT: data.responsibleIT,
+      responsibleERN: data.responsibleERN,
     });
   }
 
@@ -195,6 +215,15 @@ export class GitHubServiceRepository implements IServiceRepository {
       documentationUrl: service.documentationUrl,
       logoUrl: service.logoUrl,
       versions,
+      // Campos Banorte
+      projectStatus: service.projectStatus,
+      entity: service.entity,
+      hasASM: service.hasASM,
+      implementationDate: service.implementationDate,
+      dateConfirmed: service.dateConfirmed,
+      responsibleBusiness: service.responsibleBusiness,
+      responsibleIT: service.responsibleIT,
+      responsibleERN: service.responsibleERN,
     };
   }
 
@@ -224,6 +253,19 @@ export class GitHubServiceRepository implements IServiceRepository {
           s.description.toLowerCase().includes(searchLower) ||
           s.category.toLowerCase().includes(searchLower)
       );
+    }
+
+    // Filtros Banorte
+    if (filters?.projectStatus) {
+      result = result.filter(s => s.projectStatus === filters.projectStatus);
+    }
+
+    if (filters?.entity) {
+      result = result.filter(s => s.entity === filters.entity);
+    }
+
+    if (filters?.hasASM !== undefined) {
+      result = result.filter(s => s.hasASM === filters.hasASM);
     }
 
     return result.sort((a, b) => a.name.localeCompare(b.name));
@@ -273,6 +315,15 @@ export class GitHubServiceRepository implements IServiceRepository {
       logoUrl: string;
       versions: ServiceVersions;
       lastCheckedAt: Date;
+      // Campos Banorte
+      projectStatus: ProjectStatus;
+      entity: EntityType;
+      hasASM: boolean;
+      implementationDate: string;
+      dateConfirmed: boolean;
+      responsibleBusiness: string;
+      responsibleIT: string;
+      responsibleERN: string;
     }>
   ): Promise<Service> {
     const { services, sha } = await this.loadServices(true);
@@ -293,6 +344,15 @@ export class GitHubServiceRepository implements IServiceRepository {
       lastCheckedAt: data.lastCheckedAt ?? existing.lastCheckedAt,
       createdAt: existing.createdAt,
       updatedAt: new Date(),
+      // Campos Banorte
+      projectStatus: data.projectStatus ?? existing.projectStatus,
+      entity: data.entity ?? existing.entity,
+      hasASM: data.hasASM ?? existing.hasASM,
+      implementationDate: data.implementationDate ?? existing.implementationDate,
+      dateConfirmed: data.dateConfirmed ?? existing.dateConfirmed,
+      responsibleBusiness: data.responsibleBusiness ?? existing.responsibleBusiness,
+      responsibleIT: data.responsibleIT ?? existing.responsibleIT,
+      responsibleERN: data.responsibleERN ?? existing.responsibleERN,
     });
 
     services.set(id, updated);

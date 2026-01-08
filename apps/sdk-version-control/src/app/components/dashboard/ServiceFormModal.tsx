@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, Globe, Smartphone, TabletSmartphone } from 'lucide-react';
+import { X, Loader2, Globe, Smartphone, TabletSmartphone, Calendar, User, Building2, CheckCircle } from 'lucide-react';
 import { ServiceDTO } from '@/core/application/dtos/ServiceDTO';
 import { ServiceCategory } from '@/core/domain/entities/Service';
+import { ProjectStatus, ALL_PROJECT_STATUSES, PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/value-objects/ProjectStatus';
+import { EntityType, ALL_ENTITY_TYPES, ENTITY_TYPE_LABELS } from '@/core/domain/value-objects/EntityType';
 
 interface ServiceFormModalProps {
   isOpen: boolean;
@@ -27,6 +29,15 @@ export interface ServiceFormData {
     ios?: { currentVersion: string } | null;
     android?: { currentVersion: string } | null;
   };
+  // Campos Banorte
+  projectStatus: ProjectStatus;
+  entity: EntityType;
+  hasASM: boolean;
+  implementationDate: string;
+  dateConfirmed: boolean;
+  responsibleBusiness: string;
+  responsibleIT: string;
+  responsibleERN: string;
 }
 
 const categories: ServiceCategory[] = [
@@ -47,6 +58,15 @@ const initialFormState: ServiceFormData = {
   documentationUrl: '',
   logoUrl: '',
   versions: {},
+  // Valores por defecto Banorte
+  projectStatus: 'iniciativa',
+  entity: 'banco',
+  hasASM: false,
+  implementationDate: '',
+  dateConfirmed: false,
+  responsibleBusiness: '',
+  responsibleIT: '',
+  responsibleERN: '',
 };
 
 export function ServiceFormModal({
@@ -81,6 +101,15 @@ export function ServiceFormModal({
           ios: service.versions.ios ? { currentVersion: service.versions.ios.currentVersion } : null,
           android: service.versions.android ? { currentVersion: service.versions.android.currentVersion } : null,
         },
+        // Campos Banorte
+        projectStatus: service.projectStatus || 'iniciativa',
+        entity: service.entity || 'banco',
+        hasASM: service.hasASM || false,
+        implementationDate: service.implementationDate || '',
+        dateConfirmed: service.dateConfirmed || false,
+        responsibleBusiness: service.responsibleBusiness || '',
+        responsibleIT: service.responsibleIT || '',
+        responsibleERN: service.responsibleERN || '',
       });
       setPlatforms({
         web: !!service.versions.web,
@@ -416,6 +445,205 @@ export function ServiceFormModal({
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-200 my-2"></div>
+
+            {/* Project Information Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-banorte-dark uppercase tracking-wide flex items-center gap-2">
+                <Building2 size={16} />
+                Informacion del Proyecto
+              </h3>
+
+              {/* Project Status */}
+              <div>
+                <label className="block text-sm font-medium text-banorte-dark mb-2">
+                  Estado del proyecto
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {ALL_PROJECT_STATUSES.map((status) => (
+                    <label
+                      key={status}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                        formData.projectStatus === status
+                          ? 'border-banorte-red bg-red-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="projectStatus"
+                        value={status}
+                        checked={formData.projectStatus === status}
+                        onChange={(e) => setFormData(prev => ({ ...prev, projectStatus: e.target.value as ProjectStatus }))}
+                        className="sr-only"
+                      />
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: PROJECT_STATUS_COLORS[status] }}
+                      />
+                      <span className="text-sm text-banorte-dark">{PROJECT_STATUS_LABELS[status]}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Entity and ASM */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-banorte-dark mb-2">
+                    Entidad
+                  </label>
+                  <div className="flex gap-3">
+                    {ALL_ENTITY_TYPES.map((entity) => (
+                      <label
+                        key={entity}
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
+                          formData.entity === entity
+                            ? entity === 'banco'
+                              ? 'border-banorte-red bg-red-50 text-banorte-red'
+                              : 'border-blue-500 bg-blue-50 text-blue-600'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="entity"
+                          value={entity}
+                          checked={formData.entity === entity}
+                          onChange={(e) => setFormData(prev => ({ ...prev, entity: e.target.value as EntityType }))}
+                          className="sr-only"
+                        />
+                        <span className="text-sm font-medium">{ENTITY_TYPE_LABELS[entity]}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-banorte-dark mb-2">
+                    ASM (Arquitectura de Software Modular)
+                  </label>
+                  <label
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg border cursor-pointer transition-all ${
+                      formData.hasASM
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.hasASM}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hasASM: e.target.checked }))}
+                      className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-banorte-dark">
+                      {formData.hasASM ? 'Con ASM' : 'Sin ASM'}
+                    </span>
+                    {formData.hasASM && <CheckCircle size={16} className="text-green-600" />}
+                  </label>
+                </div>
+              </div>
+
+              {/* Implementation Date */}
+              <div>
+                <label className="block text-sm font-medium text-banorte-dark mb-2">
+                  Fecha de implementacion
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="date"
+                      value={formData.implementationDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, implementationDate: e.target.value }))}
+                      disabled={!formData.dateConfirmed}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red transition-shadow ${
+                        !formData.dateConfirmed ? 'bg-gray-100 text-gray-400' : 'border-gray-200'
+                      }`}
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={!formData.dateConfirmed}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        dateConfirmed: !e.target.checked,
+                        implementationDate: e.target.checked ? '' : prev.implementationDate
+                      }))}
+                      className="w-4 h-4 rounded border-gray-300 text-banorte-red focus:ring-banorte-red"
+                    />
+                    <span className="text-sm text-banorte-gray">Por confirmar</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-200 my-2"></div>
+
+            {/* Responsibles Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-banorte-dark uppercase tracking-wide flex items-center gap-2">
+                <User size={16} />
+                Responsables
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-banorte-dark mb-1">
+                    Responsable Negocio
+                  </label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="responsibleBusiness"
+                      value={formData.responsibleBusiness}
+                      onChange={handleInputChange}
+                      placeholder="Nombre completo"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red transition-shadow"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-banorte-dark mb-1">
+                    Responsable TI
+                  </label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="responsibleIT"
+                      value={formData.responsibleIT}
+                      onChange={handleInputChange}
+                      placeholder="Nombre completo"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red transition-shadow"
+                    />
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-banorte-dark mb-1">
+                    ERN (Ejecutivo Relacion de Negocio)
+                  </label>
+                  <div className="relative">
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="responsibleERN"
+                      value={formData.responsibleERN}
+                      onChange={handleInputChange}
+                      placeholder="Nombre completo"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red transition-shadow"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

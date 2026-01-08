@@ -8,6 +8,8 @@ import {
   ServiceNotFoundException,
   ServiceAlreadyExistsException
 } from '../../domain/exceptions/DomainException';
+import { ProjectStatus } from '../../domain/value-objects/ProjectStatus';
+import { EntityType } from '../../domain/value-objects/EntityType';
 
 /**
  * Input para actualizar un servicio
@@ -24,6 +26,15 @@ export interface UpdateServiceInput {
     ios?: { currentVersion: string } | null;
     android?: { currentVersion: string } | null;
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 /**
@@ -67,6 +78,14 @@ export class UpdateServiceUseCase {
         documentationUrl: string;
         logoUrl: string;
         versions: ServiceVersions;
+        projectStatus: ProjectStatus;
+        entity: EntityType;
+        hasASM: boolean;
+        implementationDate: string;
+        dateConfirmed: boolean;
+        responsibleBusiness: string;
+        responsibleIT: string;
+        responsibleERN: string;
       }> = {};
 
       if (input.name !== undefined) {
@@ -83,6 +102,31 @@ export class UpdateServiceUseCase {
       }
       if (input.logoUrl !== undefined) {
         updateData.logoUrl = input.logoUrl;
+      }
+      // Campos Banorte
+      if (input.projectStatus !== undefined) {
+        updateData.projectStatus = input.projectStatus;
+      }
+      if (input.entity !== undefined) {
+        updateData.entity = input.entity;
+      }
+      if (input.hasASM !== undefined) {
+        updateData.hasASM = input.hasASM;
+      }
+      if (input.implementationDate !== undefined) {
+        updateData.implementationDate = input.implementationDate;
+      }
+      if (input.dateConfirmed !== undefined) {
+        updateData.dateConfirmed = input.dateConfirmed;
+      }
+      if (input.responsibleBusiness !== undefined) {
+        updateData.responsibleBusiness = input.responsibleBusiness;
+      }
+      if (input.responsibleIT !== undefined) {
+        updateData.responsibleIT = input.responsibleIT;
+      }
+      if (input.responsibleERN !== undefined) {
+        updateData.responsibleERN = input.responsibleERN;
       }
 
       // Manejar versiones

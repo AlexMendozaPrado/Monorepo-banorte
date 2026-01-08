@@ -6,6 +6,8 @@ import {
   ValidationException,
   ServiceAlreadyExistsException
 } from '../../domain/exceptions/DomainException';
+import { ProjectStatus } from '../../domain/value-objects/ProjectStatus';
+import { EntityType } from '../../domain/value-objects/EntityType';
 
 /**
  * Input para crear un servicio
@@ -21,6 +23,15 @@ export interface CreateServiceInput {
     ios?: { currentVersion: string };
     android?: { currentVersion: string };
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 /**
@@ -82,6 +93,15 @@ export class CreateServiceUseCase {
         documentationUrl: input.documentationUrl,
         logoUrl: input.logoUrl,
         versions,
+        // Campos Banorte
+        projectStatus: input.projectStatus,
+        entity: input.entity,
+        hasASM: input.hasASM,
+        implementationDate: input.implementationDate,
+        dateConfirmed: input.dateConfirmed,
+        responsibleBusiness: input.responsibleBusiness,
+        responsibleIT: input.responsibleIT,
+        responsibleERN: input.responsibleERN,
       });
 
       // Persistir

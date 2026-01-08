@@ -2,6 +2,8 @@ import { Service, ServiceCategory, CreateServiceData } from '@/core/domain/entit
 import { SDKVersionData } from '@/core/domain/entities/SDKVersion';
 import { PlatformType } from '@/core/domain/value-objects/PlatformType';
 import { VersionStatus } from '@/core/domain/value-objects/VersionStatus';
+import { ProjectStatus } from '@/core/domain/value-objects/ProjectStatus';
+import { EntityType } from '@/core/domain/value-objects/EntityType';
 import servicesConfig from '../config/services.config.json';
 
 /**
@@ -20,6 +22,15 @@ interface ServiceConfigJSON {
       status?: string;
     };
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 interface ConfigJSON {
@@ -65,6 +76,15 @@ export class JSONConfigLoader {
         documentationUrl: serviceJson.documentationUrl,
         logoUrl: serviceJson.logoUrl,
         versions,
+        // Campos Banorte
+        projectStatus: serviceJson.projectStatus,
+        entity: serviceJson.entity,
+        hasASM: serviceJson.hasASM,
+        implementationDate: serviceJson.implementationDate,
+        dateConfirmed: serviceJson.dateConfirmed,
+        responsibleBusiness: serviceJson.responsibleBusiness,
+        responsibleIT: serviceJson.responsibleIT,
+        responsibleERN: serviceJson.responsibleERN,
       });
     });
   }

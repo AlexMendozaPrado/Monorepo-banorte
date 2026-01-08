@@ -3,6 +3,8 @@
 import { useState, useCallback } from 'react';
 import { ServiceDTO } from '@/core/application/dtos/ServiceDTO';
 import { ServiceCategory } from '@/core/domain/entities/Service';
+import { ProjectStatus } from '@/core/domain/value-objects/ProjectStatus';
+import { EntityType } from '@/core/domain/value-objects/EntityType';
 
 /**
  * Input para crear un servicio
@@ -18,6 +20,15 @@ export interface CreateServiceData {
     ios?: { currentVersion: string };
     android?: { currentVersion: string };
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 /**
@@ -34,6 +45,15 @@ export interface UpdateServiceData {
     ios?: { currentVersion: string } | null;
     android?: { currentVersion: string } | null;
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 interface UseServiceMutationsReturn {
