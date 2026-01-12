@@ -6,7 +6,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Paper,
   Select,
   MenuItem,
@@ -127,120 +126,118 @@ export default function ReportesPage() {
       </Box>
 
       {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total de Reglas"
-            value={stats.totalRules}
-            subtitle="Reglas creadas"
-            icon={<RuleIcon sx={{ fontSize: 32, color: '#EB0029' }} />}
-            color="#EB0029"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Reglas Activas"
-            value={stats.activeRules}
-            subtitle="En producción"
-            icon={<CheckCircleIcon sx={{ fontSize: 32, color: '#4caf50' }} />}
-            color="#4caf50"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Reglas Este Mes"
-            value={stats.rulesThisMonth}
-            subtitle="Nuevas reglas"
-            icon={<TrendingUpIcon sx={{ fontSize: 32, color: '#2196f3' }} />}
-            color="#2196f3"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Tasa de Éxito"
-            value={`${stats.successRate}%`}
-            subtitle="Reglas validadas"
-            icon={<CheckCircleIcon sx={{ fontSize: 32, color: '#ff9800' }} />}
-            color="#ff9800"
-          />
-        </Grid>
-      </Grid>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+        gap: 3,
+        mb: 4
+      }}>
+        <StatCard
+          title="Total de Reglas"
+          value={stats.totalRules}
+          subtitle="Reglas creadas"
+          icon={<RuleIcon sx={{ fontSize: 32, color: '#EB0029' }} />}
+          color="#EB0029"
+        />
+        <StatCard
+          title="Reglas Activas"
+          value={stats.activeRules}
+          subtitle="En producción"
+          icon={<CheckCircleIcon sx={{ fontSize: 32, color: '#4caf50' }} />}
+          color="#4caf50"
+        />
+        <StatCard
+          title="Reglas Este Mes"
+          value={stats.rulesThisMonth}
+          subtitle="Nuevas reglas"
+          icon={<TrendingUpIcon sx={{ fontSize: 32, color: '#2196f3' }} />}
+          color="#2196f3"
+        />
+        <StatCard
+          title="Tasa de Éxito"
+          value={`${stats.successRate}%`}
+          subtitle="Reglas validadas"
+          icon={<CheckCircleIcon sx={{ fontSize: 32, color: '#ff9800' }} />}
+          color="#ff9800"
+        />
+      </Box>
 
       {/* Status Breakdown */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
-                Distribución por Estado
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label="Activas" color="success" size="small" />
-                    <Typography variant="body2" color="textSecondary">
-                      Reglas en producción
-                    </Typography>
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {stats.activeRules}
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+        gap: 3,
+        mb: 4
+      }}>
+        <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
+              Distribución por Estado
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip label="Activas" color="success" size="small" />
+                  <Typography variant="body2" color="textSecondary">
+                    Reglas en producción
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label="Inactivas" color="default" size="small" />
-                    <Typography variant="body2" color="textSecondary">
-                      Reglas deshabilitadas
-                    </Typography>
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {stats.inactiveRules}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label="Simulación" color="warning" size="small" />
-                    <Typography variant="body2" color="textSecondary">
-                      Reglas en prueba
-                    </Typography>
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {stats.simulationRules}
-                  </Typography>
-                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {stats.activeRules}
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip label="Inactivas" color="default" size="small" />
+                  <Typography variant="body2" color="textSecondary">
+                    Reglas deshabilitadas
+                  </Typography>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {stats.inactiveRules}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip label="Simulación" color="warning" size="small" />
+                  <Typography variant="body2" color="textSecondary">
+                    Reglas en prueba
+                  </Typography>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {stats.simulationRules}
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
 
-        <Grid item xs={12} md={6}>
-          <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
-                Resumen de Actividad
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                    Reglas más utilizadas
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Próximamente: Análisis de uso de reglas
-                  </Typography>
-                </Paper>
-                <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
-                    Tendencias de creación
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    {stats.rulesThisMonth} reglas creadas este mes
-                  </Typography>
-                </Paper>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+        <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
+              Resumen de Actividad
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Reglas más utilizadas
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  Próximamente: Análisis de uso de reglas
+                </Typography>
+              </Paper>
+              <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Tendencias de creación
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  {stats.rulesThisMonth} reglas creadas este mes
+                </Typography>
+              </Paper>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* Info Card */}
       <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>

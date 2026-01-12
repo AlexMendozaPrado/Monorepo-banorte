@@ -364,21 +364,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       </ListItemIcon>
                       <ListItemText primary="Mi Perfil" />
                     </ListItem>
-                    <ListItem button>
-                      <ListItemIcon>
-                        <KeyIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Cambiar Contraseña" />
+                    <ListItem disablePadding>
+                      <ListItemButton>
+                        <ListItemIcon>
+                          <KeyIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Cambiar Contraseña" />
+                      </ListItemButton>
                     </ListItem>
                     <Divider />
-                    <ListItem button onClick={handleLogout}>
-                      <ListItemIcon>
-                        <ExitToAppIcon sx={{ color: '#EB0029' }} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Cerrar Sesión"
-                        primaryTypographyProps={{ color: '#EB0029' }}
-                      />
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={handleLogout}>
+                        <ListItemIcon>
+                          <ExitToAppIcon sx={{ color: '#EB0029' }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary="Cerrar Sesión"
+                          primaryTypographyProps={{ color: '#EB0029' }}
+                        />
+                      </ListItemButton>
                     </ListItem>
                   </List>
                 </Box>
