@@ -1,6 +1,9 @@
 import { SDKVersion, SDKVersionData } from './SDKVersion';
 import { PlatformType, ALL_PLATFORMS } from '../value-objects/PlatformType';
 import { VersionStatus, getMostCriticalStatus } from '../value-objects/VersionStatus';
+import { ProjectStatus } from '../value-objects/ProjectStatus';
+import { EntityType } from '../value-objects/EntityType';
+import { ResponsiblePerson, createResponsibleArray } from '../value-objects/ResponsiblePerson';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -40,6 +43,15 @@ export interface CreateServiceData {
     ios?: SDKVersionData;
     android?: SDKVersionData;
   };
+  // Campos Banorte
+  projectStatus?: ProjectStatus;
+  entity?: EntityType;
+  hasASM?: boolean;
+  implementationDate?: string;
+  dateConfirmed?: boolean;
+  responsibleBusiness?: string;
+  responsibleIT?: string;
+  responsibleERN?: string;
 }
 
 /**
@@ -56,6 +68,15 @@ export class Service {
   readonly lastCheckedAt?: Date;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+  // Campos Banorte
+  readonly projectStatus: ProjectStatus;
+  readonly entity: EntityType;
+  readonly hasASM: boolean;
+  readonly implementationDate: string;
+  readonly dateConfirmed: boolean;
+  readonly responsibleBusiness: string;
+  readonly responsibleIT: string;
+  readonly responsibleERN: string;
 
   private constructor(data: {
     id: string;
@@ -68,6 +89,15 @@ export class Service {
     lastCheckedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+    // Campos Banorte
+    projectStatus: ProjectStatus;
+    entity: EntityType;
+    hasASM: boolean;
+    implementationDate: string;
+    dateConfirmed: boolean;
+    responsibleBusiness: string;
+    responsibleIT: string;
+    responsibleERN: string;
   }) {
     this.id = data.id;
     this.name = data.name;
@@ -79,6 +109,15 @@ export class Service {
     this.lastCheckedAt = data.lastCheckedAt;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
+    // Campos Banorte
+    this.projectStatus = data.projectStatus;
+    this.entity = data.entity;
+    this.hasASM = data.hasASM;
+    this.implementationDate = data.implementationDate;
+    this.dateConfirmed = data.dateConfirmed;
+    this.responsibleBusiness = data.responsibleBusiness;
+    this.responsibleIT = data.responsibleIT;
+    this.responsibleERN = data.responsibleERN;
   }
 
   /**
@@ -108,6 +147,15 @@ export class Service {
       versions,
       createdAt: now,
       updatedAt: now,
+      // Campos Banorte con valores por defecto
+      projectStatus: data.projectStatus ?? 'iniciativa',
+      entity: data.entity ?? 'banco',
+      hasASM: data.hasASM ?? false,
+      implementationDate: data.implementationDate ?? '',
+      dateConfirmed: data.dateConfirmed ?? false,
+      responsibleBusiness: data.responsibleBusiness ?? '',
+      responsibleIT: data.responsibleIT ?? '',
+      responsibleERN: data.responsibleERN ?? '',
     });
   }
 
@@ -125,8 +173,57 @@ export class Service {
     lastCheckedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+    // Campos Banorte
+    projectStatus?: ProjectStatus;
+    entity?: EntityType;
+    hasASM?: boolean;
+    implementationDate?: string;
+    dateConfirmed?: boolean;
+    responsibleBusiness?: string;
+    responsibleIT?: string;
+    responsibleERN?: string;
   }): Service {
-    return new Service(data);
+    return new Service({
+      ...data,
+      projectStatus: data.projectStatus ?? 'iniciativa',
+      entity: data.entity ?? 'banco',
+      hasASM: data.hasASM ?? false,
+      implementationDate: data.implementationDate ?? '',
+      dateConfirmed: data.dateConfirmed ?? false,
+      responsibleBusiness: data.responsibleBusiness ?? '',
+      responsibleIT: data.responsibleIT ?? '',
+      responsibleERN: data.responsibleERN ?? '',
+    });
+  }
+
+  /**
+   * Obtiene el array de responsables
+   */
+  getResponsibles(): ResponsiblePerson[] {
+    return createResponsibleArray(
+      this.responsibleBusiness,
+      this.responsibleIT,
+      this.responsibleERN
+    );
+  }
+
+  /**
+   * Obtiene la fecha de implementacion formateada
+   */
+  getFormattedImplementationDate(): string {
+    if (!this.dateConfirmed || !this.implementationDate) {
+      return 'Por confirmar';
+    }
+    try {
+      const date = new Date(this.implementationDate);
+      return date.toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch {
+      return this.implementationDate;
+    }
   }
 
   /**
@@ -221,6 +318,17 @@ export class Service {
       lastCheckedAt: this.lastCheckedAt?.toISOString(),
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
+      // Campos Banorte
+      projectStatus: this.projectStatus,
+      entity: this.entity,
+      hasASM: this.hasASM,
+      implementationDate: this.implementationDate,
+      dateConfirmed: this.dateConfirmed,
+      responsibleBusiness: this.responsibleBusiness,
+      responsibleIT: this.responsibleIT,
+      responsibleERN: this.responsibleERN,
+      responsibles: this.getResponsibles(),
+      formattedImplementationDate: this.getFormattedImplementationDate(),
     };
   }
 }

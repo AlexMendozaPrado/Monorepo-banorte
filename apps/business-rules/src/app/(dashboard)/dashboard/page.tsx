@@ -10,7 +10,12 @@ import {
   CardContent,
   Chip,
   IconButton,
-  LinearProgress
+  LinearProgress,
+  Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -19,6 +24,10 @@ import {
   CloudUpload as CloudUploadIcon,
   Refresh as RefreshIcon,
   ChatBubbleOutline as ChatIcon,
+  ExpandMore as ExpandMoreIcon,
+  CheckCircle as CheckCircleIcon,
+  Rule as RuleIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import { useNotification } from '@/hooks/useNotification';
 import { useBusinessRules } from '@/hooks/useBusinessRules';
@@ -43,6 +52,7 @@ export default function DashboardPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const conversationScrollRef = useRef<HTMLDivElement>(null);
+  const lastErrorRef = useRef<string | null>(null);
 
   // Business rules hook
   const {
@@ -285,13 +295,71 @@ export default function DashboardPage() {
     }
   };
 
+  // MIME types permitidos
+  const ALLOWED_MIME_TYPES: Record<string, string[]> = {
+    '.txt': ['text/plain'],
+    '.xml': ['text/xml', 'application/xml'],
+    '.csv': ['text/csv', 'application/csv'],
+    '.json': ['application/json', 'text/json']
+  };
+
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    const fileName = file.name.toLowerCase();
+    const extension = '.' + fileName.split('.').pop();
+
+    // Validar extensión
+    const allowedExtensions = Object.keys(ALLOWED_MIME_TYPES);
+    if (!allowedExtensions.includes(extension)) {
+      return {
+        valid: false,
+        error: `Extensión no permitida. Solo se aceptan: ${allowedExtensions.join(', ')}`
+      };
+    }
+
+    // Validar MIME type
+    const allowedMimes = ALLOWED_MIME_TYPES[extension];
+    if (file.type && !allowedMimes.includes(file.type) && file.type !== '') {
+      // Algunos navegadores no reportan MIME type, permitir si está vacío
+      console.warn(`MIME type ${file.type} no coincide con esperado para ${extension}`);
+    }
+
+    // Validar tamaño (máx 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return { valid: false, error: 'El archivo no puede ser mayor a 10MB' };
+    }
+
+    return { valid: true };
+  };
+
+  const showUniqueError = (message: string) => {
+    if (lastErrorRef.current !== message) {
+      lastErrorRef.current = message;
+      showError(message);
+      // Reset después de 3 segundos para permitir el mismo error de nuevo
+      setTimeout(() => {
+        lastErrorRef.current = null;
+      }, 3000);
+    }
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        showUniqueError(validation.error || 'Archivo no válido');
+        return;
+      }
+
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFilePreview(event.target?.result as string);
+        const content = event.target?.result as string;
+        // Limitar preview a primeros 1000 caracteres
+        setFilePreview(content.substring(0, 1000) + (content.length > 1000 ? '\n... (contenido truncado)' : ''));
+      };
+      reader.onerror = () => {
+        showUniqueError('Error al leer el archivo');
       };
       reader.readAsText(file);
     }
@@ -311,10 +379,20 @@ export default function DashboardPage() {
     setDragOver(false);
     const file = e.dataTransfer.files[0];
     if (file) {
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        showUniqueError(validation.error || 'Archivo no válido');
+        return;
+      }
+
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFilePreview(event.target?.result as string);
+        const content = event.target?.result as string;
+        setFilePreview(content.substring(0, 1000) + (content.length > 1000 ? '\n... (contenido truncado)' : ''));
+      };
+      reader.onerror = () => {
+        showUniqueError('Error al leer el archivo');
       };
       reader.readAsText(file);
     }
@@ -325,6 +403,108 @@ export default function DashboardPage() {
       <Typography variant="h4" sx={{ fontWeight: 600, color: '#333', mb: 4 }}>
         Generador de Reglas de Negocio
       </Typography>
+
+      {/* AI Response Display */}
+      {(currentRule || aiResponse) && (
+        <Card sx={{ mb: 4, border: '2px solid #4CAF50', borderRadius: '12px', overflow: 'hidden' }}>
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <CheckCircleIcon sx={{ color: '#4CAF50', fontSize: 32 }} />
+              <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
+                Regla Generada Exitosamente
+              </Typography>
+            </Box>
+
+            <Alert severity="success" sx={{ mb: 3 }}>
+              La regla de negocio ha sido generada y guardada. Puedes verla en la sección de Reglas.
+            </Alert>
+
+            {currentRule && (
+              <Accordion defaultExpanded>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <RuleIcon sx={{ color: '#EB0029' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {currentRule.id_display || `Regla #${currentRule.id_regla}`}
+                    </Typography>
+                    {currentRule.estado && (
+                      <Chip
+                        label={currentRule.estado}
+                        size="small"
+                        color={currentRule.estado.toLowerCase() === 'activa' ? 'success' : 'default'}
+                      />
+                    )}
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {currentRule.descripcion && (
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#666' }}>
+                          Descripción:
+                        </Typography>
+                        <Typography variant="body2">{currentRule.descripcion}</Typography>
+                      </Box>
+                    )}
+
+                    {currentRule.regla_generada && (
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#666', mb: 1 }}>
+                          Regla Generada por IA:
+                        </Typography>
+                        <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderRadius: 1, maxHeight: 200, overflow: 'auto' }}>
+                          <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+                            {typeof currentRule.regla_generada === 'string'
+                              ? currentRule.regla_generada
+                              : JSON.stringify(currentRule.regla_generada, null, 2)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => goToReglas()}
+                        startIcon={<VisibilityIcon />}
+                        sx={{ bgcolor: '#EB0029', '&:hover': { bgcolor: '#d4002a' } }}
+                      >
+                        Ver en Reglas
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          setPromptText('');
+                          setSelectedFile(null);
+                          setFilePreview('');
+                        }}
+                        sx={{ borderColor: '#EB0029', color: '#EB0029' }}
+                      >
+                        Generar Otra Regla
+                      </Button>
+                    </Box>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+            )}
+
+            {aiResponse && !currentRule && (
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                  Respuesta de IA:
+                </Typography>
+                <Box sx={{ p: 2, bgcolor: '#f8f9fa', borderRadius: 1, maxHeight: 300, overflow: 'auto' }}>
+                  <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem' }}>
+                    {typeof aiResponse === 'string' ? aiResponse : JSON.stringify(aiResponse, null, 2)}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3, mb: 4 }}>
         {/* AI Generator Card */}
@@ -521,15 +701,39 @@ export default function DashboardPage() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".txt,.xml"
+                    accept=".txt,.xml,.csv,.json"
                     onChange={handleFileSelect}
                     style={{ display: 'none' }}
                   />
                   <CloudUploadIcon sx={{ fontSize: 48, color: '#EB0029', mb: 1 }} />
                   <Typography variant="body2" sx={{ color: '#666' }}>
-                    {selectedFile ? selectedFile.name : 'Arrastra un archivo TXT/XML o haz clic para seleccionar'}
+                    {selectedFile ? selectedFile.name : 'Arrastra un archivo TXT, XML, CSV o JSON'}
                   </Typography>
+                  {selectedFile && (
+                    <Typography variant="caption" sx={{ color: '#999', mt: 0.5, display: 'block' }}>
+                      Tamaño: {(selectedFile.size / 1024).toFixed(1)} KB | Tipo: {selectedFile.type || 'desconocido'}
+                    </Typography>
+                  )}
                 </Box>
+
+                {/* File Preview */}
+                {filePreview && (
+                  <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1, border: '1px solid #e0e0e0' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#666' }}>
+                        Vista previa del contenido:
+                      </Typography>
+                      <IconButton size="small" onClick={() => { setSelectedFile(null); setFilePreview(''); }}>
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <Box sx={{ maxHeight: 150, overflow: 'auto', bgcolor: '#fff', p: 1, borderRadius: 1 }}>
+                      <Typography component="pre" sx={{ fontSize: '0.75rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', m: 0 }}>
+                        {filePreview}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
 
                 {(isGenerating || isFileGenerating) && <LinearProgress sx={{ mb: 2 }} />}
 

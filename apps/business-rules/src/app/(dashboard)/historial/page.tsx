@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { useNotification } from '@/hooks/useNotification';
 import { rulesService } from '@/services/api';
+import historialService, { type HistorialEntry as ServiceHistorialEntry } from '@/services/historialService';
 import authService from '@/services/authService';
 
 interface HistoryEntry {
@@ -67,29 +68,60 @@ export default function HistorialPage() {
     try {
       const currentUser = authService.getCurrentUser?.();
       const userId = currentUser?.id || null;
-      const rules = await rulesService.getAllRules(userId);
 
-      // Generate mock history from rules data
-      const history: HistoryEntry[] = rules.flatMap((rule: any, index: number) => [
-        {
-          id: index * 3 + 1,
-          regla_id: rule.id_regla,
-          regla_display: rule.id_display || `R-${rule.id_regla}`,
-          accion: 'Creación',
-          usuario: currentUser?.usuario || 'Usuario',
-          detalles: `Regla "${rule.descripcion}" creada`,
-          fecha: rule.fecha_creacion
-        },
-        ...(rule.estado === 'activa' ? [{
-          id: index * 3 + 2,
-          regla_id: rule.id_regla,
-          regla_display: rule.id_display || `R-${rule.id_regla}`,
-          accion: 'Activación',
-          usuario: currentUser?.usuario || 'Usuario',
-          detalles: 'Regla activada en producción',
-          fecha: rule.fecha_creacion
-        }] : [])
-      ]);
+      // Try to load from real historial API first
+      let history: HistoryEntry[] = [];
+      try {
+        const historialData = await historialService.getHistorialData();
+        if (historialData && historialData.length > 0) {
+          history = historialData.map((entry: ServiceHistorialEntry, index: number) => ({
+            id: index + 1,
+            regla_id: entry.id_regla,
+            regla_display: entry.nombre || `R-${entry.id_regla}`,
+            accion: entry.status === 'activa' ? 'Activación' : entry.status === 'inactiva' ? 'Desactivación' : 'Creación',
+            usuario: currentUser?.usuario || 'Usuario',
+            detalles: entry.descripcion || entry.summary || 'Sin descripción',
+            fecha: entry.fecha_creacion || entry.createdAt
+          }));
+        }
+      } catch (apiError) {
+        console.log('Historial API not available, falling back to rules data');
+      }
+
+      // Fallback: Generate history from rules data if API is empty or fails
+      if (history.length === 0) {
+        const rules = await rulesService.getAllRules(userId);
+
+        history = rules.flatMap((rule: any, index: number) => [
+          {
+            id: index * 3 + 1,
+            regla_id: rule.id_regla,
+            regla_display: rule.id_display || `R-${rule.id_regla}`,
+            accion: 'Creación',
+            usuario: currentUser?.usuario || 'Usuario',
+            detalles: `Regla "${rule.descripcion?.substring(0, 50) || 'Sin descripción'}..." creada`,
+            fecha: rule.fecha_creacion
+          },
+          ...(rule.estado?.toLowerCase() === 'activa' ? [{
+            id: index * 3 + 2,
+            regla_id: rule.id_regla,
+            regla_display: rule.id_display || `R-${rule.id_regla}`,
+            accion: 'Activación',
+            usuario: currentUser?.usuario || 'Usuario',
+            detalles: 'Regla activada en producción',
+            fecha: rule.fecha_creacion
+          }] : []),
+          ...(rule.estado?.toLowerCase() === 'simulacion' ? [{
+            id: index * 3 + 3,
+            regla_id: rule.id_regla,
+            regla_display: rule.id_display || `R-${rule.id_regla}`,
+            accion: 'Simulación',
+            usuario: currentUser?.usuario || 'Usuario',
+            detalles: 'Regla en modo simulación',
+            fecha: rule.fecha_creacion
+          }] : [])
+        ]);
+      }
 
       // Sort by date descending
       history.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
@@ -150,7 +182,7 @@ export default function HistorialPage() {
   const getActionColor = (action: string) => {
     switch (action.toLowerCase()) {
       case 'creación':
-        return 'success';
+        return 'primary';
       case 'modificación':
       case 'edición':
         return 'info';
@@ -159,6 +191,8 @@ export default function HistorialPage() {
       case 'activación':
         return 'success';
       case 'desactivación':
+        return 'default';
+      case 'simulación':
         return 'warning';
       default:
         return 'default';
@@ -207,10 +241,11 @@ export default function HistorialPage() {
               >
                 <MenuItem value="all">Todas las Acciones</MenuItem>
                 <MenuItem value="creación">Creación</MenuItem>
-                <MenuItem value="modificación">Modificación</MenuItem>
-                <MenuItem value="eliminación">Eliminación</MenuItem>
                 <MenuItem value="activación">Activación</MenuItem>
                 <MenuItem value="desactivación">Desactivación</MenuItem>
+                <MenuItem value="simulación">Simulación</MenuItem>
+                <MenuItem value="modificación">Modificación</MenuItem>
+                <MenuItem value="eliminación">Eliminación</MenuItem>
               </Select>
             </FormControl>
           </Box>

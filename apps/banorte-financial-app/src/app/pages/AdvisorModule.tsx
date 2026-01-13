@@ -8,34 +8,7 @@ import { TypingIndicator } from '../components/chat/TypingIndicator'
 import { ChatHistoryModal } from '../components/chat/ChatHistoryModal'
 import { History, RotateCcw, Sparkles, AlertCircle } from 'lucide-react'
 import { useAdvisorChat, FinancialContext } from '../hooks/useAdvisorChat'
-
-/**
- * Contexto financiero del usuario (en producción vendría de una API/store)
- */
-const FINANCIAL_CONTEXT: FinancialContext = {
-  currentBudget: {
-    totalIncome: 30000,
-    spent: 12450,
-    budget: 20000,
-    categories: [
-      { name: 'Alimentos', spent: 3200, budget: 6000 },
-      { name: 'Transporte', spent: 1800, budget: 2500 },
-      { name: 'Ocio', spent: 800, budget: 1500 },
-      { name: 'Hogar', spent: 5500, budget: 8500 },
-      { name: 'Servicios', spent: 1150, budget: 2000 },
-    ],
-  },
-  debts: [
-    { creditor: 'Banorte Oro', amount: 12450, rate: 42, type: 'credit' },
-    { creditor: 'Liverpool', amount: 9550, rate: 35, type: 'store' },
-    { creditor: 'BBVA Personal', amount: 18000, rate: 28, type: 'personal' },
-    { creditor: 'Santander Auto', amount: 45000, rate: 12, type: 'auto' },
-  ],
-  savingsGoals: [
-    { name: 'Fondo de Emergencia', current: 15000, target: 90000, priority: 'high' },
-    { name: 'Vacaciones', current: 5000, target: 25000, priority: 'medium' },
-  ],
-}
+import { useFinancialContext } from '../context/FinancialContext'
 
 /**
  * Preguntas sugeridas por defecto
@@ -65,6 +38,56 @@ export function AdvisorModule() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Obtener datos financieros reales del contexto global
+  const {
+    userId,
+    userName,
+    monthlyIncome,
+    monthlyExpenses,
+    availableBudget,
+    categories,
+    debts,
+    savingsGoals,
+    emergencyFund,
+    totalSavings,
+  } = useFinancialContext()
+
+  // Construir contexto financiero dinámico para el chat
+  const financialContext: FinancialContext = useMemo(() => ({
+    currentBudget: {
+      totalIncome: monthlyIncome,
+      spent: monthlyExpenses,
+      budget: monthlyIncome - availableBudget, // Budget allocated
+      categories: categories.map(cat => ({
+        name: cat.name,
+        spent: cat.spent.amount,
+        budget: cat.budgeted.amount,
+      })),
+    },
+    debts: debts.map(d => ({
+      creditor: d.name,
+      amount: d.balance,
+      rate: d.interestRate,
+      type: d.type.toLowerCase().replace('_', ' ') as 'credit' | 'personal' | 'auto' | 'store',
+    })),
+    savingsGoals: [
+      {
+        name: 'Fondo de Emergencia',
+        current: emergencyFund.current,
+        target: emergencyFund.target,
+        priority: 'high' as const,
+      },
+      ...savingsGoals
+        .filter(g => !g.name.toLowerCase().includes('emergencia'))
+        .map(g => ({
+          name: g.name,
+          current: g.currentAmount.amount,
+          target: g.targetAmount.amount,
+          priority: (g.priority?.toLowerCase() || 'medium') as 'high' | 'medium' | 'low',
+        })),
+    ],
+  }), [monthlyIncome, monthlyExpenses, availableBudget, categories, debts, savingsGoals, emergencyFund])
+
   // Hook de chat con streaming usando Vercel AI SDK v5
   const {
     messages,
@@ -75,8 +98,8 @@ export function AdvisorModule() {
     error,
     clearConversation,
   } = useAdvisorChat({
-    userId: 'user-demo',
-    context: FINANCIAL_CONTEXT,
+    userId,
+    context: financialContext,
   })
 
   // Convertir mensajes del formato AI SDK v5 al formato de componentes

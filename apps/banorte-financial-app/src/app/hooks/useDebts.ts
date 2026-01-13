@@ -39,7 +39,7 @@ interface CreateDebtData {
   dueDate?: string;
 }
 
-export function useDebts(userId: string = 'user-demo'): UseDebtsReturn {
+export function useDebts(userId: string = 'user-1'): UseDebtsReturn {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { Activity, Settings, Bell, User } from 'lucide-react';
+import Image from 'next/image';
+import { Search, Bell, Menu } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -11,46 +11,33 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-banorte-red shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo & Title */}
-            <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-banorte-red" />
-                </div>
-                <div className="hidden sm:block">
-                  <h1 className="text-white font-bold text-lg leading-tight">
-                    SDK Version Control
-                  </h1>
-                  <p className="text-white/70 text-xs">
-                    Monitoreo de Versiones
-                  </p>
-                </div>
-              </Link>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              <button
-                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                title="Notificaciones"
-              >
-                <Bell size={20} />
-              </button>
-              <button
-                className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                title="Configuración"
-              >
-                <Settings size={20} />
-              </button>
-              <div className="ml-2 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <User size={18} className="text-white" />
-              </div>
-            </div>
-          </div>
+      {/* Header - Design System Banorte */}
+      <header className="bg-[#EB0029] h-[63px] flex items-center justify-between px-5 md:px-12 sticky top-0 z-50">
+        <div className="logo">
+          <Image
+            src="/images/LogotipoBanorteFinal.png"
+            alt="Banorte"
+            width={140}
+            height={32}
+            priority={true}
+            className="object-contain"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+              filter: 'brightness(0) invert(1)',
+            }}
+          />
+        </div>
+        <div className="flex items-center space-x-6">
+          <button className="text-white hover:text-white/80 transition-colors" aria-label="Buscar">
+            <Search size={20} />
+          </button>
+          <button className="text-white hover:text-white/80 transition-colors" aria-label="Notificaciones">
+            <Bell size={20} />
+          </button>
+          <button className="text-white hover:text-white/80 transition-colors" aria-label="Menú">
+            <Menu size={20} />
+          </button>
         </div>
       </header>
 

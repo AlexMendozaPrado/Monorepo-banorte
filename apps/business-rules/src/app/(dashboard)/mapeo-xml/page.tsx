@@ -1,312 +1,503 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
-  Typography,
   Card,
   CardContent,
+  Typography,
   Button,
-  TextField,
-  Paper,
-  Divider,
-  LinearProgress
+  Alert,
+  LinearProgress,
+  Stepper,
+  Step,
+  StepLabel,
+  Paper
 } from '@mui/material';
-import {
-  CloudUpload as CloudUploadIcon,
-  Send as SendIcon,
-  Download as DownloadIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
-import { useNotification } from '@/hooks/useNotification';
-import { useGlobalNotifications } from '@/contexts/NotificationsContext';
-import { rulesService } from '@/services/api';
-import authService from '@/services/authService';
-import { useNavigation } from '@/hooks/useNavigation';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DownloadIcon from '@mui/icons-material/Download';
+
+import ValidationModal from '@/components/ValidationModal';
+import xmlParserService from '@/services/xmlParser.service';
+import mapeoAltamiraService, { type XMLNominaData, type XMLProveedoresData } from '@/services/mapeoAltamira.service';
+import txtGeneratorService from '@/services/txtGenerator.service';
+import { TIPOS_OPERACION_SISTEMA } from '@/types/xmlValidation.types';
+
+const steps = ['Cargar XML', 'Validar Datos', 'Generar TXT'];
+
+type TipoOperacion = 'proveedores' | 'nomina';
+
+interface TxtResult {
+  success: boolean;
+  content?: string;
+  totalLineas?: number;
+  totalEmpleados?: number;
+  errors?: string[];
+}
+
+interface NominaMapeadaData {
+  empleados: any[];
+  totalImporte: number;
+  totalRegistros: number;
+  fechaProceso: string;
+}
 
 export default function MapeoXMLPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState('');
-  const [description, setDescription] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [mappingResult, setMappingResult] = useState<any>(null);
-  const [dragOver, setDragOver] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { showSuccess, showError, showWarning } = useNotification();
-  const { addNotification } = useGlobalNotifications();
-  const { goToReglas } = useNavigation();
+  // Datos del proceso
+  const [archivoXML, setArchivoXML] = useState<File | null>(null);
+  const [tipoOperacion, setTipoOperacion] = useState<TipoOperacion | null>(null);
+  const [registrosMapeados, setRegistrosMapeados] = useState<any[]>([]);
+  const [nominaData, setNominaData] = useState<NominaMapeadaData | null>(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [txtGenerado, setTxtGenerado] = useState<TxtResult | null>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  };
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const processFile = (file: File) => {
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setFileContent(event.target?.result as string);
-    };
-    reader.readAsText(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      processFile(file);
-    }
-  };
-
-  const handleGenerateMapping = async () => {
-    if (!selectedFile) {
-      showWarning('Selecciona un archivo TXT o XML');
+    if (!file.name.endsWith('.xml')) {
+      setError('Por favor selecciona un archivo XML válido');
       return;
     }
 
-    if (!description.trim()) {
-      showWarning('Agrega una descripción para el mapeo');
+    setArchivoXML(file);
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleProcessXML = async () => {
+    if (!archivoXML) {
+      setError('Por favor selecciona un archivo XML');
       return;
     }
 
-    setIsProcessing(true);
+    setLoading(true);
+    setError(null);
+
     try {
-      const user = authService.getCurrentUser?.();
-      if (!user?.id) {
-        showError('No hay usuario autenticado. Inicia sesión nuevamente.');
-        return;
+      // 1. Parsear XML
+      const parseResult = await xmlParserService.parseXMLFile(archivoXML);
+
+      if (!parseResult.success) {
+        throw new Error(parseResult.error);
       }
 
-      const name = selectedFile.name.toLowerCase();
-      const fileType = name.endsWith('.xml') ? 'xml' : 'txt';
+      setTipoOperacion(parseResult.tipoOperacion as TipoOperacion);
 
-      const result = await rulesService.generateMappedRule({
-        usuario_id: user.id,
-        descripcion: description.trim(),
-        fileContent: fileContent,
-        fileType,
-        fileName: selectedFile.name
-      });
+      // 2. Mapear a formato Altamira
+      let registros;
+      if (parseResult.tipoOperacion === TIPOS_OPERACION_SISTEMA.NOMINA) {
+        // Cast to XMLNominaData - structure is compatible
+        const xmlNominaData = parseResult.data as unknown as XMLNominaData;
+        const datosNomina = mapeoAltamiraService.mapearNomina(xmlNominaData);
+        registros = datosNomina.empleados;
+        // Store full nomina data for TXT generation
+        setNominaData(datosNomina);
+      } else {
+        // Cast to XMLProveedoresData - structure is compatible
+        const provData = parseResult.data as unknown as XMLProveedoresData;
+        registros = mapeoAltamiraService.mapearProveedores(provData);
+        setNominaData(null);
+      }
 
-      setMappingResult(result);
-      showSuccess('¡Mapeo generado exitosamente!');
-      addNotification({
-        type: 'success',
-        title: 'Mapeo Creado',
-        message: `Mapeo ISO 20022 generado desde ${selectedFile.name}`
-      });
-    } catch (error) {
-      console.error('Error generating mapping:', error);
-      showError('Error al generar el mapeo');
+      if (!registros || registros.length === 0) {
+        throw new Error('No se encontraron registros para mapear');
+      }
+
+      setRegistrosMapeados(registros);
+      setActiveStep(1);
+      setShowValidationModal(true);
+      setSuccess(`Se mapearon ${registros.length} registros correctamente`);
+
+    } catch (err: any) {
+      setError(err.message || 'Error al procesar el archivo XML');
     } finally {
-      setIsProcessing(false);
+      setLoading(false);
+    }
+  };
+
+  const handleValidationConfirm = async (registrosValidados: any[]) => {
+    console.log('📥 handleValidationConfirm llamado con', registrosValidados.length, 'registros');
+    console.log('📋 Tipo de operación:', tipoOperacion);
+
+    setShowValidationModal(false);
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 3. Generar TXT
+      console.log('🔧 Llamando a generarTXT...');
+
+      let result;
+      if (tipoOperacion === 'nomina') {
+        // For nómina, we need to pass NominaMapeada object with updated employees
+        const nominaMapeada = {
+          empleados: registrosValidados,
+          totalImporte: registrosValidados.reduce((sum: number, emp: any) => sum + (emp.salario || 0), 0),
+          totalRegistros: registrosValidados.length,
+          fechaProceso: nominaData?.fechaProceso || new Date().toISOString()
+        };
+        console.log('📋 Datos de nómina para TXT:', nominaMapeada);
+        result = txtGeneratorService.generarTXT(nominaMapeada, tipoOperacion);
+      } else {
+        // For proveedores, pass the array directly
+        result = txtGeneratorService.generarTXT(registrosValidados, tipoOperacion);
+      }
+
+      console.log('📄 Resultado de generarTXT:', result);
+
+      if (!result.success) {
+        console.error('❌ Generación falló con errores:', result.errors);
+        throw new Error(result.errors?.join('\n') || 'Error al generar TXT');
+      }
+
+      console.log('✅ TXT generado exitosamente, actualizando estado...');
+      setTxtGenerado(result);
+      setActiveStep(2);
+      setSuccess('TXT generado exitosamente. Listo para descargar.');
+      console.log('✅ Estado actualizado, activeStep = 2');
+
+    } catch (err: any) {
+      console.error('❌ Error en handleValidationConfirm:', err);
+      setError(err.message || 'Error al generar el archivo TXT');
+      setShowValidationModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownloadTXT = () => {
+    if (txtGenerado && txtGenerado.content) {
+      txtGeneratorService.descargarTXT(txtGenerado.content, tipoOperacion);
+      setSuccess('Archivo TXT descargado exitosamente');
     }
   };
 
   const handleReset = () => {
-    setSelectedFile(null);
-    setFileContent('');
-    setDescription('');
-    setMappingResult(null);
-  };
-
-  const handleExportResult = () => {
-    if (!mappingResult) return;
-
-    const blob = new Blob([JSON.stringify(mappingResult, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `mapeo_${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    showSuccess('Resultado exportado');
+    setActiveStep(0);
+    setArchivoXML(null);
+    setTipoOperacion(null);
+    setRegistrosMapeados([]);
+    setNominaData(null);
+    setTxtGenerado(null);
+    setError(null);
+    setSuccess(null);
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-      <Typography variant="h4" sx={{ fontWeight: 600, color: '#333', mb: 4 }}>
-        Mapeo de Archivos ISO 20022
+    <Box sx={{
+      p: { xs: 2, md: 4 },
+      minHeight: '100vh',
+      backgroundColor: '#f8f9fa',
+      maxWidth: '1400px',
+      margin: '0 auto'
+    }}>
+      {/* Header */}
+      <Typography variant="h3" sx={{ mb: 2, fontWeight: 700, color: '#333', textAlign: 'center' }}>
+        Mapeo XML Bancario
+      </Typography>
+      <Typography variant="h6" sx={{ mb: 5, color: '#666', textAlign: 'center', fontWeight: 400 }}>
+        Convierte archivos XML ISO 20022 a formato TXT Altamira
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 3 }}>
-        {/* Input Panel */}
-        <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
-              Cargar Archivo
-            </Typography>
-
-            {/* File Upload Area */}
-            <Box
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              sx={{
-                border: `2px dashed ${dragOver ? '#EB0029' : '#e0e0e0'}`,
-                borderRadius: '8px',
-                p: 4,
-                textAlign: 'center',
-                backgroundColor: dragOver ? '#fff5f5' : '#fafafa',
-                cursor: 'pointer',
-                mb: 3,
-                transition: 'all 0.3s'
-              }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".txt,.xml"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-              />
-              <CloudUploadIcon sx={{ fontSize: 64, color: '#EB0029', mb: 2 }} />
-              <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
-                {selectedFile ? selectedFile.name : 'Arrastra un archivo aquí'}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                o haz clic para seleccionar un archivo TXT/XML
-              </Typography>
-            </Box>
-
-            <TextField
-              fullWidth
-              label="Descripción del Mapeo"
-              placeholder="Ej: Mapeo de archivo PAIN.001 para pagos internacionales"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              multiline
-              rows={3}
-              sx={{ mb: 3 }}
-            />
-
-            {isProcessing && <LinearProgress sx={{ mb: 2 }} />}
-
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<SendIcon />}
-                onClick={handleGenerateMapping}
-                disabled={isProcessing || !selectedFile}
+      {/* Stepper */}
+      <Paper sx={{ p: 4, mb: 4, boxShadow: 3 }}>
+        <Stepper activeStep={activeStep}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel
                 sx={{
-                  bgcolor: '#EB0029',
-                  py: 1.5,
-                  '&:hover': { bgcolor: '#d4002a' },
-                  '&:disabled': { bgcolor: '#ccc' }
+                  '& .MuiStepLabel-label': {
+                    fontSize: '1.1rem',
+                    fontWeight: 500
+                  }
                 }}
               >
-                {isProcessing ? 'Procesando...' : 'Generar Mapeo'}
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={handleReset}
-                sx={{ borderColor: '#EB0029', color: '#EB0029' }}
-              >
-                Limpiar
-              </Button>
+                {label}
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Paper>
+
+      {/* Mensajes */}
+      {error && (
+        <Alert
+          severity="error"
+          sx={{
+            mb: 4,
+            fontSize: '1.1rem',
+            py: 2,
+            boxShadow: 2
+          }}
+          onClose={() => setError(null)}
+        >
+          <Typography variant="h6" sx={{ mb: 0.5 }}>Error</Typography>
+          <Typography variant="body1">{error}</Typography>
+        </Alert>
+      )}
+
+      {success && (
+        <Alert
+          severity="success"
+          sx={{
+            mb: 4,
+            fontSize: '1.1rem',
+            py: 2,
+            boxShadow: 2
+          }}
+          onClose={() => setSuccess(null)}
+        >
+          <Typography variant="h6" sx={{ mb: 0.5 }}>Éxito</Typography>
+          <Typography variant="body1">{success}</Typography>
+        </Alert>
+      )}
+
+      {/* Loading */}
+      {loading && (
+        <Box sx={{ mb: 4 }}>
+          <LinearProgress sx={{ height: 8, borderRadius: 1 }} />
+          <Typography variant="body1" sx={{ mt: 2, textAlign: 'center', color: '#666' }}>
+            Procesando archivo...
+          </Typography>
+        </Box>
+      )}
+
+      {/* Contenido por paso */}
+      <Card sx={{ boxShadow: 3 }}>
+        <CardContent sx={{ p: { xs: 3, md: 6 }, minHeight: '500px' }}>
+          {activeStep === 0 && (
+            <Box sx={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+              <CloudUploadIcon sx={{ fontSize: 140, color: '#EB0029', mb: 3 }} />
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
+                Paso 1: Cargar Archivo XML
+              </Typography>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 5, fontWeight: 400 }}>
+                Selecciona un archivo XML en formato ISO 20022 (pain.001)
+              </Typography>
+
+              <input
+                accept=".xml"
+                id="xml-file-input"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={handleFileSelect}
+              />
+              <label htmlFor="xml-file-input">
+                <Button
+                  variant="contained"
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                  size="large"
+                  sx={{
+                    backgroundColor: '#EB0029',
+                    color: 'white',
+                    fontSize: '1.1rem',
+                    py: 2,
+                    px: 5,
+                    '&:hover': { backgroundColor: '#c70023' }
+                  }}
+                >
+                  SELECCIONAR ARCHIVO
+                </Button>
+              </label>
+
+              {archivoXML && (
+                <Box sx={{ mt: 5 }}>
+                  <Alert
+                    severity="info"
+                    sx={{
+                      mb: 4,
+                      fontSize: '1rem',
+                      py: 2,
+                      '& .MuiAlert-message': {
+                        width: '100%'
+                      }
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      <strong>Archivo seleccionado:</strong> {archivoXML.name}
+                    </Typography>
+                    <Typography variant="body1">
+                      Tamaño: {(archivoXML.size / 1024).toFixed(2)} KB
+                    </Typography>
+                  </Alert>
+
+                  <Button
+                    variant="contained"
+                    onClick={handleProcessXML}
+                    disabled={loading}
+                    size="large"
+                    sx={{
+                      backgroundColor: '#EB0029',
+                      fontSize: '1.1rem',
+                      py: 2,
+                      px: 6,
+                      '&:hover': { backgroundColor: '#c70023' }
+                    }}
+                  >
+                    Procesar XML
+                  </Button>
+                </Box>
+              )}
             </Box>
+          )}
 
-            {mappingResult && (
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<DownloadIcon />}
-                onClick={() => goToReglas()}
-                sx={{ mt: 2, borderColor: '#EB0029', color: '#EB0029' }}
+          {activeStep === 1 && (
+            <Box sx={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+              <CheckCircleIcon sx={{ fontSize: 140, color: '#10b981', mb: 3 }} />
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
+                Paso 2: Validación de Datos
+              </Typography>
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 5, fontWeight: 400 }}>
+                Los datos han sido mapeados. Revisa y edita en el modal de validación.
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                <Button
+                  variant="contained"
+                  onClick={() => setShowValidationModal(true)}
+                  size="large"
+                  sx={{
+                    backgroundColor: '#EB0029',
+                    fontSize: '1.1rem',
+                    py: 2,
+                    px: 5,
+                    '&:hover': { backgroundColor: '#c70023' }
+                  }}
+                >
+                  Abrir Validación
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  onClick={handleReset}
+                  size="large"
+                  sx={{
+                    borderColor: '#EB0029',
+                    color: '#EB0029',
+                    fontSize: '1.1rem',
+                    py: 2,
+                    px: 5,
+                    '&:hover': { borderColor: '#c70023', backgroundColor: 'rgba(235, 0, 41, 0.04)' }
+                  }}
+                >
+                  Reiniciar Proceso
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          {activeStep === 2 && txtGenerado && (
+            <Box sx={{ textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
+              <DownloadIcon sx={{ fontSize: 140, color: '#6366f1', mb: 3 }} />
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
+                Paso 3: Descargar TXT
+              </Typography>
+
+              <Alert
+                severity="success"
+                sx={{
+                  mb: 4,
+                  textAlign: 'left',
+                  fontSize: '1rem',
+                  py: 2,
+                  '& .MuiAlert-message': {
+                    width: '100%'
+                  }
+                }}
               >
-                Ver en Reglas
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  <strong>✓ TXT Generado Exitosamente</strong>
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="body1">
+                    • Total de líneas: <strong>{txtGenerado.totalLineas || txtGenerado.totalEmpleados}</strong>
+                  </Typography>
+                  <Typography variant="body1">
+                    • Tipo: <strong>{tipoOperacion === 'proveedores' ? 'Proveedores' : 'Nómina'}</strong>
+                  </Typography>
+                </Box>
+              </Alert>
 
-        {/* Preview Panel */}
-        <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
-          <CardContent sx={{ p: 4 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 3 }}>
-              Vista Previa del Archivo
-            </Typography>
-
-            {fileContent ? (
-              <Paper sx={{ p: 2, bgcolor: '#fafafa', maxHeight: 400, overflow: 'auto' }}>
-                <Typography variant="caption" component="pre" sx={{ whiteSpace: 'pre-wrap', fontSize: '12px' }}>
-                  {fileContent.substring(0, 2000)}
-                  {fileContent.length > 2000 && '\n\n... (contenido truncado)'}
+              {/* Vista previa simplificada */}
+              <Paper
+                sx={{
+                  p: 3,
+                  mb: 4,
+                  backgroundColor: '#f8f9fa',
+                  maxHeight: 250,
+                  overflow: 'auto',
+                  fontFamily: 'monospace',
+                  fontSize: '0.9rem',
+                  textAlign: 'left',
+                  border: '2px solid #e0e0e0'
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  component="pre"
+                  sx={{
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  {txtGenerado.content?.substring(0, 500)}...
                 </Typography>
               </Paper>
-            ) : (
-              <Box sx={{ textAlign: 'center', py: 8 }}>
-                <Typography variant="body1" color="textSecondary">
-                  La vista previa del archivo aparecerá aquí
-                </Typography>
-                <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                  Carga un archivo para comenzar
-                </Typography>
-              </Box>
-            )}
 
-            {mappingResult && (
-              <>
-                <Divider sx={{ my: 3 }} />
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 2 }}>
-                  Resultado del Mapeo
-                </Typography>
-                <Paper sx={{ p: 2, bgcolor: '#f0f7ff' }}>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    ✅ Mapeo generado exitosamente
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    Regla guardada con ID: {mappingResult?.regla?.id_display || 'N/A'}
-                  </Typography>
-                </Paper>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
                 <Button
-                  fullWidth
-                  variant="text"
+                  variant="contained"
+                  onClick={handleDownloadTXT}
                   startIcon={<DownloadIcon />}
-                  onClick={handleExportResult}
-                  sx={{ mt: 2, color: '#EB0029' }}
+                  size="large"
+                  sx={{
+                    backgroundColor: '#EB0029',
+                    fontSize: '1.1rem',
+                    py: 2,
+                    px: 5,
+                    '&:hover': { backgroundColor: '#c70023' }
+                  }}
                 >
-                  Exportar Resultado
+                  Descargar TXT
                 </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
 
-      {/* Info Card */}
-      <Card sx={{ border: '1px solid #e0e0e0', borderRadius: '12px', mt: 3 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#333', mb: 2 }}>
-            Acerca del Mapeo ISO 20022
-          </Typography>
-          <Typography variant="body2" color="textSecondary" paragraph>
-            Esta herramienta permite mapear archivos de pago en formato ISO 20022 (PAIN.001, PAIN.002, etc.)
-            a estructuras XML estandarizadas utilizando inteligencia artificial.
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            <strong>Formatos soportados:</strong> TXT (estructurado), XML (ISO 20022)
-          </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={handleReset}
+                  size="large"
+                  sx={{
+                    borderColor: '#EB0029',
+                    color: '#EB0029',
+                    fontSize: '1.1rem',
+                    py: 2,
+                    px: 5,
+                    '&:hover': { borderColor: '#c70023', backgroundColor: 'rgba(235, 0, 41, 0.04)' }
+                  }}
+                >
+                  Procesar Otro Archivo
+                </Button>
+              </Box>
+            </Box>
+          )}
         </CardContent>
       </Card>
+
+      {/* Modal de validación */}
+      <ValidationModal
+        open={showValidationModal}
+        registros={registrosMapeados}
+        tipoOperacion={tipoOperacion}
+        onClose={() => setShowValidationModal(false)}
+        onConfirm={handleValidationConfirm}
+      />
     </Box>
   );
 }

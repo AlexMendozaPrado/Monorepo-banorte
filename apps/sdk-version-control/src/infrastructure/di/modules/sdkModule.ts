@@ -1,8 +1,11 @@
 import { DIContainer } from '../container';
 import { InMemoryServiceRepository } from '../../repositories/InMemoryServiceRepository';
+import { GitHubServiceRepository } from '../../repositories/GitHubServiceRepository';
+import { GitHubApiClient } from '../../services/GitHubApiClient';
 import { BaseVersionScraper } from '../../scrapers/BaseVersionScraper';
 import { WebScraperVersionChecker } from '../../scrapers/WebScraperVersionChecker';
 import { scrapingConfigs } from '../../config/scraping.config';
+import { IServiceRepository } from '@/core/domain/ports/repositories/IServiceRepository';
 
 // Use Cases
 import { GetAllServicesUseCase } from '@/core/application/use-cases/GetAllServicesUseCase';
@@ -10,6 +13,36 @@ import { GetServiceByIdUseCase } from '@/core/application/use-cases/GetServiceBy
 import { CheckVersionUpdatesUseCase } from '@/core/application/use-cases/CheckVersionUpdatesUseCase';
 import { CompareServicesUseCase } from '@/core/application/use-cases/CompareServicesUseCase';
 import { UpdateServiceVersionUseCase } from '@/core/application/use-cases/UpdateServiceVersionUseCase';
+import { CreateServiceUseCase } from '@/core/application/use-cases/CreateServiceUseCase';
+import { UpdateServiceUseCase } from '@/core/application/use-cases/UpdateServiceUseCase';
+import { DeleteServiceUseCase } from '@/core/application/use-cases/DeleteServiceUseCase';
+
+/**
+ * Crea el repositorio de servicios según la configuración del entorno
+ */
+function createServiceRepository(): IServiceRepository {
+  const repositoryType = process.env.REPOSITORY_TYPE || 'memory';
+
+  if (repositoryType === 'github') {
+    const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const branch = process.env.GITHUB_BRANCH || 'main';
+
+    if (!token || !owner || !repo) {
+      console.warn('[SDKModule] GitHub config incomplete, falling back to InMemory');
+      return new InMemoryServiceRepository();
+    }
+
+    console.log(`[SDKModule] Using GitHubServiceRepository (${owner}/${repo}@${branch})`);
+
+    const githubClient = new GitHubApiClient({ token, owner, repo, branch });
+    return new GitHubServiceRepository(githubClient);
+  }
+
+  console.log('[SDKModule] Using InMemoryServiceRepository');
+  return new InMemoryServiceRepository();
+}
 
 /**
  * Registra todos los servicios del módulo SDK en el contenedor
@@ -17,8 +50,8 @@ import { UpdateServiceVersionUseCase } from '@/core/application/use-cases/Update
 export function registerSDKModule(container: DIContainer): void {
   console.log('[SDKModule] Registering services...');
 
-  // Repositorios (Singletons)
-  container.register('IServiceRepository', () => new InMemoryServiceRepository(), true);
+  // Repositorios (Singletons) - Selección según entorno
+  container.register('IServiceRepository', () => createServiceRepository(), true);
 
   // Scrapers (Singleton - compartido entre requests)
   container.register('IVersionCheckerPort', () => {
@@ -59,6 +92,24 @@ export function registerSDKModule(container: DIContainer): void {
     );
   }, false);
 
+  container.register('CreateServiceUseCase', () => {
+    return new CreateServiceUseCase(
+      container.resolve('IServiceRepository')
+    );
+  }, false);
+
+  container.register('UpdateServiceUseCase', () => {
+    return new UpdateServiceUseCase(
+      container.resolve('IServiceRepository')
+    );
+  }, false);
+
+  container.register('DeleteServiceUseCase', () => {
+    return new DeleteServiceUseCase(
+      container.resolve('IServiceRepository')
+    );
+  }, false);
+
   console.log('[SDKModule] All services registered');
 }
 
@@ -86,4 +137,19 @@ export function getCompareServicesUseCase(): CompareServicesUseCase {
 export function getUpdateServiceVersionUseCase(): UpdateServiceVersionUseCase {
   const { getDIContainer } = require('../initialize');
   return getDIContainer().resolve('UpdateServiceVersionUseCase');
+}
+
+export function getCreateServiceUseCase(): CreateServiceUseCase {
+  const { getDIContainer } = require('../initialize');
+  return getDIContainer().resolve('CreateServiceUseCase');
+}
+
+export function getUpdateServiceUseCase(): UpdateServiceUseCase {
+  const { getDIContainer } = require('../initialize');
+  return getDIContainer().resolve('UpdateServiceUseCase');
+}
+
+export function getDeleteServiceUseCase(): DeleteServiceUseCase {
+  const { getDIContainer } = require('../initialize');
+  return getDIContainer().resolve('DeleteServiceUseCase');
 }

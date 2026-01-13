@@ -7,9 +7,9 @@
       "id": "incode",
       "name": "Incode",
       "category": "Identity",
-      "description": "SDK de verificación de identidad biométrica",
+      "description": "SDK de verificacion de identidad biometrica",
       "documentationUrl": "https://docs.incode.com",
-      "logoUrl": "/logos/incode.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=incode.com&sz=128",
       "versions": {
         "web": {
           "currentVersion": "5.2.1",
@@ -23,15 +23,23 @@
           "currentVersion": "4.9.2",
           "status": "outdated"
         }
-      }
+      },
+      "projectStatus": "productivo",
+      "entity": "banco",
+      "hasASM": true,
+      "implementationDate": "2025-10-17",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Lucia Olivares",
+      "responsibleIT": "Noe Valdez Gaona",
+      "responsibleERN": "Liliana Pamela Quintero"
     },
     {
       "id": "firebase",
       "name": "Firebase",
       "category": "Analytics",
-      "description": "Plataforma de desarrollo de Google para analytics, push y más",
+      "description": "Plataforma de desarrollo de Google para analytics, push y mas",
       "documentationUrl": "https://firebase.google.com/docs",
-      "logoUrl": "/logos/firebase.svg",
+      "logoUrl": "https://cdn.simpleicons.org/firebase/FFCA28",
       "versions": {
         "web": {
           "currentVersion": "10.7.0",
@@ -45,7 +53,15 @@
           "currentVersion": "32.7.0",
           "status": "warning"
         }
-      }
+      },
+      "projectStatus": "piloto",
+      "entity": "filial",
+      "hasASM": false,
+      "implementationDate": "2025-11-21",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Nancy Gonzalez",
+      "responsibleIT": "Maria de Jesus Mercado",
+      "responsibleERN": "Carlos Rodriguez"
     },
     {
       "id": "segment",
@@ -53,7 +69,7 @@
       "category": "Analytics",
       "description": "Customer Data Platform para unificar datos de clientes",
       "documentationUrl": "https://segment.com/docs",
-      "logoUrl": "/logos/segment.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=segment.com&sz=128",
       "versions": {
         "web": {
           "currentVersion": "4.15.3",
@@ -67,15 +83,23 @@
           "currentVersion": "1.14.0",
           "status": "outdated"
         }
-      }
+      },
+      "projectStatus": "productivo",
+      "entity": "banco",
+      "hasASM": true,
+      "implementationDate": "2025-09-05",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Angelina Avina",
+      "responsibleIT": "Fernando Ramos",
+      "responsibleERN": "Patricia Mendez"
     },
     {
       "id": "appsflyer",
       "name": "AppsFlyer",
       "category": "Attribution",
-      "description": "Plataforma de atribución y analytics móvil",
+      "description": "Plataforma de atribucion y analytics movil",
       "documentationUrl": "https://dev.appsflyer.com",
-      "logoUrl": "/logos/appsflyer.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=appsflyer.com&sz=128",
       "versions": {
         "ios": {
           "currentVersion": "6.12.0",
@@ -85,7 +109,15 @@
           "currentVersion": "6.12.2",
           "status": "current"
         }
-      }
+      },
+      "projectStatus": "productivo",
+      "entity": "banco",
+      "hasASM": true,
+      "implementationDate": "2025-08-12",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Roberto Sanchez",
+      "responsibleIT": "Diana Lopez",
+      "responsibleERN": "Miguel Torres"
     },
     {
       "id": "dynatrace",
@@ -93,7 +125,7 @@
       "category": "Monitoring",
       "description": "Plataforma de observabilidad y APM",
       "documentationUrl": "https://docs.dynatrace.com",
-      "logoUrl": "/logos/dynatrace.svg",
+      "logoUrl": "https://cdn.simpleicons.org/dynatrace/1496FF",
       "versions": {
         "web": {
           "currentVersion": "1.251.0",
@@ -107,7 +139,15 @@
           "currentVersion": "8.249.0",
           "status": "warning"
         }
-      }
+      },
+      "projectStatus": "desarrollo",
+      "entity": "filial",
+      "hasASM": false,
+      "implementationDate": "",
+      "dateConfirmed": false,
+      "responsibleBusiness": "Jorge de Jesus Quintanilla",
+      "responsibleIT": "Ana Martinez",
+      "responsibleERN": "Luis Hernandez"
     },
     {
       "id": "stripe",
@@ -115,7 +155,7 @@
       "category": "Payments",
       "description": "Plataforma de pagos y procesamiento de transacciones",
       "documentationUrl": "https://stripe.com/docs",
-      "logoUrl": "/logos/stripe.svg",
+      "logoUrl": "https://cdn.simpleicons.org/stripe/635BFF",
       "versions": {
         "web": {
           "currentVersion": "2.2.0",
@@ -129,7 +169,15 @@
           "currentVersion": "20.35.0",
           "status": "current"
         }
-      }
+      },
+      "projectStatus": "piloto",
+      "entity": "banco",
+      "hasASM": false,
+      "implementationDate": "2026-01-10",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Ricardo Morales",
+      "responsibleIT": "Elena Castro",
+      "responsibleERN": "Javier Ruiz"
     },
     {
       "id": "braze",
@@ -137,7 +185,7 @@
       "category": "Engagement",
       "description": "Plataforma de customer engagement y marketing automation",
       "documentationUrl": "https://www.braze.com/docs",
-      "logoUrl": "/logos/braze.svg",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=braze.com&sz=128",
       "versions": {
         "web": {
           "currentVersion": "5.1.0",
@@ -151,15 +199,23 @@
           "currentVersion": "28.0.0",
           "status": "outdated"
         }
-      }
+      },
+      "projectStatus": "iniciativa",
+      "entity": "filial",
+      "hasASM": false,
+      "implementationDate": "",
+      "dateConfirmed": false,
+      "responsibleBusiness": "Mariana Silva",
+      "responsibleIT": "Alberto Diaz",
+      "responsibleERN": "Gabriela Ortiz"
     },
     {
       "id": "contentful",
       "name": "Contentful",
       "category": "CMS",
-      "description": "Headless CMS para gestión de contenido",
+      "description": "Headless CMS para gestion de contenido",
       "documentationUrl": "https://www.contentful.com/developers/docs",
-      "logoUrl": "/logos/contentful.svg",
+      "logoUrl": "https://cdn.simpleicons.org/contentful/2478CC",
       "versions": {
         "web": {
           "currentVersion": "10.6.0",
@@ -173,7 +229,15 @@
           "currentVersion": "10.6.0",
           "status": "current"
         }
-      }
+      },
+      "projectStatus": "productivo",
+      "entity": "banco",
+      "hasASM": true,
+      "implementationDate": "2025-12-15",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Sofia Ramirez",
+      "responsibleIT": "Pedro Gonzalez",
+      "responsibleERN": "Carmen Flores"
     }
   ]
 }
