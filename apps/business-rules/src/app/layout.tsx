@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Providers from '@/components/Providers'
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
   title: 'Business Rules Generator - Banorte',
@@ -16,9 +16,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

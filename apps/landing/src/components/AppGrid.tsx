@@ -5,7 +5,7 @@ import { AppCard } from './AppCard'
 import { AppCardHorizontal } from './AppCardHorizontal'
 import { AppCardMinimal } from './AppCardMinimal'
 import { AppCardBold } from './AppCardBold'
-import { FileText, BarChart2, FileCode, GitCompare } from 'lucide-react'
+import { FileText, BarChart2, FileCode, Wallet, GitCompare } from 'lucide-react'
 
 export type DesignVariant = 'cards' | 'horizontal' | 'minimal' | 'bold'
 
@@ -40,6 +40,13 @@ export const AppGrid: React.FC<AppGridProps> = ({ variant }) => {
       description:
         'Generación automática de reglas de negocio basadas en regulaciones',
       route: process.env.NEXT_PUBLIC_BUSINESS_RULES_URL || '/business-rules',
+    },
+    {
+      icon: <Wallet size={60} color="#EB0029" />,
+      title: 'Asesor financiero Banorte',
+      description:
+        'Gestión integral de finanzas: presupuestos, ahorros, deudas, tarjetas y asesor financiero con IA',
+      route: process.env.NEXT_PUBLIC_FINANCIAL_APP_URL || '/financial-app',
     },
     {
       icon: <GitCompare size={60} color="#EB0029" />,

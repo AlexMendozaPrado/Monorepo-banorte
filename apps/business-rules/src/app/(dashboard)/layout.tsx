@@ -41,7 +41,7 @@ import {
   Circle as CircleIcon,
 } from '@mui/icons-material';
 import { useNavigation } from '@/hooks/useNavigation';
-import { NotificationsProvider, useGlobalNotifications } from '@/contexts/NotificationsContext';
+import { useGlobalNotifications } from '@/contexts/NotificationsContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -49,8 +49,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// Inner layout component that uses the notifications context
-function DashboardLayoutInner({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -365,22 +364,26 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
                       </ListItemIcon>
                       <ListItemText primary="Mi Perfil" />
                     </ListItem>
-                    <ListItemButton>
-                      <ListItemIcon>
-                        <KeyIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Cambiar Contraseña" />
-                    </ListItemButton>
+                    <ListItem disablePadding>
+                      <ListItemButton>
+                        <ListItemIcon>
+                          <KeyIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Cambiar Contraseña" />
+                      </ListItemButton>
+                    </ListItem>
                     <Divider />
-                    <ListItemButton onClick={handleLogout}>
-                      <ListItemIcon>
-                        <ExitToAppIcon sx={{ color: '#EB0029' }} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Cerrar Sesión"
-                        primaryTypographyProps={{ color: '#EB0029' }}
-                      />
-                    </ListItemButton>
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={handleLogout}>
+                        <ListItemIcon>
+                          <ExitToAppIcon sx={{ color: '#EB0029' }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary="Cerrar Sesión"
+                          primaryTypographyProps={{ color: '#EB0029' }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
                   </List>
                 </Box>
               </ClickAwayListener>
@@ -453,14 +456,5 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
         {children}
       </Box>
     </Box>
-  );
-}
-
-// Main export that wraps the layout with NotificationsProvider
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  return (
-    <NotificationsProvider>
-      <DashboardLayoutInner>{children}</DashboardLayoutInner>
-    </NotificationsProvider>
   );
 }
