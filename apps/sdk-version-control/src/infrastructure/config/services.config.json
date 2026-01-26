@@ -7,7 +7,7 @@
       "id": "incode",
       "name": "Incode",
       "category": "Identity",
-      "description": "SDK de verificacion de identidad biometrica",
+      "description": "SDK de verificacion de identidad biometrica y validacion de documentos",
       "documentationUrl": "https://docs.incode.com",
       "logoUrl": "https://www.google.com/s2/favicons?domain=incode.com&sz=128",
       "versions": {
@@ -40,246 +40,138 @@
       "responsibleERN": "Liliana Pamela Quintero"
     },
     {
-      "id": "firebase",
-      "name": "Firebase",
-      "category": "Analytics",
-      "description": "Plataforma de desarrollo de Google para analytics, push y mas",
-      "documentationUrl": "https://firebase.google.com/docs",
-      "logoUrl": "https://cdn.simpleicons.org/firebase/FFCA28",
+      "id": "truid",
+      "name": "TruId",
+      "category": "Identity",
+      "description": "Plataforma de verificacion de identidad digital y autenticacion",
+      "documentationUrl": "https://truid.com/docs",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=truid.com&sz=128",
       "versions": {
-        "web": {
-          "currentVersion": "10.7.0",
-          "status": "current"
-        },
         "ios": {
-          "currentVersion": "10.20.0",
+          "currentVersion": "3.2.0",
           "status": "current"
         },
         "android": {
-          "currentVersion": "32.7.0",
-          "status": "warning"
+          "currentVersion": "3.1.5",
+          "status": "current"
         }
       },
       "channels": [
         { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
         { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
+        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" }
       ],
-      "projectStatus": "piloto",
-      "entity": "filial",
-      "hasASM": false,
-      "implementationDate": "2025-11-21",
+      "projectStatus": "productivo",
+      "entity": "banco",
+      "hasASM": true,
+      "implementationDate": "2025-09-15",
       "dateConfirmed": true,
       "responsibleBusiness": "Nancy Gonzalez",
       "responsibleIT": "Maria de Jesus Mercado",
       "responsibleERN": "Carlos Rodriguez"
     },
     {
-      "id": "segment",
-      "name": "Segment",
-      "category": "Analytics",
-      "description": "Customer Data Platform para unificar datos de clientes",
-      "documentationUrl": "https://segment.com/docs",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=segment.com&sz=128",
+      "id": "idlayer",
+      "name": "IDLayer",
+      "category": "Identity",
+      "description": "Capa de identidad para validacion y autenticacion de usuarios",
+      "documentationUrl": "https://idlayer.io/docs",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=idlayer.io&sz=128",
       "versions": {
         "web": {
-          "currentVersion": "4.15.3",
+          "currentVersion": "2.5.0",
           "status": "current"
         },
         "ios": {
-          "currentVersion": "2.0.5",
+          "currentVersion": "2.4.1",
           "status": "warning"
         },
         "android": {
-          "currentVersion": "1.14.0",
-          "status": "outdated"
+          "currentVersion": "2.4.0",
+          "status": "warning"
         }
       },
       "channels": [
         { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
         { "channel": "casa-de-bolsa", "version": "-", "status": "piloto" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" }
+        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
       ],
-      "projectStatus": "productivo",
+      "projectStatus": "piloto",
       "entity": "banco",
       "hasASM": true,
-      "implementationDate": "2025-09-05",
+      "implementationDate": "2025-11-20",
       "dateConfirmed": true,
       "responsibleBusiness": "Angelina Avina",
       "responsibleIT": "Fernando Ramos",
       "responsibleERN": "Patricia Mendez"
     },
     {
-      "id": "appsflyer",
-      "name": "AppsFlyer",
-      "category": "Attribution",
-      "description": "Plataforma de atribucion y analytics movil",
-      "documentationUrl": "https://dev.appsflyer.com",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=appsflyer.com&sz=128",
+      "id": "mbiom",
+      "name": "MBIoM",
+      "category": "Identity",
+      "description": "Modulo Biometrico de Identidad Movil para autenticacion segura",
+      "documentationUrl": "https://mbiom.banorte.com/docs",
+      "logoUrl": "https://cdn.simpleicons.org/m/EB0029",
       "versions": {
         "ios": {
-          "currentVersion": "6.12.0",
+          "currentVersion": "1.8.0",
           "status": "current"
         },
         "android": {
-          "currentVersion": "6.12.2",
+          "currentVersion": "1.7.5",
           "status": "current"
         }
       },
       "channels": [
         { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
         { "channel": "banorte-contrata", "version": "5.35.0", "status": "desarrollo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" }
+        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
       ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
-      "implementationDate": "2025-08-12",
+      "implementationDate": "2025-08-01",
       "dateConfirmed": true,
       "responsibleBusiness": "Roberto Sanchez",
       "responsibleIT": "Diana Lopez",
       "responsibleERN": "Miguel Torres"
     },
     {
-      "id": "dynatrace",
-      "name": "Dynatrace",
-      "category": "Monitoring",
-      "description": "Plataforma de observabilidad y APM",
-      "documentationUrl": "https://docs.dynatrace.com",
-      "logoUrl": "https://cdn.simpleicons.org/dynatrace/1496FF",
+      "id": "biocatch",
+      "name": "BioCatch",
+      "category": "Identity",
+      "description": "Plataforma de biometria conductual para deteccion de fraude",
+      "documentationUrl": "https://www.biocatch.com/docs",
+      "logoUrl": "https://www.google.com/s2/favicons?domain=biocatch.com&sz=128",
       "versions": {
         "web": {
-          "currentVersion": "1.251.0",
-          "status": "warning"
-        },
-        "ios": {
-          "currentVersion": "8.251.0",
+          "currentVersion": "4.1.0",
           "status": "current"
         },
+        "ios": {
+          "currentVersion": "4.0.2",
+          "status": "warning"
+        },
         "android": {
-          "currentVersion": "8.249.0",
+          "currentVersion": "4.0.1",
           "status": "warning"
         }
       },
       "channels": [
         { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" }
-      ],
-      "projectStatus": "desarrollo",
-      "entity": "filial",
-      "hasASM": false,
-      "implementationDate": "",
-      "dateConfirmed": false,
-      "responsibleBusiness": "Jorge de Jesus Quintanilla",
-      "responsibleIT": "Ana Martinez",
-      "responsibleERN": "Luis Hernandez"
-    },
-    {
-      "id": "stripe",
-      "name": "Stripe",
-      "category": "Payments",
-      "description": "Plataforma de pagos y procesamiento de transacciones",
-      "documentationUrl": "https://stripe.com/docs",
-      "logoUrl": "https://cdn.simpleicons.org/stripe/635BFF",
-      "versions": {
-        "web": {
-          "currentVersion": "2.2.0",
-          "status": "current"
-        },
-        "ios": {
-          "currentVersion": "23.18.0",
-          "status": "warning"
-        },
-        "android": {
-          "currentVersion": "20.35.0",
-          "status": "current"
-        }
-      },
-      "channels": [
+        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" },
         { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
-        { "channel": "casa-de-bolsa", "version": "-", "status": "piloto" }
-      ],
-      "projectStatus": "piloto",
-      "entity": "banco",
-      "hasASM": false,
-      "implementationDate": "2026-01-10",
-      "dateConfirmed": true,
-      "responsibleBusiness": "Ricardo Morales",
-      "responsibleIT": "Elena Castro",
-      "responsibleERN": "Javier Ruiz"
-    },
-    {
-      "id": "braze",
-      "name": "Braze",
-      "category": "Engagement",
-      "description": "Plataforma de customer engagement y marketing automation",
-      "documentationUrl": "https://www.braze.com/docs",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=braze.com&sz=128",
-      "versions": {
-        "web": {
-          "currentVersion": "5.1.0",
-          "status": "current"
-        },
-        "ios": {
-          "currentVersion": "7.5.0",
-          "status": "warning"
-        },
-        "android": {
-          "currentVersion": "28.0.0",
-          "status": "outdated"
-        }
-      },
-      "channels": [
-        { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" }
-      ],
-      "projectStatus": "iniciativa",
-      "entity": "filial",
-      "hasASM": false,
-      "implementationDate": "",
-      "dateConfirmed": false,
-      "responsibleBusiness": "Mariana Silva",
-      "responsibleIT": "Alberto Diaz",
-      "responsibleERN": "Gabriela Ortiz"
-    },
-    {
-      "id": "contentful",
-      "name": "Contentful",
-      "category": "CMS",
-      "description": "Headless CMS para gestion de contenido",
-      "documentationUrl": "https://www.contentful.com/developers/docs",
-      "logoUrl": "https://cdn.simpleicons.org/contentful/2478CC",
-      "versions": {
-        "web": {
-          "currentVersion": "10.6.0",
-          "status": "current"
-        },
-        "ios": {
-          "currentVersion": "5.5.0",
-          "status": "current"
-        },
-        "android": {
-          "currentVersion": "10.6.0",
-          "status": "current"
-        }
-      },
-      "channels": [
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" },
-        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" }
+        { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" }
       ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
-      "implementationDate": "2025-12-15",
+      "implementationDate": "2025-07-10",
       "dateConfirmed": true,
-      "responsibleBusiness": "Sofia Ramirez",
-      "responsibleIT": "Pedro Gonzalez",
-      "responsibleERN": "Carmen Flores"
+      "responsibleBusiness": "Jorge de Jesus Quintanilla",
+      "responsibleIT": "Ana Martinez",
+      "responsibleERN": "Luis Hernandez"
     }
   ]
 }
