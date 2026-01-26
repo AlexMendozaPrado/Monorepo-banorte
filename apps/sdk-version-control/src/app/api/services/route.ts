@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       documentationUrl: body.documentationUrl,
       logoUrl: body.logoUrl,
       versions: body.versions || {},
+      channels: body.channels || [],
     };
 
     const result = await useCase.execute(input);

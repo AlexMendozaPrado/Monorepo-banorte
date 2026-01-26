@@ -5,6 +5,7 @@ import { VersionStatus } from '../../domain/value-objects/VersionStatus';
 import { ProjectStatus } from '../../domain/value-objects/ProjectStatus';
 import { EntityType } from '../../domain/value-objects/EntityType';
 import { ResponsiblePerson } from '../../domain/value-objects/ResponsiblePerson';
+import { ChannelVersion } from '../../domain/value-objects/Channel';
 
 /**
  * DTO para versión de plataforma
@@ -41,6 +42,9 @@ export interface ServiceDTO {
   lastCheckedAt?: string;
   createdAt: string;
   updatedAt: string;
+  // Canales de Banorte
+  channels: ChannelVersion[];
+  channelsCount: number;
   // Campos Banorte
   projectStatus: ProjectStatus;
   entity: EntityType;
@@ -106,6 +110,9 @@ export function toServiceDTO(service: Service): ServiceDTO {
     lastCheckedAt: service.lastCheckedAt?.toISOString(),
     createdAt: service.createdAt.toISOString(),
     updatedAt: service.updatedAt.toISOString(),
+    // Canales de Banorte
+    channels: service.getChannels(),
+    channelsCount: service.getChannelsCount(),
     // Campos Banorte
     projectStatus: service.projectStatus,
     entity: service.entity,

@@ -11,6 +11,7 @@ import {
 import { ServiceNotFoundException } from '@/core/domain/exceptions/DomainException';
 import { JSONConfigLoader } from '../services/JSONConfigLoader';
 import { PlatformType, ALL_PLATFORMS } from '@/core/domain/value-objects/PlatformType';
+import { ChannelVersion } from '@/core/domain/value-objects/Channel';
 
 /**
  * Implementación en memoria del repositorio de servicios
@@ -102,6 +103,7 @@ export class InMemoryServiceRepository implements IServiceRepository {
       documentationUrl: string;
       logoUrl: string;
       versions: ServiceVersions;
+      channels: ChannelVersion[];
       lastCheckedAt: Date;
     }>
   ): Promise<Service> {
@@ -120,6 +122,7 @@ export class InMemoryServiceRepository implements IServiceRepository {
       documentationUrl: data.documentationUrl ?? existing.documentationUrl,
       logoUrl: data.logoUrl ?? existing.logoUrl,
       versions: data.versions ?? existing.versions,
+      channels: data.channels ?? existing.channels,
       lastCheckedAt: data.lastCheckedAt ?? existing.lastCheckedAt,
       createdAt: existing.createdAt,
       updatedAt: new Date(),

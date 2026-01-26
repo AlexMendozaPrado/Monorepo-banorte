@@ -8,6 +8,7 @@ import {
 } from '../../domain/exceptions/DomainException';
 import { ProjectStatus } from '../../domain/value-objects/ProjectStatus';
 import { EntityType } from '../../domain/value-objects/EntityType';
+import { ChannelVersion } from '../../domain/value-objects/Channel';
 
 /**
  * Input para crear un servicio
@@ -23,6 +24,8 @@ export interface CreateServiceInput {
     ios?: { currentVersion: string };
     android?: { currentVersion: string };
   };
+  // Canales de Banorte
+  channels?: ChannelVersion[];
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;
@@ -93,6 +96,8 @@ export class CreateServiceUseCase {
         documentationUrl: input.documentationUrl,
         logoUrl: input.logoUrl,
         versions,
+        // Canales de Banorte
+        channels: input.channels || [],
         // Campos Banorte
         projectStatus: input.projectStatus,
         entity: input.entity,
@@ -165,10 +170,11 @@ export class CreateServiceUseCase {
       throw new ValidationException('Invalid logo URL');
     }
 
-    // Validar que haya al menos una plataforma
+    // Validar que haya al menos una plataforma o canal
     const hasPlatform = input.versions.web || input.versions.ios || input.versions.android;
-    if (!hasPlatform) {
-      throw new ValidationException('At least one platform version is required');
+    const hasChannel = input.channels && input.channels.length > 0;
+    if (!hasPlatform && !hasChannel) {
+      throw new ValidationException('At least one platform version or channel is required');
     }
 
     // Validar formato de versiones

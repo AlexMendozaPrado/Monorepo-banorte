@@ -4,6 +4,7 @@ import { PlatformType } from '@/core/domain/value-objects/PlatformType';
 import { VersionStatus } from '@/core/domain/value-objects/VersionStatus';
 import { ProjectStatus } from '@/core/domain/value-objects/ProjectStatus';
 import { EntityType } from '@/core/domain/value-objects/EntityType';
+import { ChannelVersion, ChannelType, ChannelStatus } from '@/core/domain/value-objects/Channel';
 import servicesConfig from '../config/services.config.json';
 
 /**
@@ -22,6 +23,12 @@ interface ServiceConfigJSON {
       status?: string;
     };
   };
+  // Canales de Banorte
+  channels?: Array<{
+    channel: string;
+    version: string;
+    status: string;
+  }>;
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;
@@ -68,6 +75,13 @@ export class JSONConfigLoader {
         }
       }
 
+      // Procesar canales
+      const channels: ChannelVersion[] = (serviceJson.channels || []).map(ch => ({
+        channel: ch.channel as ChannelType,
+        version: ch.version,
+        status: ch.status as ChannelStatus,
+      }));
+
       return Service.create({
         id: serviceJson.id,
         name: serviceJson.name,
@@ -76,6 +90,8 @@ export class JSONConfigLoader {
         documentationUrl: serviceJson.documentationUrl,
         logoUrl: serviceJson.logoUrl,
         versions,
+        // Canales de Banorte
+        channels,
         // Campos Banorte
         projectStatus: serviceJson.projectStatus,
         entity: serviceJson.entity,

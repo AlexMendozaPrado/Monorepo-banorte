@@ -157,6 +157,16 @@ export async function PUT(
       documentationUrl: body.documentationUrl,
       logoUrl: body.logoUrl,
       versions: body.versions,
+      channels: body.channels,
+      // Campos Banorte
+      projectStatus: body.projectStatus,
+      entity: body.entity,
+      hasASM: body.hasASM,
+      implementationDate: body.implementationDate,
+      dateConfirmed: body.dateConfirmed,
+      responsibleBusiness: body.responsibleBusiness,
+      responsibleIT: body.responsibleIT,
+      responsibleERN: body.responsibleERN,
     };
 
     const result = await useCase.execute(input);
