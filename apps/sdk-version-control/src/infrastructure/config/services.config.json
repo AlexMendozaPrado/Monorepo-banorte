@@ -9,7 +9,7 @@
       "category": "Identity",
       "description": "SDK de verificacion de identidad biometrica y validacion de documentos",
       "documentationUrl": "https://docs.incode.com",
-      "logoUrl": "https://logo.clearbit.com/incode.com",
+      "logoUrl": "https://cdn.brandfetch.io/id8aHoSKnz/w/400/h/400/theme/dark/icon.jpeg",
       "versions": {
         "web": {
           "currentVersion": "5.2.1",
@@ -41,11 +41,11 @@
     },
     {
       "id": "trueid",
-      "name": "TrueId",
+      "name": "TruID",
       "category": "Identity",
       "description": "Plataforma de verificacion de identidad digital y autenticacion",
       "documentationUrl": "https://trueid.com/docs",
-      "logoUrl": "https://ui-avatars.com/api/?name=TrueId&background=1E40AF&color=fff&bold=true&size=128",
+      "logoUrl": "https://www.truid.ai/images/truid_logo_main.png",
       "versions": {
         "ios": {
           "currentVersion": "3.2.0",
@@ -72,11 +72,11 @@
     },
     {
       "id": "idlayr",
-      "name": "IDLayr",
+      "name": "IDlayr",
       "category": "Identity",
       "description": "Capa de identidad para validacion y autenticacion de usuarios",
       "documentationUrl": "https://idlayr.com/docs",
-      "logoUrl": "https://ui-avatars.com/api/?name=IDLayr&background=7C3AED&color=fff&bold=true&size=128",
+      "logoUrl": "https://cdn.brandfetch.io/idgUYcApA3/w/400/h/400/theme/dark/icon.jpeg",
       "versions": {
         "web": {
           "currentVersion": "2.5.0",
@@ -143,7 +143,7 @@
       "category": "Identity",
       "description": "Plataforma de biometria conductual para deteccion de fraude",
       "documentationUrl": "https://www.biocatch.com/docs",
-      "logoUrl": "https://logo.clearbit.com/biocatch.com",
+      "logoUrl": "https://cdn.brandfetch.io/idnPZH2T6m/w/400/h/400/theme/dark/icon.jpeg",
       "versions": {
         "web": {
           "currentVersion": "4.1.0",
