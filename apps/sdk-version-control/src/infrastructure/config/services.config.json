@@ -9,7 +9,7 @@
       "category": "Identity",
       "description": "SDK de verificacion de identidad biometrica y validacion de documentos",
       "documentationUrl": "https://docs.incode.com",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=incode.com&sz=128",
+      "logoUrl": "https://logo.clearbit.com/incode.com",
       "versions": {
         "web": {
           "currentVersion": "5.2.1",
@@ -45,7 +45,7 @@
       "category": "Identity",
       "description": "Plataforma de verificacion de identidad digital y autenticacion",
       "documentationUrl": "https://truid.com/docs",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=truid.com&sz=128",
+      "logoUrl": "https://ui-avatars.com/api/?name=TruId&background=1E40AF&color=fff&bold=true&size=128",
       "versions": {
         "ios": {
           "currentVersion": "3.2.0",
@@ -76,7 +76,7 @@
       "category": "Identity",
       "description": "Capa de identidad para validacion y autenticacion de usuarios",
       "documentationUrl": "https://idlayer.io/docs",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=idlayer.io&sz=128",
+      "logoUrl": "https://ui-avatars.com/api/?name=IDL&background=7C3AED&color=fff&bold=true&size=128",
       "versions": {
         "web": {
           "currentVersion": "2.5.0",
@@ -111,7 +111,7 @@
       "category": "Identity",
       "description": "Modulo Biometrico de Identidad Movil para autenticacion segura",
       "documentationUrl": "https://mbiom.banorte.com/docs",
-      "logoUrl": "https://cdn.simpleicons.org/m/EB0029",
+      "logoUrl": "https://ui-avatars.com/api/?name=MBIoM&background=EC0029&color=fff&bold=true&size=128",
       "versions": {
         "ios": {
           "currentVersion": "1.8.0",
@@ -143,7 +143,7 @@
       "category": "Identity",
       "description": "Plataforma de biometria conductual para deteccion de fraude",
       "documentationUrl": "https://www.biocatch.com/docs",
-      "logoUrl": "https://www.google.com/s2/favicons?domain=biocatch.com&sz=128",
+      "logoUrl": "https://logo.clearbit.com/biocatch.com",
       "versions": {
         "web": {
           "currentVersion": "4.1.0",
