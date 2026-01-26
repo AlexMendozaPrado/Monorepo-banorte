@@ -5,6 +5,7 @@ import { GitHubApiClient } from '../../services/GitHubApiClient';
 import { BaseVersionScraper } from '../../scrapers/BaseVersionScraper';
 import { WebScraperVersionChecker } from '../../scrapers/WebScraperVersionChecker';
 import { scrapingConfigs } from '../../config/scraping.config';
+import { getGitHubConfig, getRepositoryType, isGitHubConfigured } from '../../config/github.config';
 import { IServiceRepository } from '@/core/domain/ports/repositories/IServiceRepository';
 
 // Use Cases
@@ -19,28 +20,35 @@ import { DeleteServiceUseCase } from '@/core/application/use-cases/DeleteService
 
 /**
  * Crea el repositorio de servicios según la configuración del entorno
+ *
+ * - REPOSITORY_TYPE=memory → InMemoryServiceRepository (desarrollo local)
+ * - REPOSITORY_TYPE=github → GitHubServiceRepository (persistencia en GitHub via commits)
  */
 function createServiceRepository(): IServiceRepository {
-  const repositoryType = process.env.REPOSITORY_TYPE || 'memory';
+  const repositoryType = getRepositoryType();
 
   if (repositoryType === 'github') {
-    const token = process.env.GITHUB_TOKEN;
-    const owner = process.env.GITHUB_OWNER;
-    const repo = process.env.GITHUB_REPO;
-    const branch = process.env.GITHUB_BRANCH || 'main';
-
-    if (!token || !owner || !repo) {
+    if (!isGitHubConfigured()) {
       console.warn('[SDKModule] GitHub config incomplete, falling back to InMemory');
       return new InMemoryServiceRepository();
     }
 
-    console.log(`[SDKModule] Using GitHubServiceRepository (${owner}/${repo}@${branch})`);
+    try {
+      const config = getGitHubConfig();
+      console.log(`[SDKModule] Using GitHubServiceRepository (${config.owner}/${config.repo}@${config.branch})`);
+      console.log(`[SDKModule] Config path: ${config.configPath}`);
+      console.log(`[SDKModule] Committer: ${config.committerName} <${config.committerEmail}>`);
 
-    const githubClient = new GitHubApiClient({ token, owner, repo, branch });
-    return new GitHubServiceRepository(githubClient);
+      const githubClient = new GitHubApiClient(config);
+      return new GitHubServiceRepository(githubClient, config.configPath);
+    } catch (error) {
+      console.error('[SDKModule] Failed to initialize GitHub repository:', error);
+      console.warn('[SDKModule] Falling back to InMemory');
+      return new InMemoryServiceRepository();
+    }
   }
 
-  console.log('[SDKModule] Using InMemoryServiceRepository');
+  console.log('[SDKModule] Using InMemoryServiceRepository (local development)');
   return new InMemoryServiceRepository();
 }
 

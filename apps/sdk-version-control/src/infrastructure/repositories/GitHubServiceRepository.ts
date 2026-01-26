@@ -9,11 +9,12 @@ import {
   ServiceStatistics,
 } from '@/core/domain/ports/repositories/IServiceRepository';
 import { ServiceNotFoundException } from '@/core/domain/exceptions/DomainException';
-import { GitHubApiClient } from '../services/GitHubApiClient';
+import { GitHubApiClient, GitHubConflictError } from '../services/GitHubApiClient';
 import { PlatformType, ALL_PLATFORMS } from '@/core/domain/value-objects/PlatformType';
 import { SDKVersion } from '@/core/domain/entities/SDKVersion';
 import { ProjectStatus } from '@/core/domain/value-objects/ProjectStatus';
 import { EntityType } from '@/core/domain/value-objects/EntityType';
+import { ChannelVersion, ChannelType, ChannelStatus } from '@/core/domain/value-objects/Channel';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ServiceConfigJSON {
@@ -35,6 +36,12 @@ interface ServiceJSON {
     ios?: { currentVersion: string; status?: string };
     android?: { currentVersion: string; status?: string };
   };
+  // Canales de Banorte
+  channels?: Array<{
+    channel: string;
+    version: string;
+    status: string;
+  }>;
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;
@@ -160,6 +167,13 @@ export class GitHubServiceRepository implements IServiceRepository {
       });
     }
 
+    // Procesar canales
+    const channels: ChannelVersion[] = (data.channels || []).map(ch => ({
+      channel: ch.channel as ChannelType,
+      version: ch.version,
+      status: ch.status as ChannelStatus,
+    }));
+
     return Service.reconstitute({
       id: data.id,
       name: data.name,
@@ -168,6 +182,7 @@ export class GitHubServiceRepository implements IServiceRepository {
       documentationUrl: data.documentationUrl,
       logoUrl: data.logoUrl,
       versions,
+      channels,
       createdAt: new Date(),
       updatedAt: new Date(),
       // Campos Banorte
@@ -215,6 +230,12 @@ export class GitHubServiceRepository implements IServiceRepository {
       documentationUrl: service.documentationUrl,
       logoUrl: service.logoUrl,
       versions,
+      // Canales de Banorte
+      channels: service.channels.map(ch => ({
+        channel: ch.channel,
+        version: ch.version,
+        status: ch.status,
+      })),
       // Campos Banorte
       projectStatus: service.projectStatus,
       entity: service.entity,
@@ -299,7 +320,7 @@ export class GitHubServiceRepository implements IServiceRepository {
     await this.saveServices(
       services,
       sha,
-      `feat(services): add ${serviceToSave.name}`
+      `feat(sdk): add ${serviceToSave.name}`
     );
 
     return serviceToSave;
@@ -314,6 +335,7 @@ export class GitHubServiceRepository implements IServiceRepository {
       documentationUrl: string;
       logoUrl: string;
       versions: ServiceVersions;
+      channels: ChannelVersion[];
       lastCheckedAt: Date;
       // Campos Banorte
       projectStatus: ProjectStatus;
@@ -333,6 +355,12 @@ export class GitHubServiceRepository implements IServiceRepository {
       throw new ServiceNotFoundException(id);
     }
 
+    // Determinar qué cambió para un mejor mensaje de commit
+    const changes: string[] = [];
+    if (data.name && data.name !== existing.name) changes.push('name');
+    if (data.channels) changes.push('channels');
+    if (data.versions) changes.push('versions');
+
     const updated = Service.reconstitute({
       id: existing.id,
       name: data.name ?? existing.name,
@@ -341,6 +369,7 @@ export class GitHubServiceRepository implements IServiceRepository {
       documentationUrl: data.documentationUrl ?? existing.documentationUrl,
       logoUrl: data.logoUrl ?? existing.logoUrl,
       versions: data.versions ?? existing.versions,
+      channels: data.channels ?? existing.channels,
       lastCheckedAt: data.lastCheckedAt ?? existing.lastCheckedAt,
       createdAt: existing.createdAt,
       updatedAt: new Date(),
@@ -357,10 +386,11 @@ export class GitHubServiceRepository implements IServiceRepository {
 
     services.set(id, updated);
 
+    const changesSuffix = changes.length > 0 ? ` (${changes.join(', ')})` : '';
     await this.saveServices(
       services,
       sha,
-      `chore(services): update ${updated.name}`
+      `update(sdk): ${updated.name}${changesSuffix}`
     );
 
     return updated;
@@ -380,7 +410,7 @@ export class GitHubServiceRepository implements IServiceRepository {
     await this.saveServices(
       services,
       sha,
-      `chore(services): remove ${serviceName}`
+      `remove(sdk): delete ${serviceName}`
     );
   }
 
