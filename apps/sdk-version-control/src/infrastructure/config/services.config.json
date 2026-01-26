@@ -40,12 +40,12 @@
       "responsibleERN": "Liliana Pamela Quintero"
     },
     {
-      "id": "truid",
-      "name": "TruId",
+      "id": "trueid",
+      "name": "TrueId",
       "category": "Identity",
       "description": "Plataforma de verificacion de identidad digital y autenticacion",
-      "documentationUrl": "https://truid.com/docs",
-      "logoUrl": "https://ui-avatars.com/api/?name=TruId&background=1E40AF&color=fff&bold=true&size=128",
+      "documentationUrl": "https://trueid.com/docs",
+      "logoUrl": "https://ui-avatars.com/api/?name=TrueId&background=1E40AF&color=fff&bold=true&size=128",
       "versions": {
         "ios": {
           "currentVersion": "3.2.0",
@@ -71,12 +71,12 @@
       "responsibleERN": "Carlos Rodriguez"
     },
     {
-      "id": "idlayer",
-      "name": "IDLayer",
+      "id": "idlayr",
+      "name": "IDLayr",
       "category": "Identity",
       "description": "Capa de identidad para validacion y autenticacion de usuarios",
-      "documentationUrl": "https://idlayer.io/docs",
-      "logoUrl": "https://ui-avatars.com/api/?name=IDL&background=7C3AED&color=fff&bold=true&size=128",
+      "documentationUrl": "https://idlayr.com/docs",
+      "logoUrl": "https://ui-avatars.com/api/?name=IDLayr&background=7C3AED&color=fff&bold=true&size=128",
       "versions": {
         "web": {
           "currentVersion": "2.5.0",
