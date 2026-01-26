@@ -2,10 +2,6 @@
 
 import React from 'react';
 import {
-  Globe,
-  Smartphone,
-  TabletSmartphone,
-  ExternalLink,
   RefreshCw,
   Info,
   Plus,
@@ -14,8 +10,7 @@ import {
   Calendar,
   Layers,
 } from 'lucide-react';
-import { ServiceDTO, PlatformVersionDTO } from '@/core/application/dtos/ServiceDTO';
-import { PlatformType } from '@/core/domain/value-objects/PlatformType';
+import { ServiceDTO } from '@/core/application/dtos/ServiceDTO';
 import { PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/value-objects/ProjectStatus';
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS } from '@/core/domain/value-objects/EntityType';
 import {
@@ -25,7 +20,6 @@ import {
   CHANNEL_STATUS_COLORS,
   CHANNEL_STATUS_LABELS,
 } from '@/core/domain/value-objects/Channel';
-import { StatusBadge } from './StatusBadge';
 
 interface ServiceCardProps {
   service: ServiceDTO;
@@ -34,54 +28,6 @@ interface ServiceCardProps {
   onToggleSelect: (id: string) => void;
   onEdit?: (service: ServiceDTO) => void;
   onDelete?: (service: ServiceDTO) => void;
-}
-
-const platformIcons = {
-  web: Globe,
-  ios: Smartphone,
-  android: TabletSmartphone,
-};
-
-function PlatformCell({
-  type,
-  data,
-}: {
-  type: PlatformType;
-  data: PlatformVersionDTO | undefined;
-}) {
-  const Icon = platformIcons[type];
-
-  if (!data) {
-    return (
-      <div className="flex flex-col p-2 rounded bg-gray-50/50 opacity-50">
-        <div className="flex items-center gap-1.5 mb-1 text-gray-400">
-          <Icon size={14} />
-          <span className="text-xs font-medium uppercase">{type}</span>
-        </div>
-        <span className="text-xs text-gray-400">N/A</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col p-2 rounded bg-gray-50/50">
-      <div className="flex items-center gap-1.5 mb-1 text-banorte-gray">
-        <Icon size={14} />
-        <span className="text-xs font-medium uppercase">{type}</span>
-      </div>
-      <div className="flex items-center gap-2 mb-0.5">
-        <span className="font-bold text-banorte-dark text-sm">
-          {data.currentVersion}
-        </span>
-        <StatusBadge status={data.status} size="sm" />
-      </div>
-      {data.latestVersion && data.currentVersion !== data.latestVersion && (
-        <span className="text-[10px] text-banorte-gray">
-          Latest: {data.latestVersion}
-        </span>
-      )}
-    </div>
-  );
 }
 
 function ChannelCell({ data }: { data: ChannelVersion }) {
@@ -233,20 +179,6 @@ export function ServiceCard({
           </div>
           <ChannelsGrid channels={service.channels} />
         </div>
-
-        {/* Platform Grid - Secondary (collapsed by default) */}
-        {(service.versions.web || service.versions.ios || service.versions.android) && (
-          <details className="mb-4">
-            <summary className="text-xs font-medium text-banorte-gray cursor-pointer hover:text-banorte-dark mb-2">
-              Ver versiones por plataforma
-            </summary>
-            <div className="grid grid-cols-3 gap-2">
-              <PlatformCell type="web" data={service.versions.web} />
-              <PlatformCell type="ios" data={service.versions.ios} />
-              <PlatformCell type="android" data={service.versions.android} />
-            </div>
-          </details>
-        )}
 
         {/* Footer with avatars, date, and actions */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
