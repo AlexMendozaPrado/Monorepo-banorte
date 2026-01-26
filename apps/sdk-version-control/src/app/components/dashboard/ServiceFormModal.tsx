@@ -1,11 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, Globe, Smartphone, TabletSmartphone, Calendar, User, Building2, CheckCircle } from 'lucide-react';
+import { X, Loader2, Globe, Smartphone, TabletSmartphone, Calendar, User, Building2, CheckCircle, Layers, Plus, Trash2 } from 'lucide-react';
 import { ServiceDTO } from '@/core/application/dtos/ServiceDTO';
 import { ServiceCategory } from '@/core/domain/entities/Service';
 import { ProjectStatus, ALL_PROJECT_STATUSES, PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/value-objects/ProjectStatus';
 import { EntityType, ALL_ENTITY_TYPES, ENTITY_TYPE_LABELS } from '@/core/domain/value-objects/EntityType';
+import {
+  ChannelVersion,
+  ChannelType,
+  ChannelStatus,
+  ALL_CHANNELS,
+  CHANNEL_LABELS,
+  CHANNEL_STATUS_LABELS,
+  CHANNEL_STATUS_COLORS,
+} from '@/core/domain/value-objects/Channel';
 
 interface ServiceFormModalProps {
   isOpen: boolean;
@@ -29,6 +38,8 @@ export interface ServiceFormData {
     ios?: { currentVersion: string } | null;
     android?: { currentVersion: string } | null;
   };
+  // Canales de Banorte
+  channels: ChannelVersion[];
   // Campos Banorte
   projectStatus: ProjectStatus;
   entity: EntityType;
@@ -58,6 +69,8 @@ const initialFormState: ServiceFormData = {
   documentationUrl: '',
   logoUrl: '',
   versions: {},
+  // Canales de Banorte
+  channels: [],
   // Valores por defecto Banorte
   projectStatus: 'iniciativa',
   entity: 'banco',
@@ -101,6 +114,8 @@ export function ServiceFormModal({
           ios: service.versions.ios ? { currentVersion: service.versions.ios.currentVersion } : null,
           android: service.versions.android ? { currentVersion: service.versions.android.currentVersion } : null,
         },
+        // Canales de Banorte
+        channels: service.channels || [],
         // Campos Banorte
         projectStatus: service.projectStatus || 'iniciativa',
         entity: service.entity || 'banco',
@@ -169,6 +184,39 @@ export function ServiceFormModal({
     }));
   };
 
+  // Channel handlers
+  const handleAddChannel = () => {
+    // Find first available channel not already added
+    const usedChannels = formData.channels.map(c => c.channel);
+    const availableChannel = ALL_CHANNELS.find(c => !usedChannels.includes(c));
+
+    if (availableChannel) {
+      setFormData(prev => ({
+        ...prev,
+        channels: [
+          ...prev.channels,
+          { channel: availableChannel, version: '', status: 'desarrollo' as ChannelStatus }
+        ],
+      }));
+    }
+  };
+
+  const handleRemoveChannel = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      channels: prev.channels.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleChannelChange = (index: number, field: keyof ChannelVersion, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      channels: prev.channels.map((ch, i) =>
+        i === index ? { ...ch, [field]: value } : ch
+      ),
+    }));
+  };
+
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -201,11 +249,19 @@ export function ServiceFormModal({
       }
     }
 
-    // At least one platform
+    // At least one platform or channel
     const hasAnyPlatform = platforms.web || platforms.ios || platforms.android;
-    if (!hasAnyPlatform) {
-      errors.platforms = 'Se requiere al menos una plataforma';
+    const hasAnyChannel = formData.channels.length > 0;
+    if (!hasAnyPlatform && !hasAnyChannel) {
+      errors.platforms = 'Se requiere al menos una plataforma o canal';
     }
+
+    // Validate channels
+    formData.channels.forEach((channel, index) => {
+      if (!channel.version || channel.version.trim() === '') {
+        errors[`channel_${index}_version`] = 'La versión es requerida';
+      }
+    });
 
     // Validate version format
     const versionRegex = /^\d+\.\d+\.\d+$/;
@@ -260,6 +316,7 @@ export function ServiceFormModal({
     const submitData: ServiceFormData = {
       ...formData,
       versions,
+      channels: formData.channels,
     };
 
     const success = await onSubmit(submitData);
@@ -404,15 +461,123 @@ export function ServiceFormModal({
               )}
             </div>
 
-            {/* Platforms */}
+            {/* Channels Section - Principal */}
             <div>
-              <label className="block text-sm font-medium text-banorte-dark mb-3">
-                Versiones por plataforma *
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm font-medium text-banorte-dark flex items-center gap-2">
+                  <Layers size={16} className="text-banorte-gray" />
+                  Canales de Banorte *
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddChannel}
+                  disabled={formData.channels.length >= ALL_CHANNELS.length}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-banorte-red hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus size={14} />
+                  Agregar canal
+                </button>
+              </div>
               {validationErrors.platforms && (
                 <p className="mb-2 text-xs text-banorte-red">{validationErrors.platforms}</p>
               )}
-              <div className="space-y-3">
+
+              {formData.channels.length === 0 ? (
+                <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
+                  <Layers size={24} className="mx-auto text-gray-300 mb-2" />
+                  <p className="text-sm text-banorte-gray">No hay canales configurados</p>
+                  <button
+                    type="button"
+                    onClick={handleAddChannel}
+                    className="mt-2 text-xs text-banorte-red hover:underline"
+                  >
+                    Agregar primer canal
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {formData.channels.map((channel, index) => {
+                    const usedChannels = formData.channels.map((c, i) => i !== index ? c.channel : null).filter(Boolean);
+                    const availableChannels = ALL_CHANNELS.filter(c => !usedChannels.includes(c) || c === channel.channel);
+
+                    return (
+                      <div key={index} className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+                        {/* Channel Select */}
+                        <div className="flex-1 min-w-0">
+                          <select
+                            value={channel.channel}
+                            onChange={(e) => handleChannelChange(index, 'channel', e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red bg-white"
+                          >
+                            {availableChannels.map(ch => (
+                              <option key={ch} value={ch}>
+                                {CHANNEL_LABELS[ch]}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Version Input */}
+                        <div className="w-24">
+                          <input
+                            type="text"
+                            value={channel.version}
+                            onChange={(e) => handleChannelChange(index, 'version', e.target.value)}
+                            placeholder="1.0.0"
+                            className={`w-full px-2 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red ${
+                              validationErrors[`channel_${index}_version`] ? 'border-red-300' : 'border-gray-200'
+                            }`}
+                          />
+                        </div>
+
+                        {/* Status Select */}
+                        <div className="w-28">
+                          <select
+                            value={channel.status}
+                            onChange={(e) => handleChannelChange(index, 'status', e.target.value)}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-banorte-red focus:border-banorte-red bg-white"
+                            style={{
+                              color: CHANNEL_STATUS_COLORS[channel.status],
+                            }}
+                          >
+                            <option value="productivo" style={{ color: CHANNEL_STATUS_COLORS.productivo }}>
+                              {CHANNEL_STATUS_LABELS.productivo}
+                            </option>
+                            <option value="piloto" style={{ color: CHANNEL_STATUS_COLORS.piloto }}>
+                              {CHANNEL_STATUS_LABELS.piloto}
+                            </option>
+                            <option value="desarrollo" style={{ color: CHANNEL_STATUS_COLORS.desarrollo }}>
+                              {CHANNEL_STATUS_LABELS.desarrollo}
+                            </option>
+                          </select>
+                        </div>
+
+                        {/* Remove Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveChannel(index)}
+                          className="p-1.5 text-gray-400 hover:text-banorte-red hover:bg-red-50 rounded transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-200 my-2"></div>
+
+            {/* Platforms - Secondary (collapsed) */}
+            <details className="group">
+              <summary className="text-sm font-medium text-banorte-dark mb-3 cursor-pointer hover:text-banorte-red flex items-center gap-2">
+                <Globe size={16} className="text-banorte-gray" />
+                Versiones por plataforma (opcional)
+                <span className="text-xs text-banorte-gray group-open:hidden">(expandir)</span>
+              </summary>
+              <div className="space-y-3 mt-3">
                 {platformConfig.map(({ key, label, icon: Icon }) => (
                   <div key={key} className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer min-w-[120px]">
@@ -446,7 +611,7 @@ export function ServiceFormModal({
                   </div>
                 ))}
               </div>
-            </div>
+            </details>
 
             {/* Divider */}
             <div className="border-t border-gray-200 my-2"></div>

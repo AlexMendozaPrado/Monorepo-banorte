@@ -4,6 +4,7 @@ import { VersionStatus, getMostCriticalStatus } from '../value-objects/VersionSt
 import { ProjectStatus } from '../value-objects/ProjectStatus';
 import { EntityType } from '../value-objects/EntityType';
 import { ResponsiblePerson, createResponsibleArray } from '../value-objects/ResponsiblePerson';
+import { ChannelVersion, ChannelType } from '../value-objects/Channel';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -43,6 +44,8 @@ export interface CreateServiceData {
     ios?: SDKVersionData;
     android?: SDKVersionData;
   };
+  // Canales de Banorte
+  channels?: ChannelVersion[];
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;
@@ -68,6 +71,8 @@ export class Service {
   readonly lastCheckedAt?: Date;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+  // Canales de Banorte
+  readonly channels: ChannelVersion[];
   // Campos Banorte
   readonly projectStatus: ProjectStatus;
   readonly entity: EntityType;
@@ -89,6 +94,8 @@ export class Service {
     lastCheckedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+    // Canales de Banorte
+    channels: ChannelVersion[];
     // Campos Banorte
     projectStatus: ProjectStatus;
     entity: EntityType;
@@ -109,6 +116,8 @@ export class Service {
     this.lastCheckedAt = data.lastCheckedAt;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
+    // Canales de Banorte
+    this.channels = data.channels;
     // Campos Banorte
     this.projectStatus = data.projectStatus;
     this.entity = data.entity;
@@ -147,6 +156,8 @@ export class Service {
       versions,
       createdAt: now,
       updatedAt: now,
+      // Canales de Banorte
+      channels: data.channels ?? [],
       // Campos Banorte con valores por defecto
       projectStatus: data.projectStatus ?? 'iniciativa',
       entity: data.entity ?? 'banco',
@@ -173,6 +184,8 @@ export class Service {
     lastCheckedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+    // Canales de Banorte
+    channels?: ChannelVersion[];
     // Campos Banorte
     projectStatus?: ProjectStatus;
     entity?: EntityType;
@@ -185,6 +198,7 @@ export class Service {
   }): Service {
     return new Service({
       ...data,
+      channels: data.channels ?? [],
       projectStatus: data.projectStatus ?? 'iniciativa',
       entity: data.entity ?? 'banco',
       hasASM: data.hasASM ?? false,
@@ -299,6 +313,34 @@ export class Service {
   }
 
   /**
+   * Obtiene los canales del servicio
+   */
+  getChannels(): ChannelVersion[] {
+    return this.channels;
+  }
+
+  /**
+   * Obtiene el número de canales donde está implementado
+   */
+  getChannelsCount(): number {
+    return this.channels.length;
+  }
+
+  /**
+   * Verifica si el servicio está en un canal específico
+   */
+  isInChannel(channel: ChannelType): boolean {
+    return this.channels.some(c => c.channel === channel);
+  }
+
+  /**
+   * Obtiene la versión para un canal específico
+   */
+  getVersionForChannel(channel: ChannelType): ChannelVersion | undefined {
+    return this.channels.find(c => c.channel === channel);
+  }
+
+  /**
    * Serializa a JSON
    */
   toJSON() {
@@ -318,6 +360,9 @@ export class Service {
       lastCheckedAt: this.lastCheckedAt?.toISOString(),
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
+      // Canales de Banorte
+      channels: this.channels,
+      channelsCount: this.getChannelsCount(),
       // Campos Banorte
       projectStatus: this.projectStatus,
       entity: this.entity,

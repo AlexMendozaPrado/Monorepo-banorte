@@ -10,6 +10,7 @@ import {
 } from '../../domain/exceptions/DomainException';
 import { ProjectStatus } from '../../domain/value-objects/ProjectStatus';
 import { EntityType } from '../../domain/value-objects/EntityType';
+import { ChannelVersion } from '../../domain/value-objects/Channel';
 
 /**
  * Input para actualizar un servicio
@@ -26,6 +27,8 @@ export interface UpdateServiceInput {
     ios?: { currentVersion: string } | null;
     android?: { currentVersion: string } | null;
   };
+  // Canales de Banorte
+  channels?: ChannelVersion[];
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;
@@ -78,6 +81,7 @@ export class UpdateServiceUseCase {
         documentationUrl: string;
         logoUrl: string;
         versions: ServiceVersions;
+        channels: ChannelVersion[];
         projectStatus: ProjectStatus;
         entity: EntityType;
         hasASM: boolean;
@@ -129,6 +133,11 @@ export class UpdateServiceUseCase {
         updateData.responsibleERN = input.responsibleERN;
       }
 
+      // Manejar canales
+      if (input.channels !== undefined) {
+        updateData.channels = input.channels;
+      }
+
       // Manejar versiones
       if (input.versions !== undefined) {
         const newVersions: ServiceVersions = { ...existingService.versions };
@@ -163,10 +172,11 @@ export class UpdateServiceUseCase {
           });
         }
 
-        // Validar que quede al menos una plataforma
+        // Validar que quede al menos una plataforma o canal
         const hasPlatform = newVersions.web || newVersions.ios || newVersions.android;
-        if (!hasPlatform) {
-          throw new ValidationException('At least one platform version is required');
+        const hasChannel = (input.channels !== undefined ? input.channels : existingService.channels).length > 0;
+        if (!hasPlatform && !hasChannel) {
+          throw new ValidationException('At least one platform version or channel is required');
         }
 
         updateData.versions = newVersions;

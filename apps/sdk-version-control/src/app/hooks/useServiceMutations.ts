@@ -5,6 +5,7 @@ import { ServiceDTO } from '@/core/application/dtos/ServiceDTO';
 import { ServiceCategory } from '@/core/domain/entities/Service';
 import { ProjectStatus } from '@/core/domain/value-objects/ProjectStatus';
 import { EntityType } from '@/core/domain/value-objects/EntityType';
+import { ChannelVersion } from '@/core/domain/value-objects/Channel';
 
 /**
  * Input para crear un servicio
@@ -20,6 +21,8 @@ export interface CreateServiceData {
     ios?: { currentVersion: string };
     android?: { currentVersion: string };
   };
+  // Canales de Banorte
+  channels?: ChannelVersion[];
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;
@@ -45,6 +48,8 @@ export interface UpdateServiceData {
     ios?: { currentVersion: string } | null;
     android?: { currentVersion: string } | null;
   };
+  // Canales de Banorte
+  channels?: ChannelVersion[];
   // Campos Banorte
   projectStatus?: ProjectStatus;
   entity?: EntityType;

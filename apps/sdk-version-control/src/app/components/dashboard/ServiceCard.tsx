@@ -12,11 +12,19 @@ import {
   Pencil,
   Trash2,
   Calendar,
+  Layers,
 } from 'lucide-react';
 import { ServiceDTO, PlatformVersionDTO } from '@/core/application/dtos/ServiceDTO';
 import { PlatformType } from '@/core/domain/value-objects/PlatformType';
 import { PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/value-objects/ProjectStatus';
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS } from '@/core/domain/value-objects/EntityType';
+import {
+  ChannelVersion,
+  CHANNEL_LABELS,
+  CHANNEL_SHORT_LABELS,
+  CHANNEL_STATUS_COLORS,
+  CHANNEL_STATUS_LABELS,
+} from '@/core/domain/value-objects/Channel';
 import { StatusBadge } from './StatusBadge';
 
 interface ServiceCardProps {
@@ -72,6 +80,54 @@ function PlatformCell({
           Latest: {data.latestVersion}
         </span>
       )}
+    </div>
+  );
+}
+
+function ChannelCell({ data }: { data: ChannelVersion }) {
+  const statusColor = CHANNEL_STATUS_COLORS[data.status];
+  const statusLabel = CHANNEL_STATUS_LABELS[data.status];
+  const channelLabel = CHANNEL_LABELS[data.channel];
+  const channelShort = CHANNEL_SHORT_LABELS[data.channel];
+
+  return (
+    <div className="flex items-center justify-between p-2 rounded bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className="flex-shrink-0 w-8 h-8 rounded-md flex items-center justify-center text-white text-xs font-bold"
+          style={{ backgroundColor: statusColor }}
+          title={channelLabel}
+        >
+          {channelShort}
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-banorte-dark truncate" title={channelLabel}>
+            {channelLabel}
+          </p>
+          <p className="text-[10px] text-banorte-gray">{statusLabel}</p>
+        </div>
+      </div>
+      <span className="font-bold text-banorte-dark text-sm flex-shrink-0 ml-2">
+        {data.version}
+      </span>
+    </div>
+  );
+}
+
+function ChannelsGrid({ channels }: { channels: ChannelVersion[] }) {
+  if (!channels || channels.length === 0) {
+    return (
+      <div className="text-center py-4 text-sm text-banorte-gray">
+        Sin canales configurados
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {channels.map((channel) => (
+        <ChannelCell key={channel.channel} data={channel} />
+      ))}
     </div>
   );
 }
@@ -136,7 +192,7 @@ export function ServiceCard({
           </div>
         </div>
 
-        {/* Badges Strip - ProjectStatus, Entity, ASM */}
+        {/* Badges Strip - ProjectStatus, Entity, ASM, Channels Count */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
           <span
             className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full text-white"
@@ -159,14 +215,38 @@ export function ServiceCard({
           >
             ASM: {service.hasASM ? 'Si' : 'No'}
           </span>
+          {service.channelsCount > 0 && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
+              <Layers size={10} />
+              {service.channelsCount} canal{service.channelsCount !== 1 ? 'es' : ''}
+            </span>
+          )}
         </div>
 
-        {/* Platform Grid */}
-        <div className="grid grid-cols-3 gap-2 mb-5">
-          <PlatformCell type="web" data={service.versions.web} />
-          <PlatformCell type="ios" data={service.versions.ios} />
-          <PlatformCell type="android" data={service.versions.android} />
+        {/* Channels Grid - Principal Section */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Layers size={14} className="text-banorte-gray" />
+            <span className="text-xs font-semibold text-banorte-gray uppercase tracking-wide">
+              Canales
+            </span>
+          </div>
+          <ChannelsGrid channels={service.channels} />
         </div>
+
+        {/* Platform Grid - Secondary (collapsed by default) */}
+        {(service.versions.web || service.versions.ios || service.versions.android) && (
+          <details className="mb-4">
+            <summary className="text-xs font-medium text-banorte-gray cursor-pointer hover:text-banorte-dark mb-2">
+              Ver versiones por plataforma
+            </summary>
+            <div className="grid grid-cols-3 gap-2">
+              <PlatformCell type="web" data={service.versions.web} />
+              <PlatformCell type="ios" data={service.versions.ios} />
+              <PlatformCell type="android" data={service.versions.android} />
+            </div>
+          </details>
+        )}
 
         {/* Footer with avatars, date, and actions */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">

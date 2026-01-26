@@ -1,7 +1,7 @@
 {
   "$schema": "./services.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2024-12-16T00:00:00Z",
+  "lastUpdated": "2026-01-26T00:00:00Z",
   "services": [
     {
       "id": "incode",
@@ -24,6 +24,12 @@
           "status": "outdated"
         }
       },
+      "channels": [
+        { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "banorte-contrata", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
+        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" }
+      ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
@@ -54,6 +60,12 @@
           "status": "warning"
         }
       },
+      "channels": [
+        { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" },
+        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
+      ],
       "projectStatus": "piloto",
       "entity": "filial",
       "hasASM": false,
@@ -84,6 +96,11 @@
           "status": "outdated"
         }
       },
+      "channels": [
+        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
+        { "channel": "casa-de-bolsa", "version": "-", "status": "piloto" },
+        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" }
+      ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
@@ -110,6 +127,11 @@
           "status": "current"
         }
       },
+      "channels": [
+        { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "banorte-contrata", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" }
+      ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
@@ -140,6 +162,11 @@
           "status": "warning"
         }
       },
+      "channels": [
+        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
+        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" },
+        { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" }
+      ],
       "projectStatus": "desarrollo",
       "entity": "filial",
       "hasASM": false,
@@ -170,6 +197,10 @@
           "status": "current"
         }
       },
+      "channels": [
+        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
+        { "channel": "casa-de-bolsa", "version": "-", "status": "piloto" }
+      ],
       "projectStatus": "piloto",
       "entity": "banco",
       "hasASM": false,
@@ -200,6 +231,11 @@
           "status": "outdated"
         }
       },
+      "channels": [
+        { "channel": "banorte-movil", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "desarrollo" },
+        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" }
+      ],
       "projectStatus": "iniciativa",
       "entity": "filial",
       "hasASM": false,
@@ -230,6 +266,12 @@
           "status": "current"
         }
       },
+      "channels": [
+        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" },
+        { "channel": "banortec", "version": "5.32.0", "status": "desarrollo" },
+        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
+        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" }
+      ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
