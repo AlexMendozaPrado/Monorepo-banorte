@@ -1,93 +1,152 @@
 {
   "$schema": "./services.schema.json",
   "version": "1.0.0",
-  "lastUpdated": "2026-01-26T00:00:00Z",
+  "lastUpdated": "2026-01-27T01:43:18.941Z",
   "services": [
     {
-      "id": "incode",
-      "name": "Incode",
+      "id": "biocatch",
+      "name": "BioCatch",
       "category": "Identity",
-      "description": "SDK de verificacion de identidad biometrica y validacion de documentos",
-      "documentationUrl": "https://docs.incode.com",
-      "logoUrl": "https://cdn.brandfetch.io/id8aHoSKnz/w/400/h/400/theme/dark/icon.jpeg",
+      "description": "Plataforma de biometria conductual para deteccion de fraude",
+      "documentationUrl": "https://www.biocatch.com/docs",
+      "logoUrl": "https://cdn.brandfetch.io/idnPZH2T6m/w/400/h/400/theme/dark/icon.jpeg",
       "versions": {
-        "web": { "currentVersion": "5.2.1", "status": "current" },
-        "ios": { "currentVersion": "5.1.0", "status": "current" },
-        "android": { "currentVersion": "4.9.2", "status": "current" }
+        "web": {
+          "currentVersion": "4.1.0",
+          "status": "unknown"
+        },
+        "ios": {
+          "currentVersion": "4.0.2",
+          "status": "unknown"
+        },
+        "android": {
+          "currentVersion": "4.0.1",
+          "status": "unknown"
+        }
       },
       "channels": [
-        { "channel": "banorte-movil", "version": "5.35.0", "status": "productivo" },
-        { "channel": "banorte-contrata", "version": "5.35.0", "status": "productivo" },
-        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "productivo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "productivo" },
-        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
-        { "channel": "casa-de-bolsa", "version": "1.0.0", "status": "productivo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
+        {
+          "channel": "banorte-movil",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-contrata",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "sgv1-up-tdc",
+          "version": "1.86.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "autoservicio-persona-moral",
+          "version": "1.78.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banortec",
+          "version": "5.32.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-movil-jovenes-sigma",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "auto-en-linea",
+          "version": "1.84.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "casa-de-bolsa",
+          "version": "1.0.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "mbio-web",
+          "version": "1.81.0",
+          "status": "productivo"
+        }
       ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
-      "implementationDate": "2025-10-17",
+      "implementationDate": "2025-07-10",
       "dateConfirmed": true,
-      "responsibleBusiness": "Lucia Olivares",
-      "responsibleIT": "Noe Valdez Gaona",
-      "responsibleERN": "Liliana Pamela Quintero"
-    },
-    {
-      "id": "trueid",
-      "name": "TruID",
-      "category": "Identity",
-      "description": "Plataforma de verificacion de identidad digital y autenticacion",
-      "documentationUrl": "https://trueid.com/docs",
-      "logoUrl": "https://www.truid.ai/images/truid_logo_main.png",
-      "versions": {
-        "ios": { "currentVersion": "3.2.0", "status": "current" },
-        "android": { "currentVersion": "3.1.5", "status": "current" }
-      },
-      "channels": [
-        { "channel": "banorte-movil", "version": "5.35.0", "status": "productivo" },
-        { "channel": "banorte-contrata", "version": "5.35.0", "status": "productivo" },
-        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "productivo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "productivo" },
-        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
-        { "channel": "casa-de-bolsa", "version": "1.0.0", "status": "productivo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
-      ],
-      "projectStatus": "productivo",
-      "entity": "banco",
-      "hasASM": true,
-      "implementationDate": "2025-09-15",
-      "dateConfirmed": true,
-      "responsibleBusiness": "Nancy Gonzalez",
-      "responsibleIT": "Maria de Jesus Mercado",
-      "responsibleERN": "Carlos Rodriguez"
+      "responsibleBusiness": "Jorge de Jesus Quintanilla",
+      "responsibleIT": "Ana Martinez",
+      "responsibleERN": "Luis Hernandez"
     },
     {
       "id": "idlayr",
       "name": "IDlayr",
       "category": "Identity",
-      "description": "Capa de identidad para validacion y autenticacion de usuarios",
+      "description": "Capa de identidad para validacion y autenticacion de usuarios.",
       "documentationUrl": "https://idlayr.com/docs",
       "logoUrl": "https://cdn.brandfetch.io/idgUYcApA3/w/400/h/400/theme/dark/icon.jpeg",
       "versions": {
-        "web": { "currentVersion": "2.5.0", "status": "current" },
-        "ios": { "currentVersion": "2.4.1", "status": "current" },
-        "android": { "currentVersion": "2.4.0", "status": "current" }
+        "web": {
+          "currentVersion": "2.5.0",
+          "status": "unknown"
+        },
+        "ios": {
+          "currentVersion": "2.4.1",
+          "status": "unknown"
+        },
+        "android": {
+          "currentVersion": "2.4.0",
+          "status": "unknown"
+        }
       },
       "channels": [
-        { "channel": "banorte-movil", "version": "5.35.0", "status": "productivo" },
-        { "channel": "banorte-contrata", "version": "5.35.0", "status": "productivo" },
-        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "productivo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "productivo" },
-        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
-        { "channel": "casa-de-bolsa", "version": "1.0.0", "status": "productivo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
+        {
+          "channel": "banorte-movil",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-contrata",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "sgv1-up-tdc",
+          "version": "1.86.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "autoservicio-persona-moral",
+          "version": "1.78.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banortec",
+          "version": "5.32.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-movil-jovenes-sigma",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "auto-en-linea",
+          "version": "1.84.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "casa-de-bolsa",
+          "version": "1.0.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "mbio-web",
+          "version": "1.81.0",
+          "status": "productivo"
+        }
       ],
       "projectStatus": "productivo",
       "entity": "banco",
@@ -99,6 +158,83 @@
       "responsibleERN": "Patricia Mendez"
     },
     {
+      "id": "incode",
+      "name": "Incode",
+      "category": "Identity",
+      "description": "SDK de verificacion de identidad biometrica y validacion de documentos",
+      "documentationUrl": "https://docs.incode.com",
+      "logoUrl": "https://cdn.brandfetch.io/id8aHoSKnz/w/400/h/400/theme/dark/icon.jpeg",
+      "versions": {
+        "web": {
+          "currentVersion": "5.2.1",
+          "status": "unknown"
+        },
+        "ios": {
+          "currentVersion": "5.1.0",
+          "status": "unknown"
+        },
+        "android": {
+          "currentVersion": "4.9.2",
+          "status": "unknown"
+        }
+      },
+      "channels": [
+        {
+          "channel": "banorte-movil",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-contrata",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "sgv1-up-tdc",
+          "version": "1.86.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "autoservicio-persona-moral",
+          "version": "1.78.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banortec",
+          "version": "5.32.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-movil-jovenes-sigma",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "auto-en-linea",
+          "version": "1.84.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "casa-de-bolsa",
+          "version": "1.0.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "mbio-web",
+          "version": "1.81.0",
+          "status": "productivo"
+        }
+      ],
+      "projectStatus": "productivo",
+      "entity": "banco",
+      "hasASM": true,
+      "implementationDate": "2025-10-17",
+      "dateConfirmed": true,
+      "responsibleBusiness": "Lucia Olivares",
+      "responsibleIT": "Noe Valdez Gaona",
+      "responsibleERN": "Liliana Pamela Quintero"
+    },
+    {
       "id": "mbiom",
       "name": "MBIoM",
       "category": "Identity",
@@ -106,19 +242,61 @@
       "documentationUrl": "https://mbiom.banorte.com/docs",
       "logoUrl": "https://ui-avatars.com/api/?name=MBIoM&background=EC0029&color=fff&bold=true&size=128",
       "versions": {
-        "ios": { "currentVersion": "1.8.0", "status": "current" },
-        "android": { "currentVersion": "1.7.5", "status": "current" }
+        "ios": {
+          "currentVersion": "1.8.0",
+          "status": "unknown"
+        },
+        "android": {
+          "currentVersion": "1.7.5",
+          "status": "unknown"
+        }
       },
       "channels": [
-        { "channel": "banorte-movil", "version": "5.35.0", "status": "productivo" },
-        { "channel": "banorte-contrata", "version": "5.35.0", "status": "productivo" },
-        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "productivo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "productivo" },
-        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
-        { "channel": "casa-de-bolsa", "version": "1.0.0", "status": "productivo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
+        {
+          "channel": "banorte-movil",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-contrata",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "sgv1-up-tdc",
+          "version": "1.86.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "autoservicio-persona-moral",
+          "version": "1.78.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banortec",
+          "version": "5.32.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-movil-jovenes-sigma",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "auto-en-linea",
+          "version": "1.84.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "casa-de-bolsa",
+          "version": "1.0.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "mbio-web",
+          "version": "1.81.0",
+          "status": "productivo"
+        }
       ],
       "projectStatus": "productivo",
       "entity": "banco",
@@ -130,36 +308,77 @@
       "responsibleERN": "Miguel Torres"
     },
     {
-      "id": "biocatch",
-      "name": "BioCatch",
+      "id": "trueid",
+      "name": "TruID",
       "category": "Identity",
-      "description": "Plataforma de biometria conductual para deteccion de fraude",
-      "documentationUrl": "https://www.biocatch.com/docs",
-      "logoUrl": "https://cdn.brandfetch.io/idnPZH2T6m/w/400/h/400/theme/dark/icon.jpeg",
+      "description": "Plataforma de verificacion de identidad digital y autenticacion",
+      "documentationUrl": "https://trueid.com/docs",
+      "logoUrl": "https://www.truid.ai/images/truid_logo_main.png",
       "versions": {
-        "web": { "currentVersion": "4.1.0", "status": "current" },
-        "ios": { "currentVersion": "4.0.2", "status": "current" },
-        "android": { "currentVersion": "4.0.1", "status": "current" }
+        "ios": {
+          "currentVersion": "3.2.0",
+          "status": "unknown"
+        },
+        "android": {
+          "currentVersion": "3.1.5",
+          "status": "unknown"
+        }
       },
       "channels": [
-        { "channel": "banorte-movil", "version": "5.35.0", "status": "productivo" },
-        { "channel": "banorte-contrata", "version": "5.35.0", "status": "productivo" },
-        { "channel": "sgv1-up-tdc", "version": "1.86.0", "status": "productivo" },
-        { "channel": "autoservicio-persona-moral", "version": "1.78.0", "status": "productivo" },
-        { "channel": "banortec", "version": "5.32.0", "status": "productivo" },
-        { "channel": "banorte-movil-jovenes-sigma", "version": "5.35.0", "status": "productivo" },
-        { "channel": "auto-en-linea", "version": "1.84.0", "status": "productivo" },
-        { "channel": "casa-de-bolsa", "version": "1.0.0", "status": "productivo" },
-        { "channel": "mbio-web", "version": "1.81.0", "status": "productivo" }
+        {
+          "channel": "banorte-movil",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-contrata",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "sgv1-up-tdc",
+          "version": "1.86.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "autoservicio-persona-moral",
+          "version": "1.78.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banortec",
+          "version": "5.32.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "banorte-movil-jovenes-sigma",
+          "version": "5.35.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "auto-en-linea",
+          "version": "1.84.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "casa-de-bolsa",
+          "version": "1.0.0",
+          "status": "productivo"
+        },
+        {
+          "channel": "mbio-web",
+          "version": "1.81.0",
+          "status": "productivo"
+        }
       ],
       "projectStatus": "productivo",
       "entity": "banco",
       "hasASM": true,
-      "implementationDate": "2025-07-10",
+      "implementationDate": "2025-09-15",
       "dateConfirmed": true,
-      "responsibleBusiness": "Jorge de Jesus Quintanilla",
-      "responsibleIT": "Ana Martinez",
-      "responsibleERN": "Luis Hernandez"
+      "responsibleBusiness": "Nancy Gonzalez",
+      "responsibleIT": "Maria de Jesus Mercado",
+      "responsibleERN": "Carlos Rodriguez"
     }
   ]
 }
