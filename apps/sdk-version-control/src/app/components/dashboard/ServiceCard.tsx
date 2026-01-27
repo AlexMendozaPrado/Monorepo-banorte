@@ -15,6 +15,7 @@ import { PROJECT_STATUS_LABELS, PROJECT_STATUS_COLORS } from '@/core/domain/valu
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS } from '@/core/domain/value-objects/EntityType';
 import {
   ChannelVersion,
+  ChannelStatus,
   CHANNEL_LABELS,
   CHANNEL_SHORT_LABELS,
   CHANNEL_STATUS_COLORS,
@@ -30,37 +31,11 @@ interface ServiceCardProps {
   onDelete?: (service: ServiceDTO) => void;
 }
 
-function ChannelCell({ data }: { data: ChannelVersion }) {
-  const statusColor = CHANNEL_STATUS_COLORS[data.status];
-  const statusLabel = CHANNEL_STATUS_LABELS[data.status];
-  const channelLabel = CHANNEL_LABELS[data.channel];
-  const channelShort = CHANNEL_SHORT_LABELS[data.channel];
-
-  return (
-    <div className="flex items-center justify-between p-2 rounded bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          className="flex-shrink-0 w-8 h-8 rounded-md flex items-center justify-center text-white text-xs font-bold"
-          style={{ backgroundColor: statusColor }}
-          title={channelLabel}
-        >
-          {channelShort}
-        </span>
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-banorte-dark truncate" title={channelLabel}>
-            {channelLabel}
-          </p>
-          <p className="text-[10px] text-banorte-gray">{statusLabel}</p>
-        </div>
-      </div>
-      <span className="font-bold text-banorte-dark text-sm flex-shrink-0 ml-2">
-        {data.version}
-      </span>
-    </div>
-  );
-}
-
-function ChannelsGrid({ channels }: { channels: ChannelVersion[] }) {
+/**
+ * Componente compacto que agrupa canales por estado
+ * Muestra badges con abreviación y versión, agrupados por Productivo/Piloto/Desarrollo
+ */
+function GroupedChannelsBadges({ channels }: { channels: ChannelVersion[] }) {
   if (!channels || channels.length === 0) {
     return (
       <div className="text-center py-4 text-sm text-banorte-gray">
@@ -69,11 +44,60 @@ function ChannelsGrid({ channels }: { channels: ChannelVersion[] }) {
     );
   }
 
+  // Agrupar canales por estado
+  const grouped = channels.reduce((acc, channel) => {
+    if (!acc[channel.status]) acc[channel.status] = [];
+    acc[channel.status].push(channel);
+    return acc;
+  }, {} as Record<ChannelStatus, ChannelVersion[]>);
+
+  const statusOrder: ChannelStatus[] = ['productivo', 'piloto', 'desarrollo'];
+
   return (
-    <div className="space-y-1.5">
-      {channels.map((channel) => (
-        <ChannelCell key={channel.channel} data={channel} />
-      ))}
+    <div className="space-y-2">
+      {statusOrder.map((status) => {
+        const statusChannels = grouped[status];
+        if (!statusChannels || statusChannels.length === 0) return null;
+
+        const statusColor = CHANNEL_STATUS_COLORS[status];
+        const statusLabel = CHANNEL_STATUS_LABELS[status];
+
+        return (
+          <div key={status} className="flex items-start gap-2">
+            {/* Indicador de estado con tooltip */}
+            <div
+              className="flex-shrink-0 w-2 h-2 rounded-full mt-1.5"
+              style={{ backgroundColor: statusColor }}
+              title={statusLabel}
+            />
+
+            {/* Badges de canales en este estado */}
+            <div className="flex flex-wrap gap-1">
+              {statusChannels.map((channel) => {
+                const channelShort = CHANNEL_SHORT_LABELS[channel.channel];
+                const channelLabel = CHANNEL_LABELS[channel.channel];
+
+                return (
+                  <span
+                    key={channel.channel}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 hover:bg-gray-200 transition-colors cursor-default"
+                    title={`${channelLabel} - ${statusLabel} - v${channel.version}`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: statusColor }}
+                    />
+                    {channelShort}
+                    <span className="text-banorte-gray font-normal">
+                      {channel.version}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -169,7 +193,7 @@ export function ServiceCard({
           )}
         </div>
 
-        {/* Channels Grid - Principal Section */}
+        {/* Channels - Grouped by Status (Compact View) */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Layers size={14} className="text-banorte-gray" />
@@ -177,7 +201,7 @@ export function ServiceCard({
               Canales
             </span>
           </div>
-          <ChannelsGrid channels={service.channels} />
+          <GroupedChannelsBadges channels={service.channels} />
         </div>
 
         {/* Footer with avatars, date, and actions */}
