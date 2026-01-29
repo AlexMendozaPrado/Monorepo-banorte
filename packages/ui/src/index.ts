@@ -10,6 +10,14 @@ export {
   Modal,
   ProgressBar,
   Stepper,
+  SearchInput,
+  Select,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from './components';
 
 export type {
@@ -23,6 +31,15 @@ export type {
   ModalProps,
   ProgressBarProps,
   StepperProps,
+  SearchInputProps,
+  SelectProps,
+  SelectOption,
+  TableProps,
+  TableHeaderProps,
+  TableBodyProps,
+  TableRowProps,
+  TableHeadProps,
+  TableCellProps,
 } from './components';
 
 // Tokens

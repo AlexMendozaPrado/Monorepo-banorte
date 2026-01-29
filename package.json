@@ -23,6 +23,8 @@
     "dev:business-api": "turbo run dev --filter=business-rules-api",
     "start:business-api": "turbo run start --filter=business-rules-api",
     "dev:business-full": "turbo run dev --filter=business-rules --filter=business-rules-api",
+    "dev:bian-poc": "turbo run dev --filter=bian-poc",
+    "build:bian-poc": "turbo run build --filter=bian-poc",
     "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
