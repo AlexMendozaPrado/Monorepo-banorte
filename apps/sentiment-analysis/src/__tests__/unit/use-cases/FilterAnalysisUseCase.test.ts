@@ -183,7 +183,7 @@ describe('FilterAnalysisUseCase', () => {
 
   describe('Pagination', () => {
     beforeEach(() => {
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
     });
 
     it('should paginate results with default values', async () => {
@@ -295,7 +295,7 @@ describe('FilterAnalysisUseCase', () => {
 
   describe('Filter Summary', () => {
     beforeEach(() => {
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
     });
 
     it('should calculate sentiment distribution correctly', async () => {
@@ -356,7 +356,7 @@ describe('FilterAnalysisUseCase', () => {
 
   describe('Available Filter Options', () => {
     beforeEach(() => {
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
     });
 
     it('should return all unique clients', async () => {
@@ -441,7 +441,7 @@ describe('FilterAnalysisUseCase', () => {
 
     it('should handle invalid confidence ranges gracefully', async () => {
       // Arrange
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
       const query = {
         criteria: {
           minConfidence: 1.5, // Invalid: > 1
@@ -458,7 +458,7 @@ describe('FilterAnalysisUseCase', () => {
 
     it('should trim whitespace from client name filter', async () => {
       // Arrange
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
       const query = {
         criteria: { clientName: '  Cliente A  ' },
       };
@@ -472,7 +472,7 @@ describe('FilterAnalysisUseCase', () => {
 
     it('should ignore empty string filters', async () => {
       // Arrange
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
       const query = {
         criteria: {
           clientName: '',
@@ -525,7 +525,7 @@ describe('FilterAnalysisUseCase', () => {
 
     it('should handle date filter with same from and to date', async () => {
       // Arrange
-      mockRepository.seed(MOCK_ANALYSES_COLLECTION);
+      mockRepository.seed(getMockAnalysesCollection());
       const targetDate = new Date('2024-01-16');
       const query = {
         criteria: {

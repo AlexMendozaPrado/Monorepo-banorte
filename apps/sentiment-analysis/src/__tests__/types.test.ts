@@ -200,13 +200,6 @@ function testUtilityFunctions() {
   };
 }
 
-// Export test functions for potential use in actual tests
-export {
-  testDomainTypes,
-  testApiTypes,
-  testUtilityFunctions,
-};
-
 // Type assertion tests
 type AssertTrue<T extends true> = T;
 type AssertFalse<T extends false> = T;
@@ -220,4 +213,27 @@ type _TestApiResponseIsGeneric = AssertTrue<
   ApiResponse<string>['data'] extends string | undefined ? true : false
 >;
 
-console.log('✅ All TypeScript types are properly defined and compatible');
+describe('TypeScript type validation', () => {
+  it('should instantiate domain types correctly', () => {
+    const result = testDomainTypes();
+    expect(result.emotionScore).toBeDefined();
+    expect(result.sentimentType).toBeDefined();
+    expect(result.metrics).toBeDefined();
+    expect(result.analysis).toBeDefined();
+    expect(result.conversation).toBeDefined();
+  });
+
+  it('should define API types correctly', () => {
+    const result = testApiTypes();
+    expect(result.successResponse.success).toBe(true);
+    expect(result.errorResponse.success).toBe(false);
+    expect(result.analysisRequest.clientName).toBe('Test Client');
+  });
+
+  it('should execute utility functions correctly', () => {
+    const result = testUtilityFunctions();
+    expect(typeof result.sentimentText).toBe('string');
+    expect(typeof result.confidenceText).toBe('string');
+    expect(typeof result.dateText).toBe('string');
+  });
+});

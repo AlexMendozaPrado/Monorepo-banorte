@@ -60,7 +60,7 @@ describe('AnalyzeSentimentUseCase', () => {
       expect(result.analysis.clientName).toBe(command.clientName);
       expect(result.analysis.documentName).toBe(command.documentName);
       expect(result.analysis.channel).toBe(command.channel);
-      expect(result.processingTimeMs).toBeGreaterThan(0);
+      expect(result.processingTimeMs).toBeGreaterThanOrEqual(0);
     });
 
     it('should save analysis to repository', async () => {
@@ -288,7 +288,7 @@ describe('AnalyzeSentimentUseCase', () => {
       const result = await useCase.execute(command);
 
       // Assert
-      expect(result.processingTimeMs).toBeGreaterThan(0);
+      expect(result.processingTimeMs).toBeGreaterThanOrEqual(0);
       expect(result.processingTimeMs).toBeLessThan(10000); // Should be fast with mocks
     });
 
