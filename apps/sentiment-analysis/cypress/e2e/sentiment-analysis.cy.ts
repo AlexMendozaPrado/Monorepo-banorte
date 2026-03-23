@@ -32,7 +32,7 @@ describe('Sentiment Analysis - Complete Flow', () => {
 
     // Attach file to upload input
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: fileName,
       mimeType: 'application/pdf',
     });
@@ -48,7 +48,7 @@ describe('Sentiment Analysis - Complete Flow', () => {
   it('should validate required fields before submission', () => {
     // Upload a file
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
@@ -60,7 +60,7 @@ describe('Sentiment Analysis - Complete Flow', () => {
   it('should successfully analyze a PDF and display results', () => {
     // Upload PDF
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: 'test-document.pdf',
       mimeType: 'application/pdf',
     });
@@ -88,7 +88,7 @@ describe('Sentiment Analysis - Complete Flow', () => {
   it('should display analysis metrics correctly', () => {
     // Upload and analyze
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
@@ -110,7 +110,7 @@ describe('Sentiment Analysis - Complete Flow', () => {
   it('should show emotions breakdown', () => {
     // Upload and analyze
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
@@ -142,7 +142,7 @@ describe('Sentiment Analysis - Error Handling', () => {
 
     // Upload file
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
@@ -164,7 +164,7 @@ describe('Sentiment Analysis - Error Handling', () => {
   it('should reject non-PDF files', () => {
     // Try to upload a non-PDF file
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test content',
+      fileContent: new Blob(['test content']),
       fileName: 'test.txt',
       mimeType: 'text/plain',
     });
@@ -178,7 +178,7 @@ describe('Sentiment Analysis - Error Handling', () => {
     const largeContent = 'x'.repeat(11 * 1024 * 1024);
 
     cy.get('input[type="file"]').attachFile({
-      fileContent: largeContent,
+      fileContent: new Blob([largeContent]),
       fileName: 'large.pdf',
       mimeType: 'application/pdf',
     });
@@ -209,7 +209,7 @@ describe('Sentiment Analysis - Navigation', () => {
 
     // Upload and analyze
     cy.get('input[type="file"]').attachFile({
-      fileContent: 'test PDF content',
+      fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });

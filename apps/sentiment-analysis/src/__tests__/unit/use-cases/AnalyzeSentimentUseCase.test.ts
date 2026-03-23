@@ -320,8 +320,6 @@ describe('AnalyzeSentimentUseCase', () => {
           fear: 0.4,
           surprise: 0.2,
           disgust: 0.3,
-          trust: 0.2,
-          anticipation: 0.3,
         },
         confidence: 0.88,
       });
@@ -346,8 +344,6 @@ describe('AnalyzeSentimentUseCase', () => {
           fear: 0.2,
           surprise: 0.2,
           disgust: 0.1,
-          trust: 0.4,
-          anticipation: 0.4,
         },
         confidence: 0.75,
       });
