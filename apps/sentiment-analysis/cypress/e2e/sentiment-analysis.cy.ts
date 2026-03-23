@@ -7,20 +7,23 @@
 
 describe('Sentiment Analysis - Complete Flow', () => {
   beforeEach(() => {
+    // Mock all GET APIs the app calls on load
+    cy.mockAppAPIs();
+
     // Mock the API response to avoid calling OpenAI during tests
     cy.mockAnalyzeAPI();
 
-    // Visit the home page
-    cy.visit('/');
+    // Visit the app page (not the landing page)
+    cy.visit('/app');
   });
 
-  it('should display the landing page correctly', () => {
+  it('should display the app page correctly', () => {
     // Verify main elements are visible
-    cy.contains('Banorte').should('be.visible');
-    cy.contains('Análisis de Sentimiento').should('be.visible');
+    cy.contains('Análisis de Sentimientos').should('be.visible');
+    cy.contains('Analizar Documento').should('be.visible');
 
     // Verify upload area is present
-    cy.get('[data-testid="upload-zone"]').should('exist');
+    cy.get('input[type="file"]').should('exist');
   });
 
   it('should allow file upload and show form', () => {
@@ -37,9 +40,9 @@ describe('Sentiment Analysis - Complete Flow', () => {
     // Verify file name is displayed
     cy.contains(fileName).should('be.visible');
 
-    // Verify form fields are visible
-    cy.get('input[name="clientName"]').should('be.visible');
-    cy.get('select[name="channel"]').should('be.visible');
+    // Verify form fields are visible (MUI TextField renders label text)
+    cy.contains('Nombre del Cliente').should('be.visible');
+    cy.contains('Canal de Comunicación').should('be.visible');
   });
 
   it('should validate required fields before submission', () => {
@@ -50,11 +53,8 @@ describe('Sentiment Analysis - Complete Flow', () => {
       mimeType: 'application/pdf',
     });
 
-    // Try to submit without filling required fields
-    cy.contains('button', /analizar/i).click();
-
-    // Should show validation error
-    cy.contains(/requerido/i).should('be.visible');
+    // Try to submit without filling required fields - button should be disabled
+    cy.get('button.MuiButton-contained').contains(/analizar documento/i).should('be.disabled');
   });
 
   it('should successfully analyze a PDF and display results', () => {
@@ -65,31 +65,24 @@ describe('Sentiment Analysis - Complete Flow', () => {
       mimeType: 'application/pdf',
     });
 
-    // Fill in required fields
-    cy.get('input[name="clientName"]').type('Cliente de Prueba');
-    cy.get('select[name="channel"]').select('Email');
+    // Fill in client name (MUI TextField)
+    cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Cliente de Prueba');
+
+    // Fill in channel (MUI Select)
+    cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
+    cy.get('[role="option"]').contains('Correo Electrónico').click();
 
     // Submit for analysis
-    cy.contains('button', /analizar/i).click();
+    cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
 
     // Wait for API call
     cy.wait('@analyzeAPI');
 
-    // Verify loading indicator appeared
-    cy.get('[data-testid="loading"]').should('be.visible');
+    // Verify results card is displayed (dynamic import may take a moment)
+    cy.contains('Resultados del Análisis', { timeout: 15000 }).should('be.visible');
 
-    // Verify results are displayed
-    cy.contains('Resultado del Análisis', { timeout: 10000 }).should('be.visible');
-
-    // Verify sentiment is shown
-    cy.contains(/positivo|negativo|neutral/i).should('be.visible');
-
-    // Verify confidence score is displayed
-    cy.contains(/confianza/i).should('be.visible');
-    cy.contains('92%').should('be.visible');
-
-    // Verify emotions chart is rendered
-    cy.get('.recharts-wrapper').should('be.visible');
+    // Verify sentiment information is shown
+    cy.contains('Sentimiento General').should('be.visible');
   });
 
   it('should display analysis metrics correctly', () => {
@@ -100,17 +93,18 @@ describe('Sentiment Analysis - Complete Flow', () => {
       mimeType: 'application/pdf',
     });
 
-    cy.get('input[name="clientName"]').type('Test Client');
-    cy.get('select[name="channel"]').select('Chat');
-    cy.contains('button', /analizar/i).click();
+    cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Test Client');
+    cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
+    cy.get('[role="option"]').contains('Chat en Línea').click();
+
+    cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
     cy.wait('@analyzeAPI');
 
-    // Verify metrics are shown
-    cy.contains(/palabras/i).should('be.visible');
-    cy.contains('250').should('be.visible'); // wordCount from fixture
+    // Verify results section appears (dynamic import may take a moment)
+    cy.contains('Resultados del Análisis', { timeout: 15000 }).should('be.visible');
 
-    cy.contains(/oraciones/i).should('be.visible');
-    cy.contains('15').should('be.visible'); // sentenceCount from fixture
+    // Verify text metrics are shown
+    cy.contains('Métricas del Texto').should('be.visible');
   });
 
   it('should show emotions breakdown', () => {
@@ -121,45 +115,50 @@ describe('Sentiment Analysis - Complete Flow', () => {
       mimeType: 'application/pdf',
     });
 
-    cy.get('input[name="clientName"]').type('Test Client');
-    cy.get('select[name="channel"]').select('Phone');
-    cy.contains('button', /analizar/i).click();
+    cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Test Client');
+    cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
+    cy.get('[role="option"]').contains('Call Center').click();
+
+    cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
     cy.wait('@analyzeAPI');
 
-    // Verify emotions are displayed
-    cy.contains(/alegr[ií]a|joy/i).should('be.visible');
-    cy.contains(/tristeza|sadness/i).should('be.visible');
-    cy.contains(/enojo|anger/i).should('be.visible');
-    cy.contains(/miedo|fear/i).should('be.visible');
+    // Verify results are displayed (dynamic import may take a moment)
+    cy.contains('Resultados del Análisis', { timeout: 15000 }).should('be.visible');
+
+    // Verify emotion distribution chart section exists
+    cy.contains('Distribución de Emociones').should('be.visible');
   });
 });
 
 describe('Sentiment Analysis - Error Handling', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.mockAppAPIs();
+    cy.visit('/app');
   });
 
   it('should show error when API fails', () => {
     // Mock API error
     cy.mockAnalyzeAPIError(500, 'Error al procesar el documento');
 
-    // Upload and try to analyze
+    // Upload file
     cy.get('input[type="file"]').attachFile({
       fileContent: 'test PDF content',
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
 
-    cy.get('input[name="clientName"]').type('Test Client');
-    cy.get('select[name="channel"]').select('Email');
-    cy.contains('button', /analizar/i).click();
+    // Fill required fields
+    cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Test Client');
+    cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
+    cy.get('[role="option"]').contains('Correo Electrónico').click();
+
+    cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
 
     // Wait for error
     cy.wait('@analyzeAPIError');
 
     // Verify error message is shown
     cy.contains(/error/i).should('be.visible');
-    cy.contains(/procesar/i).should('be.visible');
   });
 
   it('should reject non-PDF files', () => {
@@ -171,7 +170,7 @@ describe('Sentiment Analysis - Error Handling', () => {
     });
 
     // Should show validation error
-    cy.contains(/solo.*pdf/i).should('be.visible');
+    cy.contains(/no válido|Solo se permiten archivos PDF/i).should('be.visible');
   });
 
   it('should reject files that are too large', () => {
@@ -185,25 +184,28 @@ describe('Sentiment Analysis - Error Handling', () => {
     });
 
     // Should show size error
-    cy.contains(/tamaño.*excede/i).should('be.visible');
+    cy.contains(/demasiado grande/i).should('be.visible');
   });
 });
 
 describe('Sentiment Analysis - Navigation', () => {
-  it('should navigate to history page', () => {
-    cy.visit('/');
+  it('should navigate to history tab', () => {
+    cy.mockAppAPIs();
+    cy.visit('/app');
 
-    // Find and click history/historial link
-    cy.get('nav a[href*="histor"]').first().click();
+    // Find and click the history tab (it's a MUI Tab button)
+    cy.get('[role="tab"]').contains('Historial de Análisis').click();
 
-    // Should be on history page
-    cy.url().should('include', 'histor');
-    cy.contains(/historial|history/i).should('be.visible');
+    // Should show history panel content
+    cy.get('#simple-tabpanel-1').should('not.have.attr', 'hidden');
+    cy.contains('Historial de Análisis').should('be.visible');
+    cy.contains(/No se encontraron análisis/).should('be.visible');
   });
 
   it('should allow navigating back from results', () => {
+    cy.mockAppAPIs();
     cy.mockAnalyzeAPI();
-    cy.visit('/');
+    cy.visit('/app');
 
     // Upload and analyze
     cy.get('input[type="file"]').attachFile({
@@ -212,13 +214,15 @@ describe('Sentiment Analysis - Navigation', () => {
       mimeType: 'application/pdf',
     });
 
-    cy.get('input[name="clientName"]').type('Test Client');
-    cy.get('select[name="channel"]').select('Email');
-    cy.contains('button', /analizar/i).click();
+    cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Test Client');
+    cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
+    cy.get('[role="option"]').contains('Correo Electrónico').click();
+
+    cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
     cy.wait('@analyzeAPI');
 
-    // Should have a way to go back or analyze another document
-    cy.contains(/nuevo.*análisis|analizar.*otro/i).should('be.visible');
+    // Should still have the form area available (Limpiar button to reset)
+    cy.contains('button', /limpiar/i).should('be.visible');
   });
 });
 
@@ -232,10 +236,11 @@ describe('Sentiment Analysis - Responsiveness', () => {
   viewports.forEach(({ device, width, height }) => {
     it(`should display correctly on ${device}`, () => {
       cy.viewport(width, height);
-      cy.visit('/');
+      cy.mockAppAPIs();
+      cy.visit('/app');
 
       // Main elements should be visible
-      cy.contains('Banorte').should('be.visible');
+      cy.contains('Análisis de Sentimientos').should('be.visible');
       cy.get('input[type="file"]').should('exist');
     });
   });

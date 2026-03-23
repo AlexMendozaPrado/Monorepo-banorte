@@ -1,5 +1,6 @@
 {
-  "analysis": {
+  "success": true,
+  "data": {
     "id": "test-analysis-123",
     "clientName": "Cliente de Prueba",
     "documentName": "test-document.pdf",
@@ -26,7 +27,7 @@
     "confidence": 0.92,
     "channel": "Email",
     "createdAt": "2024-01-20T10:00:00.000Z",
-    "updatedAt": "2024-01-20T10:00:00.000Z"
-  },
-  "processingTimeMs": 5000
+    "updatedAt": "2024-01-20T10:00:00.000Z",
+    "processingTimeMs": 5000
+  }
 }
