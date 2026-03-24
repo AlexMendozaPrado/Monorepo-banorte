@@ -8,76 +8,80 @@ describe('FilterAnalysisUseCase', () => {
   let mockRepository: SentimentAnalysisRepositoryMock;
 
   beforeEach(() => {
+    // Crear mock fresco del repositorio
     mockRepository = new SentimentAnalysisRepositoryMock();
+    // Inyectar el mock en el Use Case , qué patrón se esta utlizando ? 
     useCase = new FilterAnalysisUseCase(mockRepository);
   });
 
   afterEach(() => {
+    // Limpiar estado después de cada test
     mockRepository.reset();
   });
 
-  describe('Basic Filtering', () => {
+  describe('Filtrado Básico', () => {
     beforeEach(() => {
+      // Cargar datos de prueba (seed) en el repositorio mock
       mockRepository.seed(getMockAnalysesCollection());
     });
 
-    it('should return all analyses when no filter is applied', async () => {
-      // Arrange
+    it('debería retornar todos los análisis cuando no se aplica filtro', async () => {
+      // ARRANGE — sin filtros
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data).toHaveLength(4);
       expect(result.analyses.total).toBe(4);
       expect(result.filterSummary.totalMatches).toBe(4);
     });
 
-    it('should filter by client name', async () => {
-      // Arrange
+    it('debería filtrar por nombre de cliente', async () => {
+      // ARRANGE
       const query = {
         criteria: { clientName: 'Cliente A' },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — solo los del Cliente A
       expect(result.analyses.data).toHaveLength(2);
       expect(result.analyses.data.every(a => a.clientName === 'Cliente A')).toBe(true);
     });
 
-    it('should filter by sentiment type', async () => {
-      // Arrange
+    it('debería filtrar por tipo de sentimiento', async () => {
+      // ARRANGE
       const query = {
         criteria: { sentimentType: SentimentType.POSITIVE },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — solo los positivos
       expect(result.analyses.data).toHaveLength(2);
       expect(result.analyses.data.every(a => a.overallSentiment === SentimentType.POSITIVE)).toBe(true);
     });
 
-    it('should filter by channel', async () => {
-      // Arrange
+    it('debería filtrar por canal', async () => {
+      // ARRANGE
       const query = {
         criteria: { channel: 'Email' },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — solo los de Email
       expect(result.analyses.data).toHaveLength(2);
       expect(result.analyses.data.every(a => a.channel === 'Email')).toBe(true);
     });
 
-    it('should filter by date range', async () => {
-      // Arrange
+    it('debería filtrar por rango de fechas', async () => {
+      // ARRANGE
       const query = {
         criteria: {
           dateFrom: new Date('2024-01-16'),
@@ -85,43 +89,43 @@ describe('FilterAnalysisUseCase', () => {
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data).toHaveLength(2);
     });
 
-    it('should filter by minimum confidence', async () => {
-      // Arrange
+    it('debería filtrar por confianza mínima', async () => {
+      // ARRANGE — solo análisis con confianza >= 0.9
       const query = {
         criteria: { minConfidence: 0.9 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data.length).toBeGreaterThan(0);
       expect(result.analyses.data.every(a => a.confidence >= 0.9)).toBe(true);
     });
 
-    it('should filter by maximum confidence', async () => {
-      // Arrange
+    it('debería filtrar por confianza máxima', async () => {
+      // ARRANGE — solo análisis con confianza <= 0.8
       const query = {
         criteria: { maxConfidence: 0.8 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data.length).toBeGreaterThan(0);
       expect(result.analyses.data.every(a => a.confidence <= 0.8)).toBe(true);
     });
 
-    it('should filter by confidence range', async () => {
-      // Arrange
+    it('debería filtrar por rango de confianza', async () => {
+      // ARRANGE — confianza entre 0.85 y 0.93
       const query = {
         criteria: {
           minConfidence: 0.85,
@@ -129,21 +133,21 @@ describe('FilterAnalysisUseCase', () => {
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data.every(a => a.confidence >= 0.85 && a.confidence <= 0.93)).toBe(true);
     });
   });
 
-  describe('Combined Filters', () => {
+  describe('Filtros Combinados', () => {
     beforeEach(() => {
       mockRepository.seed(getMockAnalysesCollection());
     });
 
-    it('should apply multiple filters together', async () => {
-      // Arrange
+    it('debería aplicar múltiples filtros juntos', async () => {
+      // ARRANGE — combinar cliente + sentimiento + canal
       const query = {
         criteria: {
           clientName: 'Cliente A',
@@ -152,10 +156,10 @@ describe('FilterAnalysisUseCase', () => {
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — solo los que cumplen TODOS los criterios
       expect(result.analyses.data).toHaveLength(2);
       expect(result.analyses.data.every(a =>
         a.clientName === 'Cliente A' &&
@@ -164,115 +168,115 @@ describe('FilterAnalysisUseCase', () => {
       )).toBe(true);
     });
 
-    it('should return empty when filters match nothing', async () => {
-      // Arrange
+    it('debería retornar vacío cuando ningún filtro coincide', async () => {
+      // ARRANGE — cliente que no existe
       const query = {
         criteria: {
           clientName: 'Nonexistent Client',
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data).toHaveLength(0);
       expect(result.filterSummary.totalMatches).toBe(0);
     });
   });
 
-  describe('Pagination', () => {
+  describe('Paginación', () => {
     beforeEach(() => {
       mockRepository.seed(getMockAnalysesCollection());
     });
 
-    it('should paginate results with default values', async () => {
-      // Arrange
+    it('debería paginar resultados con valores por defecto', async () => {
+      // ARRANGE
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — página 1, límite 20 por defecto
       expect(result.analyses.page).toBe(1);
       expect(result.analyses.limit).toBe(20);
       expect(result.analyses.totalPages).toBe(1);
     });
 
-    it('should paginate with custom page size', async () => {
-      // Arrange
+    it('debería paginar con tamaño de página personalizado', async () => {
+      // ARRANGE — solo 2 resultados por página
       const query = {
         criteria: {},
         pagination: { page: 1, limit: 2 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data).toHaveLength(2);
       expect(result.analyses.limit).toBe(2);
       expect(result.analyses.totalPages).toBe(2);
     });
 
-    it('should return second page correctly', async () => {
-      // Arrange
+    it('debería retornar la segunda página correctamente', async () => {
+      // ARRANGE
       const query = {
         criteria: {},
         pagination: { page: 2, limit: 2 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data).toHaveLength(2);
       expect(result.analyses.page).toBe(2);
     });
 
-    it('should handle invalid page numbers', async () => {
-      // Arrange
+    it('debería manejar números de página inválidos', async () => {
+      // ARRANGE — página 0 (inválida)
       const query = {
         criteria: {},
         pagination: { page: 0, limit: 20 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
-      expect(result.analyses.page).toBe(1); // Should default to 1
+      // ASSERT — debería usar página 1 por defecto
+      expect(result.analyses.page).toBe(1);
     });
 
-    it('should limit maximum page size to 100', async () => {
-      // Arrange
+    it('debería limitar el tamaño máximo de página a 100', async () => {
+      // ARRANGE — pedir 500 resultados por página
       const query = {
         criteria: {},
         pagination: { page: 1, limit: 500 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
-      expect(result.analyses.limit).toBe(100); // Should cap at 100
+      // ASSERT — se limita a 100
+      expect(result.analyses.limit).toBe(100);
     });
 
-    it('should sort by createdAt descending by default', async () => {
-      // Arrange
+    it('debería ordenar por fecha descendente por defecto', async () => {
+      // ARRANGE
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — las fechas deben estar en orden descendente
       const dates = result.analyses.data.map(a => a.createdAt.getTime());
       const sortedDates = [...dates].sort((a, b) => b - a);
       expect(dates).toEqual(sortedDates);
     });
 
-    it('should sort by confidence ascending when specified', async () => {
-      // Arrange
+    it('debería ordenar por confianza ascendente cuando se especifica', async () => {
+      // ARRANGE
       const query = {
         criteria: {},
         pagination: {
@@ -283,29 +287,29 @@ describe('FilterAnalysisUseCase', () => {
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — las confianzas deben estar en orden ascendente
       const confidences = result.analyses.data.map(a => a.confidence);
       const sortedConfidences = [...confidences].sort((a, b) => a - b);
       expect(confidences).toEqual(sortedConfidences);
     });
   });
 
-  describe('Filter Summary', () => {
+  describe('Resumen de Filtros', () => {
     beforeEach(() => {
       mockRepository.seed(getMockAnalysesCollection());
     });
 
-    it('should calculate sentiment distribution correctly', async () => {
-      // Arrange
+    it('debería calcular la distribución de sentimientos correctamente', async () => {
+      // ARRANGE
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — 2 positivos, 1 neutral, 1 negativo
       expect(result.filterSummary.sentimentDistribution).toEqual({
         positive: 2,
         neutral: 1,
@@ -313,89 +317,89 @@ describe('FilterAnalysisUseCase', () => {
       });
     });
 
-    it('should calculate channel distribution correctly', async () => {
-      // Arrange
+    it('debería calcular la distribución de canales correctamente', async () => {
+      // ARRANGE
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.filterSummary.channelDistribution['Email']).toBe(2);
       expect(result.filterSummary.channelDistribution['Chat']).toBe(1);
       expect(result.filterSummary.channelDistribution['Phone']).toBe(1);
     });
 
-    it('should calculate average confidence correctly', async () => {
-      // Arrange
+    it('debería calcular el promedio de confianza correctamente', async () => {
+      // ARRANGE
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — promedio de (0.95 + 0.88 + 0.75 + 0.92) / 4
       const expectedAvg = (0.95 + 0.88 + 0.75 + 0.92) / 4;
       expect(result.filterSummary.averageConfidence).toBeCloseTo(expectedAvg, 2);
     });
 
-    it('should update summary when filters are applied', async () => {
-      // Arrange
+    it('debería actualizar el resumen cuando se aplican filtros', async () => {
+      // ARRANGE — filtrar solo positivos
       const query = {
         criteria: { sentimentType: SentimentType.POSITIVE },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — el resumen solo refleja los filtrados
       expect(result.filterSummary.totalMatches).toBe(2);
       expect(result.filterSummary.sentimentDistribution.positive).toBe(2);
       expect(result.filterSummary.sentimentDistribution.negative).toBe(0);
     });
   });
 
-  describe('Available Filter Options', () => {
+  describe('Opciones de Filtro Disponibles', () => {
     beforeEach(() => {
       mockRepository.seed(getMockAnalysesCollection());
     });
 
-    it('should return all unique clients', async () => {
-      // Act
+    it('debería retornar todos los clientes únicos', async () => {
+      // ACT
       const options = await useCase.getAvailableFilterOptions();
 
-      // Assert
+      // ASSERT
       expect(options.clients).toContain('Cliente A');
       expect(options.clients).toContain('Cliente B');
       expect(options.clients).toContain('Cliente C');
       expect(options.clients).toHaveLength(3);
     });
 
-    it('should return all unique channels', async () => {
-      // Act
+    it('debería retornar todos los canales únicos', async () => {
+      // ACT
       const options = await useCase.getAvailableFilterOptions();
 
-      // Assert
+      // ASSERT
       expect(options.channels).toContain('Email');
       expect(options.channels).toContain('Chat');
       expect(options.channels).toContain('Phone');
       expect(options.channels).toHaveLength(3);
     });
 
-    it('should return all sentiment types', async () => {
-      // Act
+    it('debería retornar todos los tipos de sentimiento', async () => {
+      // ACT
       const options = await useCase.getAvailableFilterOptions();
 
-      // Assert
+      // ASSERT
       expect(options.sentimentTypes).toContain(SentimentType.POSITIVE);
       expect(options.sentimentTypes).toContain(SentimentType.NEUTRAL);
       expect(options.sentimentTypes).toContain(SentimentType.NEGATIVE);
     });
 
-    it('should return date range', async () => {
-      // Act
+    it('debería retornar el rango de fechas', async () => {
+      // ACT
       const options = await useCase.getAvailableFilterOptions();
 
-      // Assert
+      // ASSERT — la fecha más antigua debe ser menor o igual que la más reciente
       expect(options.dateRange.earliest).toBeInstanceOf(Date);
       expect(options.dateRange.latest).toBeInstanceOf(Date);
       expect(options.dateRange.earliest!.getTime()).toBeLessThanOrEqual(
@@ -403,23 +407,23 @@ describe('FilterAnalysisUseCase', () => {
       );
     });
 
-    it('should return confidence range', async () => {
-      // Act
+    it('debería retornar el rango de confianza', async () => {
+      // ACT
       const options = await useCase.getAvailableFilterOptions();
 
-      // Assert
+      // ASSERT
       expect(options.confidenceRange.min).toBe(0.75);
       expect(options.confidenceRange.max).toBe(0.95);
     });
 
-    it('should handle empty repository', async () => {
-      // Arrange
+    it('debería manejar un repositorio vacío', async () => {
+      // ARRANGE — vaciar el repositorio
       mockRepository.clear();
 
-      // Act
+      // ACT
       const options = await useCase.getAvailableFilterOptions();
 
-      // Assert
+      // ASSERT — todo vacío/por defecto
       expect(options.clients).toHaveLength(0);
       expect(options.channels).toHaveLength(0);
       expect(options.dateRange.earliest).toBeNull();
@@ -429,49 +433,49 @@ describe('FilterAnalysisUseCase', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should throw error when repository fails', async () => {
-      // Arrange
+  describe('Manejo de Errores', () => {
+    it('debería lanzar error cuando el repositorio falla', async () => {
+      // ARRANGE — simular que la BD está caída
       mockRepository.setShouldFail(true);
       const query = { criteria: {} };
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(query)).rejects.toThrow('Failed to find analyses');
     });
 
-    it('should handle invalid confidence ranges gracefully', async () => {
-      // Arrange
+    it('debería manejar rangos de confianza inválidos gracefully', async () => {
+      // ARRANGE — valores fuera de rango [0, 1]
       mockRepository.seed(getMockAnalysesCollection());
       const query = {
         criteria: {
-          minConfidence: 1.5, // Invalid: > 1
-          maxConfidence: -0.5, // Invalid: < 0
+          minConfidence: 1.5, // Inválido: > 1
+          maxConfidence: -0.5, // Inválido: < 0
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert - Should filter out invalid values
-      expect(result.analyses.data).toHaveLength(4); // Returns all because filters are invalid
+      // ASSERT — retorna todos porque los filtros son inválidos
+      expect(result.analyses.data).toHaveLength(4);
     });
 
-    it('should trim whitespace from client name filter', async () => {
-      // Arrange
+    it('debería recortar espacios del filtro de nombre de cliente', async () => {
+      // ARRANGE — nombre con espacios extra
       mockRepository.seed(getMockAnalysesCollection());
       const query = {
         criteria: { clientName: '  Cliente A  ' },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — encuentra los del Cliente A a pesar de los espacios
       expect(result.analyses.data).toHaveLength(2);
     });
 
-    it('should ignore empty string filters', async () => {
-      // Arrange
+    it('debería ignorar filtros con cadenas vacías', async () => {
+      // ARRANGE
       mockRepository.seed(getMockAnalysesCollection());
       const query = {
         criteria: {
@@ -480,31 +484,31 @@ describe('FilterAnalysisUseCase', () => {
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
-      expect(result.analyses.data).toHaveLength(4); // Returns all
+      // ASSERT — retorna todos (ignora filtros vacíos)
+      expect(result.analyses.data).toHaveLength(4);
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle single analysis', async () => {
-      // Arrange
+  describe('Casos Borde', () => {
+    it('debería manejar un solo análisis', async () => {
+      // ARRANGE
       const singleAnalysis = createMockSentimentAnalysis();
       mockRepository.seed([singleAnalysis]);
       const query = { criteria: {} };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT
       expect(result.analyses.data).toHaveLength(1);
       expect(result.analyses.totalPages).toBe(1);
     });
 
-    it('should handle large dataset pagination', async () => {
-      // Arrange
+    it('debería manejar paginación con dataset grande', async () => {
+      // ARRANGE — crear 50 análisis
       const largeDataset = Array.from({ length: 50 }, (_, i) =>
         createMockSentimentAnalysis({ id: `analysis-${i}` })
       );
@@ -514,17 +518,17 @@ describe('FilterAnalysisUseCase', () => {
         pagination: { page: 1, limit: 10 },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert
+      // ASSERT — 10 por página, 50 total, 5 páginas
       expect(result.analyses.data).toHaveLength(10);
       expect(result.analyses.total).toBe(50);
       expect(result.analyses.totalPages).toBe(5);
     });
 
-    it('should handle date filter with same from and to date', async () => {
-      // Arrange
+    it('debería manejar filtro de fecha con mismo día inicio y fin', async () => {
+      // ARRANGE
       mockRepository.seed(getMockAnalysesCollection());
       const targetDate = new Date('2024-01-16');
       const query = {
@@ -534,10 +538,10 @@ describe('FilterAnalysisUseCase', () => {
         },
       };
 
-      // Act
+      // ACT
       const result = await useCase.execute(query);
 
-      // Assert - Should find analyses on exactly that date
+      // ASSERT — debería encontrar análisis de exactamente ese día
       expect(result.analyses.data.length).toBeGreaterThanOrEqual(0);
     });
   });

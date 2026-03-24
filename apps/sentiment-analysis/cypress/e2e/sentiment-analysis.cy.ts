@@ -1,92 +1,95 @@
 /**
- * E2E Tests for Sentiment Analysis Flow
+ * Tests E2E para el Flujo de Análisis de Sentimiento
  *
- * These tests cover the complete user journey from uploading a PDF
- * to viewing the sentiment analysis results.
+ * Estos tests cubren el recorrido completo del usuario:
+ * subir un PDF → llenar el formulario → analizar → ver resultados.
+ *
+ * A diferencia de los unit tests (que usan mocks de clase),
+ * aquí los mocks son a nivel HTTP con cy.intercept().
  */
 
-describe('Sentiment Analysis - Complete Flow', () => {
+describe('Análisis de Sentimiento - Flujo Completo', () => {
   beforeEach(() => {
-    // Mock all GET APIs the app calls on load
+    // Interceptar todas las APIs GET que la app llama al cargar
     cy.mockAppAPIs();
 
-    // Mock the API response to avoid calling OpenAI during tests
+    // Interceptar la API de análisis para NO llamar a OpenAI real
     cy.mockAnalyzeAPI();
 
-    // Visit the app page (not the landing page)
+    // Visitar la página de la app (no el landing page)
     cy.visit('/app');
   });
 
-  it('should display the app page correctly', () => {
-    // Verify main elements are visible
+  it('debería mostrar la página correctamente', () => {
+    // Verificar que los elementos principales son visibles
     cy.contains('Análisis de Sentimientos').should('be.visible');
     cy.contains('Analizar Documento').should('be.visible');
 
-    // Verify upload area is present
+    // Verificar que el área de subida existe
     cy.get('input[type="file"]').should('exist');
   });
 
-  it('should allow file upload and show form', () => {
-    // Create a dummy PDF file for testing
+  it('debería permitir subir archivo y mostrar el formulario', () => {
+    // Crear un archivo PDF dummy para testing
     const fileName = 'test-document.pdf';
 
-    // Attach file to upload input
+    // Adjuntar archivo al input de subida
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: fileName,
       mimeType: 'application/pdf',
     });
 
-    // Verify file name is displayed
+    // Verificar que el nombre del archivo se muestra
     cy.contains(fileName).should('be.visible');
 
-    // Verify form fields are visible (MUI TextField renders label text)
+    // Verificar que los campos del formulario son visibles
     cy.contains('Nombre del Cliente').should('be.visible');
     cy.contains('Canal de Comunicación').should('be.visible');
   });
 
-  it('should validate required fields before submission', () => {
-    // Upload a file
+  it('debería validar campos requeridos antes de enviar', () => {
+    // Subir un archivo
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
 
-    // Try to submit without filling required fields - button should be disabled
+    // Intentar enviar sin llenar campos — el botón debería estar deshabilitado
     cy.get('button.MuiButton-contained').contains(/analizar documento/i).should('be.disabled');
   });
 
-  it('should successfully analyze a PDF and display results', () => {
-    // Upload PDF
+  it('debería analizar un PDF exitosamente y mostrar resultados', () => {
+    // Subir PDF
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: 'test-document.pdf',
       mimeType: 'application/pdf',
     });
 
-    // Fill in client name (MUI TextField)
+    // Llenar nombre del cliente (MUI TextField)
     cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Cliente de Prueba');
 
-    // Fill in channel (MUI Select)
+    // Seleccionar canal (MUI Select)
     cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
     cy.get('[role="option"]').contains('Correo Electrónico').click();
 
-    // Submit for analysis
+    // Enviar para análisis
     cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
 
-    // Wait for API call
+    // Esperar la respuesta de la API (interceptada por el mock)
     cy.wait('@analyzeAPI');
 
-    // Verify results card is displayed (dynamic import may take a moment)
+    // Verificar que se muestran los resultados
     cy.contains('Resultados del Análisis', { timeout: 15000 }).should('be.visible');
 
-    // Verify sentiment information is shown
+    // Verificar que la información de sentimiento se muestra
     cy.contains('Sentimiento General').should('be.visible');
   });
 
-  it('should display analysis metrics correctly', () => {
-    // Upload and analyze
+  it('debería mostrar las métricas del análisis correctamente', () => {
+    // Subir y analizar
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
@@ -100,15 +103,15 @@ describe('Sentiment Analysis - Complete Flow', () => {
     cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
     cy.wait('@analyzeAPI');
 
-    // Verify results section appears (dynamic import may take a moment)
+    // Verificar que aparece la sección de resultados
     cy.contains('Resultados del Análisis', { timeout: 15000 }).should('be.visible');
 
-    // Verify text metrics are shown
+    // Verificar que las métricas de texto se muestran
     cy.contains('Métricas del Texto').should('be.visible');
   });
 
-  it('should show emotions breakdown', () => {
-    // Upload and analyze
+  it('debería mostrar el desglose de emociones', () => {
+    // Subir y analizar
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
@@ -122,59 +125,59 @@ describe('Sentiment Analysis - Complete Flow', () => {
     cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
     cy.wait('@analyzeAPI');
 
-    // Verify results are displayed (dynamic import may take a moment)
+    // Verificar que se muestran los resultados
     cy.contains('Resultados del Análisis', { timeout: 15000 }).should('be.visible');
 
-    // Verify emotion distribution chart section exists
+    // Verificar que existe la sección de distribución de emociones
     cy.contains('Distribución de Emociones').should('be.visible');
   });
 });
 
-describe('Sentiment Analysis - Error Handling', () => {
+describe('Análisis de Sentimiento - Manejo de Errores', () => {
   beforeEach(() => {
     cy.mockAppAPIs();
     cy.visit('/app');
   });
 
-  it('should show error when API fails', () => {
-    // Mock API error
+  it('debería mostrar error cuando la API falla', () => {
+    // Configurar el interceptor para devolver error (simula fallo del servidor)
     cy.mockAnalyzeAPIError(500, 'Error al procesar el documento');
 
-    // Upload file
+    // Subir archivo
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
       mimeType: 'application/pdf',
     });
 
-    // Fill required fields
+    // Llenar campos requeridos
     cy.get('label').contains('Nombre del Cliente').parent().parent().find('input').type('Test Client');
     cy.get('label').contains('Canal de Comunicación').parent().parent().find('[role="combobox"]').click();
     cy.get('[role="option"]').contains('Correo Electrónico').click();
 
     cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
 
-    // Wait for error
+    // Esperar la respuesta de error
     cy.wait('@analyzeAPIError');
 
-    // Verify error message is shown
+    // Verificar que se muestra el mensaje de error
     cy.contains(/error/i).should('be.visible');
   });
 
-  it('should reject non-PDF files', () => {
-    // Try to upload a non-PDF file
+  it('debería rechazar archivos que no son PDF', () => {
+    // Intentar subir un archivo de texto (no PDF)
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test content']),
       fileName: 'test.txt',
       mimeType: 'text/plain',
     });
 
-    // Should show validation error
+    // Debería mostrar error de validación
     cy.contains(/no válido|Solo se permiten archivos PDF/i).should('be.visible');
   });
 
-  it('should reject files that are too large', () => {
-    // Create a large file (> 10MB)
+  it('debería rechazar archivos demasiado grandes', () => {
+    // Crear un archivo grande (> 10MB)
     const largeContent = 'x'.repeat(11 * 1024 * 1024);
 
     cy.get('input[type="file"]').attachFile({
@@ -183,31 +186,31 @@ describe('Sentiment Analysis - Error Handling', () => {
       mimeType: 'application/pdf',
     });
 
-    // Should show size error
+    // Debería mostrar error de tamaño
     cy.contains(/demasiado grande/i).should('be.visible');
   });
 });
 
-describe('Sentiment Analysis - Navigation', () => {
-  it('should navigate to history tab', () => {
+describe('Análisis de Sentimiento - Navegación', () => {
+  it('debería navegar a la pestaña de historial', () => {
     cy.mockAppAPIs();
     cy.visit('/app');
 
-    // Find and click the history tab (it's a MUI Tab button)
+    // Buscar y hacer clic en la pestaña de historial (MUI Tab)
     cy.get('[role="tab"]').contains('Historial de Análisis').click();
 
-    // Should show history panel content
+    // Debería mostrar el contenido del panel de historial
     cy.get('#simple-tabpanel-1').should('not.have.attr', 'hidden');
     cy.contains('Historial de Análisis').should('be.visible');
     cy.contains(/No se encontraron análisis/).should('be.visible');
   });
 
-  it('should allow navigating back from results', () => {
+  it('debería permitir regresar desde los resultados', () => {
     cy.mockAppAPIs();
     cy.mockAnalyzeAPI();
     cy.visit('/app');
 
-    // Upload and analyze
+    // Subir y analizar
     cy.get('input[type="file"]').attachFile({
       fileContent: new Blob(['test PDF content']),
       fileName: 'test.pdf',
@@ -221,12 +224,12 @@ describe('Sentiment Analysis - Navigation', () => {
     cy.get('button.MuiButton-contained').contains(/analizar documento/i).click();
     cy.wait('@analyzeAPI');
 
-    // Should still have the form area available (Limpiar button to reset)
+    // Debería tener el botón de limpiar disponible para resetear
     cy.contains('button', /limpiar/i).should('be.visible');
   });
 });
 
-describe('Sentiment Analysis - Responsiveness', () => {
+describe('Análisis de Sentimiento - Responsividad', () => {
   const viewports = [
     { device: 'iphone-6', width: 375, height: 667 },
     { device: 'ipad-2', width: 768, height: 1024 },
@@ -234,12 +237,12 @@ describe('Sentiment Analysis - Responsiveness', () => {
   ];
 
   viewports.forEach(({ device, width, height }) => {
-    it(`should display correctly on ${device}`, () => {
+    it(`debería mostrarse correctamente en ${device}`, () => {
       cy.viewport(width, height);
       cy.mockAppAPIs();
       cy.visit('/app');
 
-      // Main elements should be visible
+      // Los elementos principales deben ser visibles
       cy.contains('Análisis de Sentimientos').should('be.visible');
       cy.get('input[type="file"]').should('exist');
     });

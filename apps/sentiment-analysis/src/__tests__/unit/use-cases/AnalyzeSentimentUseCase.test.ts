@@ -18,29 +18,30 @@ describe('AnalyzeSentimentUseCase', () => {
   let mockRepository: SentimentAnalysisRepositoryMock;
 
   beforeEach(() => {
-    // Create fresh mocks for each test
+    // Crear mocks frescos para cada test (estado limpio)
     mockAnalyzer = new SentimentAnalyzerMock();
     mockExtractor = new TextExtractorMock();
     mockRepository = new SentimentAnalysisRepositoryMock();
 
-    // Inject mocks into use case
+    // Inyectar mocks en el Use Case (Dependency Injection)
+    // El Use Case recibe Ports, no sabe si son mocks o reales
     useCase = new AnalyzeSentimentUseCase(
-      mockAnalyzer,
-      mockExtractor,
-      mockRepository
+      mockAnalyzer,    // en vez de OpenAISentimentAnalyzer
+      mockExtractor,   // en vez de PDFTextExtractor
+      mockRepository   // en vez de InMemoryRepository / Supabase
     );
   });
 
   afterEach(() => {
-    // Clean up after each test
+    // Limpiar estado después de cada test
     mockAnalyzer.reset();
     mockExtractor.reset();
     mockRepository.reset();
   });
 
-  describe('Happy Path - Successful Analysis', () => {
-    it('should analyze sentiment successfully with valid inputs', async () => {
-      // Arrange
+  describe('Camino Feliz - Análisis Exitoso', () => {
+    it('debería analizar sentimiento exitosamente con inputs válidos', async () => {
+      // ARRANGE — preparar datos y configurar mocks
       const command = createMockAnalyzeSentimentCommand();
       mockExtractor.setMockExtractedText(createMockExtractedText(TEST_TEXT_CONTENT));
       mockAnalyzer.setMockResponse({
@@ -49,10 +50,10 @@ describe('AnalyzeSentimentUseCase', () => {
         confidence: 0.92,
       });
 
-      // Act
+      // ACT — ejecutar el caso de uso
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT — verificar el resultado
       expect(result).toBeDefined();
       expect(result.analysis).toBeDefined();
       expect(result.analysis.overallSentiment).toBe(SentimentType.POSITIVE);
@@ -63,243 +64,243 @@ describe('AnalyzeSentimentUseCase', () => {
       expect(result.processingTimeMs).toBeGreaterThanOrEqual(0);
     });
 
-    it('should save analysis to repository', async () => {
-      // Arrange
+    it('debería guardar el análisis en el repositorio', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
 
-      // Act
+      // ACT
       await useCase.execute(command);
 
-      // Assert
+      // ASSERT — verificar que el mock del repositorio guardó el análisis
       const savedAnalyses = mockRepository.getAll();
       expect(savedAnalyses).toHaveLength(1);
       expect(savedAnalyses[0].clientName).toBe(command.clientName);
     });
 
-    it('should call all dependencies in correct order', async () => {
-      // Arrange
+    it('debería llamar todas las dependencias en orden correcto', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
 
-      // Act
+      // ACT
       await useCase.execute(command);
 
-      // Assert
+      // ASSERT — verificar el historial de llamadas del mock
       const analyzerHistory = mockAnalyzer.getCallHistory();
       expect(analyzerHistory).toHaveLength(1);
       expect(analyzerHistory[0].clientName).toBe(command.clientName);
       expect(mockRepository.getAll()).toHaveLength(1);
     });
 
-    it('should generate unique IDs for each analysis', async () => {
-      // Arrange
+    it('debería generar IDs únicos para cada análisis', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
 
-      // Act
+      // ACT — ejecutar dos veces
       const result1 = await useCase.execute(command);
       const result2 = await useCase.execute(command);
 
-      // Assert
+      // ASSERT — cada análisis tiene un ID diferente
       expect(result1.analysis.id).not.toBe(result2.analysis.id);
       expect(mockRepository.getAll()).toHaveLength(2);
     });
   });
 
-  describe('Input Validation', () => {
-    it('should throw error when file buffer is empty', async () => {
-      // Arrange
+  describe('Validación de Inputs', () => {
+    it('debería lanzar error cuando el buffer del archivo está vacío', async () => {
+      // ARRANGE — crear comando con buffer vacío
       const command = createMockAnalyzeSentimentCommand({
         fileBuffer: Buffer.alloc(0),
       });
 
-      // Act & Assert
+      // ACT & ASSERT — verificar que lanza el error esperado
       await expect(useCase.execute(command)).rejects.toThrow(
         'File buffer cannot be empty'
       );
     });
 
-    it('should throw error when client name is empty', async () => {
-      // Arrange
+    it('debería lanzar error cuando el nombre del cliente está vacío', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand({
         clientName: '',
       });
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Client name is required'
       );
     });
 
-    it('should throw error when client name is only whitespace', async () => {
-      // Arrange
+    it('debería lanzar error cuando el nombre del cliente es solo espacios', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand({
         clientName: '   ',
       });
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Client name is required'
       );
     });
 
-    it('should throw error when document name is empty', async () => {
-      // Arrange
+    it('debería lanzar error cuando el nombre del documento está vacío', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand({
         documentName: '',
       });
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Document name is required'
       );
     });
 
-    it('should throw error when channel is empty', async () => {
-      // Arrange
+    it('debería lanzar error cuando el canal está vacío', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand({
         channel: '',
       });
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Channel is required'
       );
     });
 
-    it('should throw error when file size exceeds maximum', async () => {
-      // Arrange
+    it('debería lanzar error cuando el archivo excede el tamaño máximo', async () => {
+      // ARRANGE — crear un archivo más grande que el límite
       const maxSize = mockExtractor.getMaxFileSize();
       const oversizedBuffer = Buffer.alloc(maxSize + 1);
       const command = createMockAnalyzeSentimentCommand({
         fileBuffer: oversizedBuffer,
       });
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         `File size exceeds maximum limit of ${maxSize} bytes`
       );
     });
   });
 
-  describe('Sentiment Analyzer Errors', () => {
-    it('should throw error when analyzer is not ready', async () => {
-      // Arrange
+  describe('Errores del Analizador de Sentimiento', () => {
+    it('debería lanzar error cuando el analizador no está listo', async () => {
+      // ARRANGE — configurar el mock para que NO esté listo
       const command = createMockAnalyzeSentimentCommand();
       mockAnalyzer.setReady(false);
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Sentiment analyzer is not ready'
       );
     });
 
-    it('should throw error when analyzer fails', async () => {
-      // Arrange
+    it('debería lanzar error cuando el analizador falla', async () => {
+      // ARRANGE — configurar el mock para que falle (simula caída de OpenAI)
       const command = createMockAnalyzeSentimentCommand();
       mockAnalyzer.setShouldFail(true);
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Sentiment analyzer failed'
       );
     });
 
-    it('should not save analysis when analyzer fails', async () => {
-      // Arrange
+    it('NO debería guardar el análisis cuando el analizador falla', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
       mockAnalyzer.setShouldFail(true);
 
-      // Act
+      // ACT — intentar ejecutar (esperamos que falle)
       try {
         await useCase.execute(command);
       } catch (error) {
-        // Expected error
+        // Error esperado
       }
 
-      // Assert
+      // ASSERT — el repositorio debe estar vacío
       expect(mockRepository.getAll()).toHaveLength(0);
     });
   });
 
-  describe('PDF Extraction Errors', () => {
-    it('should throw error when PDF is invalid', async () => {
-      // Arrange
+  describe('Errores de Extracción de PDF', () => {
+    it('debería lanzar error cuando el PDF es inválido', async () => {
+      // ARRANGE — configurar el mock para que rechace el PDF
       const command = createMockAnalyzeSentimentCommand();
       mockExtractor.setValidPDF(false);
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Invalid PDF file provided'
       );
     });
 
-    it('should throw error when PDF extraction fails', async () => {
-      // Arrange
+    it('debería lanzar error cuando la extracción de PDF falla', async () => {
+      // ARRANGE — configurar el mock para que falle
       const command = createMockAnalyzeSentimentCommand();
       mockExtractor.setShouldFail(true);
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Failed to validate PDF'
       );
     });
 
-    it('should throw error when extracted text is empty', async () => {
-      // Arrange
+    it('debería lanzar error cuando el texto extraído está vacío', async () => {
+      // ARRANGE — el PDF es válido pero no tiene contenido
       const command = createMockAnalyzeSentimentCommand();
       mockExtractor.setMockExtractedText(createMockExtractedText(''));
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'No text content could be extracted from the PDF file'
       );
     });
 
-    it('should throw error when extracted text is only whitespace', async () => {
-      // Arrange
+    it('debería lanzar error cuando el texto extraído es solo espacios en blanco', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
       mockExtractor.setMockExtractedText(createMockExtractedText('   \n\t  '));
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'No text content could be extracted from the PDF file'
       );
     });
   });
 
-  describe('Repository Errors', () => {
-    it('should throw error when repository save fails', async () => {
-      // Arrange
+  describe('Errores del Repositorio', () => {
+    it('debería lanzar error cuando el repositorio falla al guardar', async () => {
+      // ARRANGE — simular que la BD está caída
       const command = createMockAnalyzeSentimentCommand();
       mockRepository.setShouldFail(true);
 
-      // Act & Assert
+      // ACT & ASSERT
       await expect(useCase.execute(command)).rejects.toThrow(
         'Failed to save analysis'
       );
     });
   });
 
-  describe('Analysis Metrics', () => {
-    it('should calculate processing time correctly', async () => {
-      // Arrange
+  describe('Métricas del Análisis', () => {
+    it('debería calcular el tiempo de procesamiento correctamente', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT — con mocks debería ser casi instantáneo
       expect(result.processingTimeMs).toBeGreaterThanOrEqual(0);
-      expect(result.processingTimeMs).toBeLessThan(10000); // Should be fast with mocks
+      expect(result.processingTimeMs).toBeLessThan(10000);
     });
 
-    it('should include analysis metrics in result', async () => {
-      // Arrange
+    it('debería incluir métricas del análisis en el resultado', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT — verificar que las métricas de texto se calcularon
       expect(result.analysis.analysisMetrics).toBeDefined();
       expect(result.analysis.analysisMetrics.wordCount).toBeGreaterThan(0);
       expect(result.analysis.analysisMetrics.sentenceCount).toBeGreaterThan(0);
@@ -307,9 +308,9 @@ describe('AnalyzeSentimentUseCase', () => {
     });
   });
 
-  describe('Different Sentiment Types', () => {
-    it('should handle negative sentiment correctly', async () => {
-      // Arrange
+  describe('Diferentes Tipos de Sentimiento', () => {
+    it('debería manejar sentimiento negativo correctamente', async () => {
+      // ARRANGE — configurar mock para devolver sentimiento negativo
       const command = createMockAnalyzeSentimentCommand();
       mockAnalyzer.setMockResponse({
         overallSentiment: SentimentType.NEGATIVE,
@@ -324,16 +325,16 @@ describe('AnalyzeSentimentUseCase', () => {
         confidence: 0.88,
       });
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT
       expect(result.analysis.overallSentiment).toBe(SentimentType.NEGATIVE);
       expect(result.analysis.emotionScores.sadness).toBeGreaterThan(0.5);
     });
 
-    it('should handle neutral sentiment correctly', async () => {
-      // Arrange
+    it('debería manejar sentimiento neutral correctamente', async () => {
+      // ARRANGE — configurar mock para devolver sentimiento neutral
       const command = createMockAnalyzeSentimentCommand();
       mockAnalyzer.setMockResponse({
         overallSentiment: SentimentType.NEUTRAL,
@@ -348,17 +349,17 @@ describe('AnalyzeSentimentUseCase', () => {
         confidence: 0.75,
       });
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT
       expect(result.analysis.overallSentiment).toBe(SentimentType.NEUTRAL);
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle very low confidence scores', async () => {
-      // Arrange
+  describe('Casos Borde', () => {
+    it('debería manejar confianza muy baja', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
       mockAnalyzer.setMockResponse({
         overallSentiment: SentimentType.NEUTRAL,
@@ -366,36 +367,36 @@ describe('AnalyzeSentimentUseCase', () => {
         confidence: 0.3,
       });
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT
       expect(result.analysis.confidence).toBe(0.3);
     });
 
-    it('should handle special characters in client name', async () => {
-      // Arrange
+    it('debería manejar caracteres especiales en el nombre del cliente', async () => {
+      // ARRANGE — nombre con acentos, apóstrofes y ampersand
       const command = createMockAnalyzeSentimentCommand({
         clientName: 'José María O\'Brien & García',
       });
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT
       expect(result.analysis.clientName).toBe('José María O\'Brien & García');
     });
 
-    it('should preserve document metadata', async () => {
-      // Arrange
+    it('debería preservar los metadatos del documento', async () => {
+      // ARRANGE
       const command = createMockAnalyzeSentimentCommand();
       const mockExtractedText = createMockExtractedText(TEST_TEXT_CONTENT);
       mockExtractor.setMockExtractedText(mockExtractedText);
 
-      // Act
+      // ACT
       const result = await useCase.execute(command);
 
-      // Assert
+      // ASSERT
       expect(result.analysis.documentContent).toBe(mockExtractedText.content);
     });
   });

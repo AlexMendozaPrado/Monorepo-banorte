@@ -7,8 +7,9 @@ import { SentimentType } from '../../core/domain/value-objects/SentimentType';
 import { MOCK_EMOTION_POSITIVE, MOCK_EMOTION_NEGATIVE, MOCK_EMOTION_NEUTRAL } from './testData';
 
 /**
- * Mock implementation of SentimentAnalyzerPort for testing
- * Provides configurable responses for different test scenarios
+ * Implementación mock de SentimentAnalyzerPort para testing.
+ * Cumple el mismo contrato (Port) que OpenAISentimentAnalyzer,
+ * pero devuelve respuestas controlables sin llamar a la API real.
  */
 export class SentimentAnalyzerMock implements SentimentAnalyzerPort {
   private ready: boolean = true;
@@ -17,17 +18,20 @@ export class SentimentAnalyzerMock implements SentimentAnalyzerPort {
   private callHistory: SentimentAnalysisRequest[] = [];
 
   async analyzeSentiment(request: SentimentAnalysisRequest): Promise<SentimentAnalysisResponse> {
+    // Registra la llamada para poder verificarla en los tests
     this.callHistory.push(request);
 
+    // Si se configuró para fallar, lanza error (simula caída de OpenAI)
     if (this.shouldFail) {
       throw new Error('Sentiment analyzer failed');
     }
 
+    // Si hay una respuesta configurada, la devuelve
     if (this.mockResponse) {
       return this.mockResponse;
     }
 
-    // Default behavior: return positive sentiment
+    // Comportamiento por defecto: devuelve sentimiento positivo
     return {
       overallSentiment: SentimentType.POSITIVE,
       emotionScores: MOCK_EMOTION_POSITIVE,
@@ -48,23 +52,28 @@ export class SentimentAnalyzerMock implements SentimentAnalyzerPort {
     };
   }
 
-  // Test utility methods
+  // ─── Métodos de utilidad para tests ─────────────────────────
+  /** Controla si el analizador está "listo" */
   setReady(ready: boolean): void {
     this.ready = ready;
   }
 
+  /** Fuerza que el mock lance un error (simula fallo de la API) */
   setShouldFail(shouldFail: boolean): void {
     this.shouldFail = shouldFail;
   }
 
+  /** Define la respuesta que devolverá el mock */
   setMockResponse(response: SentimentAnalysisResponse): void {
     this.mockResponse = response;
   }
 
+  /** Devuelve el historial de llamadas para verificar en los asserts */
   getCallHistory(): SentimentAnalysisRequest[] {
     return this.callHistory;
   }
 
+  /** Limpia todo el estado — se llama en afterEach() */
   reset(): void {
     this.ready = true;
     this.shouldFail = false;
@@ -74,7 +83,7 @@ export class SentimentAnalyzerMock implements SentimentAnalyzerPort {
 }
 
 /**
- * Factory function to create a configured mock
+ * Factory para crear un mock ya configurado
  */
 export const createSentimentAnalyzerMock = (config?: {
   ready?: boolean;

@@ -8,8 +8,9 @@ import { SentimentAnalysis } from '../../core/domain/entities/SentimentAnalysis'
 import { SentimentType } from '../../core/domain/value-objects/SentimentType';
 
 /**
- * Mock implementation of SentimentAnalysisRepositoryPort for testing
- * Simulates in-memory storage
+ * Implementación mock de SentimentAnalysisRepositoryPort para testing.
+ * Simula almacenamiento en memoria — reemplaza a la BD real (Supabase)
+ * cumpliendo el mismo contrato (Port).
  */
 export class SentimentAnalysisRepositoryMock implements SentimentAnalysisRepositoryPort {
   private analyses: Map<string, SentimentAnalysis> = new Map();
@@ -42,17 +43,17 @@ export class SentimentAnalysisRepositoryMock implements SentimentAnalysisReposit
 
     let results = Array.from(this.analyses.values());
 
-    // Apply filters
+    // Aplicar filtros
     if (filter) {
       results = this.applyFilters(results, filter);
     }
 
-    // Apply sorting
+    // Aplicar ordenamiento
     if (pagination?.sortBy) {
       results = this.applySorting(results, pagination);
     }
 
-    // Calculate pagination
+    // Calcular paginación
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 20;
     const total = results.length;
@@ -106,6 +107,7 @@ export class SentimentAnalysisRepositoryMock implements SentimentAnalysisReposit
       ? results.reduce((sum, a) => sum + a.confidence, 0) / results.length
       : 0;
 
+    // Encontrar el canal más común
     const channelCounts = new Map<string, number>();
     results.forEach(a => {
       channelCounts.set(a.channel, (channelCounts.get(a.channel) || 0) + 1);
@@ -153,27 +155,35 @@ export class SentimentAnalysisRepositoryMock implements SentimentAnalysisReposit
     return updated;
   }
 
-  // Test utility methods
+  // ─── Métodos de utilidad para tests ─────────────────────────
+
+  /** Fuerza que todas las operaciones del repositorio fallen */
   setShouldFail(shouldFail: boolean): void {
     this.shouldFail = shouldFail;
   }
 
+  /** Vacía el repositorio */
   clear(): void {
     this.analyses.clear();
   }
 
+  /** Carga datos iniciales (seed) para los tests */
   seed(analyses: SentimentAnalysis[]): void {
     analyses.forEach(a => this.analyses.set(a.id, a));
   }
 
+  /** Devuelve todos los análisis guardados (para verificar en asserts) */
   getAll(): SentimentAnalysis[] {
     return Array.from(this.analyses.values());
   }
 
+  /** Limpia todo el estado — se llama en afterEach() */
   reset(): void {
     this.analyses.clear();
     this.shouldFail = false;
   }
+
+  // ─── Métodos privados ──────────────────────────────────────
 
   private applyFilters(results: SentimentAnalysis[], filter: AnalysisFilter): SentimentAnalysis[] {
     return results.filter(analysis => {
@@ -218,7 +228,7 @@ export class SentimentAnalysisRepositoryMock implements SentimentAnalysisReposit
 }
 
 /**
- * Factory function to create a configured mock
+ * Factory para crear un mock ya configurado
  */
 export const createRepositoryMock = (config?: {
   shouldFail?: boolean;

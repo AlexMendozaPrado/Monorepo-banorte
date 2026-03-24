@@ -1,9 +1,11 @@
 // ***********************************************
-// Custom commands for reusability
+// Comandos personalizados de Cypress para reutilización
 // ***********************************************
 
 /**
- * Mock the analyze API endpoint with a predefined response
+ * Intercepta la API de análisis con una respuesta exitosa predefinida.
+ * Esto evita llamar a OpenAI durante los tests E2E.
+ * Es el equivalente a los mocks de clase, pero a nivel HTTP.
  */
 Cypress.Commands.add('mockAnalyzeAPI', (fixture = 'analysis-success.json') => {
   cy.intercept('POST', '/api/analyze', {
@@ -12,7 +14,8 @@ Cypress.Commands.add('mockAnalyzeAPI', (fixture = 'analysis-success.json') => {
 });
 
 /**
- * Mock the analyze API to return an error
+ * Intercepta la API de análisis para devolver un error.
+ * Simula un fallo del servidor (equivalente a setShouldFail(true) en unit tests).
  */
 Cypress.Commands.add('mockAnalyzeAPIError', (statusCode = 500, message = 'Internal Server Error') => {
   cy.intercept('POST', '/api/analyze', {
@@ -22,14 +25,17 @@ Cypress.Commands.add('mockAnalyzeAPIError', (statusCode = 500, message = 'Intern
 });
 
 /**
- * Mock the GET APIs that the app calls on load (recent analyses, history, trends)
+ * Intercepta todas las APIs GET que la app llama al cargar.
+ * Sin estos interceptores, la app intentaría llamar al backend real.
  */
 Cypress.Commands.add('mockAppAPIs', () => {
+  // Mock de análisis recientes
   cy.intercept('GET', '/api/analyses/recent*', {
     statusCode: 200,
     body: { success: true, data: [] },
   }).as('recentAPI');
 
+  // Mock del historial
   cy.intercept('GET', '/api/analyses/history*', {
     statusCode: 200,
     body: {
@@ -48,13 +54,14 @@ Cypress.Commands.add('mockAppAPIs', () => {
     },
   }).as('historyAPI');
 
+  // Mock de tendencias
   cy.intercept('GET', '/sessions/trends*', {
     statusCode: 200,
     body: { success: true, data: [] },
   }).as('trendsAPI');
 });
 
-// Type definitions for custom commands
+// Definiciones de tipos para los comandos personalizados
 declare global {
   namespace Cypress {
     interface Chainable {

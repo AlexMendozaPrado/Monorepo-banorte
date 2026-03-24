@@ -6,7 +6,8 @@ import {
 import { createMockExtractedText, TEST_TEXT_CONTENT } from './testData';
 
 /**
- * Mock implementation of TextExtractorPort for testing
+ * Implementación mock de TextExtractorPort para testing.
+ * Simula la extracción de texto de un PDF sin usar la librería real (pdf-parse).
  */
 export class TextExtractorMock implements TextExtractorPort {
   private validPDF: boolean = true;
@@ -18,15 +19,16 @@ export class TextExtractorMock implements TextExtractorPort {
     fileBuffer: Buffer,
     options?: TextExtractionOptions
   ): Promise<ExtractedText> {
+    // Simula fallo de extracción
     if (this.shouldFail) {
       throw new Error('Failed to extract text from PDF');
     }
 
+    // Devuelve el texto configurado o uno por defecto
     if (this.mockExtractedText) {
       return this.mockExtractedText;
     }
 
-    // Default behavior: return mock extracted text
     return createMockExtractedText(TEST_TEXT_CONTENT);
   }
 
@@ -45,23 +47,28 @@ export class TextExtractorMock implements TextExtractorPort {
     return this.maxFileSize;
   }
 
-  // Test utility methods
+  // ─── Métodos de utilidad para tests ─────────────────────────
+  /** Controla si el PDF se considera válido o no */
   setValidPDF(valid: boolean): void {
     this.validPDF = valid;
   }
 
+  /** Fuerza que el mock lance un error */
   setShouldFail(shouldFail: boolean): void {
     this.shouldFail = shouldFail;
   }
 
+  /** Define el texto extraído que devolverá */
   setMockExtractedText(text: ExtractedText): void {
     this.mockExtractedText = text;
   }
 
+  /** Cambia el tamaño máximo de archivo permitido */
   setMaxFileSize(size: number): void {
     this.maxFileSize = size;
   }
 
+  /** Limpia todo el estado — se llama en afterEach() */
   reset(): void {
     this.validPDF = true;
     this.shouldFail = false;
@@ -71,7 +78,7 @@ export class TextExtractorMock implements TextExtractorPort {
 }
 
 /**
- * Factory function to create a configured mock
+ * Factory para crear un mock ya configurado
  */
 export const createTextExtractorMock = (config?: {
   validPDF?: boolean;

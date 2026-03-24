@@ -4,10 +4,11 @@ import { AnalysisMetricsValueObject } from '../../core/domain/value-objects/Anal
 import { SentimentAnalysisEntity } from '../../core/domain/entities/SentimentAnalysis';
 
 /**
- * Test data factory for creating consistent test data across unit tests
+ * Fábrica de datos de prueba para crear datos consistentes en todos los unit tests.
+ * Estos datos simulan lo que vendría de la API real o de la BD.
  */
 
-// Sample text content for testing
+// ─── Textos de ejemplo para testing ──────────────────────────
 export const TEST_TEXT_CONTENT = `
 Estimado equipo de Banorte,
 
@@ -29,12 +30,12 @@ Solicito información sobre los requisitos para abrir una cuenta.
 Por favor envíenme la documentación necesaria.
 `;
 
-// Mock PDF buffer
+// ─── Buffer simulado de PDF ──────────────────────────────────
 export const createMockPDFBuffer = (size: number = 1024): Buffer => {
   return Buffer.alloc(size, 'test-pdf-content');
 };
 
-// Mock emotion scores
+// ─── Puntuaciones de emociones simuladas ─────────────────────
 export const createMockEmotionScore = (overrides?: Partial<EmotionScore>): EmotionScore => {
   return {
     joy: 0.8,
@@ -67,7 +68,7 @@ export const MOCK_EMOTION_NEUTRAL: EmotionScore = createMockEmotionScore({
   trust: 0.4,
 });
 
-// Mock analysis metrics
+// ─── Métricas de análisis simuladas ──────────────────────────
 export const createMockAnalysisMetrics = (
   overrides?: Partial<{
     wordCount: number;
@@ -80,17 +81,17 @@ export const createMockAnalysisMetrics = (
   }>
 ): AnalysisMetricsValueObject => {
   return new AnalysisMetricsValueObject(
-    overrides?.wordCount ?? 250,                   // wordCount
-    overrides?.sentenceCount ?? 15,                // sentenceCount
-    overrides?.paragraphCount ?? 5,                // paragraphCount
-    overrides?.averageWordsPerSentence ?? 16.7,    // averageWordsPerSentence
-    overrides?.readabilityScore ?? 65.5,           // readabilityScore
-    overrides?.processingTimeMs ?? 5000,           // processingTimeMs
-    overrides?.languageDetected ?? 'es'            // languageDetected
+    overrides?.wordCount ?? 250,                   // palabras
+    overrides?.sentenceCount ?? 15,                // oraciones
+    overrides?.paragraphCount ?? 5,                // párrafos
+    overrides?.averageWordsPerSentence ?? 16.7,    // promedio palabras/oración
+    overrides?.readabilityScore ?? 65.5,           // legibilidad
+    overrides?.processingTimeMs ?? 5000,           // tiempo de procesamiento (ms)
+    overrides?.languageDetected ?? 'es'            // idioma detectado
   );
 };
 
-// Mock sentiment analysis entity
+// ─── Entidad de análisis simulada ────────────────────────────
 export const createMockSentimentAnalysis = (
   overrides?: Partial<SentimentAnalysisEntity>
 ): SentimentAnalysisEntity => {
@@ -111,7 +112,7 @@ export const createMockSentimentAnalysis = (
   );
 };
 
-// Mock extracted text
+// ─── Texto extraído simulado (lo que devolvería pdf-parse) ───
 export const createMockExtractedText = (content: string = TEST_TEXT_CONTENT) => ({
   content,
   metadata: {
@@ -124,7 +125,7 @@ export const createMockExtractedText = (content: string = TEST_TEXT_CONTENT) => 
   },
 });
 
-// Mock command data
+// ─── Comando simulado (input del Use Case) ───────────────────
 export const createMockAnalyzeSentimentCommand = (overrides?: any) => ({
   fileBuffer: createMockPDFBuffer(),
   clientName: 'Test Client',
@@ -133,8 +134,8 @@ export const createMockAnalyzeSentimentCommand = (overrides?: any) => ({
   ...overrides,
 });
 
-// Collection of mock analyses for repository tests
-// Using a function to avoid premature execution
+// ─── Colección de análisis para tests de repositorio ─────────
+// Usa función para evitar ejecución prematura
 export const getMockAnalysesCollection = () => [
   createMockSentimentAnalysis({
     id: '1',
