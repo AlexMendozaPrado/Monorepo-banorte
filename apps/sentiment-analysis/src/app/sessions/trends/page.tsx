@@ -26,10 +26,10 @@ export default function TrendsPage() {
   const [error, setError] = useState<string | null>(null);
   const [trends, setTrends] = useState<SessionTrendsResponse | null>(null);
 
-  // Form state
+  // Estado del formulario
   const [fromDate, setFromDate] = useState(() => {
     const date = new Date();
-    date.setMonth(date.getMonth() - 3); // 3 months ago
+    date.setMonth(date.getMonth() - 3); // 3 meses atrás
     return date.toISOString().split('T')[0];
   });
 
@@ -55,7 +55,7 @@ export default function TrendsPage() {
       setLoading(true);
       setError(null);
 
-      // Build query params
+      // Construir parámetros de consulta
       const params = new URLSearchParams({
         from: fromDate,
         to: toDate,
@@ -82,7 +82,7 @@ export default function TrendsPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
+      {/* Encabezado */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <TrendsIcon sx={{ mr: 1, color: 'primary.main', fontSize: 40 }} />
@@ -95,7 +95,7 @@ export default function TrendsPage() {
         </Typography>
       </Box>
 
-      {/* Filters */}
+      {/* Filtros */}
       <Card variant="outlined" sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
@@ -169,21 +169,21 @@ export default function TrendsPage() {
         </Alert>
       )}
 
-      {/* Loading */}
+      {/* Cargando */}
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
           <CircularProgress size={60} />
         </Box>
       )}
 
-      {/* Results */}
+      {/* Resultados */}
       {!loading && trends && (
         <Box>
           <SessionTrendsDynamic trends={trends} />
         </Box>
       )}
 
-      {/* Initial State */}
+      {/* Estado Inicial */}
       {!loading && !trends && !error && (
         <Card variant="outlined" sx={{ textAlign: 'center', py: 8 }}>
           <CardContent>

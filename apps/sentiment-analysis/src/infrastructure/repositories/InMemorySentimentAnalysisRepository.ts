@@ -34,17 +34,17 @@ export class InMemorySentimentAnalysisRepository implements SentimentAnalysisRep
     try {
       let filteredAnalyses = Array.from(this.analyses.values());
 
-      // Apply filters
+      // Aplicar filtros
       if (filter) {
         filteredAnalyses = this.applyFilters(filteredAnalyses, filter);
       }
 
-      // Apply sorting
+      // Aplicar ordenamiento
       if (pagination?.sortBy) {
         filteredAnalyses = this.applySorting(filteredAnalyses, pagination);
       }
 
-      // Calculate pagination
+      // Calcular paginación
       const page = pagination?.page || 1;
       const limit = pagination?.limit || 20;
       const startIndex = (page - 1) * limit;
@@ -112,7 +112,7 @@ export class InMemorySentimentAnalysisRepository implements SentimentAnalysisRep
 
       const averageConfidence = analyses.reduce((sum, a) => sum + a.confidence, 0) / totalAnalyses;
 
-      // Find most common channel
+      // Encontrar el canal más común
       const channelCounts = analyses.reduce((counts, analysis) => {
         counts[analysis.channel] = (counts[analysis.channel] || 0) + 1;
         return counts;
@@ -198,13 +198,13 @@ export class InMemorySentimentAnalysisRepository implements SentimentAnalysisRep
       let aValue: any = a[sortBy!];
       let bValue: any = b[sortBy!];
 
-      // Handle date sorting
+      // Manejar ordenamiento por fecha
       if (aValue instanceof Date && bValue instanceof Date) {
         aValue = aValue.getTime();
         bValue = bValue.getTime();
       }
 
-      // Handle string sorting
+      // Manejar ordenamiento por cadena de texto
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
@@ -218,7 +218,7 @@ export class InMemorySentimentAnalysisRepository implements SentimentAnalysisRep
     });
   }
 
-  // Utility methods for testing and development
+  // Métodos utilitarios para pruebas y desarrollo
   async clear(): Promise<void> {
     this.analyses.clear();
   }
@@ -228,7 +228,7 @@ export class InMemorySentimentAnalysisRepository implements SentimentAnalysisRep
   }
 
   async seedWithSampleData(): Promise<void> {
-    // This method can be used to populate the repository with sample data for testing
-    // Implementation would go here if needed for the POC
+    // Este método se puede usar para poblar el repositorio con datos de ejemplo para pruebas
+    // La implementación iría aquí si se necesita para el POC
   }
 }

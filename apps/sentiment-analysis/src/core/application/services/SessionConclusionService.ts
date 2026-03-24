@@ -156,7 +156,7 @@ export class SessionConclusionService {
   private identifyRisks(analysis: SentimentAnalysis, metrics: SessionMetrics): Array<RiskItem> {
     const risks: Array<{ level: string; description: string; impact: string; recommendation: string }> = [];
 
-    // High priority blockers are risks
+    // Los blockers de alta prioridad son riesgos
     metrics.blockers.filter(b => b.priority === 'high').forEach(blocker => {
       risks.push({
         level: 'high',
@@ -166,7 +166,7 @@ export class SessionConclusionService {
       });
     });
 
-    // Low productivity is a risk
+    // La baja productividad es un riesgo
     if (metrics.productivityScore < 60) {
       risks.push({
         level: 'medium',
@@ -176,7 +176,7 @@ export class SessionConclusionService {
       });
     }
 
-    // Too much time on problems
+    // Demasiado tiempo en problemas
     if (metrics.problemsTimePercentage > 60) {
       risks.push({
         level: 'medium',
@@ -199,7 +199,7 @@ export class SessionConclusionService {
   private identifyOpportunities(analysis: SentimentAnalysis, metrics: SessionMetrics): Array<OpportunityItem> {
     const opportunities: Array<{ description: string; potentialValue: string; priority: string; effort: string }> = [];
 
-    // High achievements are opportunities
+    // Los altos logros son oportunidades
     if (metrics.achievements.length >= 3) {
       opportunities.push({
         description: 'Múltiples logros alcanzados - usar para caso de éxito',
@@ -209,7 +209,7 @@ export class SessionConclusionService {
       });
     }
 
-    // High sentiment with high confidence
+    // Sentimiento alto con alta confianza
     if (analysis.overallSentiment === SentimentType.POSITIVE && analysis.confidence > 0.8) {
       opportunities.push({
         description: 'Cliente altamente satisfecho - oportunidad de upselling',
@@ -219,7 +219,7 @@ export class SessionConclusionService {
       });
     }
 
-    // High engagement
+    // Alto engagement
     if (metrics.engagementScore > 80) {
       opportunities.push({
         description: 'Alta participación del equipo',
@@ -247,7 +247,7 @@ export class SessionConclusionService {
     const shortTerm: Array<{ description: string; priority: string }> = [];
     const continuous: Array<{ description: string; priority: string }> = [];
 
-    // Immediate actions from high priority blockers
+    // Acciones inmediatas de blockers de alta prioridad
     metrics.blockers.filter(b => b.priority === 'high').forEach(blocker => {
       immediate.push({
         description: `Resolver: ${blocker.description.substring(0, 100)}`,
@@ -255,7 +255,7 @@ export class SessionConclusionService {
       });
     });
 
-    // Short term actions from achievements
+    // Acciones a corto plazo de logros
     if (metrics.achievements.length > 0) {
       shortTerm.push({
         description: 'Documentar y comunicar logros al equipo',
@@ -263,7 +263,7 @@ export class SessionConclusionService {
       });
     }
 
-    // Continuous monitoring
+    // Monitoreo continuo
     continuous.push({
       description: 'Monitorear progreso de acciones asignadas',
       priority: 'medium',
@@ -333,17 +333,17 @@ export class SessionConclusionService {
   private calculateSatisfactionScore(analysis: SentimentAnalysis, metrics: SessionMetrics): number {
     let score = 50;
 
-    // Based on sentiment
+    // Basado en sentimiento
     if (analysis.overallSentiment === SentimentType.POSITIVE) score += 30;
     else if (analysis.overallSentiment === SentimentType.NEGATIVE) score -= 20;
 
-    // Based on productivity
+    // Basado en productividad
     score += (metrics.productivityScore - 50) * 0.3;
 
-    // Penalize for blockers
+    // Penalizar por blockers
     score -= metrics.blockers.length * 5;
 
-    // Boost for achievements
+    // Bonificación por logros
     score += metrics.achievements.length * 5;
 
     return Math.min(100, Math.max(0, Math.round(score)));

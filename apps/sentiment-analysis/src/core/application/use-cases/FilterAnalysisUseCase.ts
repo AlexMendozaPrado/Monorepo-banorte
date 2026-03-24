@@ -45,19 +45,19 @@ export class FilterAnalysisUseCase {
 
   async execute(query: FilterAnalysisQuery): Promise<FilteredAnalysisResult> {
     try {
-      // Validate and convert criteria to repository filter
+      // Validar y convertir criterios al filtro del repositorio
       const filter = this.convertCriteriaToFilter(query.criteria);
       
-      // Validate pagination
+      // Validar paginación
       const pagination = this.validatePagination(query.pagination);
 
-      // Get filtered analyses
+      // Obtener análisis filtrados
       const analyses = await this.repository.findAll(filter, pagination);
 
-      // Get statistics for the filtered results
+      // Obtener estadísticas para los resultados filtrados
       const statistics = await this.repository.getStatistics(filter);
 
-      // Calculate filter summary
+      // Calcular resumen de filtros
       const filterSummary = this.calculateFilterSummary(analyses.data, statistics);
 
       return {
@@ -88,10 +88,10 @@ export class FilterAnalysisUseCase {
     };
   }> {
     try {
-      // Get all analyses to extract filter options
+      // Obtener todos los análisis para extraer opciones de filtro
       const allAnalyses = await this.repository.findAll(undefined, {
         page: 1,
-        limit: 1000, // Get a large sample to extract options
+        limit: 1000, // Obtener una muestra grande para extraer opciones
         sortBy: 'createdAt',
         sortOrder: 'desc',
       });

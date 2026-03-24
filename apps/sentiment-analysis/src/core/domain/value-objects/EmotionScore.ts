@@ -29,7 +29,7 @@ export class EmotionScoreValueObject implements EmotionScore {
       }
     });
 
-    // Validate that scores sum to approximately 1 (allowing for small floating point errors)
+    // Validar que los puntajes sumen aproximadamente 1 (permitiendo pequeños errores de punto flotante)
     const sum = emotions.reduce((acc, score) => acc + score, 0);
     if (Math.abs(sum - 1) > 0.01) {
       throw new Error('Emotion scores must sum to approximately 1');

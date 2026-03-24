@@ -59,7 +59,7 @@ export class OpenAISessionAnalyzer implements SessionAnalysisPort {
           type: 'json_schema',
           json_schema: {
             name: 'session_metrics_analysis',
-            strict: false,  // Cambiar a false para permitir campos opcionales
+            strict: false,  // Establecer en false para permitir campos opcionales
             schema: schema,
           },
         },
@@ -104,7 +104,7 @@ export class OpenAISessionAnalyzer implements SessionAnalysisPort {
           type: 'json_schema',
           json_schema: {
             name: 'session_conclusion_analysis',
-            strict: false,  // Allow optional fields like 'reasoning'
+            strict: false,  // Permitir campos opcionales como 'reasoning'
             schema: schema,
           },
         },
@@ -161,7 +161,7 @@ export class OpenAISessionAnalyzer implements SessionAnalysisPort {
     };
   }
 
-  // ==================== METRICS ANALYSIS ====================
+  // ==================== ANÁLISIS DE MÉTRICAS ====================
 
   private getMetricsSystemPrompt(): string {
     return `Eres un analista experto en análisis de reuniones de trabajo del sector tecnológico y bancario.
@@ -422,13 +422,13 @@ Proporciona un análisis completo y basado en evidencia del contenido.`;
     try {
       const parsed = JSON.parse(responseContent);
 
-      // Validaciones básicas
+      // Validaciones básicas del formato de respuesta
       this.validateMetricsResponse(parsed);
 
       return parsed as SessionMetricsAnalysisResponse;
     } catch (error) {
-      console.error('Error parsing metrics response:', error);
-      console.error('Response content:', responseContent);
+      console.error('Error al parsear respuesta de métricas:', error);
+      console.error('Contenido de respuesta:', responseContent);
       throw new Error('Failed to parse metrics response from OpenAI');
     }
   }
@@ -457,7 +457,7 @@ Proporciona un análisis completo y basado en evidencia del contenido.`;
     }
   }
 
-  // ==================== CONCLUSION ANALYSIS ====================
+  // ==================== ANÁLISIS DE CONCLUSIONES ====================
 
   private getConclusionSystemPrompt(): string {
     return `Eres un consultor estratégico senior especializado en análisis de reuniones de trabajo y generación de insights ejecutivos.
@@ -725,13 +725,13 @@ Genera un análisis profundo, estratégico y accionable.`;
     try {
       const parsed = JSON.parse(responseContent);
 
-      // Validaciones básicas
+      // Validaciones básicas del formato de respuesta
       this.validateConclusionResponse(parsed);
 
       return parsed as SessionConclusionAnalysisResponse;
     } catch (error) {
-      console.error('Error parsing conclusion response:', error);
-      console.error('Response content:', responseContent);
+      console.error('Error al parsear respuesta de conclusiones:', error);
+      console.error('Contenido de respuesta:', responseContent);
       throw new Error('Failed to parse conclusion response from OpenAI');
     }
   }
@@ -772,7 +772,7 @@ Genera un análisis profundo, estratégico y accionable.`;
     }
   }
 
-  // ==================== UTILITIES ====================
+  // ==================== UTILIDADES ====================
 
   private getSentimentText(sentiment: SentimentType): string {
     switch (sentiment) {

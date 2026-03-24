@@ -41,7 +41,7 @@ export class OpenAISentimentExtractor {
         return this.getDefaultAnalysis();
       }
 
-      // Extract JSON object using regex to capture the first {...} that appears
+      // Extraer objeto JSON usando regex para capturar el primer {...} que aparezca
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         console.warn("[OpenAISentimentExtractor] No JSON object found in OpenAI response");

@@ -18,21 +18,21 @@ export interface SentimentAnalysisResponse {
 
 export interface SentimentAnalyzerPort {
   /**
-   * Analyzes the sentiment of the provided text
-   * @param request The analysis request containing text and metadata
-   * @returns Promise with the sentiment analysis response
+   * Analiza el sentimiento del texto proporcionado
+   * @param request La solicitud de análisis que contiene el texto y los metadatos
+   * @returns Promesa con la respuesta del análisis de sentimiento
    */
   analyzeSentiment(request: SentimentAnalysisRequest): Promise<SentimentAnalysisResponse>;
 
   /**
-   * Validates if the analyzer is properly configured and ready to use
-   * @returns Promise<boolean> indicating if the analyzer is ready
+   * Valida si el analizador está correctamente configurado y listo para usar
+   * @returns Promise<boolean> que indica si el analizador está listo
    */
   isReady(): Promise<boolean>;
 
   /**
-   * Gets the current model configuration
-   * @returns The model configuration details
+   * Obtiene la configuración actual del modelo
+   * @returns Los detalles de configuración del modelo
    */
   getModelInfo(): {
     name: string;

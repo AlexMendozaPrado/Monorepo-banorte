@@ -1,7 +1,7 @@
 export interface TopicAnalysis {
   category: 'problem' | 'achievement' | 'coordination';
   topic: string;
-  timeSpent: number; // minutos
+  timeSpent: number; // en minutos
   sentiment: number; // 1-7
   mentions: number;
 }

@@ -11,66 +11,66 @@ export interface SessionMetricsFilter {
 
 export interface SessionMetricsRepositoryPort {
   /**
-   * Saves session metrics to the repository
-   * @param metrics The session metrics to save
-   * @returns Promise with the saved metrics
+   * Guarda las métricas de sesión en el repositorio
+   * @param metrics Las métricas de sesión a guardar
+   * @returns Promesa con las métricas guardadas
    */
   save(metrics: SessionMetrics): Promise<SessionMetrics>;
 
   /**
-   * Finds session metrics by its ID
-   * @param id The metrics ID
-   * @returns Promise with the metrics or null if not found
+   * Busca métricas de sesión por su ID
+   * @param id El ID de las métricas
+   * @returns Promesa con las métricas o null si no se encuentran
    */
   findById(id: string): Promise<SessionMetrics | null>;
 
   /**
-   * Finds session metrics by analysis ID
-   * @param analysisId The analysis ID
-   * @returns Promise with the metrics or null if not found
+   * Busca métricas de sesión por ID de análisis
+   * @param analysisId El ID del análisis
+   * @returns Promesa con las métricas o null si no se encuentran
    */
   findByAnalysisId(analysisId: string): Promise<SessionMetrics | null>;
 
   /**
-   * Finds session metrics for multiple analysis IDs
-   * @param analysisIds Array of analysis IDs
-   * @returns Promise with array of metrics
+   * Busca métricas de sesión para múltiples IDs de análisis
+   * @param analysisIds Arreglo de IDs de análisis
+   * @returns Promesa con arreglo de métricas
    */
   findByAnalysisIds(analysisIds: string[]): Promise<SessionMetrics[]>;
 
   /**
-   * Finds session metrics within a date range
-   * @param from Start date
-   * @param to End date
-   * @returns Promise with array of metrics
+   * Busca métricas de sesión dentro de un rango de fechas
+   * @param from Fecha de inicio
+   * @param to Fecha de fin
+   * @returns Promesa con arreglo de métricas
    */
   findByDateRange(from: Date, to: Date): Promise<SessionMetrics[]>;
 
   /**
-   * Finds all session metrics with optional filtering
-   * @param filter Optional filter criteria
-   * @returns Promise with array of metrics
+   * Busca todas las métricas de sesión con filtrado opcional
+   * @param filter Criterios de filtrado opcionales
+   * @returns Promesa con arreglo de métricas
    */
   findAll(filter?: SessionMetricsFilter): Promise<SessionMetrics[]>;
 
   /**
-   * Deletes session metrics by ID
-   * @param id The metrics ID
-   * @returns Promise<boolean> indicating success
+   * Elimina métricas de sesión por ID
+   * @param id El ID de las métricas
+   * @returns Promise<boolean> que indica éxito
    */
   deleteById(id: string): Promise<boolean>;
 
   /**
-   * Updates existing session metrics
-   * @param id The metrics ID
-   * @param updates Partial metrics data to update
-   * @returns Promise with the updated metrics or null if not found
+   * Actualiza métricas de sesión existentes
+   * @param id El ID de las métricas
+   * @param updates Datos parciales de métricas a actualizar
+   * @returns Promesa con las métricas actualizadas o null si no se encuentran
    */
   update(id: string, updates: Partial<SessionMetrics>): Promise<SessionMetrics | null>;
 
   /**
-   * Gets the count of sessions
-   * @returns Promise with the count
+   * Obtiene el conteo de sesiones
+   * @returns Promesa con el conteo
    */
   count(): Promise<number>;
 }

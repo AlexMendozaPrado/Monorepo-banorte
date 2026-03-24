@@ -9,7 +9,7 @@ export class PDFTextExtractor implements TextExtractorPort {
   private readonly maxFileSize: number;
   private readonly supportedTypes: string[];
 
-  constructor(maxFileSize: number = 10 * 1024 * 1024) { // 10MB default
+  constructor(maxFileSize: number = 10 * 1024 * 1024) { // 10MB por defecto
     this.maxFileSize = maxFileSize;
     this.supportedTypes = ['application/pdf'];
   }
@@ -19,18 +19,18 @@ export class PDFTextExtractor implements TextExtractorPort {
     options: TextExtractionOptions = {}
   ): Promise<ExtractedText> {
     try {
-      // Validate file size
+      // Validar tamaño del archivo
       if (fileBuffer.length > this.maxFileSize) {
         throw new Error(`File size exceeds maximum limit of ${this.maxFileSize} bytes`);
       }
 
-      // Validate PDF format
+      // Validar formato PDF
       const isValid = await this.isValidPDF(fileBuffer);
       if (!isValid) {
         throw new Error('Invalid PDF file format');
       }
 
-      // Parse PDF with error handling
+      // Parsear PDF con manejo de errores
       console.log('Starting PDF parsing with buffer size:', fileBuffer.length);
       const pdfData = await pdfParse(fileBuffer, {
         max: options.maxPages || 0, // 0 means no limit
@@ -41,14 +41,14 @@ export class PDFTextExtractor implements TextExtractorPort {
         textLength: pdfData.text?.length || 0
       });
 
-      // Extract and clean text content
+      // Extraer y limpiar contenido de texto
       let content = pdfData.text || '';
       
       if (!options.preserveFormatting) {
         content = this.cleanText(content);
       }
 
-      // Build metadata
+      // Construir metadatos
       const metadata = {
         pageCount: pdfData.numpages || 0,
         title: pdfData.info?.Title || undefined,
@@ -58,7 +58,7 @@ export class PDFTextExtractor implements TextExtractorPort {
         fileSize: fileBuffer.length,
       };
 
-      // Validate extracted content
+      // Validar contenido extraído
       if (!content || content.trim().length === 0) {
         throw new Error('No text content could be extracted from the PDF');
       }
@@ -83,7 +83,7 @@ export class PDFTextExtractor implements TextExtractorPort {
         firstBytes: fileBuffer.subarray(0, 10).toString('ascii')
       });
 
-      // Check PDF magic number (PDF signature)
+      // Verificar número mágico del PDF (firma PDF)
       if (fileBuffer.length < 4) {
         console.log('PDF validation failed: file too small');
         return false;
@@ -97,16 +97,16 @@ export class PDFTextExtractor implements TextExtractorPort {
         return false;
       }
 
-      // For now, just check the signature - skip the parsing validation
-      // to avoid the "s is not a function" error during validation
+      // Por ahora, solo verificar la firma - omitir la validación de parseo
+      // para evitar el error "s is not a function" durante la validación
       console.log('PDF validation passed: valid signature found');
       return true;
 
-      // TODO: Re-enable parsing validation once pdf-parse is working properly
+      // TODO: Re-habilitar la validación de parseo una vez que pdf-parse funcione correctamente
       /*
       try {
         const parser = await this.initializePdfParse();
-        await parser(fileBuffer, { max: 1 }); // Parse only first page for validation
+        await parser(fileBuffer, { max: 1 }); // Parsear solo la primera página para validación
         return true;
       } catch (parseError) {
         console.warn('PDF validation failed during parsing:', parseError);
@@ -129,18 +129,18 @@ export class PDFTextExtractor implements TextExtractorPort {
 
   private cleanText(text: string): string {
     return text
-      // Remove excessive whitespace
+      // Eliminar espacios en blanco excesivos
       .replace(/\s+/g, ' ')
-      // Remove page breaks and form feeds
+      // Eliminar saltos de página y avances de formulario
       .replace(/[\f\r]/g, '')
-      // Normalize line breaks
+      // Normalizar saltos de línea
       .replace(/\n+/g, '\n')
-      // Remove leading/trailing whitespace
+      // Eliminar espacios en blanco al inicio y al final
       .trim()
-      // Remove common PDF artifacts
-      .replace(/\u0000/g, '') // Null characters
-      .replace(/\u00A0/g, ' ') // Non-breaking spaces
-      // Remove excessive punctuation
+      // Eliminar artefactos comunes de PDF
+      .replace(/\u0000/g, '') // Caracteres nulos
+      .replace(/\u00A0/g, ' ') // Espacios de no separación
+      // Eliminar puntuación excesiva
       .replace(/\.{3,}/g, '...')
       .replace(/-{3,}/g, '---');
   }
@@ -148,7 +148,7 @@ export class PDFTextExtractor implements TextExtractorPort {
 
 
   /**
-   * Gets basic information about a PDF without extracting all text
+   * Obtiene información básica de un PDF sin extraer todo el texto
    */
   async getPDFInfo(fileBuffer: Buffer): Promise<{
     pageCount: number;
@@ -163,7 +163,7 @@ export class PDFTextExtractor implements TextExtractorPort {
         throw new Error('Invalid PDF file');
       }
 
-      const pdfData = await pdfParse(fileBuffer, { max: 0 }); // Don't extract text, just metadata
+      const pdfData = await pdfParse(fileBuffer, { max: 0 }); // No extraer texto, solo metadatos
 
       return {
         pageCount: pdfData.numpages || 0,

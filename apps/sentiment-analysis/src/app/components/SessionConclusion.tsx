@@ -57,7 +57,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
         </Typography>
       </Box>
 
-      {/* Executive Summary */}
+      {/* Resumen Ejecutivo */}
       <Card variant="outlined" sx={{ mb: 3, bgcolor: '#f5f5f5' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom color="primary">
@@ -98,7 +98,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
       </Card>
 
       <Grid container spacing={3}>
-        {/* Risks */}
+        {/* Riesgos */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent>
@@ -153,7 +153,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
           </Card>
         </Grid>
 
-        {/* Opportunities */}
+        {/* Oportunidades */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent>
@@ -214,7 +214,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
           </Card>
         </Grid>
 
-        {/* Action Plan */}
+        {/* Plan de Acción */}
         <Grid item xs={12}>
           <Card variant="outlined">
             <CardContent>
@@ -226,7 +226,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
               </Box>
 
               <Grid container spacing={2}>
-                {/* Immediate Actions */}
+                {/* Acciones Inmediatas */}
                 <Grid item xs={12} md={4}>
                   <Box sx={{ p: 2, bgcolor: '#ffebee', borderRadius: 1, height: '100%' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#EB0029' }}>
@@ -260,7 +260,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
                   </Box>
                 </Grid>
 
-                {/* Short Term Actions */}
+                {/* Acciones a Corto Plazo */}
                 <Grid item xs={12} md={4}>
                   <Box sx={{ p: 2, bgcolor: '#fff3e0', borderRadius: 1, height: '100%' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#FFA400' }}>
@@ -294,7 +294,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
                   </Box>
                 </Grid>
 
-                {/* Continuous Actions */}
+                {/* Acciones Continuas */}
                 <Grid item xs={12} md={4}>
                   <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 1, height: '100%' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#6CC04A' }}>
@@ -332,7 +332,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
           </Card>
         </Grid>
 
-        {/* Insights */}
+        {/* Perspectivas */}
         <Grid item xs={12}>
           <Card variant="outlined">
             <CardContent>
@@ -399,7 +399,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
           </Card>
         </Grid>
 
-        {/* Team Climate */}
+        {/* Clima del Equipo */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>
@@ -512,7 +512,7 @@ export function SessionConclusion({ conclusion }: SessionConclusionProps) {
           </Card>
         </Grid>
 
-        {/* Recommendations & Next Steps */}
+        {/* Recomendaciones y Próximos Pasos */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>

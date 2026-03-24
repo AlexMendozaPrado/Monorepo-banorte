@@ -17,13 +17,13 @@ export const formatSentiment = (sentiment: SentimentType): string => {
 export const getSentimentColor = (sentiment: SentimentType): string => {
   switch (sentiment) {
     case SentimentType.POSITIVE:
-      return '#4caf50'; // Green
+      return '#4caf50'; // Verde
     case SentimentType.NEUTRAL:
-      return '#ff9800'; // Orange
+      return '#ff9800'; // Naranja
     case SentimentType.NEGATIVE:
-      return '#f44336'; // Red
+      return '#f44336'; // Rojo
     default:
-      return '#9e9e9e'; // Gray
+      return '#9e9e9e'; // Gris
   }
 };
 
@@ -45,9 +45,9 @@ export const formatConfidence = (confidence: number): string => {
 };
 
 export const getConfidenceColor = (confidence: number): string => {
-  if (confidence >= 0.8) return '#4caf50'; // Green - High confidence
-  if (confidence >= 0.6) return '#ff9800'; // Orange - Medium confidence
-  return '#f44336'; // Red - Low confidence
+  if (confidence >= 0.8) return '#4caf50'; // Verde - Alta confianza
+  if (confidence >= 0.6) return '#ff9800'; // Naranja - Confianza media
+  return '#f44336'; // Rojo - Baja confianza
 };
 
 export const formatEmotion = (emotion: keyof EmotionScore): string => {
@@ -64,12 +64,12 @@ export const formatEmotion = (emotion: keyof EmotionScore): string => {
 
 export const getEmotionColor = (emotion: keyof EmotionScore): string => {
   const colorMap: Record<keyof EmotionScore, string> = {
-    joy: '#ffeb3b',      // Yellow
-    sadness: '#2196f3',   // Blue
-    anger: '#f44336',     // Red
-    fear: '#9c27b0',      // Purple
-    surprise: '#ff9800',  // Orange
-    disgust: '#4caf50',   // Green
+    joy: '#ffeb3b',      // Amarillo
+    sadness: '#2196f3',   // Azul
+    anger: '#f44336',     // Rojo
+    fear: '#9c27b0',      // Púrpura
+    surprise: '#ff9800',  // Naranja
+    disgust: '#4caf50',   // Verde
   };
   return colorMap[emotion] || '#9e9e9e';
 };
@@ -133,7 +133,7 @@ export const getReadabilityLevel = (score: number): string => {
 };
 
 export const getReadabilityColor = (score: number): string => {
-  if (score >= 70) return '#4caf50'; // Green - Easy to read
-  if (score >= 50) return '#ff9800'; // Orange - Medium difficulty
-  return '#f44336'; // Red - Difficult to read
+  if (score >= 70) return '#4caf50'; // Verde - Fácil de leer
+  if (score >= 50) return '#ff9800'; // Naranja - Dificultad media
+  return '#f44336'; // Rojo - Difícil de leer
 };

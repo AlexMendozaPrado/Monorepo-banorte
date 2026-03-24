@@ -4,7 +4,7 @@ import {
   SessionMetricsFilter,
 } from '../../core/domain/ports/SessionMetricsRepositoryPort';
 
-// Use globalThis to persist data across Next.js hot reloads in development
+// Usar globalThis para persistir datos entre recargas en caliente de Next.js en desarrollo
 const getMetricsStore = (): Map<string, SessionMetrics> => {
   if (!(globalThis as any).__sessionMetricsStore) {
     (globalThis as any).__sessionMetricsStore = new Map<string, SessionMetrics>();
@@ -163,7 +163,7 @@ export class InMemorySessionMetricsRepository implements SessionMetricsRepositor
     });
   }
 
-  // Utility methods for testing and development
+  // Métodos utilitarios para pruebas y desarrollo
   async clear(): Promise<void> {
     const store = getMetricsStore();
     store.clear();

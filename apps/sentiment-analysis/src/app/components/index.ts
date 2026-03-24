@@ -1,4 +1,4 @@
-// Component exports
+// Exportaciones de componentes
 export { AnalyzePage } from './AnalyzePage';
 export { HistoryPage } from './HistoryPage';
 export { FileUploadZone } from './FileUploadZone';

@@ -1,4 +1,4 @@
-// Dependency Injection Container for Clean Architecture
+// Contenedor de Inyección de Dependencias para Arquitectura Limpia
 import { PDFTextExtractor } from '../text-extraction/PDFTextExtractor';
 import { InMemorySentimentAnalysisRepository } from '../repositories/InMemorySentimentAnalysisRepository';
 import { CSVExportService } from '../export/CSVExportService';
@@ -30,18 +30,18 @@ import { SessionTrendsService } from '../../core/application/services/SessionTre
 import { SessionConclusionService } from '../../core/application/services/SessionConclusionService';
 
 export interface DIContainerConfig {
-  // AI Provider
+  // Proveedor de IA
   aiProvider?: AIProvider;
 
-  // OpenAI configuration
+  // Configuración de OpenAI
   openaiApiKey?: string;
   openaiModel?: string;
 
-  // Ollama configuration
+  // Configuración de Ollama
   ollamaBaseUrl?: string;
   ollamaModel?: string;
 
-  // Common configuration
+  // Configuración común
   maxTokens?: number;
   temperature?: number;
   maxFileSize?: number;
@@ -52,7 +52,7 @@ export class DIContainer {
   private static instance: DIContainer;
   private config: DIContainerConfig;
 
-  // Infrastructure Layer
+  // Capa de Infraestructura
   private _sentimentAnalyzer?: SentimentAnalyzerPort;
   private _textExtractor?: TextExtractorPort;
   private _repository?: SentimentAnalysisRepositoryPort;
@@ -62,13 +62,13 @@ export class DIContainer {
   private _conclusionRepository?: SessionConclusionRepositoryPort;
   private _sessionAnalyzer?: SessionAnalysisPort;
 
-  // Application Layer
+  // Capa de Aplicación
   private _analyzeSentimentUseCase?: AnalyzeSentimentUseCase;
   private _getHistoricalAnalysisUseCase?: GetHistoricalAnalysisUseCase;
   private _filterAnalysisUseCase?: FilterAnalysisUseCase;
   private _exportAnalysisUseCase?: ExportAnalysisUseCase;
 
-  // Session Services
+  // Servicios de Sesión
   private _sessionMetricsService?: SessionMetricsService;
   private _sessionTrendsService?: SessionTrendsService;
   private _sessionConclusionService?: SessionConclusionService;
@@ -91,7 +91,7 @@ export class DIContainer {
     DIContainer.instance = undefined as any;
   }
 
-  // Infrastructure Layer Getters
+  // Getters de la Capa de Infraestructura
   public get sentimentAnalyzer(): SentimentAnalyzerPort {
     if (!this._sentimentAnalyzer) {
       this._sentimentAnalyzer = SentimentAnalyzerFactory.create({
@@ -110,7 +110,7 @@ export class DIContainer {
   public get textExtractor(): TextExtractorPort {
     if (!this._textExtractor) {
       this._textExtractor = new PDFTextExtractor(
-        this.config.maxFileSize || 10 * 1024 * 1024 // 10MB
+        this.config.maxFileSize || 10 * 1024 * 1024 // 10MB por defecto
       );
     }
     return this._textExtractor;
@@ -181,8 +181,8 @@ export class DIContainer {
 
       return this._sessionAnalyzer;
     } catch (error) {
-      // Graceful degradation: si falla, retorna undefined
-      // Los services automáticamente usarán lógica basada en reglas
+      // Degradación elegante: si falla, retorna undefined
+      // Los servicios automáticamente usarán lógica basada en reglas
       console.warn(
         '[DI] Session analyzer not available, services will use rule-based approach:',
         error instanceof Error ? error.message : error
@@ -192,7 +192,7 @@ export class DIContainer {
     }
   }
 
-  // Application Layer Getters
+  // Getters de la Capa de Aplicación
   public get analyzeSentimentUseCase(): AnalyzeSentimentUseCase {
     if (!this._analyzeSentimentUseCase) {
       this._analyzeSentimentUseCase = new AnalyzeSentimentUseCase(
@@ -233,12 +233,12 @@ export class DIContainer {
     return this._exportAnalysisUseCase;
   }
 
-  // Session Services Getters
+  // Getters de Servicios de Sesión
   public get sessionMetricsService(): SessionMetricsService {
     if (!this._sessionMetricsService) {
       this._sessionMetricsService = new SessionMetricsService(
         this.metricsRepository,
-        this.sessionAnalyzer  // Pasar el session analyzer (opcional)
+        this.sessionAnalyzer  // Pasar el analizador de sesiones (opcional)
       );
     }
     return this._sessionMetricsService;
@@ -258,23 +258,23 @@ export class DIContainer {
     if (!this._sessionConclusionService) {
       this._sessionConclusionService = new SessionConclusionService(
         this.conclusionRepository,
-        this.sessionAnalyzer  // Usar session analyzer en lugar de sentiment analyzer
+        this.sessionAnalyzer  // Usar analizador de sesiones en lugar de analizador de sentimientos
       );
     }
     return this._sessionConclusionService;
   }
 
-  // Utility methods
+  // Métodos utilitarios
   public async validateConfiguration(): Promise<boolean> {
     try {
-      // Validate OpenAI connection
+      // Validar conexión con OpenAI
       const isAnalyzerReady = await this.sentimentAnalyzer.isReady();
       if (!isAnalyzerReady) {
         console.error('OpenAI sentiment analyzer is not ready');
         return false;
       }
 
-      // Validate other services
+      // Validar otros servicios
       const supportedFormats = this.exportService.getSupportedFormats();
       if (supportedFormats.length === 0) {
         console.error('Export service has no supported formats');
@@ -301,12 +301,12 @@ export class DIContainer {
   public updateConfiguration(updates: Partial<DIContainerConfig>): void {
     this.config = { ...this.config, ...updates };
     
-    // Reset instances that depend on configuration
+    // Reiniciar instancias que dependen de la configuración
     this._sentimentAnalyzer = undefined;
     this._textExtractor = undefined;
     this._exportService = undefined;
     
-    // Reset use cases that depend on updated infrastructure
+    // Reiniciar casos de uso que dependen de la infraestructura actualizada
     this._analyzeSentimentUseCase = undefined;
     this._exportAnalysisUseCase = undefined;
   }

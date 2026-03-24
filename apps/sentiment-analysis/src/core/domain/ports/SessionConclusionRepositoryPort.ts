@@ -2,44 +2,44 @@ import { SessionConclusion } from '../value-objects/SessionConclusion';
 
 export interface SessionConclusionRepositoryPort {
   /**
-   * Saves session conclusion to the repository
-   * @param conclusion The session conclusion to save
-   * @returns Promise with the saved conclusion
+   * Guarda la conclusión de sesión en el repositorio
+   * @param conclusion La conclusión de sesión a guardar
+   * @returns Promesa con la conclusión guardada
    */
   save(conclusion: SessionConclusion): Promise<SessionConclusion>;
 
   /**
-   * Finds session conclusion by its ID
-   * @param id The conclusion ID
-   * @returns Promise with the conclusion or null if not found
+   * Busca la conclusión de sesión por su ID
+   * @param id El ID de la conclusión
+   * @returns Promesa con la conclusión o null si no se encuentra
    */
   findById(id: string): Promise<SessionConclusion | null>;
 
   /**
-   * Finds session conclusion by analysis ID
-   * @param analysisId The analysis ID
-   * @returns Promise with the conclusion or null if not found
+   * Busca la conclusión de sesión por ID de análisis
+   * @param analysisId El ID del análisis
+   * @returns Promesa con la conclusión o null si no se encuentra
    */
   findByAnalysisId(analysisId: string): Promise<SessionConclusion | null>;
 
   /**
-   * Finds all session conclusions
-   * @returns Promise with array of conclusions
+   * Busca todas las conclusiones de sesión
+   * @returns Promesa con arreglo de conclusiones
    */
   findAll(): Promise<SessionConclusion[]>;
 
   /**
-   * Deletes session conclusion by ID
-   * @param id The conclusion ID
-   * @returns Promise<boolean> indicating success
+   * Elimina la conclusión de sesión por ID
+   * @param id El ID de la conclusión
+   * @returns Promise<boolean> que indica éxito
    */
   deleteById(id: string): Promise<boolean>;
 
   /**
-   * Updates existing session conclusion
-   * @param id The conclusion ID
-   * @param updates Partial conclusion data to update
-   * @returns Promise with the updated conclusion or null if not found
+   * Actualiza una conclusión de sesión existente
+   * @param id El ID de la conclusión
+   * @param updates Datos parciales de la conclusión a actualizar
+   * @returns Promesa con la conclusión actualizada o null si no se encuentra
    */
   update(id: string, updates: Partial<SessionConclusion>): Promise<SessionConclusion | null>;
 }

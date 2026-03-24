@@ -17,7 +17,7 @@ interface EmotionalTimelineProps {
 }
 
 export function EmotionalTimeline({ timeline }: EmotionalTimelineProps) {
-  // Transform timeline data for recharts
+  // Transformar datos de línea de tiempo para recharts
   const chartData = timeline.map((point) => ({
     timestamp: `${point.timestamp}%`,
     sentiment: point.sentiment,
@@ -26,11 +26,11 @@ export function EmotionalTimeline({ timeline }: EmotionalTimelineProps) {
   }));
 
   const getSentimentColor = (sentiment: number): string => {
-    if (sentiment >= 6) return '#6CC04A'; // green
-    if (sentiment >= 5) return '#FFA400'; // orange
-    if (sentiment >= 4) return '#FFD54F'; // yellow
-    if (sentiment >= 3) return '#FF671B'; // red-orange
-    return '#EB0029'; // red
+    if (sentiment >= 6) return '#6CC04A'; // verde
+    if (sentiment >= 5) return '#FFA400'; // naranja
+    if (sentiment >= 4) return '#FFD54F'; // amarillo
+    if (sentiment >= 3) return '#FF671B'; // rojo-naranja
+    return '#EB0029'; // rojo
   };
 
   return (
@@ -43,7 +43,7 @@ export function EmotionalTimeline({ timeline }: EmotionalTimelineProps) {
           </Typography>
         </Box>
 
-        {/* Chart */}
+        {/* Gráfico */}
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
             data={chartData}
@@ -99,7 +99,7 @@ export function EmotionalTimeline({ timeline }: EmotionalTimelineProps) {
           </LineChart>
         </ResponsiveContainer>
 
-        {/* Timeline Points */}
+        {/* Puntos de la Línea de Tiempo */}
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle2" gutterBottom color="text.secondary">
             Eventos Clave:

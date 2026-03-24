@@ -5,20 +5,20 @@ import { getAIProviderConfig } from '../../../../config/ai-provider.config';
 import { SessionTrends } from '../../../../core/domain/entities/SessionTrends';
 import { AnalysisFilter } from '../../../../core/domain/ports/SentimentAnalysisRepositoryPort';
 
-// Mark as dynamic to prevent static generation errors
+// Marcar como dinámico para prevenir errores de generación estática
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<SessionTrendsResponse>>> {
   try {
-    // Parse query parameters
+    // Parsear parámetros de consulta
     const searchParams = request.nextUrl.searchParams;
     const from = searchParams.get('from');
     const to = searchParams.get('to');
     const clientName = searchParams.get('clientName');
     const channel = searchParams.get('channel');
 
-    // Validate required parameters
+    // Validar parámetros requeridos
     if (!from || !to) {
       return NextResponse.json(
         {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       );
     }
 
-    // Parse dates
+    // Parsear fechas
     const fromDate = new Date(from);
     const toDate = new Date(to);
 
@@ -53,12 +53,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       );
     }
 
-    // Build filter
+    // Construir filtro
     const filter: AnalysisFilter = {};
     if (clientName) filter.clientName = clientName;
     if (channel) filter.channel = channel;
 
-    // Initialize DI Container
+    // Inicializar contenedor de inyección de dependencias
     const container = DIContainer.getInstance(getAIProviderConfig());
     const trendsService = container.sessionTrendsService;
 
@@ -68,12 +68,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       filter,
     });
 
-    // Calculate trends
+    // Calcular tendencias
     const trends = await trendsService.calculateTrends(fromDate, toDate, filter);
 
     console.log('Session trends calculated successfully');
 
-    // Convert entity to API response format
+    // Convertir entidad a formato de respuesta API
     const trendsResponse: SessionTrendsResponse = convertTrendsToResponse(trends);
 
     return NextResponse.json({

@@ -7,7 +7,7 @@ import { SessionConclusion } from '../../../core/domain/value-objects/SessionCon
 
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<AnalysisResponse>>> {
   try {
-    // Validate AI provider configuration
+    // Validar configuración del proveedor de IA
     try {
       validateAIProviderConfig();
     } catch (error) {
@@ -20,10 +20,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
 
-    // Initialize DI Container with AI provider configuration
+    // Inicializar contenedor de inyección de dependencias con configuración del proveedor de IA
     const container = DIContainer.getInstance(getAIProviderConfig());
 
-    // Validate configuration
+    // Validar configuración
     const isConfigValid = await container.validateConfiguration();
     if (!isConfigValid) {
       return NextResponse.json(
@@ -35,13 +35,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
 
-    // Parse form data
+    // Parsear datos del formulario
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const clientName = formData.get('clientName') as string;
     const channel = formData.get('channel') as string;
 
-    // Validate required fields
+    // Validar campos requeridos
     if (!file) {
       return NextResponse.json(
         {
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
 
-    // Validate file type
+    // Validar tipo de archivo
     if (file.type !== 'application/pdf') {
       return NextResponse.json(
         {
@@ -83,10 +83,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
 
-    // Convert file to buffer
+    // Convertir archivo a buffer
     const fileBuffer = Buffer.from(await file.arrayBuffer());
 
-    // Execute analysis use case
+    // Ejecutar caso de uso de análisis
     const analyzeSentimentUseCase = container.analyzeSentimentUseCase;
 
     console.log('Starting sentiment analysis for:', {
@@ -106,19 +106,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     console.log('Sentiment analysis completed successfully');
     console.log(`[ANALYZE] Analysis ID: ${result.analysis.id}`);
 
-    // Calculate session metrics automatically
+    // Calcular métricas de sesión automáticamente
     console.log('[ANALYZE] Calculating session metrics...');
     const metricsService = container.sessionMetricsService;
     const metrics = await metricsService.calculateSessionMetrics(result.analysis);
     console.log(`[ANALYZE] Session metrics calculated successfully - Metrics ID: ${metrics.id}, Analysis ID: ${metrics.analysisId}`);
 
-    // Generate session conclusion
+    // Generar conclusión de sesión
     console.log('[ANALYZE] Generating session conclusion...');
     const conclusionService = container.sessionConclusionService;
     const conclusion = await conclusionService.generateConclusion(result.analysis, metrics);
     console.log(`[ANALYZE] Session conclusion generated successfully - Conclusion ID: ${conclusion.id}, Analysis ID: ${conclusion.analysisId}`);
 
-    // Convert entity to API response format (including metrics and conclusion)
+    // Convertir entidad a formato de respuesta API (incluyendo métricas y conclusión)
     const analysisResponse: AnalysisResponse & { extendedAnalysis?: any } = {
       id: result.analysis.id,
       clientName: result.analysis.clientName,
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       updatedAt: result.analysis.updatedAt.toISOString(),
       processingTimeMs: result.processingTimeMs,
       extendedAnalysis: result.extendedAnalysis,
-      // Include metrics and conclusion in single response for Vercel compatibility
+      // Incluir métricas y conclusión en respuesta única para compatibilidad con Vercel
       metrics: convertMetricsToResponse(metrics),
       conclusion: convertConclusionToResponse(conclusion),
     };
@@ -171,7 +171,7 @@ export async function GET(): Promise<NextResponse<ApiResponse>> {
   );
 }
 
-// Helper function to convert SessionMetrics entity to API response format
+// Función auxiliar para convertir entidad SessionMetrics a formato de respuesta API
 function convertMetricsToResponse(metrics: SessionMetrics): SessionMetricsResponse {
   return {
     id: metrics.id,
@@ -236,7 +236,7 @@ function convertMetricsToResponse(metrics: SessionMetrics): SessionMetricsRespon
   };
 }
 
-// Helper function to convert SessionConclusion entity to API response format
+// Función auxiliar para convertir entidad SessionConclusion a formato de respuesta API
 function convertConclusionToResponse(conclusion: SessionConclusion): SessionConclusionResponse {
   return {
     id: conclusion.id,

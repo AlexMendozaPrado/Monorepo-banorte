@@ -1,17 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable standalone output for Docker deployments
-  // This creates a minimal .next/standalone folder with only required files
+  // Habilitar salida standalone para despliegues Docker
+  // Esto crea una carpeta .next/standalone mínima con solo los archivos requeridos
   output: 'standalone',
 
-  // Disable static page generation errors
+  // Deshabilitar errores de generación de páginas estáticas
   staticPageGenerationTimeout: 1000,
 
-  // Skip build-time static generation for problematic routes
+  // Omitir generación estática en tiempo de compilación para rutas problemáticas
   skipTrailingSlashRedirect: true,
 
-  // Disable automatic static optimization
-  // This prevents Next.js from trying to pre-render pages during build
+  // Deshabilitar optimización estática automática
+  // Esto previene que Next.js intente pre-renderizar páginas durante la compilación
   generateBuildId: async () => {
     return 'build-' + Date.now();
   },
@@ -20,19 +20,19 @@ const nextConfig = {
     serverComponentsExternalPackages: ['pdf-parse'],
   },
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
+    // !! ADVERTENCIA !!
+    // Permitir peligrosamente que las compilaciones de producción se completen exitosamente incluso si
+    // tu proyecto tiene errores de tipos.
+    // !! ADVERTENCIA !!
     ignoreBuildErrors: false,
   },
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
+    // Advertencia: Esto permite que las compilaciones de producción se completen exitosamente incluso si
+    // tu proyecto tiene errores de ESLint.
     ignoreDuringBuilds: true,
   },
 
-  // Transpile Material-UI packages to fix pre-rendering errors
+  // Transpilar paquetes de Material-UI para corregir errores de pre-renderizado
   transpilePackages: [
     '@mui/material',
     '@mui/system',
@@ -44,7 +44,7 @@ const nextConfig = {
     'recharts'
   ],
 
-  // Optimize for production builds
+  // Optimizar para compilaciones de producción
   modularizeImports: {
     '@mui/material': {
       transform: '@mui/material/{{member}}',

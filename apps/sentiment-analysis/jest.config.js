@@ -1,16 +1,16 @@
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
-  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
+  // Proporcionar la ruta a tu aplicación Next.js para cargar next.config.js y archivos .env en tu entorno de pruebas
   dir: './',
 })
 
-// Add any custom config to be passed to Jest
+// Agregar cualquier configuración personalizada para pasar a Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
-    // Handle module aliases (this will be automatically configured for you soon)
+    // Manejar alias de módulos (esto será configurado automáticamente pronto)
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/core/(.*)$': '<rootDir>/src/core/$1',
     '^@/infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
@@ -25,7 +25,7 @@ const customJestConfig = {
     '!src/**/*.d.ts',
     '!src/**/*.stories.{js,jsx,ts,tsx}',
     '!src/**/__tests__/**',
-    '!src/app/**', // Exclude Next.js app directory from coverage (will be tested with E2E)
+    '!src/app/**', // Excluir directorio app de Next.js de la cobertura (se probará con E2E)
   ],
   coverageThreshold: {
     global: {
@@ -42,5 +42,5 @@ const customJestConfig = {
   ],
 }
 
-// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
+// createJestConfig se exporta de esta manera para asegurar que next/jest pueda cargar la configuración de Next.js que es asíncrona
 module.exports = createJestConfig(customJestConfig)

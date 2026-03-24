@@ -72,7 +72,7 @@ export function HistoryPage() {
   }, []);
 
   const handleFiltersChange = (newFilters: HistoricalAnalysisRequest) => {
-    const updatedFilters = { ...newFilters, page: 1 }; // Reset to first page
+    const updatedFilters = { ...newFilters, page: 1 }; // Reiniciar a primera página
     setFilters(updatedFilters);
     fetchAnalyses(updatedFilters);
   };
@@ -113,7 +113,7 @@ export function HistoryPage() {
         throw new Error(result.error || 'Error al exportar datos');
       }
 
-      // Handle file download
+      // Manejar descarga de archivo
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -133,7 +133,7 @@ export function HistoryPage() {
   return (
     <Box>
       <Grid container spacing={3}>
-        {/* Header */}
+        {/* Encabezado */}
         <Grid item xs={12}>
           <Card>
             <CardContent>
@@ -177,7 +177,7 @@ export function HistoryPage() {
                 </Alert>
               )}
 
-              {/* Statistics */}
+              {/* Estadísticas */}
               {data && (
                 <AnalysisStatistics statistics={data.statistics} />
               )}
@@ -185,7 +185,7 @@ export function HistoryPage() {
           </Card>
         </Grid>
 
-        {/* Filters */}
+        {/* Filtros */}
         {showFilters && (
           <Grid item xs={12}>
             <AnalysisFilters
@@ -195,7 +195,7 @@ export function HistoryPage() {
           </Grid>
         )}
 
-        {/* Data Table */}
+        {/* Tabla de Datos */}
         <Grid item xs={12}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>

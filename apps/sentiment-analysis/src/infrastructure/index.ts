@@ -1,4 +1,4 @@
-// Infrastructure Layer Exports
+// Exportaciones de la Capa de Infraestructura
 export { OpenAISentimentAnalyzer } from './sentiment/OpenAISentimentAnalyzer';
 export { PDFTextExtractor } from './text-extraction/PDFTextExtractor';
 export { InMemorySentimentAnalysisRepository } from './repositories/InMemorySentimentAnalysisRepository';

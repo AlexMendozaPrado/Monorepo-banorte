@@ -26,9 +26,9 @@ interface SessionMetricsCardsProps {
 
 export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
   const getScoreColor = (score: number): string => {
-    if (score >= 80) return '#6CC04A'; // success.main - green
-    if (score >= 60) return '#FFA400'; // warning.main - orange
-    return '#FF671B'; // error.main - red
+    if (score >= 80) return '#6CC04A'; // success.main - verde
+    if (score >= 60) return '#FFA400'; // warning.main - naranja
+    return '#FF671B'; // error.main - rojo
   };
 
   const getScoreLabel = (score: number): string => {
@@ -48,7 +48,7 @@ export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
       </Box>
 
       <Grid container spacing={2}>
-        {/* Productivity Score */}
+        {/* Puntuación de Productividad */}
         <Grid item xs={12} sm={6} md={3}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
@@ -91,7 +91,7 @@ export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
           </Card>
         </Grid>
 
-        {/* Effectiveness Score */}
+        {/* Puntuación de Efectividad */}
         <Grid item xs={12} sm={6} md={3}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
@@ -134,7 +134,7 @@ export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
           </Card>
         </Grid>
 
-        {/* Resolution Rate */}
+        {/* Tasa de Resolución */}
         <Grid item xs={12} sm={6} md={3}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
@@ -177,7 +177,7 @@ export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
           </Card>
         </Grid>
 
-        {/* Engagement Score */}
+        {/* Puntuación de Participación */}
         <Grid item xs={12} sm={6} md={3}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
@@ -220,7 +220,7 @@ export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
           </Card>
         </Grid>
 
-        {/* Duration & Participants */}
+        {/* Duración y Participantes */}
         <Grid item xs={12} sm={6}>
           <Card variant="outlined">
             <CardContent>
@@ -255,7 +255,7 @@ export function SessionMetricsCards({ metrics }: SessionMetricsCardsProps) {
           </Card>
         </Grid>
 
-        {/* Time Distribution */}
+        {/* Distribución de Tiempo */}
         <Grid item xs={12}>
           <Card variant="outlined">
             <CardContent>

@@ -1,4 +1,4 @@
-// Extended domain types for detailed sentiment analysis
+// Tipos de dominio extendidos para análisis de sentimiento detallado
 
 export type SentimentScore = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 

@@ -35,7 +35,7 @@ export class SessionTrendsService {
     const velocityEvolution = this.calculateVelocityEvolution(metrics);
     const blockersEvolution = this.calculateBlockersEvolution(metrics);
 
-    // Detectar patrones
+    // Detectar patrones recurrentes
     const recurringTopics = this.findRecurringTopics(metrics);
     const sentimentTrend = this.analyzeSentimentTrend(timeSeries);
     const productivityTrend = this.analyzeProductivityTrend(timeSeries);
@@ -68,7 +68,7 @@ export class SessionTrendsService {
       productivityTrend,
       nextSessionProjection,
       this.findMostProductiveDay(analyses.data),
-      undefined, // mostProductiveTimeOfDay
+      undefined, // horario más productivo del día
       avgBlockers,
       avgAchievements,
       new Date()

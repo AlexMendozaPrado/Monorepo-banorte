@@ -29,7 +29,7 @@ export class OpenAISentimentAnalyzer implements SentimentAnalyzerPort {
     try {
       const prompt = this.buildAnalysisPrompt(request);
 
-      // Prepare the completion request
+      // Preparar la solicitud de completado
       const completionRequest: any = {
         model: this.model,
         messages: [
@@ -46,7 +46,7 @@ export class OpenAISentimentAnalyzer implements SentimentAnalyzerPort {
         temperature: this.temperature,
       };
 
-      // Add JSON mode only for compatible models
+      // Agregar modo JSON solo para modelos compatibles
       if (this.supportsJsonMode()) {
         completionRequest.response_format = { type: 'json_object' };
       }
@@ -67,7 +67,7 @@ export class OpenAISentimentAnalyzer implements SentimentAnalyzerPort {
 
   async isReady(): Promise<boolean> {
     try {
-      // Test with a simple request
+      // Probar con una solicitud simple
       const testCompletion = await this.openai.chat.completions.create({
         model: this.model,
         messages: [{ role: 'user', content: 'Test' }],
@@ -90,7 +90,7 @@ export class OpenAISentimentAnalyzer implements SentimentAnalyzerPort {
   }
 
   private supportsJsonMode(): boolean {
-    // Models that support JSON mode
+    // Modelos que soportan modo JSON
     const jsonModeModels = [
       'gpt-4-1106-preview',
       'gpt-4-turbo-preview',
@@ -157,10 +157,10 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
 
   private parseAnalysisResponse(responseContent: string): SentimentAnalysisResponse {
     try {
-      // Try to extract JSON from the response (in case it's wrapped in text)
+      // Intentar extraer JSON de la respuesta (en caso de que esté envuelto en texto)
       let jsonContent = responseContent.trim();
 
-      // Look for JSON object in the response
+      // Buscar objeto JSON en la respuesta
       const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         jsonContent = jsonMatch[0];
@@ -168,15 +168,15 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
 
       const parsed = JSON.parse(jsonContent);
 
-      // Validate required fields
+      // Validar campos requeridos
       if (!parsed.overallSentiment || !parsed.emotionScores || parsed.confidence === undefined) {
         throw new Error('Invalid response format from OpenAI');
       }
 
-      // Validate sentiment type
+      // Validar tipo de sentimiento
       const sentimentType = this.parseSentimentType(parsed.overallSentiment);
 
-      // Validate and normalize emotion scores
+      // Validar y normalizar puntajes de emociones
       const rawScores = {
         joy: parsed.emotionScores.joy || 0,
         sadness: parsed.emotionScores.sadness || 0,
@@ -196,7 +196,7 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
         normalizedScores.disgust
       );
 
-      // Validate confidence
+      // Validar confianza
       const confidence = Math.max(0, Math.min(1, parsed.confidence));
 
       return {
@@ -209,7 +209,7 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
       console.error('Error parsing OpenAI response:', error);
       console.error('Response content:', responseContent);
 
-      // Fallback: create a basic analysis if parsing fails
+      // Respaldo: crear un análisis básico si falla el parseo
       return this.createFallbackAnalysis(responseContent);
     }
   }
@@ -285,12 +285,12 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
   private createFallbackAnalysis(responseContent: string): SentimentAnalysisResponse {
     console.log('Creating fallback analysis due to parsing error');
 
-    // Simple text analysis for fallback
+    // Análisis de texto simple como respaldo
     const text = responseContent.toLowerCase();
     let sentiment = SentimentType.NEUTRAL;
     let confidence = 0.5;
 
-    // Basic sentiment detection
+    // Detección básica de sentimiento
     const positiveWords = ['bueno', 'excelente', 'satisfecho', 'contento', 'feliz', 'gracias'];
     const negativeWords = ['malo', 'terrible', 'molesto', 'enojado', 'problema', 'error'];
 
@@ -305,7 +305,7 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
       confidence = 0.6;
     }
 
-    // Create basic emotion scores that sum to 1
+    // Crear puntajes de emociones básicos que sumen 1
     let joy = 0.1, sadness = 0.1, anger = 0.1, fear = 0.1, surprise = 0.1, disgust = 0.1;
 
     if (sentiment === SentimentType.POSITIVE) {
@@ -323,7 +323,7 @@ Proporciona un análisis completo del sentimiento y emociones presentes en el te
       surprise = 0.1;
       disgust = 0.1;
     } else {
-      // Neutral - distribute evenly
+      // Neutral - distribuir equitativamente
       joy = sadness = anger = fear = surprise = disgust = 1/6;
     }
 

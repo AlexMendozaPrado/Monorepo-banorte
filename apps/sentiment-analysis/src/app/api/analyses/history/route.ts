@@ -4,13 +4,13 @@ import { ApiResponse, HistoricalAnalysisResponse, HistoricalAnalysisRequest } fr
 import { SentimentType } from '../../../../core/domain/value-objects/SentimentType';
 import { getAIProviderConfig, validateAIProviderConfig } from '../../../../config/ai-provider.config';
 
-// Mark as dynamic to prevent static generation errors
+// Marcar como dinámico para prevenir errores de generación estática
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<HistoricalAnalysisResponse>>> {
   try {
-    // Validate AI provider configuration
+    // Validar configuración del proveedor de IA
     try {
       validateAIProviderConfig();
     } catch (error) {
@@ -23,10 +23,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       );
     }
 
-    // Initialize DI Container
+    // Inicializar contenedor de inyección de dependencias
     const container = DIContainer.getInstance(getAIProviderConfig());
 
-    // Parse query parameters
+    // Parsear parámetros de consulta
     const { searchParams } = new URL(request.url);
     
     const filters: HistoricalAnalysisRequest = {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
     };
 
-    // Add optional filters
+    // Agregar filtros opcionales
     const clientName = searchParams.get('clientName');
     if (clientName) filters.clientName = clientName;
 
@@ -60,10 +60,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const maxConfidence = searchParams.get('maxConfidence');
     if (maxConfidence) filters.maxConfidence = parseFloat(maxConfidence);
 
-    // Execute use case
+    // Ejecutar caso de uso
     const getHistoricalAnalysisUseCase = container.getHistoricalAnalysisUseCase;
     
-    // Convert API filters to domain filters
+    // Convertir filtros de API a filtros de dominio
     const domainFilter: any = {};
     if (filters.clientName) domainFilter.clientName = filters.clientName;
     if (filters.sentimentType) domainFilter.sentimentType = filters.sentimentType;
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       },
     });
 
-    // Convert domain entities to API response format
+    // Convertir entidades de dominio a formato de respuesta API
     const response: HistoricalAnalysisResponse = {
       analyses: {
         data: result.analyses.data.map(analysis => ({
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
           channel: analysis.channel,
           createdAt: analysis.createdAt.toISOString(),
           updatedAt: analysis.updatedAt.toISOString(),
-          processingTimeMs: 0, // Not stored in historical data
+          processingTimeMs: 0, // No se almacena en datos históricos
         })),
         total: result.analyses.total,
         page: result.analyses.page,

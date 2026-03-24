@@ -32,16 +32,16 @@ export class ExportAnalysisUseCase {
     const exportTimestamp = new Date();
 
     try {
-      // Validate export options
+      // Validar opciones de exportación
       await this.validateExportCommand(command);
 
-      // Determine maximum records to export
+      // Determinar máximo de registros a exportar
       const maxRecords = Math.min(
         command.maxRecords || this.exportService.getMaxExportLimit(),
         this.exportService.getMaxExportLimit()
       );
 
-      // Get analyses to export
+      // Obtener análisis a exportar
       const analysesResult = await this.repository.findAll(
         command.filter,
         {
@@ -56,13 +56,13 @@ export class ExportAnalysisUseCase {
         throw new Error('No analyses found matching the specified criteria.');
       }
 
-      // Export the analyses
+      // Exportar los análisis
       const exportResult = await this.exportService.exportAnalyses(
         analysesResult.data,
         command.exportOptions
       );
 
-      // Log export activity
+      // Registrar actividad de exportación
       console.log('Export completed:', {
         format: command.exportOptions.format,
         recordCount: analysesResult.data.length,
@@ -93,7 +93,7 @@ export class ExportAnalysisUseCase {
     estimatedFileSize: string;
   }> {
     try {
-      // Get sample data
+      // Obtener datos de muestra
       const sampleResult = await this.repository.findAll(filter, {
         page: 1,
         limit,
@@ -101,7 +101,7 @@ export class ExportAnalysisUseCase {
         sortOrder: 'desc',
       });
 
-      // Estimate file size based on sample
+      // Estimar tamaño de archivo basado en la muestra
       const avgRecordSize = this.estimateRecordSize(sampleResult.data[0]);
       const estimatedTotalSize = avgRecordSize * sampleResult.total;
       const estimatedFileSize = this.formatFileSize(estimatedTotalSize);
@@ -122,19 +122,19 @@ export class ExportAnalysisUseCase {
   }
 
   private async validateExportCommand(command: ExportAnalysisCommand): Promise<void> {
-    // Validate export options
+    // Validar opciones de exportación
     const isValidOptions = await this.exportService.validateExportOptions(command.exportOptions);
     if (!isValidOptions) {
       throw new Error('Invalid export options provided.');
     }
 
-    // Validate max records
+    // Validar máximo de registros
     const maxLimit = this.exportService.getMaxExportLimit();
     if (command.maxRecords && command.maxRecords > maxLimit) {
       throw new Error(`Maximum export limit is ${maxLimit} records.`);
     }
 
-    // Validate format
+    // Validar formato
     const supportedFormats = this.exportService.getSupportedFormats();
     if (!supportedFormats.includes(command.exportOptions.format)) {
       throw new Error(`Unsupported export format: ${command.exportOptions.format}. Supported formats: ${supportedFormats.join(', ')}`);
@@ -142,11 +142,11 @@ export class ExportAnalysisUseCase {
   }
 
   private estimateRecordSize(analysis: SentimentAnalysis | undefined): number {
-    if (!analysis) return 1000; // Default estimate
+    if (!analysis) return 1000; // Estimación por defecto
 
-    // Rough estimation based on JSON serialization
+    // Estimación aproximada basada en serialización JSON
     const jsonString = JSON.stringify(analysis);
-    return jsonString.length * 1.2; // Add 20% overhead for CSV/Excel formatting
+    return jsonString.length * 1.2; // Agregar 20% de sobrecarga para formato CSV/Excel
   }
 
   private formatFileSize(bytes: number): string {

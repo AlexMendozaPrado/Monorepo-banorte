@@ -18,10 +18,10 @@ export interface TextExtractionOptions {
 
 export interface TextExtractorPort {
   /**
-   * Extracts text content from a PDF file buffer
-   * @param fileBuffer The PDF file as a buffer
-   * @param options Optional extraction configuration
-   * @returns Promise with the extracted text and metadata
+   * Extrae el contenido de texto de un buffer de archivo PDF
+   * @param fileBuffer El archivo PDF como buffer
+   * @param options Configuración de extracción opcional
+   * @returns Promesa con el texto extraído y los metadatos
    */
   extractTextFromPDF(
     fileBuffer: Buffer, 
@@ -29,21 +29,21 @@ export interface TextExtractorPort {
   ): Promise<ExtractedText>;
 
   /**
-   * Validates if the provided buffer is a valid PDF file
-   * @param fileBuffer The file buffer to validate
-   * @returns Promise<boolean> indicating if the file is a valid PDF
+   * Valida si el buffer proporcionado es un archivo PDF válido
+   * @param fileBuffer El buffer del archivo a validar
+   * @returns Promise<boolean> que indica si el archivo es un PDF válido
    */
   isValidPDF(fileBuffer: Buffer): Promise<boolean>;
 
   /**
-   * Gets the supported file types
-   * @returns Array of supported MIME types
+   * Obtiene los tipos de archivo soportados
+   * @returns Arreglo de tipos MIME soportados
    */
   getSupportedTypes(): string[];
 
   /**
-   * Gets the maximum file size supported
-   * @returns Maximum file size in bytes
+   * Obtiene el tamaño máximo de archivo soportado
+   * @returns Tamaño máximo de archivo en bytes
    */
   getMaxFileSize(): number;
 }

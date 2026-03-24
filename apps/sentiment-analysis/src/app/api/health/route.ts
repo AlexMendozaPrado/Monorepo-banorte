@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 
 /**
- * Health Check Endpoint
+ * Endpoint de verificación de salud
  *
- * Used by OpenShift/Kubernetes for:
- * - Liveness Probe: Is the app running?
- * - Readiness Probe: Is the app ready to accept traffic?
- * - Startup Probe: Has the app finished starting up?
+ * Utilizado por OpenShift/Kubernetes para:
+ * - Sonda de vivacidad: ¿Está la aplicación ejecutándose?
+ * - Sonda de disponibilidad: ¿Está la aplicación lista para aceptar tráfico?
+ * - Sonda de inicio: ¿Ha terminado la aplicación de iniciar?
  *
- * This endpoint should always respond quickly and not depend on external services.
+ * Este endpoint siempre debe responder rápidamente y no depender de servicios externos.
  */
 export async function GET() {
   try {
-    // Basic health check - just verify the app is running
+    // Verificación básica de salud - solo verificar que la aplicación está ejecutándose
     const healthData = {
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -24,19 +24,19 @@ export async function GET() {
 
     return NextResponse.json(healthData, { status: 200 });
   } catch (error) {
-    // If we can't even return a basic response, something is seriously wrong
+    // Si no podemos ni retornar una respuesta básica, algo está seriamente mal
     return NextResponse.json(
       {
         status: 'error',
         timestamp: new Date().toISOString(),
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 503 } // Service Unavailable
+      { status: 503 } // Servicio No Disponible
     );
   }
 }
 
-// Support HEAD requests (some load balancers prefer these)
+// Soportar solicitudes HEAD (algunos balanceadores de carga las prefieren)
 export async function HEAD() {
   return new NextResponse(null, { status: 200 });
 }

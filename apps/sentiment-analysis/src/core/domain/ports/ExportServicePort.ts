@@ -16,10 +16,10 @@ export interface ExportResult {
 
 export interface ExportServicePort {
   /**
-   * Exports sentiment analyses to the specified format
-   * @param analyses Array of sentiment analyses to export
-   * @param options Export configuration options
-   * @returns Promise with the export result
+   * Exporta análisis de sentimiento al formato especificado
+   * @param analyses Arreglo de análisis de sentimiento a exportar
+   * @param options Opciones de configuración de exportación
+   * @returns Promesa con el resultado de la exportación
    */
   exportAnalyses(
     analyses: SentimentAnalysis[],
@@ -27,21 +27,21 @@ export interface ExportServicePort {
   ): Promise<ExportResult>;
 
   /**
-   * Gets the supported export formats
-   * @returns Array of supported export formats
+   * Obtiene los formatos de exportación soportados
+   * @returns Arreglo de formatos de exportación soportados
    */
   getSupportedFormats(): string[];
 
   /**
-   * Validates export options
-   * @param options Export options to validate
-   * @returns Promise<boolean> indicating if options are valid
+   * Valida las opciones de exportación
+   * @param options Opciones de exportación a validar
+   * @returns Promise<boolean> que indica si las opciones son válidas
    */
   validateExportOptions(options: ExportOptions): Promise<boolean>;
 
   /**
-   * Gets the maximum number of records that can be exported at once
-   * @returns Maximum export limit
+   * Obtiene el número máximo de registros que se pueden exportar a la vez
+   * @returns Límite máximo de exportación
    */
   getMaxExportLimit(): number;
 }

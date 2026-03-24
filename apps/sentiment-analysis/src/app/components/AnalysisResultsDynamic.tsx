@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { CircularProgress, Box } from '@mui/material';
 import { AnalysisResponse } from '../../shared/types/api';
 
-// Dynamically import AnalysisResults with no SSR
+// Importar AnalysisResults dinámicamente sin SSR
 const AnalysisResults = dynamic(
   () => import('./AnalysisResults').then((mod) => ({ default: mod.AnalysisResults })),
   {

@@ -3,13 +3,13 @@ import { DIContainer } from '../../../../infrastructure/di/DIContainer';
 import { ApiResponse, AnalysisResponse } from '../../../../shared/types/api';
 import { getAIProviderConfig, validateAIProviderConfig } from '../../../../config/ai-provider.config';
 
-// Mark as dynamic to prevent static generation errors
+// Marcar como dinámico para prevenir errores de generación estática
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<AnalysisResponse[]>>> {
   try {
-    // Validate AI provider configuration
+    // Validar configuración del proveedor de IA
     try {
       validateAIProviderConfig();
     } catch (error) {
@@ -22,15 +22,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       );
     }
 
-    // Initialize DI Container
+    // Inicializar contenedor de inyección de dependencias
     const container = DIContainer.getInstance(getAIProviderConfig());
 
-    // Parse query parameters
+    // Parsear parámetros de consulta
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
     const clientName = searchParams.get('clientName') || undefined;
 
-    // Validate limit
+    // Validar límite
     if (limit < 1 || limit > 50) {
       return NextResponse.json(
         {
@@ -41,11 +41,11 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       );
     }
 
-    // Execute use case
+    // Ejecutar caso de uso
     const getHistoricalAnalysisUseCase = container.getHistoricalAnalysisUseCase;
     const recentAnalyses = await getHistoricalAnalysisUseCase.getRecentAnalyses(clientName, limit);
 
-    // Convert domain entities to API response format
+    // Convertir entidades de dominio a formato de respuesta API
     const response: AnalysisResponse[] = recentAnalyses.map(analysis => ({
       id: analysis.id,
       clientName: analysis.clientName,
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       channel: analysis.channel,
       createdAt: analysis.createdAt.toISOString(),
       updatedAt: analysis.updatedAt.toISOString(),
-      processingTimeMs: 0, // Not stored in historical data
+      processingTimeMs: 0, // No se almacena en datos históricos
     }));
 
     return NextResponse.json({

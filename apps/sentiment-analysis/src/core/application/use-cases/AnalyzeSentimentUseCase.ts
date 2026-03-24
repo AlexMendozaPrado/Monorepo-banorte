@@ -31,22 +31,22 @@ export class AnalyzeSentimentUseCase {
     const startTime = Date.now();
 
     try {
-      // Validate inputs
+      // Validar entradas
       this.validateCommand(command);
 
-      // Check if analyzer is ready
+      // Verificar si el analizador está listo
       const isAnalyzerReady = await this.sentimentAnalyzer.isReady();
       if (!isAnalyzerReady) {
         throw new Error('Sentiment analyzer is not ready. Please check configuration.');
       }
 
-      // Validate PDF file
+      // Validar archivo PDF
       const isValidPDF = await this.textExtractor.isValidPDF(command.fileBuffer);
       if (!isValidPDF) {
         throw new Error('Invalid PDF file provided.');
       }
 
-      // Extract text from PDF
+      // Extraer texto del PDF
       const extractedText = await this.textExtractor.extractTextFromPDF(command.fileBuffer, {
         includeMetadata: true,
         preserveFormatting: false,
@@ -56,7 +56,7 @@ export class AnalyzeSentimentUseCase {
         throw new Error('No text content could be extracted from the PDF file.');
       }
 
-      // Analyze sentiment
+      // Analizar sentimiento
       const analysisRequest: SentimentAnalysisRequest = {
         text: extractedText.content,
         clientName: command.clientName,
@@ -66,15 +66,15 @@ export class AnalyzeSentimentUseCase {
 
       const sentimentResult = await this.sentimentAnalyzer.analyzeSentiment(analysisRequest);
 
-      // Calculate processing time and metrics
+      // Calcular tiempo de procesamiento y métricas
       const processingTimeMs = Date.now() - startTime;
       const analysisMetrics = AnalysisMetricsValueObject.fromText(
         extractedText.content,
         processingTimeMs,
-        'es' // Assuming Spanish for Banorte
+        'es' // Asumiendo español para Banorte
       );
 
-      // Create sentiment analysis entity
+      // Crear entidad de análisis de sentimiento
       const analysisEntity = new SentimentAnalysisEntity(
         uuidv4(),
         command.clientName,
@@ -89,10 +89,10 @@ export class AnalyzeSentimentUseCase {
         new Date()
       );
 
-      // Save to repository
+      // Guardar en repositorio
       const savedAnalysis = await this.repository.save(analysisEntity);
 
-      // Convert back to entity to ensure we have all methods
+      // Convertir de vuelta a entidad para asegurar que tenemos todos los métodos
       const resultEntity = new SentimentAnalysisEntity(
         savedAnalysis.id,
         savedAnalysis.clientName,
@@ -134,7 +134,7 @@ export class AnalyzeSentimentUseCase {
     } catch (error) {
       const processingTimeMs = Date.now() - startTime;
       
-      // Log error for monitoring
+      // Registrar error para monitoreo
       console.error('Error in AnalyzeSentimentUseCase:', {
         error: error instanceof Error ? error.message : 'Unknown error',
         command: {
@@ -167,7 +167,7 @@ export class AnalyzeSentimentUseCase {
       throw new Error('Channel is required.');
     }
 
-    // Check file size limits
+    // Verificar límites de tamaño de archivo
     const maxFileSize = this.textExtractor.getMaxFileSize();
     if (command.fileBuffer.length > maxFileSize) {
       throw new Error(`File size exceeds maximum limit of ${maxFileSize} bytes.`);

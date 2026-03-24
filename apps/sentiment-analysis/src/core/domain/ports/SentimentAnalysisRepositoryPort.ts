@@ -28,24 +28,24 @@ export interface PaginatedResult<T> {
 
 export interface SentimentAnalysisRepositoryPort {
   /**
-   * Saves a sentiment analysis to the repository
-   * @param analysis The sentiment analysis to save
-   * @returns Promise with the saved analysis
+   * Guarda un análisis de sentimiento en el repositorio
+   * @param analysis El análisis de sentimiento a guardar
+   * @returns Promesa con el análisis guardado
    */
   save(analysis: SentimentAnalysis): Promise<SentimentAnalysis>;
 
   /**
-   * Finds a sentiment analysis by its ID
-   * @param id The analysis ID
-   * @returns Promise with the analysis or null if not found
+   * Busca un análisis de sentimiento por su ID
+   * @param id El ID del análisis
+   * @returns Promesa con el análisis o null si no se encuentra
    */
   findById(id: string): Promise<SentimentAnalysis | null>;
 
   /**
-   * Finds all sentiment analyses with optional filtering and pagination
-   * @param filter Optional filter criteria
-   * @param pagination Optional pagination options
-   * @returns Promise with paginated results
+   * Busca todos los análisis de sentimiento con filtrado y paginación opcionales
+   * @param filter Criterios de filtrado opcionales
+   * @param pagination Opciones de paginación opcionales
+   * @returns Promesa con resultados paginados
    */
   findAll(
     filter?: AnalysisFilter,
@@ -53,17 +53,17 @@ export interface SentimentAnalysisRepositoryPort {
   ): Promise<PaginatedResult<SentimentAnalysis>>;
 
   /**
-   * Finds recent analyses for a specific client
-   * @param clientName The client name
-   * @param limit Maximum number of results
-   * @returns Promise with the recent analyses
+   * Busca análisis recientes para un cliente específico
+   * @param clientName El nombre del cliente
+   * @param limit Número máximo de resultados
+   * @returns Promesa con los análisis recientes
    */
   findRecentByClient(clientName: string, limit?: number): Promise<SentimentAnalysis[]>;
 
   /**
-   * Gets analysis statistics
-   * @param filter Optional filter criteria
-   * @returns Promise with statistics
+   * Obtiene estadísticas de los análisis
+   * @param filter Criterios de filtrado opcionales
+   * @returns Promesa con las estadísticas
    */
   getStatistics(filter?: AnalysisFilter): Promise<{
     totalAnalyses: number;
@@ -75,17 +75,17 @@ export interface SentimentAnalysisRepositoryPort {
   }>;
 
   /**
-   * Deletes a sentiment analysis by its ID
-   * @param id The analysis ID
-   * @returns Promise<boolean> indicating success
+   * Elimina un análisis de sentimiento por su ID
+   * @param id El ID del análisis
+   * @returns Promise<boolean> que indica éxito
    */
   deleteById(id: string): Promise<boolean>;
 
   /**
-   * Updates an existing sentiment analysis
-   * @param id The analysis ID
-   * @param updates Partial analysis data to update
-   * @returns Promise with the updated analysis or null if not found
+   * Actualiza un análisis de sentimiento existente
+   * @param id El ID del análisis
+   * @param updates Datos parciales del análisis a actualizar
+   * @returns Promesa con el análisis actualizado o null si no se encuentra
    */
   update(id: string, updates: Partial<SentimentAnalysis>): Promise<SentimentAnalysis | null>;
 }

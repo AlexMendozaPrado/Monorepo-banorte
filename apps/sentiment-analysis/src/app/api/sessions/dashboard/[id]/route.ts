@@ -29,15 +29,15 @@ export async function GET(
       );
     }
 
-    // Initialize DI Container
+    // Inicializar contenedor de inyección de dependencias
     const container = DIContainer.getInstance(getAIProviderConfig());
 
-    // Get all components for the dashboard
+    // Obtener todos los componentes para el dashboard
     const analysisRepository = container.repository;
     const metricsService = container.sessionMetricsService;
     const conclusionService = container.sessionConclusionService;
 
-    // 1. Get the sentiment analysis
+    // 1. Obtener el análisis de sentimientos
     const analysis = await analysisRepository.findById(id);
     if (!analysis) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function GET(
       );
     }
 
-    // 2. Get the metrics
+    // 2. Obtener las métricas
     const metrics = await metricsService.getMetricsByAnalysisId(id);
     if (!metrics) {
       return NextResponse.json(
@@ -61,7 +61,7 @@ export async function GET(
       );
     }
 
-    // 3. Get the conclusion
+    // 3. Obtener la conclusión
     const conclusion = await conclusionService.getConclusionByAnalysisId(id);
     if (!conclusion) {
       return NextResponse.json(
@@ -73,14 +73,14 @@ export async function GET(
       );
     }
 
-    // 4. Optional: Get historical comparison (previous session + averages)
+    // 4. Opcional: Obtener comparación histórica (sesión anterior + promedios)
     const historicalComparison = await getHistoricalComparison(
       container,
       analysis,
       metrics
     );
 
-    // Convert entities to API response format
+    // Convertir entidades a formato de respuesta API
     const dashboardResponse: SessionDashboardResponse = {
       analysis: convertAnalysisToResponse(analysis),
       metrics: convertMetricsToResponse(metrics),
@@ -118,13 +118,13 @@ async function getHistoricalComparison(
     const analysisRepository = container.repository;
     const metricsService = container.sessionMetricsService;
 
-    // Get all analyses for the same client, ordered by date
+    // Obtener todos los análisis del mismo cliente, ordenados por fecha
     const allAnalyses = await analysisRepository.findAll(
       { clientName: currentAnalysis.clientName },
       { page: 1, limit: 100, sortBy: 'createdAt', sortOrder: 'desc' }
     );
 
-    // Find the previous session (the one before current)
+    // Encontrar la sesión anterior (la anterior a la actual)
     const currentIndex = allAnalyses.data.findIndex(a => a.id === currentAnalysis.id);
     const previousAnalysis = currentIndex < allAnalyses.data.length - 1
       ? allAnalyses.data[currentIndex + 1]
@@ -138,11 +138,11 @@ async function getHistoricalComparison(
       }
     }
 
-    // Calculate averages across all sessions
+    // Calcular promedios a través de todas las sesiones
     const allMetrics = await metricsService.getAllMetrics();
     const clientMetrics = allMetrics.filter(m => {
-      // Filter by client name (need to match with analysis)
-      return true; // Simplified for now
+      // Filtrar por nombre de cliente (necesita coincidir con el análisis)
+      return true; // Simplificado por ahora
     });
 
     const averageProductivity = clientMetrics.length > 0
@@ -188,7 +188,7 @@ function convertAnalysisToResponse(analysis: SentimentAnalysis): AnalysisRespons
     channel: analysis.channel,
     createdAt: analysis.createdAt.toISOString(),
     updatedAt: analysis.updatedAt.toISOString(),
-    processingTimeMs: 0, // Not available in entity
+    processingTimeMs: 0, // No disponible en la entidad
   };
 }
 

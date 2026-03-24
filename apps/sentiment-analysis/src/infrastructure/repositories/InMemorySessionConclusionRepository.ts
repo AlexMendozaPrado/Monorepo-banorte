@@ -1,7 +1,7 @@
 import { SessionConclusion } from '../../core/domain/value-objects/SessionConclusion';
 import { SessionConclusionRepositoryPort } from '../../core/domain/ports/SessionConclusionRepositoryPort';
 
-// Use globalThis to persist data across Next.js hot reloads in development
+// Usar globalThis para persistir datos entre recargas en caliente de Next.js en desarrollo
 const getConclusionStore = (): Map<string, SessionConclusion> => {
   if (!(globalThis as any).__sessionConclusionStore) {
     (globalThis as any).__sessionConclusionStore = new Map<string, SessionConclusion>();
@@ -92,7 +92,7 @@ export class InMemorySessionConclusionRepository implements SessionConclusionRep
     }
   }
 
-  // Utility methods for testing and development
+  // Métodos utilitarios para pruebas y desarrollo
   async clear(): Promise<void> {
     const store = getConclusionStore();
     store.clear();

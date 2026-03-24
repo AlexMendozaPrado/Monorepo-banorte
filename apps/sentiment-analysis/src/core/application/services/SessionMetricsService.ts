@@ -38,11 +38,11 @@ export class SessionMetricsService {
         return await this.metricsRepository.save(aiMetrics);
       } catch (error) {
         console.warn('AI metrics analysis failed, falling back to rule-based approach:', error);
-        // Continue to rule-based approach
+        // Continuar con enfoque basado en reglas
       }
     }
 
-    // Fallback: Rule-based metrics
+    // Fallback: Métricas basadas en reglas
     const ruleBasedMetrics = await this.generateWithRules(analysis);
     return await this.metricsRepository.save(ruleBasedMetrics);
   }
@@ -82,7 +82,7 @@ export class SessionMetricsService {
     const topicsDiscussed: TopicAnalysis[] = response.topics.map((t: any) => ({
       category: t.category,
       topic: t.topic,
-      timeSpent: t.timePercentage, // API usa timePercentage, entity usa timeSpent
+      timeSpent: t.timePercentage, // La API usa timePercentage, la entidad usa timeSpent
       sentiment: t.sentiment,
       mentions: t.mentions,
     }));
@@ -294,39 +294,39 @@ export class SessionMetricsService {
   }
 
   private calculateProductivityScore(analysis: SentimentAnalysis, topics: TopicAnalysis[]): number {
-    let score = 50; // Base score
+    let score = 50; // Puntuación base
 
-    // Adjust based on sentiment
+    // Ajustar basado en sentimiento
     if (analysis.overallSentiment === SentimentType.POSITIVE) score += 20;
     else if (analysis.overallSentiment === SentimentType.NEGATIVE) score -= 10;
 
-    // Boost for achievements
+    // Bonificación por logros
     const achievementsCount = topics.filter(t => t.category === 'achievement').length;
     score += achievementsCount * 10;
 
-    // Penalize for too many problems
+    // Penalizar por demasiados problemas
     const problemsPercentage = topics
       .filter(t => t.category === 'problem')
       .reduce((sum, t) => sum + t.timeSpent, 0) / 100;
 
     if (problemsPercentage > 0.6) score -= 15;
 
-    // Confidence bonus
+    // Bonificación por confianza
     if (analysis.confidence > 0.8) score += 5;
 
     return Math.min(100, Math.max(0, Math.round(score)));
   }
 
   private calculateEffectivenessScore(analysis: SentimentAnalysis, topics: TopicAnalysis[]): number {
-    let score = 60; // Base score
+    let score = 60; // Puntuación base
 
-    // High confidence is a good indicator
+    // Alta confianza es un buen indicador
     score += analysis.confidence * 20;
 
-    // Diverse topics indicate good coverage
+    // Temas diversos indican buena cobertura
     if (topics.length >= 3) score += 10;
 
-    // Balance is good
+    // El equilibrio es bueno
     const hasBalance = topics.every(t => t.timeSpent >= 20 && t.timeSpent <= 50);
     if (hasBalance) score += 10;
 
@@ -346,10 +346,10 @@ export class SessionMetricsService {
   private calculateEngagementScore(analysis: SentimentAnalysis, participantCount: number): number {
     let score = 50;
 
-    // More participants = higher engagement
+    // Más participantes = mayor engagement
     score += Math.min(participantCount * 10, 30);
 
-    // Word count indicates engagement
+    // El conteo de palabras indica engagement
     if (analysis.analysisMetrics.wordCount > 500) score += 10;
     if (analysis.analysisMetrics.wordCount > 1000) score += 10;
 
@@ -379,7 +379,7 @@ export class SessionMetricsService {
       });
     });
 
-    return blockers.slice(0, 5); // Limit to top 5
+    return blockers.slice(0, 5); // Limitar a los 5 principales
   }
 
   private extractAchievements(content: string, sentiment: SentimentType): AchievementItem[] {
@@ -401,7 +401,7 @@ export class SessionMetricsService {
       });
     });
 
-    return achievements.slice(0, 5); // Limit to top 5
+    return achievements.slice(0, 5); // Limitar a los 5 principales
   }
 
   private extractActionItems(content: string): ActionItem[] {
@@ -423,7 +423,7 @@ export class SessionMetricsService {
       });
     });
 
-    return actions.slice(0, 10); // Limit to top 10
+    return actions.slice(0, 10); // Limitar a los 10 principales
   }
 
   private extractKeywords(content: string, sentiment: SentimentType): KeywordFrequency[] {
@@ -459,7 +459,7 @@ export class SessionMetricsService {
     const sentimentScore = analysis.overallSentiment === SentimentType.POSITIVE ? 6 :
                           analysis.overallSentiment === SentimentType.NEUTRAL ? 4 : 2;
 
-    // Simplified timeline with 3 points: inicio, desarrollo, final
+    // Línea temporal simplificada con 3 puntos: inicio, desarrollo, final
     timeline.push({
       timestamp: 0,
       sentiment: sentimentScore,

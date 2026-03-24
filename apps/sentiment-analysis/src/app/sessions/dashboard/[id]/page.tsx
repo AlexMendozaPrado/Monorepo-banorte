@@ -123,7 +123,7 @@ export default function SessionDashboardPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
+      {/* Encabezado */}
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <DashboardIcon sx={{ mr: 1, color: 'primary.main', fontSize: 40 }} />
@@ -188,7 +188,7 @@ export default function SessionDashboardPage() {
         </Card>
       </Box>
 
-      {/* Tabs */}
+      {/* Pestañas */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="dashboard tabs">
           <Tab icon={<DashboardIcon />} label="Métricas" iconPosition="start" />
@@ -197,23 +197,23 @@ export default function SessionDashboardPage() {
         </Tabs>
       </Box>
 
-      {/* Tab Panels */}
+      {/* Paneles de Pestañas */}
       <TabPanel value={activeTab} index={0}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {/* Metrics Cards */}
+          {/* Tarjetas de Métricas */}
           <SessionMetricsCards metrics={dashboard.metrics} />
 
-          {/* Likert Scale */}
+          {/* Escala Likert */}
           <LikertScaleDisplay
             score={dashboard.analysis.overallSentiment === SentimentType.POSITIVE ? 6 : dashboard.analysis.overallSentiment === SentimentType.NEUTRAL ? 4 : 2}
             confidence={dashboard.analysis.confidence}
             keywords={dashboard.metrics.keywords}
           />
 
-          {/* Emotional Timeline */}
+          {/* Línea de Tiempo Emocional */}
           <EmotionalTimelineDynamic timeline={dashboard.metrics.emotionalTimeline} />
 
-          {/* Blockers & Achievements */}
+          {/* Bloqueadores y Logros */}
           <BlockersAchievements
             blockers={dashboard.metrics.blockers}
             achievements={dashboard.metrics.achievements}
@@ -230,7 +230,7 @@ export default function SessionDashboardPage() {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {dashboard.historicalComparison ? (
             <>
-              {/* Previous Session Comparison */}
+              {/* Comparación con Sesión Anterior */}
               {dashboard.historicalComparison.previousSession && (
                 <Card variant="outlined">
                   <CardContent>
@@ -295,7 +295,7 @@ export default function SessionDashboardPage() {
                 </Card>
               )}
 
-              {/* Averages Comparison */}
+              {/* Comparación de Promedios */}
               <Card variant="outlined">
                 <CardContent>
                   <Typography variant="h6" gutterBottom>

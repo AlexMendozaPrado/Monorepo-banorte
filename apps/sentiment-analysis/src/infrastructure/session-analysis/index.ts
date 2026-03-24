@@ -1,14 +1,14 @@
 /**
- * Session Analysis Infrastructure
+ * Infraestructura de Análisis de Sesiones
  *
- * Implementaciones de SessionAnalysisPort para diferentes providers de IA.
+ * Implementaciones de SessionAnalysisPort para diferentes proveedores de IA.
  */
 
 export { OpenAISessionAnalyzer } from './OpenAISessionAnalyzer';
 export { SessionAnalyzerFactory } from './SessionAnalyzerFactory';
 export type { SessionAnalyzerConfig, SessionAnalyzerProvider } from './SessionAnalyzerFactory';
 
-// Export types from domain for convenience
+// Exportar tipos del dominio por conveniencia
 export type {
   SessionAnalysisPort,
   SessionMetricsAnalysisRequest,

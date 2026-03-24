@@ -65,12 +65,12 @@ export class CSVExportService implements ExportServicePort {
 
   async validateExportOptions(options: ExportOptions): Promise<boolean> {
     try {
-      // Validate format
+      // Validar formato
       if (!this.supportedFormats.includes(options.format)) {
         return false;
       }
 
-      // Validate date format if provided
+      // Validar formato de fecha si se proporcionó
       if (options.dateFormat) {
         try {
           const testDate = new Date();
@@ -221,7 +221,7 @@ export class CSVExportService implements ExportServicePort {
       return date.toISOString();
     }
 
-    // Simple date formatting - in production, you might want to use a library like date-fns
+    // Formato de fecha simple - en producción, podrías querer usar una librería como date-fns
     switch (format) {
       case 'YYYY-MM-DD':
         return date.toISOString().split('T')[0];

@@ -54,7 +54,7 @@ export default function AppPage() {
           Analiza documentos PDF para obtener insights sobre el sentimiento y emociones de tus clientes
         </p>
 
-        {/* Overview Cards */}
+        {/* Tarjetas de Vista General */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-surface1 rounded-lg p-6 shadow-sm border border-borderLight text-center">
             <UploadIcon sx={{ fontSize: 40, color: '#EB0029', mb: 1 }} />
@@ -97,7 +97,7 @@ export default function AppPage() {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Pestañas de Navegación */}
         <div className="border-b border-borderDashed">
           <Tabs value={currentTab} onChange={handleTabChange} aria-label="navigation tabs">
             <Tab
@@ -118,7 +118,7 @@ export default function AppPage() {
         </div>
       </div>
 
-      {/* Tab Panels */}
+      {/* Paneles de Pestañas */}
       <TabPanel value={currentTab} index={0}>
         <AnalyzePage />
       </TabPanel>

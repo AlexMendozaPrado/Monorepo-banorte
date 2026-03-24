@@ -45,7 +45,7 @@ interface SessionTrendsProps {
 }
 
 export function SessionTrends({ trends }: SessionTrendsProps) {
-  // Map API trend values to display trend values
+  // Mapear valores de tendencia de la API a valores de visualización
   const mapTrendValue = (trend: 'increasing' | 'decreasing' | 'stable'): 'improving' | 'declining' | 'stable' => {
     if (trend === 'increasing') return 'improving';
     if (trend === 'decreasing') return 'declining';
@@ -70,11 +70,11 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
     return '#EB0029';
   };
 
-  // Transform time series data for charts
+  // Transformar datos de series de tiempo para gráficos
   const timeSeriesData = trends.timeSeries.map((point) => ({
     date: new Date(point.date).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' }),
     productivity: point.productivityScore,
-    sentiment: point.sentimentScore * 14.28, // Convert 1-7 to 0-100 scale
+    sentiment: point.sentimentScore * 14.28, // Convertir escala 1-7 a escala 0-100
     blockers: point.blockersCount,
     achievements: point.achievementsCount,
   }));
@@ -88,7 +88,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
         </Typography>
       </Box>
 
-      {/* Summary Cards */}
+      {/* Tarjetas de Resumen */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card variant="outlined">
@@ -165,7 +165,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
         </Grid>
       </Grid>
 
-      {/* Time Series Chart */}
+      {/* Gráfico de Series de Tiempo */}
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card variant="outlined">
@@ -212,7 +212,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
           </Card>
         </Grid>
 
-        {/* Metrics Evolution */}
+        {/* Evolución de Métricas */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>
@@ -234,7 +234,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
           </Card>
         </Grid>
 
-        {/* NPS & Errors Evolution */}
+        {/* Evolución de NPS y Errores */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>
@@ -264,7 +264,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
           </Card>
         </Grid>
 
-        {/* Recurring Topics */}
+        {/* Temas Recurrentes */}
         <Grid item xs={12}>
           <Card variant="outlined">
             <CardContent>
@@ -334,7 +334,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
           </Card>
         </Grid>
 
-        {/* Projection */}
+        {/* Proyección */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined" sx={{ bgcolor: '#e3f2fd' }}>
             <CardContent>
@@ -371,7 +371,7 @@ export function SessionTrends({ trends }: SessionTrendsProps) {
           </Card>
         </Grid>
 
-        {/* Additional Stats */}
+        {/* Estadísticas Adicionales */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>

@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { CircularProgress, Box } from '@mui/material';
 import { SessionMetricsResponse } from '../../shared/types/api';
 
-// Dynamically import EmotionalTimeline with no SSR
+// Importar EmotionalTimeline dinámicamente sin SSR
 const EmotionalTimeline = dynamic(
   () => import('./EmotionalTimeline').then((mod) => ({ default: mod.EmotionalTimeline })),
   {

@@ -1,4 +1,4 @@
-// API Types for the presentation layer
+// Tipos de API para la capa de presentación
 import { SentimentType } from '../../core/domain/value-objects/SentimentType';
 import { EmotionScore } from '../../core/domain/value-objects/EmotionScore';
 import { AnalysisMetrics } from '../../core/domain/value-objects/AnalysisMetrics';
@@ -28,7 +28,7 @@ export interface AnalysisResponse {
   createdAt: string;
   updatedAt: string;
   processingTimeMs: number;
-  // Session data included in single response (for Vercel serverless compatibility)
+  // Datos de sesión incluidos en respuesta única (para compatibilidad con serverless de Vercel)
   metrics?: SessionMetricsResponse;
   conclusion?: SessionConclusionResponse;
 }
@@ -104,7 +104,7 @@ export interface FilterOptionsResponse {
   };
 }
 
-// Session Metrics Types
+// Tipos de Métricas de Sesión
 export interface SessionMetricsResponse {
   id: string;
   analysisId: string;
@@ -167,7 +167,7 @@ export interface SessionMetricsResponse {
   updatedAt: string;
 }
 
-// Session Trends Types
+// Tipos de Tendencias de Sesión
 export interface SessionTrendsResponse {
   id: string;
   timeRange: {
@@ -232,7 +232,7 @@ export interface SessionTrendsResponse {
   createdAt: string;
 }
 
-// Session Conclusion Types
+// Tipos de Conclusión de Sesión
 export interface SessionConclusionResponse {
   id: string;
   analysisId: string;
@@ -297,7 +297,7 @@ export interface SessionConclusionResponse {
   updatedAt: string;
 }
 
-// Combined Dashboard Response
+// Respuesta Combinada del Dashboard
 export interface SessionDashboardResponse {
   analysis: AnalysisResponse;
   metrics: SessionMetricsResponse;
@@ -312,7 +312,7 @@ export interface SessionDashboardResponse {
   };
 }
 
-// Trends Request
+// Solicitud de Tendencias
 export interface SessionTrendsRequest {
   from: string;
   to: string;

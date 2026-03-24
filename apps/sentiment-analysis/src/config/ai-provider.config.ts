@@ -2,8 +2,8 @@ import { DIContainerConfig } from '../infrastructure/di/DIContainer';
 import { AIProvider } from '../infrastructure/sentiment/SentimentAnalyzerFactory';
 
 /**
- * Gets the AI provider configuration from environment variables
- * @returns DIContainerConfig with all provider settings
+ * Obtiene la configuración del proveedor de IA desde variables de entorno
+ * @returns DIContainerConfig con todas las configuraciones del proveedor
  */
 export function getAIProviderConfig(): DIContainerConfig {
   const aiProvider = (process.env.AI_PROVIDER as AIProvider) || 'openai';
@@ -11,15 +11,15 @@ export function getAIProviderConfig(): DIContainerConfig {
   return {
     aiProvider,
 
-    // OpenAI configuration
+    // Configuración de OpenAI
     openaiApiKey: process.env.OPENAI_API_KEY,
     openaiModel: process.env.DEFAULT_MODEL || 'gpt-4',
 
-    // Ollama configuration
+    // Configuración de Ollama
     ollamaBaseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
     ollamaModel: process.env.OLLAMA_MODEL || 'llama3.2',
 
-    // Common configuration
+    // Configuración común
     maxTokens: process.env.MAX_TOKENS ? parseInt(process.env.MAX_TOKENS) : undefined,
     temperature: process.env.TEMPERATURE ? parseFloat(process.env.TEMPERATURE) : undefined,
     maxFileSize: process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE) : undefined,
@@ -28,8 +28,8 @@ export function getAIProviderConfig(): DIContainerConfig {
 }
 
 /**
- * Validates that the required configuration for the selected AI provider is present
- * @throws Error if required configuration is missing
+ * Valida que la configuración requerida para el proveedor de IA seleccionado esté presente
+ * @throws Error si falta configuración requerida
  */
 export function validateAIProviderConfig(): void {
   const aiProvider = (process.env.AI_PROVIDER as AIProvider) || 'openai';

@@ -29,9 +29,9 @@ interface BlockersAchievementsProps {
 
 export function BlockersAchievements({ blockers, achievements, actionItems }: BlockersAchievementsProps) {
   const getPriorityColor = (priority: 'high' | 'medium' | 'low'): string => {
-    if (priority === 'high') return '#EB0029'; // primary red
-    if (priority === 'medium') return '#FFA400'; // warning orange
-    return '#6CC04A'; // success green
+    if (priority === 'high') return '#EB0029'; // rojo primario
+    if (priority === 'medium') return '#FFA400'; // naranja advertencia
+    return '#6CC04A'; // verde éxito
   };
 
   const getPriorityIcon = (priority: 'high' | 'medium' | 'low'): string => {
@@ -55,7 +55,7 @@ export function BlockersAchievements({ blockers, achievements, actionItems }: Bl
   return (
     <Box>
       <Grid container spacing={3}>
-        {/* Blockers Section */}
+        {/* Sección de Bloqueadores */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent>
@@ -127,7 +127,7 @@ export function BlockersAchievements({ blockers, achievements, actionItems }: Bl
           </Card>
         </Grid>
 
-        {/* Achievements Section */}
+        {/* Sección de Logros */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent>
@@ -196,7 +196,7 @@ export function BlockersAchievements({ blockers, achievements, actionItems }: Bl
           </Card>
         </Grid>
 
-        {/* Action Items Section */}
+        {/* Sección de Elementos de Acción */}
         <Grid item xs={12}>
           <Card variant="outlined">
             <CardContent>

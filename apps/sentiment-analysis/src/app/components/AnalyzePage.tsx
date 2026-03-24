@@ -40,8 +40,8 @@ export function AnalyzePage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
 
-  // Note: Session metrics and conclusion are now included in analysisResult
-  // No separate state or API calls needed
+  // Nota: Las métricas de sesión y conclusión ahora están incluidas en analysisResult
+  // No se necesitan estados separados ni llamadas API adicionales
 
   const channels = [
     'Sucursal',
@@ -92,7 +92,7 @@ export function AnalyzePage() {
 
       if (result.success) {
         setAnalysisResult(result.data);
-        // Reset form
+        // Reiniciar formulario
         setFile(null);
         setClientName('');
         setChannel('');
@@ -118,7 +118,7 @@ export function AnalyzePage() {
   return (
     <Box>
       <Grid container spacing={3}>
-        {/* Analysis Form */}
+        {/* Formulario de Análisis */}
         <Grid item xs={12} lg={8}>
           <Card>
             <CardContent>
@@ -203,18 +203,18 @@ export function AnalyzePage() {
             </CardContent>
           </Card>
 
-          {/* Analysis Results */}
+          {/* Resultados del Análisis */}
           {analysisResult && (
             <Box sx={{ mt: 3 }}>
               <AnalysisResultsDynamic analysis={analysisResult} />
 
-              {/* Session Metrics & Conclusion (now included in analysisResult) */}
+              {/* Métricas de Sesión y Conclusión (ahora incluidas en analysisResult) */}
               {analysisResult.metrics && (
                 <Box sx={{ mt: 4 }}>
-                  {/* Divider */}
+                  {/* Divisor */}
                   <Divider sx={{ my: 2 }} />
 
-                  {/* Tabs Navigation */}
+                  {/* Navegación de Pestañas */}
                   <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                     <Tabs
                       value={activeTab}
@@ -239,7 +239,7 @@ export function AnalyzePage() {
                     </Tabs>
                   </Box>
 
-                  {/* Tab Panel 1: Métricas y KPIs */}
+                  {/* Panel de Pestaña 1: Métricas y KPIs */}
                   {activeTab === 0 && (
                     <Box
                       role="tabpanel"
@@ -247,20 +247,20 @@ export function AnalyzePage() {
                       aria-labelledby="tab-0"
                       sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}
                     >
-                      {/* Likert Scale Display */}
+                      {/* Visualización de Escala Likert */}
                       <LikertScaleDisplay
                         score={analysisResult.overallSentiment === SentimentType.POSITIVE ? 6 : analysisResult.overallSentiment === SentimentType.NEUTRAL ? 4 : 2}
                         confidence={analysisResult.confidence}
                         keywords={analysisResult.metrics.keywords}
                       />
 
-                      {/* Session Metrics Cards */}
+                      {/* Tarjetas de Métricas de Sesión */}
                       <SessionMetricsCards metrics={analysisResult.metrics} />
 
-                      {/* Emotional Timeline */}
+                      {/* Línea de Tiempo Emocional */}
                       <EmotionalTimelineDynamic timeline={analysisResult.metrics.emotionalTimeline} />
 
-                      {/* Blockers & Achievements */}
+                      {/* Bloqueadores y Logros */}
                       <BlockersAchievements
                         blockers={analysisResult.metrics.blockers}
                         achievements={analysisResult.metrics.achievements}
@@ -269,7 +269,7 @@ export function AnalyzePage() {
                     </Box>
                   )}
 
-                  {/* Tab Panel 2: Resumen Ejecutivo */}
+                  {/* Panel de Pestaña 2: Resumen Ejecutivo */}
                   {activeTab === 1 && analysisResult.conclusion && (
                     <Box
                       role="tabpanel"
@@ -285,7 +285,7 @@ export function AnalyzePage() {
           )}
         </Grid>
 
-        {/* Recent Analyses Sidebar */}
+        {/* Barra Lateral de Análisis Recientes */}
         <Grid item xs={12} lg={4}>
           <RecentAnalyses />
         </Grid>

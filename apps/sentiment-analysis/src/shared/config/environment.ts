@@ -1,4 +1,4 @@
-// Environment configuration and validation
+// Configuración y validación de entorno
 export interface EnvironmentConfig {
   openaiApiKey: string;
   openaiModel: string;
@@ -16,13 +16,13 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     openaiModel: process.env.DEFAULT_MODEL || 'gpt-4',
     maxTokens: parseInt(process.env.MAX_TOKENS || '4000'),
     temperature: parseFloat(process.env.TEMPERATURE || '0.3'),
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760'), // 10MB
+    maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760'), // 10 MB
     maxExportLimit: parseInt(process.env.MAX_EXPORT_LIMIT || '10000'),
     isDevelopment: process.env.NODE_ENV === 'development',
     isProduction: process.env.NODE_ENV === 'production',
   };
 
-  // Validate required environment variables
+  // Validar variables de entorno requeridas
   const requiredVars = ['openaiApiKey'];
   const missingVars = requiredVars.filter(key => !config[key as keyof EnvironmentConfig]);
   
@@ -30,7 +30,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
   }
 
-  // Validate numeric values
+  // Validar valores numéricos
   if (config.maxTokens <= 0) {
     throw new Error('MAX_TOKENS must be a positive number');
   }

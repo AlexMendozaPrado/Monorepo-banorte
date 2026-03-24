@@ -30,13 +30,13 @@ export class GetHistoricalAnalysisUseCase {
 
   async execute(query: GetHistoricalAnalysisQuery = {}): Promise<HistoricalAnalysisResult> {
     try {
-      // Validate and set default pagination
+      // Validar y establecer paginación por defecto
       const pagination = this.validateAndSetDefaults(query.pagination);
       
-      // Get paginated analyses
+      // Obtener análisis paginados
       const analyses = await this.repository.findAll(query.filter, pagination);
       
-      // Get statistics for the same filter
+      // Obtener estadísticas para el mismo filtro
       const statistics = await this.repository.getStatistics(query.filter);
 
       return {
@@ -58,7 +58,7 @@ export class GetHistoricalAnalysisUseCase {
         return await this.repository.findRecentByClient(clientName, limit);
       }
 
-      // Get recent analyses for all clients
+      // Obtener análisis recientes para todos los clientes
       const result = await this.repository.findAll(
         undefined,
         {
@@ -108,17 +108,17 @@ export class GetHistoricalAnalysisUseCase {
       return defaults;
     }
 
-    // Validate page
+    // Validar página
     if (pagination.page && pagination.page < 1) {
       throw new Error('Page number must be greater than 0.');
     }
 
-    // Validate limit
+    // Validar límite
     if (pagination.limit && (pagination.limit < 1 || pagination.limit > 100)) {
       throw new Error('Limit must be between 1 and 100.');
     }
 
-    // Validate sort order
+    // Validar orden de clasificación
     if (pagination.sortOrder && !['asc', 'desc'].includes(pagination.sortOrder)) {
       throw new Error('Sort order must be either "asc" or "desc".');
     }

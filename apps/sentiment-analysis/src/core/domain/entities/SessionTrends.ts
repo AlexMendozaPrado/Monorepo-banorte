@@ -10,7 +10,7 @@ export interface TimeSeriesPoint {
 export interface MetricEvolution {
   date: Date;
   value: number;
-  change: number; // % vs anterior
+  change: number; // % comparado con el anterior
   label?: string;
 }
 

@@ -6,15 +6,15 @@ export type SessionAnalyzerProvider = 'openai' | 'ollama';
 export interface SessionAnalyzerConfig {
   provider: SessionAnalyzerProvider;
 
-  // OpenAI configuration
+  // Configuración de OpenAI
   openaiApiKey?: string;
   openaiModel?: string;
 
-  // Ollama configuration (for future implementation)
+  // Configuración de Ollama (para futura implementación)
   ollamaBaseUrl?: string;
   ollamaModel?: string;
 
-  // Common configuration
+  // Configuración común
   maxTokens?: number;
   temperature?: number;
 }
@@ -116,7 +116,7 @@ export class SessionAnalyzerFactory {
       throw new Error('Ollama model is required when provider is "ollama"');
     }
 
-    // TODO: Implementar OllamaSessionAnalyzer
+    // TODO: Implementar el analizador de sesiones de Ollama
     throw new Error('Ollama session analyzer not yet implemented');
   }
 

@@ -1,6 +1,6 @@
 import { Header, SecondaryNav, LoginForm, Promotion, ChatBubble, SocialIcons } from '@banorte/landing-page';
 
-// Force dynamic rendering to avoid build errors with client components
+// Forzar renderizado dinámico para evitar errores de compilación con componentes de cliente
 export const dynamic = 'force-dynamic';
 
 export default function LandingPage() {

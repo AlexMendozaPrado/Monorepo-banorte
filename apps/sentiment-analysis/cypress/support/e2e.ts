@@ -1,11 +1,11 @@
 // ***********************************************************
-// This support file runs before every test file.
+// Este archivo de soporte se ejecuta antes de cada archivo de prueba.
 // ***********************************************************
 
 import 'cypress-file-upload';
-import './commands';  // Import custom commands
+import './commands';  // Importar comandos personalizados
 
-// Add custom commands here
+// Agregar comandos personalizados aquí
 Cypress.Commands.add('getBySel', (selector: string, ...args) => {
   return cy.get(`[data-testid="${selector}"]`, ...args);
 });
@@ -14,18 +14,18 @@ Cypress.Commands.add('getBySelLike', (selector: string, ...args) => {
   return cy.get(`[data-testid*="${selector}"]`, ...args);
 });
 
-// Declare custom commands for TypeScript
+// Declarar comandos personalizados para TypeScript
 declare global {
   namespace Cypress {
     interface Chainable {
       /**
-       * Custom command to select DOM element by data-testid attribute.
+       * Comando personalizado para seleccionar elemento DOM por atributo data-testid.
        * @example cy.getBySel('greeting')
        */
       getBySel(dataTestAttribute: string, args?: any): Chainable<JQuery<HTMLElement>>;
 
       /**
-       * Custom command to select DOM element by partial data-testid attribute match.
+       * Comando personalizado para seleccionar elemento DOM por coincidencia parcial de atributo data-testid.
        * @example cy.getBySelLike('submit')
        */
       getBySelLike(dataTestPrefixAttribute: string, args?: any): Chainable<JQuery<HTMLElement>>;
@@ -33,5 +33,5 @@ declare global {
   }
 }
 
-// Prevent TypeScript errors
+// Prevenir errores de TypeScript
 export {};

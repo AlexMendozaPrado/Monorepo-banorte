@@ -40,7 +40,7 @@ interface AnalysisTableProps {
 
 export function AnalysisTable({ analyses, onPageChange, onSortChange, currentSort }: AnalysisTableProps) {
   const handleChangePage = (event: unknown, newPage: number) => {
-    onPageChange(newPage + 1); // Convert from 0-based to 1-based
+    onPageChange(newPage + 1); // Convertir de base 0 a base 1
   };
 
   const handleSort = (property: string) => {
@@ -136,7 +136,7 @@ export function AnalysisTable({ analyses, onPageChange, onSortChange, currentSor
                       <IconButton
                         size="small"
                         onClick={() => {
-                          // TODO: Implement view details functionality
+                          // TODO: Implementar funcionalidad de ver detalles
                           console.log('View details for:', analysis.id);
                         }}
                       >
@@ -155,7 +155,7 @@ export function AnalysisTable({ analyses, onPageChange, onSortChange, currentSor
         <TablePagination
           component="div"
           count={analyses.total}
-          page={analyses.page - 1} // Convert from 1-based to 0-based
+          page={analyses.page - 1} // Convertir de base 1 a base 0
           onPageChange={handleChangePage}
           rowsPerPage={analyses.limit}
           rowsPerPageOptions={[10, 20, 50, 100]}

@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ): Promise<NextResponse<ApiResponse<SessionConclusionResponse>>> {
   try {
-    // Await params if it's a Promise (Next.js 15+)
+    // Esperar params si es una Promise (Next.js 15+)
     const resolvedParams = params instanceof Promise ? await params : params;
     const { id } = resolvedParams;
 
@@ -25,12 +25,12 @@ export async function GET(
       );
     }
 
-    // Initialize DI Container
+    // Inicializar contenedor de inyección de dependencias
     const container = DIContainer.getInstance(getAIProviderConfig());
     const conclusionService = container.sessionConclusionService;
 
     console.log('[API] Getting conclusion from service...');
-    // Get conclusion by analysis ID
+    // Obtener conclusión por ID de análisis
     const conclusion = await conclusionService.getConclusionByAnalysisId(id);
     console.log(`[API] Conclusion result: ${conclusion ? 'found' : 'not found'}`);
 
@@ -44,7 +44,7 @@ export async function GET(
       );
     }
 
-    // Convert entity to API response format
+    // Convertir entidad a formato de respuesta API
     const conclusionResponse: SessionConclusionResponse = convertConclusionToResponse(conclusion);
 
     return NextResponse.json({

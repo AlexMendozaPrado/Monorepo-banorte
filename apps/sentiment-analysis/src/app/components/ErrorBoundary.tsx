@@ -122,10 +122,10 @@ function DefaultErrorFallback({ error, resetError }: DefaultErrorFallbackProps) 
   );
 }
 
-// Hook for functional components
+// Hook para componentes funcionales
 export function useErrorHandler() {
   return (error: Error, errorInfo?: React.ErrorInfo) => {
     console.error('Error caught by useErrorHandler:', error, errorInfo);
-    // In a real application, you might want to send this to an error reporting service
+    // En una aplicación real, podrías querer enviar esto a un servicio de reporte de errores
   };
 }

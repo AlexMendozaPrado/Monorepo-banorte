@@ -6,7 +6,7 @@ import { getAIProviderConfig, validateAIProviderConfig } from '../../../../confi
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // Validate AI provider configuration
+    // Validar configuración del proveedor de IA
     try {
       validateAIProviderConfig();
     } catch (error) {
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Initialize DI Container
+    // Inicializar contenedor de inyección de dependencias
     const container = DIContainer.getInstance(getAIProviderConfig());
 
-    // Parse request body
+    // Parsear cuerpo de la solicitud
     const body: ExportRequest = await request.json();
 
-    // Validate required fields
+    // Validar campos requeridos
     if (!body.format || !['csv', 'json'].includes(body.format)) {
       return NextResponse.json(
         {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Convert API filters to domain filters
+    // Convertir filtros de API a filtros de dominio
     const domainFilter: any = {};
     if (body.filter) {
       if (body.filter.clientName) domainFilter.clientName = body.filter.clientName;
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       if (body.filter.maxConfidence !== undefined) domainFilter.maxConfidence = body.filter.maxConfidence;
     }
 
-    // Execute export use case
+    // Ejecutar caso de uso de exportación
     const exportAnalysisUseCase = container.exportAnalysisUseCase;
     const result = await exportAnalysisUseCase.execute({
       filter: domainFilter,
@@ -60,14 +60,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    // Return file as response
+    // Retornar archivo como respuesta
     const headers = new Headers();
     headers.set('Content-Type', result.exportResult.mimeType);
     headers.set('Content-Disposition', `attachment; filename="${result.exportResult.filename}"`);
     headers.set('Content-Length', result.exportResult.size.toString());
 
-    // Convert data to appropriate format for NextResponse
-    // NextResponse expects ReadableStream, string, or ArrayBuffer
+    // Convertir datos al formato apropiado para NextResponse
+    // NextResponse espera ReadableStream, string o ArrayBuffer
     const responseData = Buffer.isBuffer(result.exportResult.data)
       ? new Uint8Array(result.exportResult.data)
       : result.exportResult.data;

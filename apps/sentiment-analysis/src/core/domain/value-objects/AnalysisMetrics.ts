@@ -109,9 +109,9 @@ export class AnalysisMetricsValueObject implements AnalysisMetrics {
     const paragraphCount = paragraphs.length;
     const averageWordsPerSentence = sentenceCount > 0 ? wordCount / sentenceCount : 0;
     
-    // Simple readability score calculation (Flesch-like)
+    // Cálculo simple de puntaje de legibilidad (tipo Flesch)
     const averageSentenceLength = averageWordsPerSentence;
-    const averageSyllablesPerWord = 1.5; // Simplified assumption
+    const averageSyllablesPerWord = 1.5; // Suposición simplificada
     const readabilityScore = Math.max(0, Math.min(100, 
       206.835 - (1.015 * averageSentenceLength) - (84.6 * averageSyllablesPerWord)
     ));

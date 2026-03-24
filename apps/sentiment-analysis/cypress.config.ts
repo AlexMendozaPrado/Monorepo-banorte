@@ -12,12 +12,12 @@ export default defineConfig({
     responseTimeout: 15000,
 
     env: {
-      // Toggle to use real OpenAI API or mocked responses
+      // Alternar entre usar la API real de OpenAI o respuestas simuladas
       USE_REAL_OPENAI: false,
     },
 
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      // implementar listeners de eventos de nodo aquí
       return config;
     },
 

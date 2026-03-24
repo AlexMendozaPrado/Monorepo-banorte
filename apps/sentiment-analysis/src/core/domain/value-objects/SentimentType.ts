@@ -47,13 +47,13 @@ export class SentimentTypeValueObject {
   public getColor(): string {
     switch (this.value) {
       case SentimentType.POSITIVE:
-        return '#4caf50'; // Green
+        return '#4caf50'; // Verde
       case SentimentType.NEUTRAL:
-        return '#ff9800'; // Orange
+        return '#ff9800'; // Naranja
       case SentimentType.NEGATIVE:
-        return '#f44336'; // Red
+        return '#f44336'; // Rojo
       default:
-        return '#9e9e9e'; // Gray
+        return '#9e9e9e'; // Gris
     }
   }
 

@@ -40,7 +40,7 @@ interface AnalysisResultsProps {
 
 export function AnalysisResults({ analysis }: AnalysisResultsProps) {
   const extendedData = analysis.extendedAnalysis;
-  // Prepare emotion data for charts
+  // Preparar datos de emociones para gráficos
   const validEmotions: Array<keyof EmotionScore> = ['joy', 'sadness', 'anger', 'fear', 'surprise', 'disgust'];
   const emotionData = validEmotions
     .filter(emotion => emotion in analysis.emotionScores)
@@ -69,7 +69,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
         </Box>
 
         <Grid container spacing={3}>
-          {/* Overall Sentiment */}
+          {/* Sentimiento General */}
           <Grid item xs={12} md={6} lg={3}>
             <Card variant="outlined">
               <CardContent sx={{ textAlign: 'center' }}>
@@ -95,7 +95,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Confidence */}
+          {/* Confianza */}
           <Grid item xs={12} md={6} lg={3}>
             <Card variant="outlined">
               <CardContent sx={{ textAlign: 'center' }}>
@@ -129,7 +129,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Processing Time */}
+          {/* Tiempo de Procesamiento */}
           <Grid item xs={12} md={6} lg={3}>
             <Card variant="outlined">
               <CardContent sx={{ textAlign: 'center' }}>
@@ -144,7 +144,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Document Info */}
+          {/* Información del Documento */}
           <Grid item xs={12} md={6} lg={3}>
             <Card variant="outlined">
               <CardContent sx={{ textAlign: 'center' }}>
@@ -164,7 +164,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Emotion Distribution Chart */}
+          {/* Gráfico de Distribución de Emociones */}
           <Grid item xs={12} md={6}>
             <Card variant="outlined">
               <CardContent>
@@ -194,7 +194,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Emotion Bars */}
+          {/* Barras de Emociones */}
           <Grid item xs={12} md={6}>
             <Card variant="outlined">
               <CardContent>
@@ -217,7 +217,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Text Metrics */}
+          {/* Métricas de Texto */}
           <Grid item xs={12}>
             <Card variant="outlined">
               <CardContent>
@@ -282,7 +282,7 @@ export function AnalysisResults({ analysis }: AnalysisResultsProps) {
             </Card>
           </Grid>
 
-          {/* Extended Analysis Section */}
+          {/* Sección de Análisis Extendido */}
           {extendedData && (
             <Grid item xs={12}>
               <Card variant="outlined" sx={{ mt: 3, bgcolor: '#f5f5f5' }}>

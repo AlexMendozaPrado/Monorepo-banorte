@@ -7,25 +7,25 @@ export type AIProvider = 'openai' | 'ollama';
 export interface SentimentAnalyzerConfig {
   provider: AIProvider;
 
-  // OpenAI configuration
+  // Configuración de OpenAI
   openaiApiKey?: string;
   openaiModel?: string;
 
-  // Ollama configuration
+  // Configuración de Ollama
   ollamaBaseUrl?: string;
   ollamaModel?: string;
 
-  // Common configuration
+  // Configuración común
   maxTokens?: number;
   temperature?: number;
 }
 
 export class SentimentAnalyzerFactory {
   /**
-   * Creates the appropriate sentiment analyzer based on the provided configuration
-   * @param config Configuration for the sentiment analyzer
-   * @returns A concrete implementation of SentimentAnalyzerPort
-   * @throws Error if required configuration is missing
+   * Crea el analizador de sentimientos apropiado basado en la configuración proporcionada
+   * @param config Configuración para el analizador de sentimientos
+   * @returns Una implementación concreta de SentimentAnalyzerPort
+   * @throws Error si falta configuración requerida
    */
   static create(config: SentimentAnalyzerConfig): SentimentAnalyzerPort {
     switch (config.provider) {
@@ -71,10 +71,10 @@ export class SentimentAnalyzerFactory {
   }
 
   /**
-   * Validates that the configuration has all required fields for the specified provider
-   * @param config Configuration to validate
-   * @returns true if configuration is valid
-   * @throws Error if configuration is invalid
+   * Valida que la configuración tenga todos los campos requeridos para el proveedor especificado
+   * @param config Configuración a validar
+   * @returns true si la configuración es válida
+   * @throws Error si la configuración es inválida
    */
   static validateConfig(config: SentimentAnalyzerConfig): boolean {
     if (!config.provider) {

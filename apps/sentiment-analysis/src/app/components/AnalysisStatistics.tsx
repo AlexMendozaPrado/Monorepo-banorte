@@ -34,7 +34,7 @@ export function AnalysisStatistics({ statistics }: AnalysisStatisticsProps) {
 
   return (
     <Grid container spacing={2}>
-      {/* Total Analyses */}
+      {/* Total de Análisis */}
       <Grid item xs={12} sm={6} md={3}>
         <Card variant="outlined">
           <CardContent sx={{ textAlign: 'center' }}>
@@ -49,7 +49,7 @@ export function AnalysisStatistics({ statistics }: AnalysisStatisticsProps) {
         </Card>
       </Grid>
 
-      {/* Positive Sentiment */}
+      {/* Sentimiento Positivo */}
       <Grid item xs={12} sm={6} md={3}>
         <Card variant="outlined">
           <CardContent sx={{ textAlign: 'center' }}>
@@ -77,7 +77,7 @@ export function AnalysisStatistics({ statistics }: AnalysisStatisticsProps) {
         </Card>
       </Grid>
 
-      {/* Neutral Sentiment */}
+      {/* Sentimiento Neutral */}
       <Grid item xs={12} sm={6} md={3}>
         <Card variant="outlined">
           <CardContent sx={{ textAlign: 'center' }}>
@@ -105,7 +105,7 @@ export function AnalysisStatistics({ statistics }: AnalysisStatisticsProps) {
         </Card>
       </Grid>
 
-      {/* Negative Sentiment */}
+      {/* Sentimiento Negativo */}
       <Grid item xs={12} sm={6} md={3}>
         <Card variant="outlined">
           <CardContent sx={{ textAlign: 'center' }}>
@@ -133,7 +133,7 @@ export function AnalysisStatistics({ statistics }: AnalysisStatisticsProps) {
         </Card>
       </Grid>
 
-      {/* Average Confidence */}
+      {/* Confianza Promedio */}
       <Grid item xs={12} sm={6} md={6}>
         <Card variant="outlined">
           <CardContent>
@@ -163,7 +163,7 @@ export function AnalysisStatistics({ statistics }: AnalysisStatisticsProps) {
         </Card>
       </Grid>
 
-      {/* Most Common Channel */}
+      {/* Canal Más Común */}
       <Grid item xs={12} sm={6} md={6}>
         <Card variant="outlined">
           <CardContent>

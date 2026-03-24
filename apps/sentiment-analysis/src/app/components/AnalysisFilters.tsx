@@ -91,7 +91,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
           </Typography>
           
           <Grid container spacing={3}>
-            {/* Client Name */}
+            {/* Nombre del Cliente */}
             <Grid item xs={12} md={6} lg={3}>
               <TextField
                 fullWidth
@@ -102,7 +102,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
               />
             </Grid>
 
-            {/* Channel */}
+            {/* Canal */}
             <Grid item xs={12} md={6} lg={3}>
               <FormControl fullWidth>
                 <InputLabel>Canal</InputLabel>
@@ -121,7 +121,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
               </FormControl>
             </Grid>
 
-            {/* Sentiment Type */}
+            {/* Tipo de Sentimiento */}
             <Grid item xs={12} md={6} lg={3}>
               <FormControl fullWidth>
                 <InputLabel>Sentimiento</InputLabel>
@@ -140,7 +140,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
               </FormControl>
             </Grid>
 
-            {/* Date From */}
+            {/* Fecha Desde */}
             <Grid item xs={12} md={6} lg={3}>
               <DatePicker
                 label="Fecha desde"
@@ -154,7 +154,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
               />
             </Grid>
 
-            {/* Date To */}
+            {/* Fecha Hasta */}
             <Grid item xs={12} md={6} lg={3}>
               <DatePicker
                 label="Fecha hasta"
@@ -168,7 +168,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
               />
             </Grid>
 
-            {/* Confidence Range */}
+            {/* Rango de Confianza */}
             <Grid item xs={12} md={6} lg={6}>
               <Typography gutterBottom>
                 Rango de Confianza: {confidenceRange[0].toFixed(0)}% - {confidenceRange[1].toFixed(0)}%
@@ -189,7 +189,7 @@ export function AnalysisFilters({ filters, onFiltersChange }: AnalysisFiltersPro
               />
             </Grid>
 
-            {/* Action Buttons */}
+            {/* Botones de Acción */}
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                 <Button

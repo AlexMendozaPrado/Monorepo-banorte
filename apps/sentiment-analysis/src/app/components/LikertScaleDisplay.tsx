@@ -23,11 +23,11 @@ interface LikertScaleDisplayProps {
 
 export function LikertScaleDisplay({ score, confidence, keywords = [] }: LikertScaleDisplayProps) {
   const getLikertColor = (value: number): string => {
-    if (value >= 6) return '#6CC04A'; // Very positive - green
-    if (value >= 5) return '#FFA400'; // Positive - orange
-    if (value >= 4) return '#FFD54F'; // Neutral/Positive - yellow
-    if (value >= 3) return '#FF671B'; // Negative - red-orange
-    return '#EB0029'; // Very negative - primary red
+    if (value >= 6) return '#6CC04A'; // Muy positivo - verde
+    if (value >= 5) return '#FFA400'; // Positivo - naranja
+    if (value >= 4) return '#FFD54F'; // Neutral/Positivo - amarillo
+    if (value >= 3) return '#FF671B'; // Negativo - rojo-naranja
+    return '#EB0029'; // Muy negativo - rojo primario
   };
 
   const getLikertLabel = (value: number): string => {
@@ -55,7 +55,7 @@ export function LikertScaleDisplay({ score, confidence, keywords = [] }: LikertS
           Sentimiento Numérico Detallado (Escala Likert)
         </Typography>
 
-        {/* Icon and Score */}
+        {/* Ícono y Puntuación */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3, mt: 2 }}>
           {getSentimentIcon(score)}
           <Box sx={{ ml: 3 }}>
@@ -71,10 +71,10 @@ export function LikertScaleDisplay({ score, confidence, keywords = [] }: LikertS
           </Box>
         </Box>
 
-        {/* Likert Scale Visual */}
+        {/* Visual de Escala Likert */}
         <Box sx={{ mt: 3, mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', px: 2 }}>
-            {/* Scale Line */}
+            {/* Línea de Escala */}
             <Box
               sx={{
                 position: 'absolute',
@@ -88,7 +88,7 @@ export function LikertScaleDisplay({ score, confidence, keywords = [] }: LikertS
               }}
             />
 
-            {/* Scale Points */}
+            {/* Puntos de Escala */}
             {[1, 2, 3, 4, 5, 6, 7].map((value) => (
               <Box
                 key={value}
@@ -124,7 +124,7 @@ export function LikertScaleDisplay({ score, confidence, keywords = [] }: LikertS
             ))}
           </Box>
 
-          {/* Scale Labels */}
+          {/* Etiquetas de Escala */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, px: 1 }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
               Muy Negativo
@@ -138,7 +138,7 @@ export function LikertScaleDisplay({ score, confidence, keywords = [] }: LikertS
           </Box>
         </Box>
 
-        {/* Keywords */}
+        {/* Palabras Clave */}
         {keywords.length > 0 && (
           <Box sx={{ mt: 3 }}>
             <Typography variant="subtitle2" gutterBottom color="text.secondary">
