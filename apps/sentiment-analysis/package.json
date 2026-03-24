@@ -13,7 +13,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:unit": "jest --testPathPattern=unit",
+    "test:unit": "jest --testPathPatterns=unit",
     "test:verbose": "jest --verbose",
     "cypress": "cypress open",
     "cypress:headless": "cypress run",
