@@ -8,6 +8,7 @@ import { Button, Card } from '@banorte/ui';
 import { Header } from '@/presentation/components/Header';
 import { TransactionAccordion } from '@/presentation/components/TransactionAccordion';
 import { CertificationResponse } from '@/shared/types/api';
+import { generateCertificationPDF } from '@/presentation/utils/generateCertificationPDF';
 
 const INTEGRATION_NAMES: Record<string, string> = {
   ECOMMERCE_TRADICIONAL: 'E-Commerce Tradicional',
@@ -216,7 +217,7 @@ export default function ResultadosPage() {
               Nueva Certificacion
             </Button>
           </Link>
-          <Button variant="secondary" size="lg" className="gap-2">
+          <Button variant="secondary" size="lg" className="gap-2" onClick={() => generateCertificationPDF(data)}>
             <Download className="w-4 h-4" /> Descargar Dictamen PDF
           </Button>
         </div>
