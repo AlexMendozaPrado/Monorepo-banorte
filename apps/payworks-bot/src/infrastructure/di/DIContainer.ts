@@ -1,0 +1,152 @@
+import { OperationMode } from '@/core/domain/entities/CertificationSession';
+
+import { ServletLogParserPort } from '@/core/domain/ports/ServletLogParserPort';
+import { ProsaLogParserPort } from '@/core/domain/ports/ProsaLogParserPort';
+import { MatrixParserPort } from '@/core/domain/ports/MatrixParserPort';
+import { MandatoryFieldsPort } from '@/core/domain/ports/MandatoryFieldsPort';
+import { TransactionRepositoryPort } from '@/core/domain/ports/TransactionRepositoryPort';
+import { LogRetrievalPort } from '@/core/domain/ports/LogRetrievalPort';
+import { CertificationRepositoryPort } from '@/core/domain/ports/CertificationRepositoryPort';
+
+import { PayworksServletLogParser } from '../log-parsers/PayworksServletLogParser';
+import { PayworksProsaLogParser } from '../log-parsers/PayworksProsaLogParser';
+import { ExcelMatrixParser } from '../matrix-parser/ExcelMatrixParser';
+import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig';
+import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
+import { InMemoryCertificationRepository } from '../repositories/InMemoryCertificationRepository';
+import { FileUploadLogRetrieval } from '../log-retrieval/FileUploadLogRetrieval';
+
+import { ValidateTransactionFieldsUseCase } from '@/core/application/use-cases/ValidateTransactionFieldsUseCase';
+import { RunCertificationUseCase } from '@/core/application/use-cases/RunCertificationUseCase';
+import { GetCertificationHistoryUseCase } from '@/core/application/use-cases/GetCertificationHistoryUseCase';
+
+export interface DIContainerConfig {
+  operationMode: OperationMode;
+}
+
+export class DIContainer {
+  private static instance: DIContainer;
+  private config: DIContainerConfig;
+
+  // Infraestructura
+  private _servletLogParser?: ServletLogParserPort;
+  private _prosaLogParser?: ProsaLogParserPort;
+  private _matrixParser?: MatrixParserPort;
+  private _mandatoryFields?: MandatoryFieldsPort;
+  private _transactionRepo?: InMemoryTransactionRepository;
+  private _certificationRepo?: CertificationRepositoryPort;
+  private _logRetrieval?: FileUploadLogRetrieval;
+
+  // Use Cases
+  private _validateFieldsUseCase?: ValidateTransactionFieldsUseCase;
+  private _runCertificationUseCase?: RunCertificationUseCase;
+  private _getCertificationHistoryUseCase?: GetCertificationHistoryUseCase;
+
+  private constructor(config: DIContainerConfig) {
+    this.config = config;
+  }
+
+  static getInstance(config?: DIContainerConfig): DIContainer {
+    if (!DIContainer.instance) {
+      if (!config) {
+        throw new Error('DIContainer requiere configuracion en la primera inicializacion');
+      }
+      DIContainer.instance = new DIContainer(config);
+    }
+    return DIContainer.instance;
+  }
+
+  static reset(): void {
+    DIContainer.instance = undefined as any;
+  }
+
+  // --- Getters de Infraestructura ---
+
+  get servletLogParser(): ServletLogParserPort {
+    if (!this._servletLogParser) {
+      this._servletLogParser = new PayworksServletLogParser();
+    }
+    return this._servletLogParser;
+  }
+
+  get prosaLogParser(): ProsaLogParserPort {
+    if (!this._prosaLogParser) {
+      this._prosaLogParser = new PayworksProsaLogParser();
+    }
+    return this._prosaLogParser;
+  }
+
+  get matrixParser(): MatrixParserPort {
+    if (!this._matrixParser) {
+      this._matrixParser = new ExcelMatrixParser();
+    }
+    return this._matrixParser;
+  }
+
+  get mandatoryFields(): MandatoryFieldsPort {
+    if (!this._mandatoryFields) {
+      this._mandatoryFields = new MandatoryFieldsConfig();
+    }
+    return this._mandatoryFields;
+  }
+
+  get transactionRepository(): InMemoryTransactionRepository {
+    if (!this._transactionRepo) {
+      this._transactionRepo = new InMemoryTransactionRepository();
+    }
+    return this._transactionRepo;
+  }
+
+  get certificationRepository(): CertificationRepositoryPort {
+    if (!this._certificationRepo) {
+      this._certificationRepo = new InMemoryCertificationRepository();
+    }
+    return this._certificationRepo;
+  }
+
+  get logRetrieval(): FileUploadLogRetrieval {
+    if (!this._logRetrieval) {
+      this._logRetrieval = new FileUploadLogRetrieval();
+    }
+    return this._logRetrieval;
+  }
+
+  // --- Getters de Use Cases ---
+
+  get validateFieldsUseCase(): ValidateTransactionFieldsUseCase {
+    if (!this._validateFieldsUseCase) {
+      this._validateFieldsUseCase = new ValidateTransactionFieldsUseCase(
+        this.mandatoryFields,
+      );
+    }
+    return this._validateFieldsUseCase;
+  }
+
+  get runCertificationUseCase(): RunCertificationUseCase {
+    if (!this._runCertificationUseCase) {
+      this._runCertificationUseCase = new RunCertificationUseCase(
+        this.matrixParser,
+        this.transactionRepository,
+        this.logRetrieval,
+        this.servletLogParser,
+        this.prosaLogParser,
+        this.validateFieldsUseCase,
+        this.certificationRepository,
+      );
+    }
+    return this._runCertificationUseCase;
+  }
+
+  get getCertificationHistoryUseCase(): GetCertificationHistoryUseCase {
+    if (!this._getCertificationHistoryUseCase) {
+      this._getCertificationHistoryUseCase = new GetCertificationHistoryUseCase(
+        this.certificationRepository,
+      );
+    }
+    return this._getCertificationHistoryUseCase;
+  }
+
+  getConfiguration(): Readonly<DIContainerConfig> {
+    return { ...this.config };
+  }
+}
