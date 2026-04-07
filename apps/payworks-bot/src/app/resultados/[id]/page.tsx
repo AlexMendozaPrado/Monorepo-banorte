@@ -11,12 +11,12 @@ import { CertificationResponse } from '@/shared/types/api';
 import { generateCertificationPDF } from '@/presentation/utils/generateCertificationPDF';
 
 const INTEGRATION_NAMES: Record<string, string> = {
-  ECOMMERCE_TRADICIONAL: 'E-Commerce Tradicional',
-  ECOMMERCE_TOKENIZACION: 'E-Commerce Tokenizacion',
-  VENTANA_COMERCIOS: 'Ventana de Comercios',
-  CYBERSOURCE_DIRECTO: 'Cybersource Directo',
-  AGREGADOR_ECOMM: 'Agregador E-Commerce',
-  AGREGADOR_CARGOS_AUTO: 'Agregador Cargos Auto',
+  ECOMMERCE_TRADICIONAL: 'Servlet - E-Commerce Tradicional',
+  ECOMMERCE_TOKENIZACION: '3D Secure + Servlet',
+  VENTANA_COMERCIOS: 'Servlet - Ventana de Comercios',
+  CYBERSOURCE_DIRECTO: 'Cybersource Direct',
+  AGREGADOR_ECOMM: 'Esquema 1 Tasa Natural',
+  AGREGADOR_CARGOS_AUTO: 'Esquema 4 Sin AGP',
 };
 
 const TRANSACTION_NAMES: Record<string, string> = {

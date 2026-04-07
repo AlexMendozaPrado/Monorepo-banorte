@@ -24,12 +24,12 @@ export class IntegrationTypeValueObject {
 
   getDisplayName(): string {
     const names: Record<IntegrationType, string> = {
-      [IntegrationType.ECOMMERCE_TRADICIONAL]: 'E-Commerce Tradicional',
-      [IntegrationType.ECOMMERCE_TOKENIZACION]: 'E-Commerce con Tokenizacion',
-      [IntegrationType.VENTANA_COMERCIOS]: 'Ventana de Comercios',
-      [IntegrationType.CYBERSOURCE_DIRECTO]: 'Cybersource Directo',
-      [IntegrationType.AGREGADOR_ECOMM]: 'Agregador E-Commerce (Esquema 1)',
-      [IntegrationType.AGREGADOR_CARGOS_AUTO]: 'Agregador Cargos Automaticos (Esquema 4)',
+      [IntegrationType.ECOMMERCE_TRADICIONAL]: 'Servlet - E-Commerce Tradicional',
+      [IntegrationType.ECOMMERCE_TOKENIZACION]: '3D Secure + Servlet',
+      [IntegrationType.VENTANA_COMERCIOS]: 'Servlet - Ventana de Comercios',
+      [IntegrationType.CYBERSOURCE_DIRECTO]: 'Cybersource Direct',
+      [IntegrationType.AGREGADOR_ECOMM]: 'Esquema 1 Tasa Natural',
+      [IntegrationType.AGREGADOR_CARGOS_AUTO]: 'Esquema 4 Sin AGP',
     };
     return names[this.value];
   }

@@ -6,12 +6,12 @@ import { ArrowUp, ArrowRight, Upload, FileText } from 'lucide-react';
 import { Button } from '@banorte/ui';
 
 const INTEGRATION_OPTIONS = [
-  { value: 'ECOMMERCE_TRADICIONAL', label: 'E-Commerce Tradicional' },
-  { value: 'ECOMMERCE_TOKENIZACION', label: 'E-Commerce con Tokenizacion' },
-  { value: 'VENTANA_COMERCIOS', label: 'Ventana de Comercios' },
-  { value: 'CYBERSOURCE_DIRECTO', label: 'Cybersource Directo' },
-  { value: 'AGREGADOR_ECOMM', label: 'Agregador E-Commerce (Esquema 1)' },
-  { value: 'AGREGADOR_CARGOS_AUTO', label: 'Agregador Cargos Automaticos (Esquema 4)' },
+  { value: 'ECOMMERCE_TRADICIONAL', label: 'Servlet - E-Commerce Tradicional' },
+  { value: 'ECOMMERCE_TOKENIZACION', label: '3D Secure + Servlet' },
+  { value: 'VENTANA_COMERCIOS', label: 'Servlet - Ventana de Comercios' },
+  { value: 'CYBERSOURCE_DIRECTO', label: 'Cybersource Direct' },
+  { value: 'AGREGADOR_ECOMM', label: 'Esquema 1 Tasa Natural' },
+  { value: 'AGREGADOR_CARGOS_AUTO', label: 'Esquema 4 Sin AGP' },
 ];
 
 const OPERATION_MODES = [
