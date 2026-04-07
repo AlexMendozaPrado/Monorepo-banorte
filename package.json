@@ -25,9 +25,14 @@
     "dev:business-full": "turbo run dev --filter=business-rules --filter=business-rules-api",
     "dev:bian-poc": "turbo run dev --filter=bian-poc",
     "build:bian-poc": "turbo run build --filter=bian-poc",
+    "dev:payworks": "turbo run dev --filter=payworks-bot",
+    "build:payworks": "turbo run build --filter=payworks-bot",
     "clean": "turbo run clean && rm -rf node_modules .turbo"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "jest": "^30.2.0",
     "prettier": "^3.6.2",
     "turbo": "^2.6.1",
     "typescript": "^5.4.0"

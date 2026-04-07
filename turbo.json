@@ -42,7 +42,15 @@
     "DB_PASSWORD",
     "DB_PORT",
     "GEMINI_API_KEY",
-    "PORT"
+    "PORT",
+    "ORACLE_HOST",
+    "ORACLE_PORT",
+    "ORACLE_SID",
+    "ORACLE_USER",
+    "ORACLE_PASSWORD",
+    "OWNCLOUD_URL",
+    "OWNCLOUD_USER",
+    "OWNCLOUD_PASSWORD"
   ],
   "globalDependencies": [
     "**/.env.*local"
