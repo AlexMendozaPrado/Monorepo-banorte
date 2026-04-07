@@ -1,0 +1,139 @@
+********************************************************************************
+[11/03/2026 18:02:25] SE RECIBIO POST HTTP DESDE LA IP: 99.80.99.245
+ID_AFILIACION:   [7049408]
+USUARIO:         [7049408]
+CMD_TRANS:       [AUTH]
+ID_TERMINAL:     [70494081]
+MONTO:           [98.39]
+MODO:            [PRD]
+REFERENCIA:      []
+NUMERO_CONTROL:  [140802786372026031200022522]
+NUMERO_TARJETA:  [510125******2396]
+MODO_ENTRADA:    [MANUAL]
+IDIOMA_RESPUESTA:[01]
+CUSTOMER_REF1:   [Pedido-84726]
+CUSTOMER_REF2:   []
+CUSTOMER_REF3:   []
+CUSTOMER_REF4:   []
+CUSTOMER_REF5:   []
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:02:26] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.99.245
+RESULTADO_PAYW:  [A]
+CODIGO_PAYW:     [000]
+TEXTO:           [Approved]
+REFERENCIA:      [320146914713]
+NUMERO_CONTROL:  [140802786372026031200022522]
+CODIGO_AUT:      [830125]
+FECHA_REQ_CTE:   [20260311]
+HORA_REQ_CTE:    [180225]
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:03:10] SE RECIBIO POST HTTP DESDE LA IP: 99.80.99.245
+ID_AFILIACION:   [7049408]
+USUARIO:         [7049408]
+CMD_TRANS:       [AUTH]
+ID_TERMINAL:     [70494081]
+MONTO:           [150.00]
+MODO:            [PRD]
+REFERENCIA:      []
+NUMERO_CONTROL:  [140802786372026031200022523]
+NUMERO_TARJETA:  [411111******1111]
+MODO_ENTRADA:    [MANUAL]
+IDIOMA_RESPUESTA:[01]
+CUSTOMER_REF1:   [Pedido-84727]
+CUSTOMER_REF2:   []
+CUSTOMER_REF3:   []
+CUSTOMER_REF4:   []
+CUSTOMER_REF5:   []
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:03:11] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.99.245
+RESULTADO_PAYW:  [A]
+CODIGO_PAYW:     [000]
+TEXTO:           [Approved]
+REFERENCIA:      [320146914714]
+NUMERO_CONTROL:  [140802786372026031200022523]
+CODIGO_AUT:      [830126]
+FECHA_REQ_CTE:   [20260311]
+HORA_REQ_CTE:    [180310]
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:05:42] SE RECIBIO POST HTTP DESDE LA IP: 99.80.99.245
+ID_AFILIACION:   [7049408]
+USUARIO:         [7049408]
+CMD_TRANS:       [VOID]
+ID_TERMINAL:     [70494081]
+MONTO:           []
+MODO:            [PRD]
+REFERENCIA:      [320146914713]
+NUMERO_CONTROL:  [140802786372026031200022530]
+NUMERO_TARJETA:  []
+MODO_ENTRADA:    []
+IDIOMA_RESPUESTA:[01]
+CUSTOMER_REF1:   []
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:05:43] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.99.245
+RESULTADO_PAYW:  [A]
+CODIGO_PAYW:     [000]
+TEXTO:           [Approved]
+REFERENCIA:      [320146914800]
+NUMERO_CONTROL:  [140802786372026031200022530]
+CODIGO_AUT:      [830127]
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:06:15] SE RECIBIO POST HTTP DESDE LA IP: 99.80.99.245
+ID_AFILIACION:   [7049408]
+USUARIO:         [7049408]
+CMD_TRANS:       [VOID]
+ID_TERMINAL:     [70494081]
+MONTO:           []
+MODO:            [PRD]
+REFERENCIA:      [320146914714]
+NUMERO_CONTROL:  [140802786372026031200022531]
+NUMERO_TARJETA:  []
+MODO_ENTRADA:    []
+IDIOMA_RESPUESTA:[01]
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:06:16] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.99.245
+RESULTADO_PAYW:  [A]
+CODIGO_PAYW:     [000]
+TEXTO:           [Approved]
+REFERENCIA:      [320146914801]
+NUMERO_CONTROL:  [140802786372026031200022531]
+CODIGO_AUT:      [830128]
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:10:30] SE RECIBIO POST HTTP DESDE LA IP: 99.80.99.245
+ID_AFILIACION:   [7049408]
+USUARIO:         [7049408]
+CMD_TRANS:       [REFUND]
+ID_TERMINAL:     [70494081]
+MONTO:           [50.00]
+MODO:            [PRD]
+REFERENCIA:      [320146914713]
+NUMERO_CONTROL:  [140802786372026031200022540]
+NUMERO_TARJETA:  []
+MODO_ENTRADA:    []
+IDIOMA_RESPUESTA:[01]
+********************************************************************************
+
+********************************************************************************
+[11/03/2026 18:10:31] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.99.245
+RESULTADO_PAYW:  [A]
+CODIGO_PAYW:     [000]
+TEXTO:           [Approved]
+REFERENCIA:      [320146914850]
+NUMERO_CONTROL:  [140802786372026031200022540]
+CODIGO_AUT:      [830129]
+********************************************************************************
