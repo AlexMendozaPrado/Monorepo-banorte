@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import { cn } from '@banorte/ui';
 
@@ -23,10 +22,22 @@ export function BanorteLogo({
 }: BanorteLogoProps) {
   const [imageError, setImageError] = useState(false);
 
+  const TextFallback = () => (
+    <span
+      className={cn(
+        'flex items-center justify-center font-bold tracking-[3px] text-xl',
+        variant === 'white' ? 'text-white' : 'text-banorte-red'
+      )}
+    >
+      BANORTE
+    </span>
+  );
+
   const LogoContent = () => {
     if (useOfficialLogo && !imageError) {
       return (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src="/images/LogotipoBanorteFinal.png"
           alt="Banorte"
           width={width}
@@ -38,24 +49,11 @@ export function BanorteLogo({
             maxHeight: height,
           }}
           onError={() => setImageError(true)}
-          priority
         />
       );
     }
 
-    return (
-      <span
-        className={cn(
-          'flex items-center justify-center font-bold rounded px-4 py-2',
-          variant === 'white'
-            ? 'bg-transparent border-2 border-white text-white'
-            : 'bg-banorte-red border-2 border-transparent text-white'
-        )}
-        style={{ fontSize: `${height * 0.25}px`, minWidth: `${height * 2.5}px`, height: `${height}px` }}
-      >
-        BANORTE
-      </span>
-    );
+    return <TextFallback />;
   };
 
   const logoElement = (
@@ -65,7 +63,6 @@ export function BanorteLogo({
         href && 'cursor-pointer hover:opacity-80',
         className
       )}
-      style={{ width, height }}
     >
       <LogoContent />
     </span>
