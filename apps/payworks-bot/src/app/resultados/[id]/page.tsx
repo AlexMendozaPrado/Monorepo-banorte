@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Download } from 'lucide-react';
+import { Button, Card } from '@banorte/ui';
 import { Header } from '@/presentation/components/Header';
 import { TransactionResultCard } from '@/presentation/components/TransactionResultCard';
 
@@ -60,7 +61,7 @@ export default function ResultadosPage() {
           <h1 className="text-[28px] font-bold text-banorte-dark">Resultados de Certificacion</h1>
         </div>
 
-        <div className="bg-white rounded-card shadow-card p-6 mb-8">
+        <Card className="!p-6 mb-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <div><div className="text-xs text-banorte-secondary mb-1">Comercio</div><div className="text-base font-semibold text-banorte-dark">{r.merchantName}</div></div>
             <div><div className="text-xs text-banorte-secondary mb-1">Integracion</div><div className="text-base font-semibold text-banorte-dark">{r.integrationType}</div></div>
@@ -69,7 +70,7 @@ export default function ResultadosPage() {
             <div><div className="text-xs text-banorte-secondary mb-1">Rechazadas</div><div className="text-base font-semibold text-banorte-error">{r.rejected} / {r.totalTransactions}</div></div>
             <div><div className="text-xs text-banorte-secondary mb-1">Dictamen</div><div className="text-base font-bold text-banorte-error">{r.verdict}</div></div>
           </div>
-        </div>
+        </Card>
 
         <div className="space-y-6">
           {r.transactions.map((txn) => (
@@ -78,9 +79,9 @@ export default function ResultadosPage() {
         </div>
 
         <div className="mt-8 flex justify-end">
-          <button className="bg-banorte-dark text-white font-semibold py-3 px-6 rounded-btn flex items-center gap-2 hover:bg-opacity-90 transition-colors">
+          <Button variant="secondary" size="lg" className="gap-2">
             <Download className="w-4 h-4" /> Descargar Dictamen PDF
-          </button>
+          </Button>
         </div>
       </main>
     </div>

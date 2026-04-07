@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Card } from '@banorte/ui';
 import { FieldValidationTable } from './FieldValidationTable';
 
 interface FieldResult {
@@ -36,7 +37,7 @@ export function TransactionResultCard({
   const isApproved = verdict === 'APROBADO';
 
   return (
-    <div className="bg-white rounded-card shadow-card overflow-hidden">
+    <Card noPadding className="overflow-hidden">
       <div className={`h-1 w-full ${isApproved ? 'bg-banorte-success' : 'bg-banorte-error'}`} />
 
       <div className="p-5 border-b border-gray-100">
@@ -72,6 +73,6 @@ export function TransactionResultCard({
       )}
 
       {showTable && <FieldValidationTable fields={fieldResults} />}
-    </div>
+    </Card>
   );
 }

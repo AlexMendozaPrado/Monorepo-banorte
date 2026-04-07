@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Check, Loader2, Circle } from 'lucide-react';
+import { Card } from '@banorte/ui';
 
 type ProcessingStatus = 'completed' | 'processing' | 'pending';
 
@@ -34,7 +35,7 @@ export function ProcessingChecklist({
   const percentage = total > 0 ? (progress / total) * 100 : 0;
 
   return (
-    <div className="w-full max-w-[720px] bg-white rounded-card shadow-card p-8">
+    <Card className="w-full max-w-[720px] !p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-banorte-dark mb-1">Certificando comercio...</h1>
         <p className="text-sm text-banorte-secondary">{merchantName} | {integrationType}</p>
@@ -81,6 +82,6 @@ export function ProcessingChecklist({
           <p className="text-sm font-medium text-banorte-dark mb-1">Paso actual: {currentStepDetail}</p>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

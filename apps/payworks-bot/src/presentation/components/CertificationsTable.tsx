@@ -2,6 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
+import {
+  Button,
+  Card,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@banorte/ui';
 import { StatusBadge, Status } from './StatusBadge';
 
 interface Certification {
@@ -27,41 +37,41 @@ export function CertificationsTable() {
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between w-full">
         <h2 className="text-banorte-dark font-semibold text-lg">Certificaciones Recientes</h2>
-        <Link
-          href="/nueva-certificacion"
-          className="bg-banorte-red hover:bg-[#D00024] transition-colors text-white font-semibold text-[13px] py-2.5 px-5 rounded-btn flex items-center justify-center"
-        >
-          + Nueva Certificacion
+        <Link href="/nueva-certificacion">
+          <Button variant="primary" size="sm">
+            + Nueva Certificacion
+          </Button>
         </Link>
       </div>
 
-      <div className="bg-white rounded-card shadow-card overflow-hidden w-full">
+      <Card noPadding className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
-            <thead>
-              <tr className="bg-banorte-surface">
-                {['Comercio', 'Tipo Integracion', 'Transacciones', 'Fecha', 'Analista', 'Estado'].map((col) => (
-                  <th key={col} className="py-3.5 px-5 text-banorte-secondary font-semibold text-xs">
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="min-w-[1000px]">
+            <TableHeader>
+              <TableRow hoverable={false}>
+                <TableHead className="text-banorte-secondary text-xs">Comercio</TableHead>
+                <TableHead className="text-banorte-secondary text-xs w-[200px]">Tipo Integracion</TableHead>
+                <TableHead className="text-banorte-secondary text-xs w-[120px]">Transacciones</TableHead>
+                <TableHead className="text-banorte-secondary text-xs w-[120px]">Fecha</TableHead>
+                <TableHead className="text-banorte-secondary text-xs w-[140px]">Analista</TableHead>
+                <TableHead className="text-banorte-secondary text-xs w-[130px]">Estado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {mockData.map((row) => (
-                <tr key={row.id} className="border-b border-[#E5E7E8] last:border-b-0 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-5 text-banorte-dark text-[13px]">{row.comercio}</td>
-                  <td className="py-4 px-5 text-banorte-dark text-[13px]">{row.tipoIntegracion}</td>
-                  <td className="py-4 px-5 text-banorte-dark text-[13px]">{row.transacciones}</td>
-                  <td className="py-4 px-5 text-banorte-dark text-[13px]">{row.fecha}</td>
-                  <td className="py-4 px-5 text-banorte-dark text-[13px]">{row.analista}</td>
-                  <td className="py-4 px-5"><StatusBadge status={row.estado} /></td>
-                </tr>
+                <TableRow key={row.id}>
+                  <TableCell className="text-banorte-dark text-[13px]">{row.comercio}</TableCell>
+                  <TableCell className="text-banorte-dark text-[13px]">{row.tipoIntegracion}</TableCell>
+                  <TableCell className="text-banorte-dark text-[13px]">{row.transacciones}</TableCell>
+                  <TableCell className="text-banorte-dark text-[13px]">{row.fecha}</TableCell>
+                  <TableCell className="text-banorte-dark text-[13px]">{row.analista}</TableCell>
+                  <TableCell><StatusBadge status={row.estado} /></TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

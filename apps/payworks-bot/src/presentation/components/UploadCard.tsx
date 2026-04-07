@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { ArrowUp, ArrowRight } from 'lucide-react';
+import { Button, Card } from '@banorte/ui';
 
 const INTEGRATION_OPTIONS = [
   'E-Commerce Tradicional',
@@ -36,7 +37,7 @@ export function UploadCard() {
   };
 
   return (
-    <div className="w-full bg-white rounded-card shadow-card p-[40px] flex flex-col gap-[32px]">
+    <Card className="w-full !p-[40px] flex flex-col gap-[32px]">
       {/* Paso 1: Dropzone */}
       <div className="flex flex-col gap-3">
         <h2 className="font-semibold text-base text-banorte-dark">Paso 1: Subir Matriz de Pruebas</h2>
@@ -111,11 +112,11 @@ export function UploadCard() {
 
       {/* CTA */}
       <div className="flex justify-end mt-4">
-        <button className="flex items-center gap-2 bg-banorte-red hover:bg-[#D00024] transition-colors text-white px-8 py-3.5 rounded-btn">
-          <span className="font-semibold text-[15px]">Iniciar Certificacion</span>
+        <Button variant="primary" size="lg" className="gap-2">
+          Iniciar Certificacion
           <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
