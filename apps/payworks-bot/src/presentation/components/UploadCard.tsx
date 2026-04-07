@@ -171,7 +171,7 @@ export function UploadCard() {
               ${csvFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
             onClick={() => csvInputRef.current?.click()}
           >
-            <input type="file" ref={csvInputRef} className="hidden" accept=".csv,.xlsx" onChange={(e) => e.target.files?.[0] && setCsvFile(e.target.files[0])} />
+            <input type="file" ref={csvInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setCsvFile(e.target.files[0])} />
             <Upload className={`w-5 h-5 ${csvFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
             <div>
               <p className="font-medium text-sm text-banorte-dark">{csvFile ? csvFile.name : 'CSV exportado de Toad/SQLDeveloper'}</p>
@@ -186,7 +186,7 @@ export function UploadCard() {
                 ${servletLogFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
               onClick={() => servletInputRef.current?.click()}
             >
-              <input type="file" ref={servletInputRef} className="hidden" accept=".log,.txt" onChange={(e) => e.target.files?.[0] && setServletLogFile(e.target.files[0])} />
+              <input type="file" ref={servletInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setServletLogFile(e.target.files[0])} />
               <FileText className={`w-5 h-5 ${servletLogFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
               <div>
                 <p className="font-medium text-sm text-banorte-dark">{servletLogFile ? servletLogFile.name : 'LOG Servlet'}</p>
@@ -199,7 +199,7 @@ export function UploadCard() {
                 ${prosaLogFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
               onClick={() => prosaInputRef.current?.click()}
             >
-              <input type="file" ref={prosaInputRef} className="hidden" accept=".log,.txt" onChange={(e) => e.target.files?.[0] && setProsaLogFile(e.target.files[0])} />
+              <input type="file" ref={prosaInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setProsaLogFile(e.target.files[0])} />
               <FileText className={`w-5 h-5 ${prosaLogFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
               <div>
                 <p className="font-medium text-sm text-banorte-dark">{prosaLogFile ? prosaLogFile.name : 'LOG PROSA'}</p>
