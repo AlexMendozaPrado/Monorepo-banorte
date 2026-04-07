@@ -9,6 +9,24 @@ import { Header } from '@/presentation/components/Header';
 import { TransactionResultCard } from '@/presentation/components/TransactionResultCard';
 import { CertificationResponse } from '@/shared/types/api';
 
+const INTEGRATION_NAMES: Record<string, string> = {
+  ECOMMERCE_TRADICIONAL: 'E-Commerce Tradicional',
+  ECOMMERCE_TOKENIZACION: 'E-Commerce Tokenizacion',
+  VENTANA_COMERCIOS: 'Ventana de Comercios',
+  CYBERSOURCE_DIRECTO: 'Cybersource Directo',
+  AGREGADOR_ECOMM: 'Agregador E-Commerce',
+  AGREGADOR_CARGOS_AUTO: 'Agregador Cargos Auto',
+};
+
+const TRANSACTION_NAMES: Record<string, string> = {
+  AUTH: 'VENTA',
+  VOID: 'CANCELACION',
+  REFUND: 'DEVOLUCION',
+  PREAUTH: 'PREAUTORIZACION',
+  POSTAUTH: 'POSTAUTORIZACION',
+  VERIFY: 'VERIFICACION',
+};
+
 export default function ResultadosPage() {
   const params = useParams();
   const id = params.id as string;
@@ -45,30 +63,30 @@ export default function ResultadosPage() {
 
         {/* Summary Card */}
         <Card className="!p-6 mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4">
             <div>
               <div className="text-xs text-banorte-secondary mb-1">Comercio</div>
-              <div className="text-base font-semibold text-banorte-dark">{data.merchantName}</div>
+              <div className="text-sm font-semibold text-banorte-dark">{data.merchantName}</div>
             </div>
             <div>
               <div className="text-xs text-banorte-secondary mb-1">Integracion</div>
-              <div className="text-base font-semibold text-banorte-dark">{data.integrationType}</div>
+              <div className="text-sm font-semibold text-banorte-dark">{INTEGRATION_NAMES[data.integrationType] || data.integrationType}</div>
             </div>
             <div>
               <div className="text-xs text-banorte-secondary mb-1">Transacciones</div>
-              <div className="text-base font-semibold text-banorte-dark">{data.totalTransactions} validadas</div>
+              <div className="text-sm font-semibold text-banorte-dark">{data.totalTransactions} validadas</div>
             </div>
             <div>
               <div className="text-xs text-banorte-secondary mb-1">Aprobadas</div>
-              <div className="text-base font-semibold text-banorte-success">{data.approvedCount} / {data.totalTransactions}</div>
+              <div className="text-sm font-semibold text-banorte-success">{data.approvedCount} / {data.totalTransactions}</div>
             </div>
             <div>
               <div className="text-xs text-banorte-secondary mb-1">Rechazadas</div>
-              <div className="text-base font-semibold text-banorte-error">{data.rejectedCount} / {data.totalTransactions}</div>
+              <div className="text-sm font-semibold text-banorte-error">{data.rejectedCount} / {data.totalTransactions}</div>
             </div>
             <div>
               <div className="text-xs text-banorte-secondary mb-1">Dictamen</div>
-              <div className={`text-base font-bold ${data.verdict === 'APROBADO' ? 'text-banorte-success' : 'text-banorte-error'}`}>
+              <div className={`text-sm font-bold ${data.verdict === 'APROBADO' ? 'text-banorte-success' : 'text-banorte-error'}`}>
                 {data.verdict}
               </div>
             </div>
@@ -85,7 +103,7 @@ export default function ResultadosPage() {
             return (
               <TransactionResultCard
                 key={txn.transactionRef}
-                name={`${txn.transactionType} ${txn.cardBrand}`}
+                name={`${TRANSACTION_NAMES[txn.transactionType] || txn.transactionType} ${txn.cardBrand}`}
                 referencia={txn.transactionRef}
                 verdict={txn.verdict === 'APROBADO' ? 'APROBADO' : 'RECHAZADO'}
                 passedCount={txn.passedCount}
