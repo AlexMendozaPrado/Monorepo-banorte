@@ -1,54 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download } from 'lucide-react';
 import { Button, Card } from '@banorte/ui';
 import { Header } from '@/presentation/components/Header';
 import { TransactionResultCard } from '@/presentation/components/TransactionResultCard';
-
-const mockResults = {
-  merchantName: 'Liverpool SA de CV',
-  integrationType: 'E-Commerce Tradicional',
-  totalTransactions: 10,
-  approved: 9,
-  rejected: 1,
-  verdict: 'RECHAZADO' as const,
-  transactions: [
-    {
-      name: 'VENTA VISA',
-      referencia: '320146914713',
-      verdict: 'APROBADO' as const,
-      passedCount: 11,
-      totalCount: 11,
-      failedFields: [],
-      fieldResults: [
-        { field: 'ID_AFILIACION', rule: 'R', found: true, value: '7049408', verdict: 'PASS' as const },
-        { field: 'USUARIO', rule: 'R', found: true, value: '7049408', verdict: 'PASS' as const },
-        { field: 'CMD_TRANS', rule: 'R', found: true, value: 'AUTH', verdict: 'PASS' as const },
-        { field: 'MONTO', rule: 'R', found: true, value: '98.39', verdict: 'PASS' as const },
-        { field: 'NUMERO_TARJETA', rule: 'R', found: true, value: '510125******2396', verdict: 'PASS' as const },
-        { field: 'MODO_ENTRADA', rule: 'R', found: true, value: 'MANUAL', verdict: 'PASS' as const },
-        { field: 'NUMERO_PAGOS', rule: 'N/A', found: false, value: undefined, verdict: 'PASS' as const },
-      ],
-    },
-    {
-      name: 'CANCELACION VISA',
-      referencia: '320146914800',
-      verdict: 'RECHAZADO' as const,
-      passedCount: 8,
-      totalCount: 9,
-      failedFields: [{ field: 'REFERENCIA', message: 'No encontrado en el LOG Servlet. El comercio no envio este campo obligatorio' }],
-      fieldResults: [
-        { field: 'REFERENCIA', rule: 'R', found: false, value: undefined, verdict: 'FAIL' as const },
-        { field: 'ID_AFILIACION', rule: 'R', found: true, value: '7049408', verdict: 'PASS' as const },
-      ],
-    },
-  ],
-};
+import { CertificationResponse } from '@/shared/types/api';
 
 export default function ResultadosPage() {
-  const r = mockResults;
+  const params = useParams();
+  const id = params.id as string;
+  const [data, setData] = useState<CertificationResponse | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(`certification_${id}`);
+    if (stored) {
+      setData(JSON.parse(stored));
+    }
+  }, [id]);
+
+  if (!data) {
+    return (
+      <div className="flex flex-col min-h-screen bg-banorte-bg">
+        <Header />
+        <main className="flex-1 p-8 max-w-6xl mx-auto w-full">
+          <p className="text-banorte-secondary">Cargando resultados...</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-banorte-bg">
@@ -61,21 +43,58 @@ export default function ResultadosPage() {
           <h1 className="text-[28px] font-bold text-banorte-dark">Resultados de Certificacion</h1>
         </div>
 
+        {/* Summary Card */}
         <Card className="!p-6 mb-8">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            <div><div className="text-xs text-banorte-secondary mb-1">Comercio</div><div className="text-base font-semibold text-banorte-dark">{r.merchantName}</div></div>
-            <div><div className="text-xs text-banorte-secondary mb-1">Integracion</div><div className="text-base font-semibold text-banorte-dark">{r.integrationType}</div></div>
-            <div><div className="text-xs text-banorte-secondary mb-1">Transacciones</div><div className="text-base font-semibold text-banorte-dark">{r.totalTransactions} validadas</div></div>
-            <div><div className="text-xs text-banorte-secondary mb-1">Aprobadas</div><div className="text-base font-semibold text-banorte-success">{r.approved} / {r.totalTransactions}</div></div>
-            <div><div className="text-xs text-banorte-secondary mb-1">Rechazadas</div><div className="text-base font-semibold text-banorte-error">{r.rejected} / {r.totalTransactions}</div></div>
-            <div><div className="text-xs text-banorte-secondary mb-1">Dictamen</div><div className="text-base font-bold text-banorte-error">{r.verdict}</div></div>
+            <div>
+              <div className="text-xs text-banorte-secondary mb-1">Comercio</div>
+              <div className="text-base font-semibold text-banorte-dark">{data.merchantName}</div>
+            </div>
+            <div>
+              <div className="text-xs text-banorte-secondary mb-1">Integracion</div>
+              <div className="text-base font-semibold text-banorte-dark">{data.integrationType}</div>
+            </div>
+            <div>
+              <div className="text-xs text-banorte-secondary mb-1">Transacciones</div>
+              <div className="text-base font-semibold text-banorte-dark">{data.totalTransactions} validadas</div>
+            </div>
+            <div>
+              <div className="text-xs text-banorte-secondary mb-1">Aprobadas</div>
+              <div className="text-base font-semibold text-banorte-success">{data.approvedCount} / {data.totalTransactions}</div>
+            </div>
+            <div>
+              <div className="text-xs text-banorte-secondary mb-1">Rechazadas</div>
+              <div className="text-base font-semibold text-banorte-error">{data.rejectedCount} / {data.totalTransactions}</div>
+            </div>
+            <div>
+              <div className="text-xs text-banorte-secondary mb-1">Dictamen</div>
+              <div className={`text-base font-bold ${data.verdict === 'APROBADO' ? 'text-banorte-success' : 'text-banorte-error'}`}>
+                {data.verdict}
+              </div>
+            </div>
           </div>
         </Card>
 
+        {/* Transaction Result Cards */}
         <div className="space-y-6">
-          {r.transactions.map((txn) => (
-            <TransactionResultCard key={txn.referencia} {...txn} />
-          ))}
+          {data.results.map((txn) => {
+            const failedFields = txn.fieldResults
+              .filter(f => f.verdict === 'FAIL')
+              .map(f => ({ field: f.field, message: 'No encontrado en el LOG Servlet' }));
+
+            return (
+              <TransactionResultCard
+                key={txn.transactionRef}
+                name={`${txn.transactionType} ${txn.cardBrand}`}
+                referencia={txn.transactionRef}
+                verdict={txn.verdict === 'APROBADO' ? 'APROBADO' : 'RECHAZADO'}
+                passedCount={txn.passedCount}
+                totalCount={txn.totalValidated}
+                failedFields={failedFields}
+                fieldResults={txn.fieldResults}
+              />
+            );
+          })}
         </div>
 
         <div className="mt-8 flex justify-end">

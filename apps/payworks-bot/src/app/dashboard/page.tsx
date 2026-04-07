@@ -1,8 +1,42 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Header } from '@/presentation/components/Header';
 import { StatCard } from '@/presentation/components/StatCard';
 import { CertificationsTable } from '@/presentation/components/CertificationsTable';
 
+interface DashboardStats {
+  total: number;
+  aprobadas: number;
+  rechazadas: number;
+  pendientes: number;
+}
+
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    total: 0,
+    aprobadas: 0,
+    rechazadas: 0,
+    pendientes: 0,
+  });
+
+  useEffect(() => {
+    fetch('/api/certificacion/historial')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data) {
+          const sessions = result.data;
+          setStats({
+            total: sessions.length,
+            aprobadas: sessions.filter((s: any) => s.verdict === 'APROBADO').length,
+            rechazadas: sessions.filter((s: any) => s.verdict === 'RECHAZADO').length,
+            pendientes: sessions.filter((s: any) => s.verdict === 'PENDIENTE').length,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen w-full bg-banorte-bg flex flex-col">
       <Header />
@@ -18,10 +52,30 @@ export default function DashboardPage() {
 
         <section className="px-[60px] pb-8">
           <div className="flex flex-wrap gap-5">
-            <StatCard title="Total Certificaciones" value="48" subtitle="Ultimos 30 dias" accentColor="#323E48" />
-            <StatCard title="Aprobadas" value="36" subtitle="75% tasa de aprobacion" accentColor="#6CC04A" />
-            <StatCard title="Rechazadas" value="8" subtitle="16.7% requieren correccion" accentColor="#EB0029" />
-            <StatCard title="Pendientes" value="4" subtitle="En proceso de validacion" accentColor="#FFA400" />
+            <StatCard
+              title="Total Certificaciones"
+              value={stats.total || '--'}
+              subtitle="Sesion actual"
+              accentColor="#323E48"
+            />
+            <StatCard
+              title="Aprobadas"
+              value={stats.aprobadas || '--'}
+              subtitle={stats.total > 0 ? `${Math.round((stats.aprobadas / stats.total) * 100)}% tasa de aprobacion` : 'Sin datos'}
+              accentColor="#6CC04A"
+            />
+            <StatCard
+              title="Rechazadas"
+              value={stats.rechazadas || '--'}
+              subtitle={stats.total > 0 ? `${Math.round((stats.rechazadas / stats.total) * 100)}% requieren correccion` : 'Sin datos'}
+              accentColor="#EB0029"
+            />
+            <StatCard
+              title="Pendientes"
+              value={stats.pendientes || '--'}
+              subtitle="En proceso de validacion"
+              accentColor="#FFA400"
+            />
           </div>
         </section>
 
