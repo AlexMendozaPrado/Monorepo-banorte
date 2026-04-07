@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowUp, ArrowRight, Upload, FileText } from 'lucide-react';
-import { Button, Card } from '@banorte/ui';
+import { Button } from '@banorte/ui';
 
 const INTEGRATION_OPTIONS = [
   { value: 'ECOMMERCE_TRADICIONAL', label: 'E-Commerce Tradicional' },
@@ -87,7 +87,7 @@ export function UploadCard() {
   };
 
   return (
-    <Card className="w-full !p-[40px] flex flex-col gap-[32px]">
+    <div className="w-full bg-white rounded-card shadow-card p-[40px] flex flex-col gap-[32px]">
       {/* Paso 1: Dropzone Matriz */}
       <div className="flex flex-col gap-3">
         <h2 className="font-semibold text-base text-banorte-dark">Paso 1: Subir Matriz de Pruebas</h2>
@@ -224,6 +224,6 @@ export function UploadCard() {
           {!isLoading && <ArrowRight className="w-4 h-4" strokeWidth={2.5} />}
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }
