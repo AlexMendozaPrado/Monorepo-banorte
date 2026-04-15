@@ -8,17 +8,31 @@ import {
 import { FieldRule } from '@/core/domain/value-objects/FieldRequirement';
 
 import ecommerceTradicional from '@/config/mandatory-fields/ecommerce-tradicional.json';
+import moto from '@/config/mandatory-fields/moto.json';
+import cargosPeriodicosPost from '@/config/mandatory-fields/cargos-periodicos-post.json';
+import ventanaComercioElectronico from '@/config/mandatory-fields/ventana-comercio-electronico.json';
+import agregadoresComercioElectronico from '@/config/mandatory-fields/agregadores-comercio-electronico.json';
+import agregadoresCargosPeriodicos from '@/config/mandatory-fields/agregadores-cargos-periodicos.json';
+import apiPw2Seguro from '@/config/mandatory-fields/api-pw2-seguro.json';
+import interredesRemoto from '@/config/mandatory-fields/interredes-remoto.json';
 
 /**
  * Registry of product → matrix. Keys are logName-indexed FieldSpec maps
- * (see `MandatoryFieldsMatrix.ts`).
+ * (see `MandatoryFieldsMatrix.ts`). All 8 official products are registered.
  *
- * NOTE (F3): only ECOMMERCE_TRADICIONAL is registered with the new schema.
- * F4 will add the remaining 7 products and the transversal 3DS / Cybersource
- * / AN5822 layer JSONs and wire them in here.
+ * Transversal layer matrices (3DS, Cybersource, AN5822) live under
+ * `src/config/mandatory-fields/layer-*.json` and are loaded separately
+ * in F8 when the full flow is wired end-to-end.
  */
-const MATRICES: Partial<Record<IntegrationType, MandatoryFieldsMatrix>> = {
+const MATRICES: Record<IntegrationType, MandatoryFieldsMatrix> = {
   [IntegrationType.ECOMMERCE_TRADICIONAL]: ecommerceTradicional as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.MOTO]: moto as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.CARGOS_PERIODICOS_POST]: cargosPeriodicosPost as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.VENTANA_COMERCIO_ELECTRONICO]: ventanaComercioElectronico as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.AGREGADORES_COMERCIO_ELECTRONICO]: agregadoresComercioElectronico as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.AGREGADORES_CARGOS_PERIODICOS]: agregadoresCargosPeriodicos as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.API_PW2_SEGURO]: apiPw2Seguro as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.INTERREDES_REMOTO]: interredesRemoto as unknown as MandatoryFieldsMatrix,
 };
 
 function isMetaKey(key: string): boolean {
