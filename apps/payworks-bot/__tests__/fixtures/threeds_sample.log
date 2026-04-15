@@ -1,0 +1,33 @@
+********************************************************************************
+[11/03/2026 18:02:25] SE RECIBIO SOLICITUD 3DS DESDE LA IP: 99.80.99.245
+FOLIO DE TRANSACCION: [9905419_140426_001]
+Card:                 [41891431******7492]
+Total:                [1500.00]
+CardType:             [VISA]
+MerchantId:           [7004145530]
+MerchantName:         [MUEVE CIUDAD]
+MerchantCity:         [GUADALAJARA]
+Cert3D:               [03]
+ECI:                  [05]
+XID:                  [A1B2C3D4E5F60718293A4B5C6D7E8F9001020304]
+CAVV:                 [112233445566778899AABBCCDDEEFF0011223344]
+Version3D:            [2]
+ForwardPath:          [https://example.bank/callback]
+Reference3D:          [9905419_140426_001]
+Status:               [200]
+********************************************************************************
+[11/03/2026 18:05:11] SE RECIBIO SOLICITUD 3DS DESDE LA IP: 99.80.99.245
+FOLIO DE TRANSACCION: [9905419_140426_002]
+Card:                 [51005100******0000]
+Total:                [500.00]
+CardType:             [MASTERCARD]
+MerchantId:           [7004145530]
+MerchantName:         [MUEVE CIUDAD]
+MerchantCity:         [GUADALAJARA]
+Cert3D:               [03]
+ECI:                  [02]
+CAVV:                 [AABBCCDDEEFF0011223344556677889900112233]
+Version3D:            [2]
+Reference3D:          [9905419_140426_002]
+Status:               [200]
+********************************************************************************
