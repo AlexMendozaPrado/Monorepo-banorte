@@ -2,6 +2,7 @@ import { OperationMode } from '@/core/domain/entities/CertificationSession';
 
 import { ServletLogParserPort } from '@/core/domain/ports/ServletLogParserPort';
 import { ProsaLogParserPort } from '@/core/domain/ports/ProsaLogParserPort';
+import { CybersourceLogParserPort } from '@/core/domain/ports/CybersourceLogParserPort';
 import { MatrixParserPort } from '@/core/domain/ports/MatrixParserPort';
 import { MandatoryFieldsPort } from '@/core/domain/ports/MandatoryFieldsPort';
 import { TransactionRepositoryPort } from '@/core/domain/ports/TransactionRepositoryPort';
@@ -10,6 +11,7 @@ import { CertificationRepositoryPort } from '@/core/domain/ports/CertificationRe
 
 import { PayworksServletLogParser } from '../log-parsers/PayworksServletLogParser';
 import { PayworksProsaLogParser } from '../log-parsers/PayworksProsaLogParser';
+import { CybersourceLogParser } from '../log-parsers/CybersourceLogParser';
 import { ExcelMatrixParser } from '../matrix-parser/ExcelMatrixParser';
 import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig';
 import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
@@ -31,6 +33,7 @@ export class DIContainer {
   // Infraestructura
   private _servletLogParser?: ServletLogParserPort;
   private _prosaLogParser?: ProsaLogParserPort;
+  private _cybersourceLogParser?: CybersourceLogParserPort;
   private _matrixParser?: MatrixParserPort;
   private _mandatoryFields?: MandatoryFieldsPort;
   private _transactionRepo?: InMemoryTransactionRepository;
@@ -74,6 +77,13 @@ export class DIContainer {
       this._prosaLogParser = new PayworksProsaLogParser();
     }
     return this._prosaLogParser;
+  }
+
+  get cybersourceLogParser(): CybersourceLogParserPort {
+    if (!this._cybersourceLogParser) {
+      this._cybersourceLogParser = new CybersourceLogParser();
+    }
+    return this._cybersourceLogParser;
   }
 
   get matrixParser(): MatrixParserPort {
