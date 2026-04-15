@@ -32,9 +32,13 @@ export interface TransactionResultResponse {
 
 export interface FieldResultResponse {
   field: string;
+  manualName?: string;
+  displayName?: string;
   rule: string;
   found: boolean;
   value: string | undefined;
   verdict: 'PASS' | 'FAIL';
   source: string;
+  /** Validation layer: SERVLET | THREEDS | CYBERSOURCE | AGREGADOR | EMV | AN5822 */
+  layer?: string;
 }

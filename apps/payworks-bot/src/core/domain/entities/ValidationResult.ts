@@ -2,6 +2,7 @@ import { TransactionType } from '../value-objects/TransactionType';
 import { CardBrand } from '../value-objects/CardBrand';
 import { ValidationVerdict } from '../value-objects/ValidationVerdict';
 import { FieldRule } from '../value-objects/FieldRequirement';
+import { ValidationLayer } from '../value-objects/ValidationLayer';
 
 export interface FieldValidationResult {
   /** Name used when reading the log (keyed by `logName` in the new matrix). */
@@ -14,7 +15,12 @@ export interface FieldValidationResult {
   found: boolean;
   value: string | undefined;
   verdict: 'PASS' | 'FAIL';
-  source: 'SERVLET' | 'PROSA' | 'BD';
+  source: 'SERVLET' | 'PROSA' | 'BD' | 'THREEDS' | 'CYBERSOURCE';
+  /**
+   * Validation layer this field belongs to. Used by the UI to group
+   * per-layer results (Servlet / 3DS / Cybersource / Agregador / EMV / AN5822).
+   */
+  layer?: ValidationLayer;
 }
 
 export interface ValidationResult {

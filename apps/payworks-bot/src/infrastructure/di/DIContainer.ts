@@ -15,6 +15,9 @@ import { PayworksServletLogParser } from '../log-parsers/PayworksServletLogParse
 import { PayworksProsaLogParser } from '../log-parsers/PayworksProsaLogParser';
 import { CybersourceLogParser } from '../log-parsers/CybersourceLogParser';
 import { ThreeDSLogParser } from '../log-parsers/ThreeDSLogParser';
+import { MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
+import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
+import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
 import { ExcelMatrixParser } from '../matrix-parser/ExcelMatrixParser';
 import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig';
 import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
@@ -162,6 +165,11 @@ export class DIContainer {
         this.prosaLogParser,
         this.validateFieldsUseCase,
         this.certificationRepository,
+        this.threeDSLogParser,
+        this.cybersourceLogParser,
+        this.afiliacionRepository,
+        layer3ds as unknown as MandatoryFieldsMatrix,
+        layerCybersource as unknown as MandatoryFieldsMatrix,
       );
     }
     return this._runCertificationUseCase;
