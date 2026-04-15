@@ -5,6 +5,9 @@ export enum TransactionType {
   PREAUTH = 'PREAUTH',
   POSTAUTH = 'POSTAUTH',
   VERIFY = 'VERIFY',
+  REVERSAL = 'REVERSAL',
+  CASHBACK = 'CASHBACK',
+  REAUTH = 'REAUTH',
 }
 
 export interface ProsaMessagePair {
@@ -35,6 +38,9 @@ export class TransactionTypeValueObject {
       [TransactionType.PREAUTH]: 'Preautorizacion',
       [TransactionType.POSTAUTH]: 'Postautorizacion',
       [TransactionType.VERIFY]: 'Verificacion',
+      [TransactionType.REVERSAL]: 'Reversa',
+      [TransactionType.CASHBACK]: 'Cashback',
+      [TransactionType.REAUTH]: 'Reautorizacion',
     };
     return names[this.value];
   }
@@ -47,6 +53,9 @@ export class TransactionTypeValueObject {
       [TransactionType.PREAUTH]: 'PRE',
       [TransactionType.POSTAUTH]: 'POS',
       [TransactionType.VERIFY]: 'VER',
+      [TransactionType.REVERSAL]: 'REV',
+      [TransactionType.CASHBACK]: 'CSH',
+      [TransactionType.REAUTH]: 'REA',
     };
     return cmds[this.value];
   }
@@ -55,30 +64,50 @@ export class TransactionTypeValueObject {
     switch (this.value) {
       case TransactionType.AUTH:
       case TransactionType.PREAUTH:
+      case TransactionType.VERIFY:
+      case TransactionType.REAUTH:
+      case TransactionType.CASHBACK:
         return { request: '0200', response: '0210' };
       case TransactionType.POSTAUTH:
       case TransactionType.VOID:
       case TransactionType.REFUND:
+      case TransactionType.REVERSAL:
         return { request: '0220', response: '0230' };
-      case TransactionType.VERIFY:
-        return { request: '0200', response: '0210' };
     }
+  }
+
+  isTarjetaPresenteOnly(): boolean {
+    return this.value === TransactionType.CASHBACK || this.value === TransactionType.REAUTH;
   }
 
   static fromCmdTrans(cmd: string): TransactionTypeValueObject {
     const map: Record<string, TransactionType> = {
       VTA: TransactionType.AUTH,
+      VENTA: TransactionType.AUTH,
       AUTH: TransactionType.AUTH,
       CAN: TransactionType.VOID,
+      CANCELACION: TransactionType.VOID,
       VOID: TransactionType.VOID,
       DEV: TransactionType.REFUND,
+      DEVOLUCION: TransactionType.REFUND,
       REFUND: TransactionType.REFUND,
       PRE: TransactionType.PREAUTH,
+      PREAUTORIZACION: TransactionType.PREAUTH,
       PREAUTH: TransactionType.PREAUTH,
       POS: TransactionType.POSTAUTH,
+      POSTAUTORIZACION: TransactionType.POSTAUTH,
       POSTAUTH: TransactionType.POSTAUTH,
       VER: TransactionType.VERIFY,
+      VERIFICACION: TransactionType.VERIFY,
       VERIFY: TransactionType.VERIFY,
+      REV: TransactionType.REVERSAL,
+      REVERSA: TransactionType.REVERSAL,
+      REVERSAL: TransactionType.REVERSAL,
+      CSH: TransactionType.CASHBACK,
+      CASHBACK: TransactionType.CASHBACK,
+      REA: TransactionType.REAUTH,
+      REAUTORIZACION: TransactionType.REAUTH,
+      REAUTH: TransactionType.REAUTH,
     };
     const type = map[cmd.toUpperCase()];
     if (!type) throw new Error(`CMD_TRANS desconocido: ${cmd}`);
