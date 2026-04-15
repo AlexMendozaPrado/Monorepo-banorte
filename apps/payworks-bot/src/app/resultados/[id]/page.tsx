@@ -220,6 +220,16 @@ export default function ResultadosPage() {
           <Button variant="secondary" size="lg" className="gap-2" onClick={() => generateCertificationPDF(data)}>
             <Download className="w-4 h-4" /> Descargar Dictamen PDF
           </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            className="gap-2"
+            onClick={() => {
+              window.open(`/api/certificacion/carta/${data.id}`, '_blank');
+            }}
+          >
+            <FileText className="w-4 h-4" /> Descargar Carta Oficial
+          </Button>
         </div>
       </main>
     </div>
