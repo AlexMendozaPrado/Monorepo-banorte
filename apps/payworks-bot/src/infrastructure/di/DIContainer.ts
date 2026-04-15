@@ -9,6 +9,7 @@ import { MandatoryFieldsPort } from '@/core/domain/ports/MandatoryFieldsPort';
 import { TransactionRepositoryPort } from '@/core/domain/ports/TransactionRepositoryPort';
 import { LogRetrievalPort } from '@/core/domain/ports/LogRetrievalPort';
 import { CertificationRepositoryPort } from '@/core/domain/ports/CertificationRepositoryPort';
+import { AfiliacionRepositoryPort } from '@/core/domain/ports/AfiliacionRepositoryPort';
 
 import { PayworksServletLogParser } from '../log-parsers/PayworksServletLogParser';
 import { PayworksProsaLogParser } from '../log-parsers/PayworksProsaLogParser';
@@ -19,6 +20,7 @@ import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig'
 import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
 import { InMemoryCertificationRepository } from '../repositories/InMemoryCertificationRepository';
 import { FileUploadLogRetrieval } from '../log-retrieval/FileUploadLogRetrieval';
+import { InMemoryAfiliacionRepository } from '../repositories/InMemoryAfiliacionRepository';
 
 import { ValidateTransactionFieldsUseCase } from '@/core/application/use-cases/ValidateTransactionFieldsUseCase';
 import { RunCertificationUseCase } from '@/core/application/use-cases/RunCertificationUseCase';
@@ -37,6 +39,7 @@ export class DIContainer {
   private _prosaLogParser?: ProsaLogParserPort;
   private _cybersourceLogParser?: CybersourceLogParserPort;
   private _threeDSLogParser?: ThreeDSLogParserPort;
+  private _afiliacionRepo?: AfiliacionRepositoryPort;
   private _matrixParser?: MatrixParserPort;
   private _mandatoryFields?: MandatoryFieldsPort;
   private _transactionRepo?: InMemoryTransactionRepository;
@@ -94,6 +97,13 @@ export class DIContainer {
       this._threeDSLogParser = new ThreeDSLogParser();
     }
     return this._threeDSLogParser;
+  }
+
+  get afiliacionRepository(): AfiliacionRepositoryPort {
+    if (!this._afiliacionRepo) {
+      this._afiliacionRepo = new InMemoryAfiliacionRepository();
+    }
+    return this._afiliacionRepo;
   }
 
   get matrixParser(): MatrixParserPort {

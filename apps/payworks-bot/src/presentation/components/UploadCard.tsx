@@ -28,12 +28,14 @@ export function UploadCard() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [servletLogFile, setServletLogFile] = useState<File | null>(null);
   const [prosaLogFile, setProsaLogFile] = useState<File | null>(null);
+  const [afiliacionesFile, setAfiliacionesFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const matrizInputRef = useRef<HTMLInputElement>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const servletInputRef = useRef<HTMLInputElement>(null);
   const prosaInputRef = useRef<HTMLInputElement>(null);
+  const afiliacionesInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); };
@@ -64,6 +66,7 @@ export function UploadCard() {
         if (servletLogFile) formData.append('servletLog', servletLogFile);
         if (prosaLogFile) formData.append('prosaLog', prosaLogFile);
       }
+      if (afiliacionesFile) formData.append('afiliaciones', afiliacionesFile);
 
       const res = await fetch('/api/certificacion/validar', {
         method: 'POST',
@@ -209,6 +212,35 @@ export function UploadCard() {
           </div>
         </div>
       )}
+
+      {/* Paso 5: Afiliaciones (CSV/TXT) — opcional */}
+      <div className="flex flex-col gap-3">
+        <h2 className="font-semibold text-base text-banorte-dark">
+          Paso {selectedMode === 'semi' ? '5' : '4'}: Datos de Afiliaciones (opcional)
+        </h2>
+        <div
+          className={`w-full rounded-card border-2 border-dashed cursor-pointer flex items-center gap-4 px-6 py-4
+            ${afiliacionesFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
+          onClick={() => afiliacionesInputRef.current?.click()}
+        >
+          <input
+            type="file"
+            ref={afiliacionesInputRef}
+            className="hidden"
+            accept=".csv,.txt"
+            onChange={(e) => e.target.files?.[0] && setAfiliacionesFile(e.target.files[0])}
+          />
+          <Upload className={`w-5 h-5 ${afiliacionesFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
+          <div>
+            <p className="font-medium text-sm text-banorte-dark">
+              {afiliacionesFile ? afiliacionesFile.name : 'Export de NPAYW.AFILIACIONES (.csv o .txt)'}
+            </p>
+            <p className="text-xs text-banorte-secondary">
+              Resultado del query SELECT * FROM NPAYW.AFILIACIONES. Se usa para rellenar la carta oficial.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Error */}
       {error && (
