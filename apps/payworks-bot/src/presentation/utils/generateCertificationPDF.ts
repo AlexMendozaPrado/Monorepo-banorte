@@ -2,12 +2,14 @@ import jsPDF from 'jspdf';
 import { CertificationResponse } from '@/shared/types/api';
 
 const INTEGRATION_NAMES: Record<string, string> = {
-  ECOMMERCE_TRADICIONAL: 'E-Commerce Tradicional',
-  ECOMMERCE_TOKENIZACION: 'E-Commerce Tokenizacion',
-  VENTANA_COMERCIOS: 'Ventana de Comercios',
-  CYBERSOURCE_DIRECTO: 'Cybersource Directo',
-  AGREGADOR_ECOMM: 'Agregador E-Commerce',
-  AGREGADOR_CARGOS_AUTO: 'Agregador Cargos Auto',
+  ECOMMERCE_TRADICIONAL: 'Comercio Electrónico Tradicional',
+  MOTO: 'MOTO (Mail/Telephone Order)',
+  CARGOS_PERIODICOS_POST: 'Cargos Periódicos Post',
+  VENTANA_COMERCIO_ELECTRONICO: 'Ventana de Comercio Electrónico',
+  AGREGADORES_COMERCIO_ELECTRONICO: 'Agregadores — Comercio Electrónico',
+  AGREGADORES_CARGOS_PERIODICOS: 'Agregadores — Cargos Periódicos',
+  API_PW2_SEGURO: 'API PW2 Seguro (TP)',
+  INTERREDES_REMOTO: 'Interredes Remoto (TP)',
 };
 
 const TRANSACTION_NAMES: Record<string, string> = {
@@ -17,6 +19,9 @@ const TRANSACTION_NAMES: Record<string, string> = {
   PREAUTH: 'PREAUTORIZACION',
   POSTAUTH: 'POSTAUTORIZACION',
   VERIFY: 'VERIFICACION',
+  REVERSAL: 'REVERSA',
+  CASHBACK: 'CASHBACK',
+  REAUTH: 'REAUTORIZACION',
 };
 
 export function generateCertificationPDF(data: CertificationResponse): void {

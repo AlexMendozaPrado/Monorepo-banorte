@@ -11,12 +11,14 @@ import { CertificationResponse } from '@/shared/types/api';
 import { generateCertificationPDF } from '@/presentation/utils/generateCertificationPDF';
 
 const INTEGRATION_NAMES: Record<string, string> = {
-  ECOMMERCE_TRADICIONAL: 'Servlet - E-Commerce Tradicional',
-  ECOMMERCE_TOKENIZACION: '3D Secure + Servlet',
-  VENTANA_COMERCIOS: 'Servlet - Ventana de Comercios',
-  CYBERSOURCE_DIRECTO: 'Cybersource Direct',
-  AGREGADOR_ECOMM: 'Esquema 1 Tasa Natural',
-  AGREGADOR_CARGOS_AUTO: 'Esquema 4 Sin AGP',
+  ECOMMERCE_TRADICIONAL: 'Comercio Electrónico Tradicional',
+  MOTO: 'MOTO (Mail/Telephone Order)',
+  CARGOS_PERIODICOS_POST: 'Cargos Periódicos Post',
+  VENTANA_COMERCIO_ELECTRONICO: 'Ventana de Comercio Electrónico',
+  AGREGADORES_COMERCIO_ELECTRONICO: 'Agregadores — Comercio Electrónico',
+  AGREGADORES_CARGOS_PERIODICOS: 'Agregadores — Cargos Periódicos',
+  API_PW2_SEGURO: 'API PW2 Seguro (TP)',
+  INTERREDES_REMOTO: 'Interredes Remoto (TP)',
 };
 
 const TRANSACTION_NAMES: Record<string, string> = {
@@ -26,6 +28,9 @@ const TRANSACTION_NAMES: Record<string, string> = {
   PREAUTH: 'PREAUTORIZACION',
   POSTAUTH: 'POSTAUTORIZACION',
   VERIFY: 'VERIFICACION',
+  REVERSAL: 'REVERSA',
+  CASHBACK: 'CASHBACK',
+  REAUTH: 'REAUTORIZACION',
 };
 
 function groupByType(results: CertificationResponse['results']) {
