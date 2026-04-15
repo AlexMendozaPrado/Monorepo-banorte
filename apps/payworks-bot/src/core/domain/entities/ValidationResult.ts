@@ -4,7 +4,12 @@ import { ValidationVerdict } from '../value-objects/ValidationVerdict';
 import { FieldRule } from '../value-objects/FieldRequirement';
 
 export interface FieldValidationResult {
+  /** Name used when reading the log (keyed by `logName` in the new matrix). */
   field: string;
+  /** Original Spanish name as it appears in the official manual (e.g. `ID_AFILIACION`). */
+  manualName?: string;
+  /** Human-readable label for the UI (e.g. `ID Afiliación`). */
+  displayName?: string;
   rule: FieldRule;
   found: boolean;
   value: string | undefined;
