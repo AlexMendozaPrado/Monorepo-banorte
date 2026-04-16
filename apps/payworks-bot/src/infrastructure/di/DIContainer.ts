@@ -33,8 +33,9 @@ export interface DIContainerConfig {
   operationMode: OperationMode;
 }
 
+type GlobalWithDI = typeof globalThis & { __banortePayworksDI?: DIContainer };
+
 export class DIContainer {
-  private static instance: DIContainer;
   private config: DIContainerConfig;
 
   // Infraestructura
@@ -59,17 +60,19 @@ export class DIContainer {
   }
 
   static getInstance(config?: DIContainerConfig): DIContainer {
-    if (!DIContainer.instance) {
+    const g = globalThis as GlobalWithDI;
+    if (!g.__banortePayworksDI) {
       if (!config) {
         throw new Error('DIContainer requiere configuracion en la primera inicializacion');
       }
-      DIContainer.instance = new DIContainer(config);
+      g.__banortePayworksDI = new DIContainer(config);
     }
-    return DIContainer.instance;
+    return g.__banortePayworksDI;
   }
 
   static reset(): void {
-    DIContainer.instance = undefined as any;
+    const g = globalThis as GlobalWithDI;
+    g.__banortePayworksDI = undefined;
   }
 
   // --- Getters de Infraestructura ---

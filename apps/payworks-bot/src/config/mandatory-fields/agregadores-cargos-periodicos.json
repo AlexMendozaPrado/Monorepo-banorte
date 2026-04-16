@@ -45,16 +45,16 @@
       "displayName": "Clave de Usuario",
       "dataType": "alphanum",
       "ambiguous": true,
-      "note": "Masked in logs; mapping pending log confirmation.",
+      "note": "Masked in logs; mapping pending log confirmation. [PCI-DSS: no se logea, se valida solo al envío del comercio, no contra log]",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
+        "AUTH_VISA": "N/A",
+        "AUTH_MC": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       }
     },
     "TERMINAL_ID": {
@@ -188,17 +188,18 @@
       "dataType": "MMYY",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
         "VOID_VISA": "O",
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
       },
       "format": "^d{4}$",
-      "maxLength": 4
+      "maxLength": 4,
+      "note": "En logs de agregadores no aparece (masked por PCI). Validado en envío del comercio, no en log."
     },
     "SECURITY_CODE": {
       "manualName": "CODIGO_SEGURIDAD",
@@ -206,17 +207,18 @@
       "dataType": "numeric(3-4)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "N/A",
+        "AUTH_MC": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       },
       "format": "^d{3,4}$",
-      "maxLength": 4
+      "maxLength": 4,
+      "note": " [PCI-DSS: no se logea, se valida solo al envío del comercio, no contra log]"
     },
     "ENTRY_MODE": {
       "manualName": "MODO_ENTRADA",

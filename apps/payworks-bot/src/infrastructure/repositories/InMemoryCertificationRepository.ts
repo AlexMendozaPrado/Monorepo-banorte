@@ -1,8 +1,28 @@
 import { CertificationRepositoryPort } from '@/core/domain/ports/CertificationRepositoryPort';
 import { CertificationSession } from '@/core/domain/entities/CertificationSession';
 
+/**
+ * In-memory repository. Uses `globalThis` to persist the store across
+ * Next.js hot-reloads in dev mode. Without this, each module reload
+ * produces a new empty Map and sessions saved by POST /validar are not
+ * findable from GET /carta/[id].
+ */
+type GlobalWithStore = typeof globalThis & {
+  __banortePayworksCertificationStore?: Map<string, CertificationSession>;
+};
+
+function getGlobalStore(): Map<string, CertificationSession> {
+  const g = globalThis as GlobalWithStore;
+  if (!g.__banortePayworksCertificationStore) {
+    g.__banortePayworksCertificationStore = new Map();
+  }
+  return g.__banortePayworksCertificationStore;
+}
+
 export class InMemoryCertificationRepository implements CertificationRepositoryPort {
-  private store = new Map<string, CertificationSession>();
+  private get store(): Map<string, CertificationSession> {
+    return getGlobalStore();
+  }
 
   async save(session: CertificationSession): Promise<CertificationSession> {
     this.store.set(session.id, session);
