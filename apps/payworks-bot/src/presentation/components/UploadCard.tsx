@@ -5,13 +5,28 @@ import { useRouter } from 'next/navigation';
 import { ArrowUp, ArrowRight, Upload, FileText } from 'lucide-react';
 import { Button } from '@banorte/ui';
 
-const INTEGRATION_OPTIONS = [
-  { value: 'ECOMMERCE_TRADICIONAL', label: 'Servlet - E-Commerce Tradicional' },
-  { value: 'ECOMMERCE_TOKENIZACION', label: '3D Secure + Servlet' },
-  { value: 'VENTANA_COMERCIOS', label: 'Servlet - Ventana de Comercios' },
-  { value: 'CYBERSOURCE_DIRECTO', label: 'Cybersource Direct' },
-  { value: 'AGREGADOR_ECOMM', label: 'Esquema 1 Tasa Natural' },
-  { value: 'AGREGADOR_CARGOS_AUTO', label: 'Esquema 4 Sin AGP' },
+interface IntegrationOption {
+  value: string;
+  label: string;
+  version: string;
+  isTP?: boolean;
+  supports3DS?: boolean;
+  supportsCybersource?: boolean;
+}
+
+/**
+ * 8 productos oficiales alineados con `IntegrationType.ts`. Los badges
+ * determinan los drag-drops condicionales que se muestran debajo.
+ */
+const INTEGRATION_OPTIONS: IntegrationOption[] = [
+  { value: 'ECOMMERCE_TRADICIONAL', label: 'Comercio Electrónico Tradicional', version: 'v2.5', supports3DS: true, supportsCybersource: true },
+  { value: 'MOTO', label: 'MOTO (Mail/Telephone Order)', version: 'v1.5' },
+  { value: 'CARGOS_PERIODICOS_POST', label: 'Cargos Periódicos Post', version: 'v2.1' },
+  { value: 'VENTANA_COMERCIO_ELECTRONICO', label: 'Ventana de Comercio Electrónico (Cifrada)', version: 'v1.8', supports3DS: true, supportsCybersource: true },
+  { value: 'AGREGADORES_COMERCIO_ELECTRONICO', label: 'Agregadores — Comercio Electrónico', version: 'v2.6.4', supports3DS: true },
+  { value: 'AGREGADORES_CARGOS_PERIODICOS', label: 'Agregadores — Cargos Periódicos', version: 'v2.6.4' },
+  { value: 'API_PW2_SEGURO', label: 'API PW2 Seguro', version: 'v2.4', isTP: true },
+  { value: 'INTERREDES_REMOTO', label: 'Interredes Remoto', version: 'v1.7', isTP: true },
 ];
 
 const OPERATION_MODES = [
@@ -28,12 +43,20 @@ export function UploadCard() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [servletLogFile, setServletLogFile] = useState<File | null>(null);
   const [prosaLogFile, setProsaLogFile] = useState<File | null>(null);
+  const [afiliacionesFile, setAfiliacionesFile] = useState<File | null>(null);
+  const [threeDSLogFile, setThreeDSLogFile] = useState<File | null>(null);
+  const [cybersourceLogFile, setCybersourceLogFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const matrizInputRef = useRef<HTMLInputElement>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const servletInputRef = useRef<HTMLInputElement>(null);
   const prosaInputRef = useRef<HTMLInputElement>(null);
+  const afiliacionesInputRef = useRef<HTMLInputElement>(null);
+  const threeDSInputRef = useRef<HTMLInputElement>(null);
+  const cybersourceInputRef = useRef<HTMLInputElement>(null);
+
+  const currentIntegration = INTEGRATION_OPTIONS.find(o => o.value === selectedIntegration);
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); };
@@ -64,6 +87,9 @@ export function UploadCard() {
         if (servletLogFile) formData.append('servletLog', servletLogFile);
         if (prosaLogFile) formData.append('prosaLog', prosaLogFile);
       }
+      if (afiliacionesFile) formData.append('afiliaciones', afiliacionesFile);
+      if (threeDSLogFile) formData.append('threeDSLog', threeDSLogFile);
+      if (cybersourceLogFile) formData.append('cybersourceLog', cybersourceLogFile);
 
       const res = await fetch('/api/certificacion/validar', {
         method: 'POST',
@@ -114,7 +140,7 @@ export function UploadCard() {
 
       {/* Paso 2: Tipo de Integracion */}
       <div className="flex flex-col gap-3">
-        <h2 className="font-semibold text-base text-banorte-dark">Paso 2: Tipo de Integracion del Comercio</h2>
+        <h2 className="font-semibold text-base text-banorte-dark">Paso 2: Tipo de Integración del Comercio</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-5">
           {INTEGRATION_OPTIONS.map((option) => {
             const isSelected = selectedIntegration === option.value;
@@ -128,9 +154,23 @@ export function UploadCard() {
                 <div className={`w-[18px] h-[18px] rounded-full border-2 shrink-0
                   ${isSelected ? 'border-banorte-red bg-banorte-red' : 'border-[#D1D5D9]'}`}
                 />
-                <span className={`text-[13px] text-banorte-dark ${isSelected ? 'font-semibold' : ''}`}>
-                  {option.label}
-                </span>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-[13px] text-banorte-dark ${isSelected ? 'font-semibold' : ''}`}>
+                      {option.label}
+                    </span>
+                    {option.isTP && (
+                      <span className="text-[10px] font-bold text-white bg-banorte-dark rounded-full px-2 py-0.5">
+                        TP
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-banorte-secondary">
+                    {option.version}
+                    {option.supports3DS && ' · 3DS'}
+                    {option.supportsCybersource && ' · Cybersource'}
+                  </span>
+                </div>
               </div>
             );
           })}
@@ -209,6 +249,88 @@ export function UploadCard() {
           </div>
         </div>
       )}
+
+      {/* Paso 4b: Logs de capas transversales — condicional al producto */}
+      {selectedMode === 'semi' && (currentIntegration?.supports3DS || currentIntegration?.supportsCybersource) && (
+        <div className="flex flex-col gap-3">
+          <h2 className="font-semibold text-base text-banorte-dark">Logs de capas transversales (opcional)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {currentIntegration?.supports3DS && (
+              <div
+                className={`rounded-card border-2 border-dashed cursor-pointer flex items-center gap-4 px-6 py-4
+                  ${threeDSLogFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
+                onClick={() => threeDSInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={threeDSInputRef}
+                  className="hidden"
+                  accept="*"
+                  onChange={(e) => e.target.files?.[0] && setThreeDSLogFile(e.target.files[0])}
+                />
+                <FileText className={`w-5 h-5 ${threeDSLogFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
+                <div>
+                  <p className="font-medium text-sm text-banorte-dark">
+                    {threeDSLogFile ? threeDSLogFile.name : 'LOG 3D Secure'}
+                  </p>
+                  <p className="text-xs text-banorte-secondary">Log del servicio 3DS (indexado por FOLIO DE TRANSACCION)</p>
+                </div>
+              </div>
+            )}
+            {currentIntegration?.supportsCybersource && (
+              <div
+                className={`rounded-card border-2 border-dashed cursor-pointer flex items-center gap-4 px-6 py-4
+                  ${cybersourceLogFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
+                onClick={() => cybersourceInputRef.current?.click()}
+              >
+                <input
+                  type="file"
+                  ref={cybersourceInputRef}
+                  className="hidden"
+                  accept="*"
+                  onChange={(e) => e.target.files?.[0] && setCybersourceLogFile(e.target.files[0])}
+                />
+                <FileText className={`w-5 h-5 ${cybersourceLogFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
+                <div>
+                  <p className="font-medium text-sm text-banorte-dark">
+                    {cybersourceLogFile ? cybersourceLogFile.name : 'LOG Cybersource'}
+                  </p>
+                  <p className="text-xs text-banorte-secondary">Log Cybersource Direct (indexado por OrderId)</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Paso 5: Afiliaciones (CSV/TXT) — opcional */}
+      <div className="flex flex-col gap-3">
+        <h2 className="font-semibold text-base text-banorte-dark">
+          Paso {selectedMode === 'semi' ? '5' : '4'}: Datos de Afiliaciones (opcional)
+        </h2>
+        <div
+          className={`w-full rounded-card border-2 border-dashed cursor-pointer flex items-center gap-4 px-6 py-4
+            ${afiliacionesFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
+          onClick={() => afiliacionesInputRef.current?.click()}
+        >
+          <input
+            type="file"
+            ref={afiliacionesInputRef}
+            className="hidden"
+            accept=".csv,.txt"
+            onChange={(e) => e.target.files?.[0] && setAfiliacionesFile(e.target.files[0])}
+          />
+          <Upload className={`w-5 h-5 ${afiliacionesFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
+          <div>
+            <p className="font-medium text-sm text-banorte-dark">
+              {afiliacionesFile ? afiliacionesFile.name : 'Export de NPAYW.AFILIACIONES (.csv o .txt)'}
+            </p>
+            <p className="text-xs text-banorte-secondary">
+              Resultado del query SELECT * FROM NPAYW.AFILIACIONES. Se usa para rellenar la carta oficial.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Error */}
       {error && (

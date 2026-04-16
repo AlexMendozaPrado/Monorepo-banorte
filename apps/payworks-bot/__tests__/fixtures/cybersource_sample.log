@@ -1,0 +1,50 @@
+[2026-03-11 18:02:25] [INFO] ==== VARIABLES EN ENVÍO ====
+[INFO] MerchantID: liverpool_mx
+[INFO] Name: payworks2_user
+[INFO] Password: ********
+[INFO] MerchantNumber: 7004145530
+[INFO] TerminalId: 12345678
+[INFO] OrderId: ORD-9885405-001
+[INFO] Mode: PRD
+[INFO] DeviceFingerprintID: dfp_abcdef1234567890
+[INFO] BillTo_firstName: Juan
+[INFO] BillTo_lastName: Pérez
+[INFO] BillTo_street: Av Reforma
+[INFO] BillTo_streetNumber: 123
+[INFO] BillTo_street2Col: Juárez
+[INFO] BillTo_street2Del: Cuauhtémoc
+[INFO] BillTo_city: Ciudad de México
+[INFO] BillTo_state: CDMX
+[INFO] BillTo_country: MX
+[INFO] BillTo_postalCode: 06600
+[INFO] BillTo_phoneNumber: 5555123456
+[INFO] BillTo_email: juan.perez@example.com
+[INFO] Card_accountNumber: 4111111111111111
+[INFO] Card_cardType: 001
+[INFO] Card_expirationMonth: 12
+[INFO] Card_expirationYear: 2027
+[INFO] PurchaseTotals_currency: MXN
+[INFO] PurchaseTotals_grandTotalAmount: 1500.00
+[INFO] Comments: 3DS2 certification
+[INFO] Review: false
+[2026-03-11 18:02:27] [INFO] ==== VARIABLES DE RETORNO ====
+[INFO] decision: ACCEPT
+[INFO] requestID: 678901234567890
+[INFO] reasonCode: 100
+[INFO] OrderId: ORD-9885405-001
+[INFO] afsReply_afsResult: 10
+[INFO] Bnte_code: 00
+[2026-03-11 18:05:11] [INFO] ==== VARIABLES EN ENVÍO ====
+[INFO] MerchantID: liverpool_mx
+[INFO] OrderId: ORD-9885405-002
+[INFO] BillTo_firstName: María
+[INFO] BillTo_lastName: García
+[INFO] BillTo_city: Guadalajara
+[INFO] Card_accountNumber: 5100000000000000
+[INFO] Card_cardType: 002
+[INFO] PurchaseTotals_grandTotalAmount: 500.00
+[2026-03-11 18:05:12] [INFO] ==== VARIABLES DE RETORNO ====
+[INFO] decision: REJECT
+[INFO] reasonCode: 202
+[INFO] OrderId: ORD-9885405-002
+[INFO] Bnte_code: 05

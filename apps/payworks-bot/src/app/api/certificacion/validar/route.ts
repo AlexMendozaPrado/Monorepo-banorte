@@ -26,10 +26,12 @@ export async function POST(
 
     const integrationType = integrationTypeStr as IntegrationType;
 
-    // Para modo semi-auto, cargar CSV y LOGs si fueron enviados
-    const csvFile = formData.get('csvBD') as File;
-    const servletLogFile = formData.get('servletLog') as File;
-    const prosaLogFile = formData.get('prosaLog') as File;
+    const csvFile = formData.get('csvBD') as File | null;
+    const servletLogFile = formData.get('servletLog') as File | null;
+    const prosaLogFile = formData.get('prosaLog') as File | null;
+    const threeDSLogFile = formData.get('threeDSLog') as File | null;
+    const cybersourceLogFile = formData.get('cybersourceLog') as File | null;
+    const afiliacionesFile = formData.get('afiliaciones') as File | null;
 
     if (operationMode === 'semi') {
       if (csvFile) {
@@ -44,6 +46,20 @@ export async function POST(
         const content = await prosaLogFile.text();
         container.logRetrieval.setProsaLog(content);
       }
+      if (threeDSLogFile) {
+        const content = await threeDSLogFile.text();
+        container.logRetrieval.setThreeDSLog(content);
+      }
+      if (cybersourceLogFile) {
+        const content = await cybersourceLogFile.text();
+        container.logRetrieval.setCybersourceLog(content);
+      }
+    }
+
+    // Affiliations file is independent of operation mode — always loaded if provided.
+    if (afiliacionesFile) {
+      const buf = Buffer.from(await afiliacionesFile.arrayBuffer());
+      container.afiliacionRepository.loadFromFile(buf, afiliacionesFile.name);
     }
 
     const matrixBuffer = Buffer.from(await matrizFile.arrayBuffer());
@@ -75,11 +91,14 @@ export async function POST(
         totalValidated: 'getTotalValidated' in r ? (r as any).getTotalValidated() : 0,
         fieldResults: r.fieldResults.map((f) => ({
           field: f.field,
+          manualName: f.manualName,
+          displayName: f.displayName,
           rule: f.rule,
           found: f.found,
           value: f.value,
           verdict: f.verdict,
           source: f.source,
+          layer: f.layer,
         })),
       })),
       createdAt: session.createdAt.toISOString(),

@@ -1,0 +1,201 @@
+{
+  "_meta": {
+    "note": "F4 — Interredes Remoto manual v1.7 (Tarjeta Presente). SDK-based API (PPSet*/PPGet*) pero los logs que emite el dispositivo usan field names en formato servlet. Minimal: CMD_TRANS, MODE, CONTROL_NUMBER, AMOUNT, REFERENCE, LOTE + EMV fields. 9 transactions."
+  },
+  "integrationType": "INTERREDES_REMOTO",
+  "manualVersion": "1.7",
+  "manualDate": "2025-07-01",
+  "displayName": "Interredes Remoto (PinPad WiFi/LAN)",
+  "servlet": {
+    "CMD_TRANS": {
+      "manualName": "CMD_TRANS",
+      "displayName": "Comando Transacción (PPSetCommand)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Emitido por PPSetCommand(); valores: VENTA, CASHBACK, PREAUTORIZACION, REAUTORIZACION, POSTAUTORIZACION, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      }
+    },
+    "MODE": {
+      "manualName": "MODO",
+      "displayName": "Modo (PPSetMode)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Valores: PRD|AUT|DEC|RND",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      }
+    },
+    "CONTROL_NUMBER": {
+      "manualName": "NUMERO_CONTROL",
+      "displayName": "Número de Control (PPSetControlNumber/PPGetControlNumber)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      }
+    },
+    "AMOUNT": {
+      "manualName": "MONTO",
+      "displayName": "Monto (PPSetTransactionAmount)",
+      "dataType": "decimal",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "REFERENCE": {
+      "manualName": "REFERENCIA",
+      "displayName": "Referencia (PPSetPaywReference)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "N/A", "CASHBACK_MC": "N/A", "CASHBACK_AMEX": "N/A",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "BATCH": {
+      "manualName": "LOTE",
+      "displayName": "Lote (PPSetGroup)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "N/A", "CASHBACK_MC": "N/A", "CASHBACK_AMEX": "N/A",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "EMV_TAGS": {
+      "manualName": "EMV_TAGS",
+      "displayName": "EMV Tags (response)",
+      "dataType": "hex",
+      "ambiguous": false,
+      "note": "EMV response — obligatorio para tarjetas CHIP/CONTACTLESSCHIP.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "TVR": {
+      "manualName": "TVR",
+      "displayName": "Terminal Verification Results (PPGetTVR, TAG 95)",
+      "dataType": "hex(10)",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "AID": {
+      "manualName": "AID",
+      "displayName": "Application Identifier (PPGetAppID, TAG 4F)",
+      "dataType": "hex",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "APN": {
+      "manualName": "APN",
+      "displayName": "Application Preferred Name (PPGetAppPrefName, TAG 9F12)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    },
+    "AL": {
+      "manualName": "AL",
+      "displayName": "Application Label (PPGetAppLabel, TAG 50)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      }
+    }
+  }
+}

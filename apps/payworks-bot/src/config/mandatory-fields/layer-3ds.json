@@ -1,0 +1,140 @@
+{
+  "_meta": {
+    "note": "Transversal layer — referenced by IntegrationType.supportedLayers. 3D Secure v1.4. Pre-3DS: input al servicio 3DS (Card, Total, CardType, MerchantId, MerchantName, MerchantCity). Post-3DS: campos que comercio incluye en POST a Payworks (Cert3D/ESTATUS_3D, ECI, XID, CAVV, Version3D). XID: R para VISA/AMEX, N/A para MC. Cert3D: ambiguous — manual dice 200, log dice 03."
+  },
+  "integrationType": "ECOMMERCE_TRADICIONAL",
+  "manualVersion": "1.4",
+  "manualDate": "2025-06-19",
+  "displayName": "Capa 3D Secure 2",
+  "servlet": {},
+  "threeds": {
+    "Card": {
+      "manualName": "NUMERO_TARJETA",
+      "displayName": "Número de Tarjeta (Pre-3DS)",
+      "dataType": "masked",
+      "ambiguous": false,
+      "note": "Pre-3DS: input enviado al servicio 3DS por el comercio.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "Total": {
+      "manualName": "MONTO",
+      "displayName": "Monto (Pre-3DS)",
+      "dataType": "decimal",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "CardType": {
+      "manualName": "MARCA_TARJETA",
+      "displayName": "Marca de Tarjeta (Pre-3DS)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Valores: VISA | MASTERCARD | AMEX",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "MerchantId": {
+      "manualName": "ID_AFILIACION",
+      "displayName": "ID Afiliación (Pre-3DS)",
+      "dataType": "numeric(9)",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "MerchantName": {
+      "manualName": "NOMBRE_COMERCIO",
+      "displayName": "Nombre del Comercio (Pre-3DS)",
+      "dataType": "alphanum(25)",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "MerchantCity": {
+      "manualName": "CIUDAD_COMERCIO",
+      "displayName": "Ciudad del Comercio (Pre-3DS)",
+      "dataType": "alphanum(13)",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "Cert3D": {
+      "manualName": "ESTATUS_3D",
+      "displayName": "Estatus 3D (Post-3DS)",
+      "dataType": "numeric",
+      "ambiguous": true,
+      "note": "Ambiguo: manual indica valor 200 (auth exitoso) pero logs muestran 03. Mapping Cert3D↔ESTATUS_3D pendiente confirmación.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "ECI": {
+      "manualName": "ECI",
+      "displayName": "Electronic Commerce Indicator (Post-3DS)",
+      "dataType": "numeric(2)",
+      "ambiguous": false,
+      "note": "Valores: 01, 02, 05, 06, 07",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "XID": {
+      "manualName": "XID",
+      "displayName": "XID (Post-3DS)",
+      "dataType": "base64",
+      "ambiguous": true,
+      "note": "XID aplica a VISA/AMEX (R); MC no lo genera (N/A). Si retorna nulo/blanco, NO enviar en POST.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "N/A", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "CAVV": {
+      "manualName": "CAVV",
+      "displayName": "CAVV (Post-3DS)",
+      "dataType": "base64",
+      "ambiguous": false,
+      "note": "R para VISA/MC/AMEX. Si retorna nulo/blanco, NO enviar en POST.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    },
+    "Version3D": {
+      "manualName": "VERSION_3D",
+      "displayName": "Versión 3D (Post-3DS)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Valor fijo = 2",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+      }
+    }
+  }
+}

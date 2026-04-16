@@ -1,0 +1,100 @@
+{
+  "_meta": {
+    "note": "Transversal layer — referenced by IntegrationType.supportedLayers. Mandato AN5822 MasterCard CIT/MIT. Solo aplica a transacciones MC (N/A para VISA/AMEX). CIT = primera transacción (Customer-Initiated), MIT = subsecuente (Merchant-Initiated)."
+  },
+  "integrationType": "ECOMMERCE_TRADICIONAL",
+  "manualVersion": "1.0",
+  "manualDate": "2025-06-19",
+  "displayName": "Capa AN5822 MasterCard CIT/MIT",
+  "servlet": {},
+  "an5822": {
+    "CIT": {
+      "PAYMENT_IND": {
+        "manualName": "IND_PAGO",
+        "displayName": "Indicador de Pago (CIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "Valor fijo para CIT: U (Unscheduled Customer-Initiated). MasterCard-only; N/A para VISA/AMEX.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      },
+      "AMOUNT_TYPE": {
+        "manualName": "TIPO_MONTO",
+        "displayName": "Tipo de Monto (CIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "Valores: V (Variable) | F (Fijo). MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      },
+      "PAYMENT_INFO": {
+        "manualName": "INFO_PAGO",
+        "displayName": "Información de Pago (CIT)",
+        "dataType": "numeric",
+        "ambiguous": false,
+        "note": "Valor fijo para CIT: 0. MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      }
+    },
+    "MIT": {
+      "CIF": {
+        "manualName": "CIF",
+        "displayName": "CIF / COF - Credentials on File (MIT)",
+        "dataType": "alphanum",
+        "ambiguous": false,
+        "note": "Referencia a credencial almacenada de la CIT previa. MasterCard-only. Para MOTO usar COF=4.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      },
+      "PAYMENT_IND": {
+        "manualName": "IND_PAGO",
+        "displayName": "Indicador de Pago (MIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "Valor fijo para MIT: 8 (Merchant-Initiated). MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      },
+      "AMOUNT_TYPE": {
+        "manualName": "TIPO_MONTO",
+        "displayName": "Tipo de Monto (MIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "Valores: V (Variable) | F (Fijo). MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      },
+      "PAYMENT_INFO": {
+        "manualName": "INFO_PAGO",
+        "displayName": "Información de Pago (MIT)",
+        "dataType": "numeric",
+        "ambiguous": false,
+        "note": "Valor fijo para MIT: 3 (Tradicional/Cargos Post/Agregadores) o 2 (MOTO). MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        }
+      }
+    }
+  }
+}
