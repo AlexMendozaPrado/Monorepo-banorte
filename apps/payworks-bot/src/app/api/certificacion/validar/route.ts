@@ -15,6 +15,7 @@ export async function POST(
     const integrationTypeStr = formData.get('integrationType') as string;
     const operationMode = (formData.get('operationMode') as OperationMode) || 'semi';
     const merchantName = formData.get('merchantName') as string;
+    const coordinadorCertificacion = (formData.get('coordinadorCertificacion') as string | null)?.trim() || undefined;
 
     if (!matrizFile) {
       return NextResponse.json({ success: false, error: 'La Matriz de Pruebas es requerida' }, { status: 400 });
@@ -69,6 +70,7 @@ export async function POST(
       integrationType,
       operationMode,
       merchantName: merchantName || undefined,
+      coordinadorCertificacion,
     });
 
     const response: CertificationResponse = {

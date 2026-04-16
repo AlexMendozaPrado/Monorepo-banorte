@@ -23,6 +23,10 @@ export interface RunCertificationCommand {
   integrationType: IntegrationType;
   operationMode: OperationMode;
   merchantName?: string;
+  coordinadorCertificacion?: string;
+  responsableNombre?: string;
+  responsableEmail?: string;
+  responsableTelefono?: string;
 }
 
 export class RunCertificationUseCase {
@@ -152,6 +156,10 @@ export class RunCertificationUseCase {
       command.operationMode,
       results,
       new Date(),
+      command.coordinadorCertificacion,
+      command.responsableNombre,
+      command.responsableEmail,
+      command.responsableTelefono,
     );
 
     await this.certificationRepo.save(session);

@@ -46,6 +46,7 @@ export function UploadCard() {
   const [afiliacionesFile, setAfiliacionesFile] = useState<File | null>(null);
   const [threeDSLogFile, setThreeDSLogFile] = useState<File | null>(null);
   const [cybersourceLogFile, setCybersourceLogFile] = useState<File | null>(null);
+  const [coordinador, setCoordinador] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const matrizInputRef = useRef<HTMLInputElement>(null);
@@ -81,6 +82,7 @@ export function UploadCard() {
       formData.append('matriz', matrizFile);
       formData.append('integrationType', selectedIntegration);
       formData.append('operationMode', selectedMode);
+      if (coordinador.trim()) formData.append('coordinadorCertificacion', coordinador.trim());
 
       if (selectedMode === 'semi') {
         if (csvFile) formData.append('csvBD', csvFile);
@@ -200,10 +202,27 @@ export function UploadCard() {
         </div>
       </div>
 
-      {/* Paso 4: Archivos adicionales (solo modo semi-auto) */}
+      {/* Paso 3.5: Coordinador de Certificación */}
+      <div className="flex flex-col gap-2">
+        <h2 className="font-semibold text-base text-banorte-dark">Paso 4: Coordinador de certificación</h2>
+        <p className="text-xs text-banorte-secondary">
+          Nombre del responsable Banorte que firmará esta certificación. Aparecerá en la carta oficial.
+        </p>
+        <input
+          type="text"
+          value={coordinador}
+          onChange={(e) => setCoordinador(e.target.value)}
+          placeholder="Ej. Fabio Serrano"
+          className="w-full md:w-1/2 h-[45px] px-4 rounded-input border border-[#D1D5D9] bg-white text-sm text-banorte-dark
+                     focus:outline-none focus:border-banorte-red focus:ring-1 focus:ring-banorte-red"
+          maxLength={80}
+        />
+      </div>
+
+      {/* Paso 5: Archivos adicionales (solo modo semi-auto) */}
       {selectedMode === 'semi' && (
         <div className="flex flex-col gap-3">
-          <h2 className="font-semibold text-base text-banorte-dark">Paso 4: Subir datos de BD y LOGs</h2>
+          <h2 className="font-semibold text-base text-banorte-dark">Paso 5: Subir datos de BD y LOGs</h2>
 
           {/* CSV de BD */}
           <div
