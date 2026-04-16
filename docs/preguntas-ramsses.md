@@ -130,5 +130,27 @@
 
 ## 12. Carta de certificación — campos de afiliación
 
-- **P12.1** — **Coordinador de certificación**: en el ejemplo de carta aparece "Fabio Serrano" como coordinador. ¿Este campo lo ingresa el usuario manualmente al iniciar la corrida, o es un valor fijo por equipo/proyecto? ¿Dónde se obtiene?
+- **P12.1** — **Coordinador de certificación**: en el ejemplo de carta aparece "Fabio Serrano" como coordinador. ¿Este campo lo ingresa el usuario manualmente al iniciar la corrida, o es un valor fijo por equipo/proyecto? ¿Dónde se obtiene? [✅ parcialmente: se agregó input en UI, el usuario lo captura]
 - **P12.2** — **Responsable técnico del comercio** (nombre, email, teléfono, dirección): ¿todos estos datos vienen del CSV de afiliaciones, o el usuario los captura manualmente? El CSV de `NPAYW.AFILIACIONES` puede no tener columnas de contacto personal.
+
+## 13. Peticiones pendientes de recursos (bloqueantes)
+
+Ambas son **entregables que solo el equipo de Banorte puede proveer**. El bot no puede avanzar más allá del 97% de cobertura hasta recibir estos dos recursos.
+
+### 13.1 Plantilla editable de la carta oficial
+
+- **P13.1.1** — ¿Podrían compartir el **archivo Word (.docx) original** de la carta de certificación cuyo PDF es `CE3DS-0003652_9885405 MUEVE CIUDAD.pdf`?
+  - **Uso**: hoy el bot genera la carta PDF desde cero con jsPDF, aproximando el diseño. Si tuviéramos el Word original, podríamos reemplazar placeholders tipo `{{NOMBRE_COMERCIO}}` con los datos reales y conseguir visual 100% idéntico al template oficial.
+  - **Ventaja para el equipo**: cualquier cambio futuro de diseño (logos, fuentes, disclaimers) lo edita el equipo de legal/marketing directamente en Word, sin tocar código.
+  - **Alternativa**: si el Word no existe pero hay un **template HTML** o un **diseño en Figma**, también funciona.
+- **P13.1.2** — ¿Existe un **repositorio oficial de templates de cartas** (uno por producto: Tradicional, MOTO, Agregadores, Tarjeta Presente, etc.)? La estructura puede variar por producto.
+
+### 13.2 Estructura real de la tabla `NPAYW.AFILIACIONES`
+
+Hoy el bot hace parsing tolerante de CSV/TXT con nombres de columna flexibles. Para afinar el parser y validar contra el schema real:
+
+- **P13.2.1** — ¿Podrían ejecutar `DESCRIBE NPAYW.AFILIACIONES` (o `SELECT column_name, data_type, data_length, nullable FROM all_tab_columns WHERE owner='NPAYW' AND table_name='AFILIACIONES'`) y compartir el output?
+- **P13.2.2** — ¿Qué formato usan típicamente para exportar la consulta? (CSV con `,`, CSV con `;`, TXT con pipes `|`, Excel). ¿Con qué encoding? (UTF-8, Latin-1).
+- **P13.2.3** — De las columnas de la tabla, ¿cuáles son **las mínimas obligatorias** para armar la carta? (ej. `AFILIACION`, `NOMBRE_COMERCIO`, `RFC`, `NUMERO_CLIENTE` son claras; `GIRO`, `EMAIL`, `TELEFONO` pueden estar vacías).
+- **P13.2.4** — ¿El export se hace desde Toad, SQLDeveloper, DBeaver, un script? Saberlo ayuda a anticipar formatos problemáticos (quotes, encoding, fechas).
+- **P13.2.5** — ¿Hay **datos sensibles** en la tabla que no deberían exportarse nunca al bot? (ej. SECURITY_KEYS de agregadores, credenciales). Si sí, indicar cuáles para que el bot las ignore si aparecen.
