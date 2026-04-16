@@ -63,24 +63,55 @@ export async function GET(
           ? 'RECHAZADO'
           : 'APROBADO';
 
+    // Derivar esquema y manuales de integración según producto + capas activas
+    const hasThreeDS = session.results.some(r =>
+      r.fieldResults?.some(f => f.layer === 'THREEDS'),
+    );
+    const hasCybersource = session.results.some(r =>
+      r.fieldResults?.some(f => f.layer === 'CYBERSOURCE'),
+    );
+    const esquemaSuffix = [
+      hasThreeDS ? 'CON 3D SECURE' : null,
+      hasCybersource ? 'CON CYBERSOURCE' : null,
+    ].filter(Boolean).join(' ');
+    const esquemaCompleto = `PAYWORKS 2 - ${integrationVO.getDisplayName().toUpperCase()}${esquemaSuffix ? ' ' + esquemaSuffix : ''}`;
+
+    const manualesUsados: string[] = [
+      `Manual DeIntegración_${integrationVO.getConfigFileName()}_V${integrationVO.getManualVersion()}`,
+    ];
+    if (hasThreeDS) manualesUsados.push('Manual DeIntegración_3DSecure_Banorte_V1.4');
+    if (hasCybersource) manualesUsados.push('Manual DeIntegración_Cybersource_Direct_V1.10');
+
+    // Detectar marcas reales usadas en las transacciones
+    const marcasSet = new Set<string>();
+    session.results.forEach(r => marcasSet.add(r.cardBrand));
+    const tarjetasProcesadas = Array.from(marcasSet)
+      .map(m => m === 'MC' ? 'MASTERCARD' : m)
+      .join(', ') || 'VISA, MASTERCARD';
+
+    // Detectar tipos de transacción certificados (únicos)
+    const tiposSet = new Set<string>();
+    session.results.forEach(r => tiposSet.add(new TransactionTypeValueObject(r.transactionType).getDisplayName().toUpperCase()));
+    const transaccionesCertificadas = Array.from(tiposSet).join(', ');
+
     const data: CertificationLetterData = {
       codigoCertificado,
       fechaEmision: formatDate(session.createdAt),
       versionManual: integrationVO.getManualVersion(),
-      tituloCertificacion: `CERTIFICACIÓN ${integrationVO.getDisplayName().toUpperCase()}`,
+      tituloCertificacion: `CERTIFICACIÓN ${integrationVO.getDisplayName().toUpperCase()}${esquemaSuffix ? ' ' + esquemaSuffix : ''}`,
       coordinadorCertificacion: session.coordinadorCertificacion,
       nombreComercio: afiliacion?.getDisplayLabel() ?? session.merchantName,
       rfc: afiliacion?.rfc,
       numeroCliente: afiliacion?.numeroCliente,
       idAfiliacion: idAfiliacion || '—',
-      esquema: afiliacion?.esquema ?? integrationVO.getDisplayName(),
-      modoTransmision: 'HTTPS',
-      mensajeria: integrationVO.isTarjetaPresente() ? 'Servlet + EMV' : 'Servlet HTTPS',
-      lenguaje: 'es-MX',
-      tarjetasProcesadas: 'VISA, MasterCard' + (afiliacion?.extras?.AMEX ? ', AMEX' : ''),
+      esquema: esquemaCompleto,
+      modoTransmision: integrationVO.isTarjetaPresente() ? 'TCP / IP / TLS' : 'TCP / IP / TLS',
+      mensajeria: 'HTTP',
+      lenguaje: session.lenguaje || 'NO PROPORCIONADO',
+      tarjetasProcesadas,
       giro: afiliacion?.giro ?? afiliacion?.mccDescripcion,
-      modoLectura: integrationVO.isTarjetaPresente() ? 'CHIP/BANDA/CONTACTLESS' : 'Manual (No presente)',
-      versionAplicacion: integrationVO.getManualVersion(),
+      modoLectura: integrationVO.isTarjetaPresente() ? 'CHIP/BANDA/CONTACTLESS' : 'MANUAL',
+      versionAplicacion: session.versionAplicacion || 'NO PROPORCIONADA',
       responsableNombre: afiliacion?.usuario,
       responsableEmail: afiliacion?.email,
       responsableTelefono: afiliacion?.telefono,
@@ -92,6 +123,9 @@ export async function GET(
       ]
         .filter(Boolean)
         .join(', ') || undefined,
+      urlSubdominio: session.urlSubdominio,
+      usuarioCertificacion: afiliacion?.usuario,
+      manualesUtilizados: manualesUsados,
       totalTransacciones: session.results.length,
       aprobadas: approved,
       rechazadas: rejected,
@@ -99,11 +133,11 @@ export async function GET(
       filasMatriz: session.results.map(r => ({
         referencia: r.transactionRef,
         tipoTransaccion: new TransactionTypeValueObject(r.transactionType).getDisplayName(),
-        marca: r.cardBrand,
+        marca: r.cardBrand === 'MC' ? 'MASTERCARD' : r.cardBrand,
         veredicto: r.verdict,
       })),
-      firmaNombre: 'Soporte Técnico Payworks',
-      firmaRol: 'Certificación de Comercios — Banorte',
+      firmaNombre: 'Dulce María Rivera Luna',
+      firmaRol: 'Soporte Técnico Payworks',
     };
 
     const blob = generateCertificationLetterPDF(data);

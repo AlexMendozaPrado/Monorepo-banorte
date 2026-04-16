@@ -47,6 +47,9 @@ export function UploadCard() {
   const [threeDSLogFile, setThreeDSLogFile] = useState<File | null>(null);
   const [cybersourceLogFile, setCybersourceLogFile] = useState<File | null>(null);
   const [coordinador, setCoordinador] = useState('');
+  const [lenguaje, setLenguaje] = useState('');
+  const [versionAplicacion, setVersionAplicacion] = useState('');
+  const [urlSubdominio, setUrlSubdominio] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const matrizInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +86,9 @@ export function UploadCard() {
       formData.append('integrationType', selectedIntegration);
       formData.append('operationMode', selectedMode);
       if (coordinador.trim()) formData.append('coordinadorCertificacion', coordinador.trim());
+      if (lenguaje.trim()) formData.append('lenguaje', lenguaje.trim());
+      if (versionAplicacion.trim()) formData.append('versionAplicacion', versionAplicacion.trim());
+      if (urlSubdominio.trim()) formData.append('urlSubdominio', urlSubdominio.trim());
 
       if (selectedMode === 'semi') {
         if (csvFile) formData.append('csvBD', csvFile);
@@ -217,6 +223,45 @@ export function UploadCard() {
                      focus:outline-none focus:border-banorte-red focus:ring-1 focus:ring-banorte-red"
           maxLength={80}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-banorte-secondary">Lenguaje de la aplicación</label>
+            <input
+              type="text"
+              value={lenguaje}
+              onChange={(e) => setLenguaje(e.target.value)}
+              placeholder="Ej. RUST LANG / JAVA / NODEJS"
+              className="h-[40px] px-3 rounded-input border border-[#D1D5D9] bg-white text-sm text-banorte-dark
+                         focus:outline-none focus:border-banorte-red focus:ring-1 focus:ring-banorte-red"
+              maxLength={60}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-banorte-secondary">Versión de la aplicación</label>
+            <input
+              type="text"
+              value={versionAplicacion}
+              onChange={(e) => setVersionAplicacion(e.target.value)}
+              placeholder="Ej. 2.5 / NO PROPORCIONADA"
+              className="h-[40px] px-3 rounded-input border border-[#D1D5D9] bg-white text-sm text-banorte-dark
+                         focus:outline-none focus:border-banorte-red focus:ring-1 focus:ring-banorte-red"
+              maxLength={40}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-banorte-secondary">URL del subdominio</label>
+            <input
+              type="text"
+              value={urlSubdominio}
+              onChange={(e) => setUrlSubdominio(e.target.value)}
+              placeholder="Ej. https://api.mueveciudad.net"
+              className="h-[40px] px-3 rounded-input border border-[#D1D5D9] bg-white text-sm text-banorte-dark
+                         focus:outline-none focus:border-banorte-red focus:ring-1 focus:ring-banorte-red"
+              maxLength={200}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Paso 5: Archivos adicionales (solo modo semi-auto) */}

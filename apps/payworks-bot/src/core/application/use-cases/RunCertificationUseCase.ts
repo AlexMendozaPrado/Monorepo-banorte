@@ -27,6 +27,9 @@ export interface RunCertificationCommand {
   responsableNombre?: string;
   responsableEmail?: string;
   responsableTelefono?: string;
+  lenguaje?: string;
+  versionAplicacion?: string;
+  urlSubdominio?: string;
 }
 
 export class RunCertificationUseCase {
@@ -160,6 +163,9 @@ export class RunCertificationUseCase {
       command.responsableNombre,
       command.responsableEmail,
       command.responsableTelefono,
+      command.lenguaje,
+      command.versionAplicacion,
+      command.urlSubdominio,
     );
 
     await this.certificationRepo.save(session);

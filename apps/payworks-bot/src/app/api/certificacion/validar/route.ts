@@ -16,6 +16,9 @@ export async function POST(
     const operationMode = (formData.get('operationMode') as OperationMode) || 'semi';
     const merchantName = formData.get('merchantName') as string;
     const coordinadorCertificacion = (formData.get('coordinadorCertificacion') as string | null)?.trim() || undefined;
+    const lenguaje = (formData.get('lenguaje') as string | null)?.trim() || undefined;
+    const versionAplicacion = (formData.get('versionAplicacion') as string | null)?.trim() || undefined;
+    const urlSubdominio = (formData.get('urlSubdominio') as string | null)?.trim() || undefined;
 
     if (!matrizFile) {
       return NextResponse.json({ success: false, error: 'La Matriz de Pruebas es requerida' }, { status: 400 });
@@ -71,6 +74,9 @@ export async function POST(
       operationMode,
       merchantName: merchantName || undefined,
       coordinadorCertificacion,
+      lenguaje,
+      versionAplicacion,
+      urlSubdominio,
     });
 
     const response: CertificationResponse = {

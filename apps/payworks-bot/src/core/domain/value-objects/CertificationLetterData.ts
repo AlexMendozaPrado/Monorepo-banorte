@@ -37,6 +37,14 @@ export interface CertificationLetterData {
   responsableTelefono?: string;
   responsableDireccion?: string;
 
+  // ---- Extras para la carta oficial ----
+  /** URL del subdominio verificado (ej. `https://api.mueveciudad.net`). */
+  urlSubdominio?: string;
+  /** Usuario utilizado para la certificación (ej. `A9885405`). */
+  usuarioCertificacion?: string;
+  /** Lista de manuales utilizados (ej. `["Manual...Tradicional_V2.5", "Manual...3DSecure_V1.4"]`). */
+  manualesUtilizados?: string[];
+
   // ---- Resultados ----
   totalTransacciones: number;
   aprobadas: number;

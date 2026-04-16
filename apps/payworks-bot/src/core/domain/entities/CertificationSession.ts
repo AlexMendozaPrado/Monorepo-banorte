@@ -15,6 +15,9 @@ export interface CertificationSession {
   responsableNombre?: string;
   responsableEmail?: string;
   responsableTelefono?: string;
+  lenguaje?: string;
+  versionAplicacion?: string;
+  urlSubdominio?: string;
 }
 
 export class CertificationSessionEntity implements CertificationSession {
@@ -29,6 +32,9 @@ export class CertificationSessionEntity implements CertificationSession {
     public readonly responsableNombre?: string,
     public readonly responsableEmail?: string,
     public readonly responsableTelefono?: string,
+    public readonly lenguaje?: string,
+    public readonly versionAplicacion?: string,
+    public readonly urlSubdominio?: string,
   ) {
     this.validateEntity();
   }
