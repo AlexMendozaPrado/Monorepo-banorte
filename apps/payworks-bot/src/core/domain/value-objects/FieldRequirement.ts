@@ -60,15 +60,17 @@ export class FieldRequirementValueObject {
       if (fieldValue === undefined || fieldValue.trim() === '') return { passes: false, reason: 'empty' };
     }
 
-    if (!fieldFound || !fieldValue) return { passes: true };
+    if (!fieldFound) return { passes: true };
 
-    const trimmed = fieldValue.trim();
+    const trimmed = (fieldValue ?? '').trim();
 
-    if (spec?.omitIfEmpty && trimmed === '') {
+    if (spec?.omitIfEmpty && fieldFound && trimmed === '') {
       return { passes: false, reason: 'should_be_omitted', detail: 'Campo no debe enviarse vacío' };
     }
 
-    if (FORBIDDEN_CHARS_REGEX.test(trimmed)) {
+    if (!fieldValue || trimmed === '') return { passes: true };
+
+    if (!spec?.mustBeMasked && FORBIDDEN_CHARS_REGEX.test(trimmed)) {
       const found = trimmed.match(new RegExp(FORBIDDEN_CHARS_REGEX.source, 'g'));
       return { passes: false, reason: 'forbidden_chars', detail: [...new Set(found)].join('') };
     }
