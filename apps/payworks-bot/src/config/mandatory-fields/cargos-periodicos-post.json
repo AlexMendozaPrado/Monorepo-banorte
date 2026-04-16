@@ -21,7 +21,8 @@
         "VOID_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "maxLength": 15
     },
     "USER": {
       "manualName": "USUARIO",
@@ -70,7 +71,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 15
     },
     "CMD_TRANS": {
       "manualName": "CMD_TRANS",
@@ -104,7 +106,13 @@
         "VOID_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "validValues": [
+        "PRD",
+        "AUT",
+        "DEC",
+        "RND"
+      ]
     },
     "AMOUNT": {
       "manualName": "MONTO",
@@ -120,7 +128,9 @@
         "VOID_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "format": "^d{1,16}(.d{1,2})?$",
+      "maxLength": 18
     },
     "REFERENCE": {
       "manualName": "REFERENCIA",
@@ -152,7 +162,8 @@
         "VOID_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "maxLength": 30
     },
     "CARD_NUMBER": {
       "manualName": "NUMERO_TARJETA",
@@ -168,7 +179,8 @@
         "VOID_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "mustBeMasked": true
     },
     "EXP_DATE": {
       "manualName": "FECHA_EXP",
@@ -184,7 +196,9 @@
         "VOID_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "format": "^d{4}$",
+      "maxLength": 4
     },
     "ENTRY_MODE": {
       "manualName": "MODO_ENTRADA",
@@ -200,7 +214,15 @@
         "VOID_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "validValues": [
+        "MANUAL",
+        "BANDA",
+        "MAGSTRIPE",
+        "CHIP",
+        "CONTACTLESSCHIP",
+        "CONTACTLESSBANDA"
+      ]
     },
     "BATCH": {
       "manualName": "LOTE",
@@ -232,7 +254,13 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "validValues": [
+        "ES",
+        "EN",
+        "01",
+        "02"
+      ]
     },
     "CUSTOMER_REF1": {
       "manualName": "REF_CLIENTE1",

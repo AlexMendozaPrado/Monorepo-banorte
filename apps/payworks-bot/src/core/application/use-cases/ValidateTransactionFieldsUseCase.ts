@@ -60,7 +60,7 @@ function validateAgainstSpecMap(
     const rule = spec.rules[transactionKey] ?? 'N/A';
     const found = entity.hasField(logName);
     const value = entity.getField(logName);
-    const passes = new FieldRequirementValueObject(rule).evaluate(found, value);
+    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, spec);
     out.push({
       field: logName,
       manualName: spec.manualName,
@@ -68,7 +68,9 @@ function validateAgainstSpecMap(
       rule,
       found,
       value,
-      verdict: passes ? 'PASS' : 'FAIL',
+      verdict: result.passes ? 'PASS' : 'FAIL',
+      failReason: result.reason,
+      failDetail: result.detail,
       source,
       layer,
     });
@@ -92,7 +94,7 @@ export class ValidateTransactionFieldsUseCase {
       const rule = spec?.rules[transactionKey] ?? 'N/A';
       const found = command.servletRequest.hasField(logName);
       const value = command.servletRequest.getField(logName);
-      const passes = new FieldRequirementValueObject(rule).evaluate(found, value);
+      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, spec);
       servletResults.push({
         field: logName,
         manualName: spec?.manualName,
@@ -100,7 +102,9 @@ export class ValidateTransactionFieldsUseCase {
         rule,
         found,
         value,
-        verdict: passes ? 'PASS' : 'FAIL',
+        verdict: result.passes ? 'PASS' : 'FAIL',
+        failReason: result.reason,
+        failDetail: result.detail,
         source: 'SERVLET',
         layer: ValidationLayer.SERVLET,
       });

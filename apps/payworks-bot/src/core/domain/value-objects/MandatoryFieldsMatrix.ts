@@ -31,6 +31,18 @@ export interface FieldSpec {
   note?: string;
   /** Rule per transaction+brand key. */
   rules: Record<TransactionKey, FieldRule>;
+  /** Maximum length allowed (e.g. 9 for MERCHANT_ID). */
+  maxLength?: number;
+  /** Regex pattern the value must match (e.g. `"^\\d{1,18}\\.\\d{2}$"` for MONTO). */
+  format?: string;
+  /** Allowed values — field fails if value is present and NOT in this list. */
+  validValues?: string[];
+  /** If set, field value must equal this exact string (e.g. VERSION_3D = "2"). */
+  fixedValue?: string;
+  /** If true, field must contain masked card pattern (e.g. `******`). */
+  mustBeMasked?: boolean;
+  /** If true, field must NOT be sent when its value is empty/null (inverse of R). */
+  omitIfEmpty?: boolean;
 }
 
 /**

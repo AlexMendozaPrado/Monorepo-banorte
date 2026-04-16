@@ -117,7 +117,7 @@
       "displayName": "Estatus 3D (Post-3DS)",
       "dataType": "numeric",
       "ambiguous": true,
-      "note": "Ambiguo: manual indica valor 200 (auth exitoso) pero logs muestran 03. Mapping Cert3D↔ESTATUS_3D pendiente confirmación.",
+      "note": "P1.3: manual dice 200, log muestra 03 — usando valor del log",
       "rules": {
         "AUTH_VISA": "R",
         "AUTH_MC": "R",
@@ -128,7 +128,8 @@
         "POSTAUTH_VISA": "R",
         "POSTAUTH_MC": "R",
         "POSTAUTH_AMEX": "R"
-      }
+      },
+      "fixedValue": "03"
     },
     "ECI": {
       "manualName": "ECI",
@@ -146,7 +147,14 @@
         "POSTAUTH_VISA": "R",
         "POSTAUTH_MC": "R",
         "POSTAUTH_AMEX": "R"
-      }
+      },
+      "validValues": [
+        "01",
+        "02",
+        "05",
+        "06",
+        "07"
+      ]
     },
     "XID": {
       "manualName": "XID",
@@ -164,7 +172,8 @@
         "POSTAUTH_VISA": "R",
         "POSTAUTH_MC": "N/A",
         "POSTAUTH_AMEX": "R"
-      }
+      },
+      "omitIfEmpty": true
     },
     "CAVV": {
       "manualName": "CAVV",
@@ -182,7 +191,8 @@
         "POSTAUTH_VISA": "R",
         "POSTAUTH_MC": "R",
         "POSTAUTH_AMEX": "R"
-      }
+      },
+      "omitIfEmpty": true
     },
     "Version3D": {
       "manualName": "VERSION_3D",
@@ -200,7 +210,8 @@
         "POSTAUTH_VISA": "R",
         "POSTAUTH_MC": "R",
         "POSTAUTH_AMEX": "R"
-      }
+      },
+      "fixedValue": "2"
     },
     "UCAF": {
       "manualName": "UCAF",

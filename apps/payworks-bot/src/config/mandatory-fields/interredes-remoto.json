@@ -77,7 +77,13 @@
         "VERIFY_VISA": "R",
         "VERIFY_MC": "R",
         "VERIFY_AMEX": "R"
-      }
+      },
+      "validValues": [
+        "PRD",
+        "AUT",
+        "DEC",
+        "RND"
+      ]
     },
     "CONTROL_NUMBER": {
       "manualName": "NUMERO_CONTROL",
@@ -147,7 +153,9 @@
         "VERIFY_VISA": "N/A",
         "VERIFY_MC": "N/A",
         "VERIFY_AMEX": "N/A"
-      }
+      },
+      "format": "^d{1,16}(.d{1,2})?$",
+      "maxLength": 18
     },
     "REFERENCE": {
       "manualName": "REFERENCIA",

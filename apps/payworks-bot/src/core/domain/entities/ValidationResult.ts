@@ -15,6 +15,8 @@ export interface FieldValidationResult {
   found: boolean;
   value: string | undefined;
   verdict: 'PASS' | 'FAIL';
+  failReason?: string;
+  failDetail?: string;
   source: 'SERVLET' | 'PROSA' | 'BD' | 'THREEDS' | 'CYBERSOURCE';
   /**
    * Validation layer this field belongs to. Used by the UI to group

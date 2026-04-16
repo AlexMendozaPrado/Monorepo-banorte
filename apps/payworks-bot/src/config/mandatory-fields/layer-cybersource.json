@@ -330,7 +330,12 @@
         "POSTAUTH_VISA": "R",
         "POSTAUTH_MC": "R",
         "POSTAUTH_AMEX": "R"
-      }
+      },
+      "validValues": [
+        "001",
+        "002",
+        "003"
+      ]
     },
     "Card_expirationMonth": {
       "manualName": "Card_expirationMonth",
@@ -587,7 +592,11 @@
       "rules": {
         "AUTH_VISA": "R",
         "AUTH_MC": "R"
-      }
+      },
+      "validValues": [
+        "MXN",
+        "USD"
+      ]
     },
     "PurchaseTotals_grandTotalAmount": {
       "manualName": "PurchaseTotals_grandTotalAmount",

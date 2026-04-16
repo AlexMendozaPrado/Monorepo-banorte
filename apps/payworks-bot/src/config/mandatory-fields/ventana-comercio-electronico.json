@@ -13,13 +13,26 @@
       "dataType": "numeric(9)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
-      }
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
+      },
+      "maxLength": 15
     },
     "name": {
       "manualName": "name",
@@ -27,12 +40,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
       }
     },
     "password": {
@@ -41,12 +66,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
       }
     },
     "mode": {
@@ -56,13 +93,31 @@
       "ambiguous": false,
       "note": "Valores: PRD|AUT|DEC|RND",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
-      }
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
+      },
+      "validValues": [
+        "PRD",
+        "AUT",
+        "DEC",
+        "RND"
+      ]
     },
     "controlNumber": {
       "manualName": "controlNumber",
@@ -70,13 +125,26 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
-      }
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
+      },
+      "maxLength": 30
     },
     "terminalId": {
       "manualName": "terminalId",
@@ -84,13 +152,26 @@
       "dataType": "numeric",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
-      }
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
+      },
+      "maxLength": 15
     },
     "merchantName": {
       "manualName": "merchantName",
@@ -98,12 +179,24 @@
       "dataType": "alphanum(25)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
       }
     },
     "merchantCity": {
@@ -112,12 +205,24 @@
       "dataType": "alphanum(13)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
       }
     },
     "lang": {
@@ -127,13 +232,29 @@
       "ambiguous": false,
       "note": "Valores: ES|EN",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
-      }
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R",
+        "REVERSAL_AMEX": "R"
+      },
+      "validValues": [
+        "ES",
+        "EN"
+      ]
     },
     "amount": {
       "manualName": "amount",
@@ -141,13 +262,27 @@
       "dataType": "decimal",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
-      }
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "REFUND_AMEX": "R",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O",
+        "REVERSAL_AMEX": "O"
+      },
+      "format": "^d{1,16}(.d{1,2})?$",
+      "maxLength": 18
     },
     "customerRef1": {
       "manualName": "customerRef1",
@@ -155,12 +290,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "REFUND_AMEX": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O",
+        "REVERSAL_AMEX": "O"
       }
     },
     "customerRef2": {
@@ -169,12 +316,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "REFUND_AMEX": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O",
+        "REVERSAL_AMEX": "O"
       }
     },
     "customerRef3": {
@@ -183,12 +342,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "REFUND_AMEX": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O",
+        "REVERSAL_AMEX": "O"
       }
     },
     "customerRef4": {
@@ -197,12 +368,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "REFUND_AMEX": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O",
+        "REVERSAL_AMEX": "O"
       }
     },
     "customerRef5": {
@@ -211,12 +394,24 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O", "REFUND_AMEX": "O",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "REFUND_AMEX": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O",
+        "REVERSAL_AMEX": "O"
       }
     }
   }

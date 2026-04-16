@@ -27,7 +27,8 @@
         "VERIFY_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "maxLength": 15
     },
     "USER": {
       "manualName": "USUARIO",
@@ -94,7 +95,8 @@
         "VERIFY_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "maxLength": 15
     },
     "CMD_TRANS": {
       "manualName": "CMD_TRANS",
@@ -139,7 +141,9 @@
         "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "format": "^d{1,16}(.d{1,2})?$",
+      "maxLength": 18
     },
     "MODE": {
       "manualName": "MODO",
@@ -162,7 +166,13 @@
         "VERIFY_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "validValues": [
+        "PRD",
+        "AUT",
+        "DEC",
+        "RND"
+      ]
     },
     "REFERENCE": {
       "manualName": "REFERENCIA",
@@ -206,7 +216,8 @@
         "VERIFY_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CARD_NUMBER": {
       "manualName": "NUMERO_TARJETA",
@@ -228,7 +239,8 @@
         "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "mustBeMasked": true
     },
     "EXP_DATE": {
       "manualName": "FECHA_EXP",
@@ -250,7 +262,9 @@
         "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "format": "^d{4}$",
+      "maxLength": 4
     },
     "SECURITY_CODE": {
       "manualName": "CODIGO_SEGURIDAD",
@@ -272,7 +286,9 @@
         "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "format": "^d{3,4}$",
+      "maxLength": 4
     },
     "ENTRY_MODE": {
       "manualName": "MODO_ENTRADA",
@@ -294,7 +310,15 @@
         "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
-      }
+      },
+      "validValues": [
+        "MANUAL",
+        "BANDA",
+        "MAGSTRIPE",
+        "CHIP",
+        "CONTACTLESSCHIP",
+        "CONTACTLESSBANDA"
+      ]
     },
     "RESPONSE_LANGUAGE": {
       "manualName": "IDIOMA_RESPUESTA",
@@ -316,7 +340,13 @@
         "VERIFY_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "validValues": [
+        "ES",
+        "EN",
+        "01",
+        "02"
+      ]
     },
     "CUSTOMER_REF1": {
       "manualName": "REF_CLIENTE1",
