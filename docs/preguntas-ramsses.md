@@ -92,3 +92,30 @@
 | P1.2, P1.3 | Mapeos ambiguos | F4 (se pueden marcar `ambiguous: true`) |
 | P2.1, P2.2 | Logs Tarjeta Presente | F5/F6/F7 |
 | P6.1 | AMEX en Tradicional | F4 (se puede modelar como subEsquema AMEX) |
+| P10.1, P10.2, P10.3 | **3% restante de cobertura** — AMEX, MerchantDefinedData, validValues | Incremental |
+
+---
+
+## 10. Campos para el 3% restante de cobertura (~97% → 100%)
+
+> Estos campos ya están identificados pero no implementados porque son opcionales, dinámicos o requieren confirmación de negocio. Se agregan incrementalmente cuando haya un caso de uso real.
+
+- **P10.1** — **Campos AMEX en Comercio Electrónico Tradicional** (~20 campos opcionales):
+  - `DOMICILIO`, `CODIGO_POSTAL`, `TELEFONO`, `CORREO_ELECTRONICO`
+  - `DOMICILIO_ENTREGA`, `CODIGO_POSTAL_ENTREGA`, `TELEFONO_ENTREGA`, `CORREO_ELECTRONICO_ENTREGA`
+  - `NOMBRE_CLIENTE_FACTURA`, `NOMBRE_CLIENTE_ENTREGA`
+  - `EQUIPO_NOMBRE_CLIENTE`, `DATOS_BROWSER`, `DEPARTAMENTO_TIENDA`
+  - `PRODUCTO_1..3`, `CANTIDAD_1..3`, `PRECIO_UNITARIO_1..3`
+  - **Pregunta**: ¿Son obligatorios (`R`) cuando la marca es AMEX para VENTA/PREAUTH, o siguen siendo `O` siempre? El manual los lista como opcionales pero algunos comercios los necesitan para aprobación.
+  - **Impacto**: +20 campos al JSON de Tradicional (solo para `AUTH_AMEX`/`PREAUTH_AMEX`).
+
+- **P10.2** — **Campos MerchantDefinedData de Cybersource** (dinámicos):
+  - El log real de Cybersource (`LOG CYBERSOURCE.txt`) muestra: `MerchantDefinedData_field1`, `field2`, `field8`, `field9`, `field12`, `field17`.
+  - Estos son **campos personalizados por comercio** — no estandarizables en un JSON fijo.
+  - **Pregunta**: ¿Se deben validar como `R` (si el comercio los declara en su integración) o ignorarlos siempre? ¿Hay un catálogo de qué `field[N]` es obligatorio por giro/producto?
+  - **Impacto**: requiere un mecanismo de "campos dinámicos declarados por el usuario" (fuera del JSON estático actual).
+
+- **P10.3** — **Validación de dominios (validValues)** para campos enum:
+  - El glosario ya tiene `validValues` para `MODE` (PRD/AUT/DEC/RND), `RESPONSE_LANGUAGE` (ES/EN), `Card_cardType` (001/002), `ECI` (01/02/05/06/07), etc.
+  - **Pregunta**: ¿El bot debe **rechazar** transacciones con valores fuera del dominio (ej. `MODE=TEST`), o solo **advertir**?
+  - **Impacto**: cambio en `FieldRequirementValueObject.evaluateDetailed()` para validar contra `validValues` cuando estén definidos. Bajo esfuerzo técnico, alto impacto en calidad de validación.

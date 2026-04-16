@@ -14,9 +14,15 @@
       "dataType": "alphanum(60)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_lastName": {
@@ -25,9 +31,15 @@
       "dataType": "alphanum(60)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_street": {
@@ -36,9 +48,15 @@
       "dataType": "alphanum(60)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_streetNumber": {
@@ -47,9 +65,15 @@
       "dataType": "alphanum(10)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_streetNumber2": {
@@ -58,9 +82,15 @@
       "dataType": "alphanum(10)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O"
       }
     },
     "BillTo_street2Col": {
@@ -69,9 +99,15 @@
       "dataType": "alphanum(60)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_street2Del": {
@@ -80,9 +116,15 @@
       "dataType": "alphanum(60)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_city": {
@@ -91,9 +133,15 @@
       "dataType": "alphanum(50)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_state": {
@@ -102,9 +150,15 @@
       "dataType": "alphanum(2)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_country": {
@@ -113,9 +167,15 @@
       "dataType": "alphanum(2)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_phoneNumber": {
@@ -124,9 +184,15 @@
       "dataType": "numeric(15)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_postalCode": {
@@ -135,9 +201,15 @@
       "dataType": "alphanum(10)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_email": {
@@ -146,9 +218,15 @@
       "dataType": "email",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "BillTo_customerID": {
@@ -157,9 +235,15 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O"
       }
     },
     "BillTo_customerPassword": {
@@ -168,9 +252,15 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O"
       }
     },
     "BillTo_dateOfBirth": {
@@ -179,9 +269,15 @@
       "dataType": "date",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O"
       }
     },
     "BillTo_hostname": {
@@ -190,9 +286,15 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "POSTAUTH_AMEX": "O"
       }
     },
     "Card_accountNumber": {
@@ -201,9 +303,15 @@
       "dataType": "numeric(19)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Card_cardType": {
@@ -213,9 +321,15 @@
       "ambiguous": false,
       "note": "Valores: 001 (VISA) | 002 (MASTERCARD)",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Card_expirationMonth": {
@@ -224,9 +338,15 @@
       "dataType": "numeric(2)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Card_expirationYear": {
@@ -235,9 +355,15 @@
       "dataType": "numeric(4)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "DeviceFingerprintID": {
@@ -246,9 +372,15 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Name": {
@@ -257,9 +389,15 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Password": {
@@ -268,9 +406,15 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "MerchantNumber": {
@@ -279,9 +423,15 @@
       "dataType": "numeric(9)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "TerminalId": {
@@ -290,9 +440,15 @@
       "dataType": "numeric",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "OrderId": {
@@ -301,9 +457,146 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
+      }
+    },
+    "ShipTo_firstName": {
+      "manualName": "ShipTo_firstName",
+      "displayName": "ShipTo First Name",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_lastName": {
+      "manualName": "ShipTo_lastName",
+      "displayName": "ShipTo Last Name",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_street": {
+      "manualName": "ShipTo_street",
+      "displayName": "ShipTo Street",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_streetNumber": {
+      "manualName": "ShipTo_streetNumber",
+      "displayName": "ShipTo Street Number",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_city": {
+      "manualName": "ShipTo_city",
+      "displayName": "ShipTo City",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_state": {
+      "manualName": "ShipTo_state",
+      "displayName": "ShipTo State",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_country": {
+      "manualName": "ShipTo_country",
+      "displayName": "ShipTo Country",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_postalCode": {
+      "manualName": "ShipTo_postalCode",
+      "displayName": "ShipTo Postal Code",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_phoneNumber": {
+      "manualName": "ShipTo_phoneNumber",
+      "displayName": "ShipTo Phone Number",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_shippingMethod": {
+      "manualName": "ShipTo_shippingMethod",
+      "displayName": "ShipTo Shipping Method",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "ShipTo_email": {
+      "manualName": "ShipTo_email",
+      "displayName": "ShipTo Email",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
+    },
+    "PurchaseTotals_currency": {
+      "manualName": "PurchaseTotals_currency",
+      "displayName": "Purchase Currency",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Valores: MXN, USD",
+      "rules": {
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R"
+      }
+    },
+    "PurchaseTotals_grandTotalAmount": {
+      "manualName": "PurchaseTotals_grandTotalAmount",
+      "displayName": "Purchase Grand Total",
+      "dataType": "decimal",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R"
       }
     }
   }

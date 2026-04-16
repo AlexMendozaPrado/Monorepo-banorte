@@ -1,0 +1,36 @@
+VENTA MC - ESQUEMA 4 CON AGP (DLOCAL)
+********************************************************************************
+[27/05/2025 16:08:26] SE RECIBIO POST HTTP DESDE LA IP: 99.80.135.225
+CARD_NUMBER:          [518899******7492]
+CMD_TRANS:            [AUTH]
+MERCHANT_ID:          [9342244]
+SUB_MERCHANT:         [ECOFLOWCOM]
+RESPONSE_LANGUAGE:    [EN]
+CONTROL_NUMBER:       [94784155462025052722082685]
+TERMINAL_ID:          [93422441]
+AGGREGATOR_ID:        [5299825]
+USER:                 [a9342244]
+AMOUNT:               [37999.00]
+CUSTOMER_REF3:        [9478415546]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [DLOCAL]
+MODE:                 [PRD]
+NUMERO_BIN:           [518899]
+********************************************************************************
+[27/05/2025 16:08:27] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.135.225
+AUTH_CODE:            [010431]
+CUST_RSP_DATE:        [20250527 16:08:27.673]
+AUTH_RSP_DATE:        [20250527 16:08:27.670]
+CARD_TYPE:            [CREDITO   ]
+TEXT:                 [Approved]
+ISSUING_BANK:         [BANAMEX   ]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [94784155462025052722082685]
+CUST_REQ_DATE:        [20250527 16:08:26.949]
+REFERENCE:            [140374723108]
+AUTH_RESULT:          [00]
+CARD_BRAND:           [MASTERCARD]
+MERCHANT_ID:          [9342244]
+AUTH_REQ_DATE:        [20250527 16:08:26.974]
+NUMERO_BIN:           [518899]
+********************************************************************************

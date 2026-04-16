@@ -1,0 +1,62 @@
+VENTA VISA - ESQUEMA 1 TASA NATURAL (ZIGU)
+********************************************************************************
+[16/12/2025 08:24:57] SE RECIBIO POST HTTP DESDE LA IP: 66.23.212.68
+CARD_NUMBER:          [542418******1734]
+GATEWAY_ID:           [00000605483]
+CMD_TRANS:            [AUTH]
+COF:                  [4]
+AMOUNT_TYPE:          [V]
+USER:                 [a9607773]
+CONTROL_NUMBER:       [6535824458]
+TERMINAL_ID:          [96077731]
+RESPONSE_LANGUAGE:    [EN]
+CUST_REF3:            []
+PAYMENT_INFO:         [2]
+AMOUNT:               [19.97]
+MERCHANT_ID:          [9607773]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [ZIGU]
+MODE:                 [PRD]
+PAYMENT_IND:          [U]
+NUMERO_BIN:           [542418]
+********************************************************************************
+[16/12/2025 08:24:58] SE ENVIO RESPUESTA HTTP HACIA LA IP: 66.23.212.68
+AUTH_CODE:            [46802P]
+CUST_RSP_DATE:        [20251216 08:24:58.010]
+AUTH_RSP_DATE:        [20251216 08:24:58.007]
+CARD_TYPE:            [CREDITO   ]
+TEXT:                 [Approved]
+ISSUING_BANK:         [EXTRANJERA]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [6535824458]
+CUST_REQ_DATE:        [20251216 08:24:57.452]
+REFERENCE:            [140559968829]
+AUTH_RESULT:          [00]
+CARD_BRAND:           [MASTERCARD]
+MERCHANT_ID:          [9607773]
+AUTH_REQ_DATE:        [20251216 08:24:57.482]
+NUMERO_BIN:           [542418]
+********************************************************************************
+
+CANCELACION - ESQUEMA 1 (ZIGU)
+********************************************************************************
+[16/12/2025 08:30:10] SE RECIBIO POST HTTP DESDE LA IP: 66.23.212.68
+CMD_TRANS:            [VOID]
+USER:                 [a9607773]
+CONTROL_NUMBER:       [6535824459]
+TERMINAL_ID:          [96077731]
+RESPONSE_LANGUAGE:    [EN]
+MERCHANT_ID:          [9607773]
+MODE:                 [PRD]
+REFERENCE:            [140559968829]
+ENTRY_MODE:           [MANUAL]
+********************************************************************************
+[16/12/2025 08:30:11] SE ENVIO RESPUESTA HTTP HACIA LA IP: 66.23.212.68
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [6535824459]
+REFERENCE:            [140559968830]
+AUTH_RESULT:          [00]
+TEXT:                 [Approved]
+CARD_BRAND:           [MASTERCARD]
+MERCHANT_ID:          [9607773]
+********************************************************************************

@@ -15,9 +15,15 @@
       "ambiguous": false,
       "note": "Pre-3DS: input enviado al servicio 3DS por el comercio.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Total": {
@@ -26,9 +32,15 @@
       "dataType": "decimal",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "CardType": {
@@ -38,9 +50,15 @@
       "ambiguous": false,
       "note": "Valores: VISA | MASTERCARD | AMEX",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "MerchantId": {
@@ -49,9 +67,15 @@
       "dataType": "numeric(9)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "MerchantName": {
@@ -60,9 +84,15 @@
       "dataType": "alphanum(25)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "MerchantCity": {
@@ -71,9 +101,15 @@
       "dataType": "alphanum(13)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Cert3D": {
@@ -83,9 +119,15 @@
       "ambiguous": true,
       "note": "Ambiguo: manual indica valor 200 (auth exitoso) pero logs muestran 03. Mapping Cert3D↔ESTATUS_3D pendiente confirmación.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "ECI": {
@@ -95,9 +137,15 @@
       "ambiguous": false,
       "note": "Valores: 01, 02, 05, 06, 07",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "XID": {
@@ -107,9 +155,15 @@
       "ambiguous": true,
       "note": "XID aplica a VISA/AMEX (R); MC no lo genera (N/A). Si retorna nulo/blanco, NO enviar en POST.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "N/A", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "N/A",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "N/A",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "N/A",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "CAVV": {
@@ -119,9 +173,15 @@
       "ambiguous": false,
       "note": "R para VISA/MC/AMEX. Si retorna nulo/blanco, NO enviar en POST.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
       }
     },
     "Version3D": {
@@ -131,9 +191,30 @@
       "ambiguous": false,
       "note": "Valor fijo = 2",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "POSTAUTH_AMEX": "R"
+      }
+    },
+    "UCAF": {
+      "manualName": "UCAF",
+      "displayName": "Universal Cardholder Auth Field",
+      "dataType": "alphanum",
+      "ambiguous": true,
+      "note": "Campo post-3DS para ciertos flujos MC. Pendiente confirmación P1.3.",
+      "rules": {
+        "AUTH_VISA": "N/A",
+        "AUTH_MC": "O",
+        "PREAUTH_VISA": "N/A",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "N/A",
+        "POSTAUTH_MC": "O"
       }
     }
   }

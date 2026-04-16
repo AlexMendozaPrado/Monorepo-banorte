@@ -1,0 +1,38 @@
+
+
+
+********************************************************************************
+[2026/04/14 02:43:13] RECIBIENDO PETICION DE COMERCIO, FOLIO DE TRANSACCION: 9905419_140426_1776156193609
+MerchantId:               [9905419]
+MerchantName:             [BOLETERA RED MUSIC]
+MerchantCity:             [MEXICO]
+Card:                     [41891431******56]
+CardType:                 [VISA]
+Total:                    [4156]
+Cert3D:                   [03]
+ForwardPath:              [https://arjona.funticket.mx/onsale/en/payCompleted?localizador=J3034L2&idEmpresaFormaPago=112&tkn_c=07d4209e-3a61-438e-803e-a1446fedcaa1]
+Reference3D:              [4281440n1]
+Version3D:                [2]
+PARAMETROS CYBERSOURCE VERSION 2 
+Nombre:                   [Gloria viviana]
+Apellido:                 [Pina Angeles ]
+Correo electronico:       [vipdf84@gmail.com]
+Telefono movil:           [5539778132]
+Calle:                    [San Antonio Tomatlan 87 A 105]
+Ciudad:                   [Venustiano Carranza]
+Estado:                   [EM]
+Pais:                     [MX]
+Codigo Postal:            [15100]
+Tipo Credito:             [DB]
+********************************************************************************
+********************************************************************************
+[2026/04/14 02:43:49] ENVIANDO RESPUESTA A COMERCIO, FOLIO DE TRANSACCION: 9905419_140426_1776156193609
+**********TRANSACCION CERTIFICADA**********
+Status:                   [200]
+CardType:                 [VISA]
+Total:                    [4156]
+Reference3D:              [4281440n1]
+ECI:                      [05]
+XID:                      [0005010469201900000657704841047500000000]
+CAVV:                     [0005010469201900000657704841047500000000]
+********************************************************************************

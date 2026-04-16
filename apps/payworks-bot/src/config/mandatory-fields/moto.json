@@ -13,13 +13,20 @@
       "dataType": "numeric(9)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "R", "VERIFY_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R",
+        "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "USER": {
@@ -28,13 +35,20 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "R", "VERIFY_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R",
+        "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "PASSWORD": {
@@ -44,13 +58,20 @@
       "ambiguous": true,
       "note": "Usually masked in logs as PASSWORD or CLAVE_USR; mapping pending log confirmation.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "R", "VERIFY_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R",
+        "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "TERMINAL_ID": {
@@ -59,13 +80,20 @@
       "dataType": "numeric",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "R", "VERIFY_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R",
+        "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "CMD_TRANS": {
@@ -75,13 +103,20 @@
       "ambiguous": false,
       "note": "Valores: VENTA|AUTH | PREAUTH | POSTAUTH | DEVOLUCION|REFUND | CANCELACION|VOID | REVERSA|REVERSAL | VERIFICACION|VERIFY",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "R", "VERIFY_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R",
+        "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "AMOUNT": {
@@ -90,13 +125,20 @@
       "dataType": "decimal",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       }
     },
     "MODE": {
@@ -106,13 +148,20 @@
       "ambiguous": false,
       "note": "Valores: PRD|AUT|DEC|RND",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "R", "VERIFY_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R",
+        "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "REFERENCE": {
@@ -121,13 +170,20 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "R",
+        "VOID_MC": "R",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "R",
+        "REVERSAL_MC": "R"
       }
     },
     "CONTROL_NUMBER": {
@@ -136,13 +192,20 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "R",
+        "REFUND_MC": "R",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
       }
     },
     "CARD_NUMBER": {
@@ -151,13 +214,20 @@
       "dataType": "masked",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       }
     },
     "EXP_DATE": {
@@ -166,13 +236,20 @@
       "dataType": "MMYY",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       }
     },
     "SECURITY_CODE": {
@@ -181,13 +258,20 @@
       "dataType": "numeric(3-4)",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       }
     },
     "ENTRY_MODE": {
@@ -196,13 +280,20 @@
       "dataType": "enum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "PREAUTH_VISA": "R",
+        "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R",
+        "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A"
       }
     },
     "RESPONSE_LANGUAGE": {
@@ -211,13 +302,20 @@
       "dataType": "enum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
       }
     },
     "CUSTOMER_REF1": {
@@ -226,13 +324,20 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
       }
     },
     "CUSTOMER_REF2": {
@@ -241,13 +346,20 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
       }
     },
     "CUSTOMER_REF3": {
@@ -256,13 +368,87 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
+      }
+    },
+    "CUSTOMER_REF4": {
+      "manualName": "REF_CLIENTE4",
+      "displayName": "Referencia Cliente 4",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
+      }
+    },
+    "CUSTOMER_REF5": {
+      "manualName": "REF_CLIENTE5",
+      "displayName": "Referencia Cliente 5",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
+      }
+    },
+    "MARKETPLACE_TX": {
+      "manualName": "MARKETPLACE_TX",
+      "displayName": "Marketplace Transaction",
+      "dataType": "alphanum",
+      "ambiguous": true,
+      "note": "P6.2: caso de uso no confirmado con Ramsses",
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "VOID_VISA": "O",
+        "VOID_MC": "O",
+        "REFUND_VISA": "O",
+        "REFUND_MC": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
+        "VERIFY_VISA": "O",
+        "VERIFY_MC": "O",
+        "REVERSAL_VISA": "O",
+        "REVERSAL_MC": "O"
       }
     }
   }
