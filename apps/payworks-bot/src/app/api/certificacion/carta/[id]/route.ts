@@ -68,7 +68,7 @@ export async function GET(
       fechaEmision: formatDate(session.createdAt),
       versionManual: integrationVO.getManualVersion(),
       tituloCertificacion: `CERTIFICACIÓN ${integrationVO.getDisplayName().toUpperCase()}`,
-      coordinadorCertificacion: undefined,
+      coordinadorCertificacion: session.coordinadorCertificacion,
       nombreComercio: afiliacion?.getDisplayLabel() ?? session.merchantName,
       rfc: afiliacion?.rfc,
       numeroCliente: afiliacion?.numeroCliente,

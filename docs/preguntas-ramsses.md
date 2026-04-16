@@ -93,6 +93,8 @@
 | P2.1, P2.2 | Logs Tarjeta Presente | F5/F6/F7 |
 | P6.1 | AMEX en Tradicional | F4 (se puede modelar como subEsquema AMEX) |
 | P10.1, P10.2, P10.3 | **3% restante de cobertura** — AMEX, MerchantDefinedData, validValues | Incremental |
+| P11.1, P11.2, P11.3 | Formato MONTO, moneda, BIN | Incremental |
+| P12.1 | Coordinador certificación — ¿quién llena este campo? | F9 (carta) |
 
 ---
 
@@ -119,3 +121,14 @@
   - El glosario ya tiene `validValues` para `MODE` (PRD/AUT/DEC/RND), `RESPONSE_LANGUAGE` (ES/EN), `Card_cardType` (001/002), `ECI` (01/02/05/06/07), etc.
   - **Pregunta**: ¿El bot debe **rechazar** transacciones con valores fuera del dominio (ej. `MODE=TEST`), o solo **advertir**?
   - **Impacto**: cambio en `FieldRequirementValueObject.evaluateDetailed()` para validar contra `validValues` cuando estén definidos. Bajo esfuerzo técnico, alto impacto en calidad de validación.
+
+## 11. Reglas adicionales detectadas en auditoría final
+
+- **P11.1** — **Formato de MONTO**: ¿los decimales son obligatorios (siempre `1500.00`) o el entero sin decimales es válido (`1500`)? La regex actual acepta ambos.
+- **P11.2** — **Moneda**: ¿MXN es implícito en todos los productos TNP? ¿Hay un campo `CURRENCY` que debamos validar? ¿USD es permitido para ciertos productos (Cybersource muestra `PurchaseTotals_currency: USD` en logs reales)?
+- **P11.3** — **NUMERO_BIN**: aparece en los logs reales de agregadores (6 dígitos) pero no está en las matrices del manual. ¿Se debe validar como campo adicional? ¿Es R u O?
+
+## 12. Carta de certificación — campos de afiliación
+
+- **P12.1** — **Coordinador de certificación**: en el ejemplo de carta aparece "Fabio Serrano" como coordinador. ¿Este campo lo ingresa el usuario manualmente al iniciar la corrida, o es un valor fijo por equipo/proyecto? ¿Dónde se obtiene?
+- **P12.2** — **Responsable técnico del comercio** (nombre, email, teléfono, dirección): ¿todos estos datos vienen del CSV de afiliaciones, o el usuario los captura manualmente? El CSV de `NPAYW.AFILIACIONES` puede no tener columnas de contacto personal.

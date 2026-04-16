@@ -11,6 +11,10 @@ export interface CertificationSession {
   operationMode: OperationMode;
   results: ValidationResult[];
   createdAt: Date;
+  coordinadorCertificacion?: string;
+  responsableNombre?: string;
+  responsableEmail?: string;
+  responsableTelefono?: string;
 }
 
 export class CertificationSessionEntity implements CertificationSession {
@@ -21,6 +25,10 @@ export class CertificationSessionEntity implements CertificationSession {
     public readonly operationMode: OperationMode,
     public readonly results: ValidationResult[],
     public readonly createdAt: Date,
+    public readonly coordinadorCertificacion?: string,
+    public readonly responsableNombre?: string,
+    public readonly responsableEmail?: string,
+    public readonly responsableTelefono?: string,
   ) {
     this.validateEntity();
   }
