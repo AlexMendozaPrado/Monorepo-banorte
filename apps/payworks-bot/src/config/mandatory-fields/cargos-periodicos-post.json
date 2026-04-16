@@ -189,8 +189,8 @@
       "dataType": "MMYY",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
         "REFUND_VISA": "N/A",
         "REFUND_MC": "N/A",
         "VOID_VISA": "N/A",
@@ -199,7 +199,8 @@
         "REVERSAL_MC": "N/A"
       },
       "format": "^\\d{4}$",
-      "maxLength": 4
+      "maxLength": 4,
+      "note": "Relaxed R → O: FECHA_EXP no aparece en logs reales (PCI masking). Validado en envío del comercio, no contra log."
     },
     "ENTRY_MODE": {
       "manualName": "MODO_ENTRADA",

@@ -249,23 +249,24 @@
       "dataType": "MMYY",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
         "VOID_VISA": "N/A",
         "VOID_MC": "N/A",
         "REFUND_VISA": "N/A",
         "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O",
+        "POSTAUTH_MC": "O",
         "VERIFY_VISA": "N/A",
         "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
       "format": "^\\d{4}$",
-      "maxLength": 4
+      "maxLength": 4,
+      "note": "Relaxed R → O: FECHA_EXP no aparece en logs reales (PCI masking). Validado en envío del comercio, no contra log."
     },
     "SECURITY_CODE": {
       "manualName": "CODIGO_SEGURIDAD",
