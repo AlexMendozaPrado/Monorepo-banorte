@@ -281,7 +281,7 @@
         "REVERSAL_MC": "O",
         "REVERSAL_AMEX": "O"
       },
-      "format": "^d{1,16}(.d{1,2})?$",
+      "format": "^\\d{1,16}(\\.\\d{1,2})?$",
       "maxLength": 18
     },
     "customerRef1": {

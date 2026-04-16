@@ -142,7 +142,7 @@
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
-      "format": "^d{1,16}(.d{1,2})?$",
+      "format": "^\\d{1,16}(\\.\\d{1,2})?$",
       "maxLength": 18
     },
     "MODE": {
@@ -264,7 +264,7 @@
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
-      "format": "^d{4}$",
+      "format": "^\\d{4}$",
       "maxLength": 4
     },
     "SECURITY_CODE": {
@@ -288,7 +288,7 @@
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
-      "format": "^d{3,4}$",
+      "format": "^\\d{3,4}$",
       "maxLength": 4,
       "note": " [PCI-DSS: no se logea, se valida solo al envío del comercio, no contra log]"
     },

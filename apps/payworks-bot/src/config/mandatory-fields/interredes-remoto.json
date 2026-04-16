@@ -154,7 +154,7 @@
         "VERIFY_MC": "N/A",
         "VERIFY_AMEX": "N/A"
       },
-      "format": "^d{1,16}(.d{1,2})?$",
+      "format": "^\\d{1,16}(\\.\\d{1,2})?$",
       "maxLength": 18
     },
     "REFERENCE": {

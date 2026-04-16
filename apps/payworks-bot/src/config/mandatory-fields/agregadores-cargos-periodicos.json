@@ -127,7 +127,7 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
       },
-      "format": "^d{1,16}(.d{1,2})?$",
+      "format": "^\\d{1,16}(\\.\\d{1,2})?$",
       "maxLength": 18
     },
     "REFERENCE": {
@@ -197,7 +197,7 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
       },
-      "format": "^d{4}$",
+      "format": "^\\d{4}$",
       "maxLength": 4,
       "note": "En logs de agregadores no aparece (masked por PCI). Validado en envío del comercio, no en log."
     },
@@ -216,7 +216,7 @@
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
-      "format": "^d{3,4}$",
+      "format": "^\\d{3,4}$",
       "maxLength": 4,
       "note": " [PCI-DSS: no se logea, se valida solo al envío del comercio, no contra log]"
     },

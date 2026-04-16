@@ -129,7 +129,7 @@
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
-      "format": "^d{1,16}(.d{1,2})?$",
+      "format": "^\\d{1,16}(\\.\\d{1,2})?$",
       "maxLength": 18
     },
     "REFERENCE": {
@@ -198,7 +198,7 @@
         "REVERSAL_VISA": "N/A",
         "REVERSAL_MC": "N/A"
       },
-      "format": "^d{4}$",
+      "format": "^\\d{4}$",
       "maxLength": 4
     },
     "ENTRY_MODE": {
