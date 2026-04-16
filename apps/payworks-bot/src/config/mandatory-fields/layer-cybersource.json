@@ -607,6 +607,73 @@
         "AUTH_VISA": "R",
         "AUTH_MC": "R"
       }
+    },
+    "reasonCode": {
+      "manualName": "reasonCode",
+      "displayName": "Código de Razón Cybersource",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Regla 25: 100=Success, 101=Missing fields, 102=Invalid data, 150=System error, 200+=Fraud",
+      "validValues": [
+        "100",
+        "101",
+        "102",
+        "110",
+        "150",
+        "151",
+        "152",
+        "200",
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "207",
+        "208",
+        "210",
+        "211",
+        "221",
+        "222",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "236",
+        "240",
+        "250",
+        "400",
+        "450",
+        "451",
+        "452",
+        "453",
+        "454",
+        "455",
+        "456",
+        "457",
+        "458",
+        "459",
+        "460",
+        "475",
+        "476",
+        "481",
+        "520"
+      ],
+      "rules": {
+        "AUTH_VISA": "R",
+        "AUTH_MC": "R"
+      }
+    },
+    "afsReply_afsResult": {
+      "manualName": "afsReply_afsResult",
+      "displayName": "AFS Reply Result",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Fraud score resultado",
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O"
+      }
     }
   }
 }

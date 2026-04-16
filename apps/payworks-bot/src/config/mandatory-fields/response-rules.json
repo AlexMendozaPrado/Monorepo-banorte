@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "note": "Reglas de validación de campos de RESPUESTA. Se aplican al log de respuesta del servlet, no al request. Uso futuro."
+  },
+  "PAYW_RESULT": {
+    "manualName": "RESULTADO_PAYW",
+    "displayName": "Resultado Payworks",
+    "dataType": "enum",
+    "ambiguous": false,
+    "validValues": [
+      "A",
+      "D",
+      "R",
+      "T"
+    ],
+    "note": "A=Aprobada, D=Declinada, R=Rechazada, T=Sin respuesta"
+  },
+  "AUTH_RESULT": {
+    "manualName": "RESULTADO_AUT",
+    "displayName": "Resultado Autorizador",
+    "dataType": "numeric(2)",
+    "ambiguous": false,
+    "validValues": [
+      "00",
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14"
+    ],
+    "note": "00=Aprobada"
+  },
+  "AUTH_CODE": {
+    "manualName": "CODIGO_AUT",
+    "displayName": "Código de Autorización",
+    "dataType": "alphanum(6)",
+    "ambiguous": false,
+    "maxLength": 6
+  },
+  "CARD_BRAND": {
+    "manualName": "MARCA_TARJETA",
+    "displayName": "Marca de Tarjeta",
+    "dataType": "enum",
+    "ambiguous": false,
+    "validValues": [
+      "VISA",
+      "MASTERCARD",
+      "AMEX"
+    ]
+  },
+  "CARD_TYPE": {
+    "manualName": "TIPO_TARJETA",
+    "displayName": "Tipo de Tarjeta",
+    "dataType": "enum",
+    "ambiguous": false,
+    "validValues": [
+      "CREDITO",
+      "DEBITO"
+    ]
+  },
+  "AGGREGATOR_REF": {
+    "manualName": "REFERENCIA_AGREGADOR",
+    "displayName": "Referencia de Agregador",
+    "dataType": "alphanum",
+    "ambiguous": true,
+    "note": "Regla 26: campo de respuesta para rastreo de agregadores. Nombre de log no confirmado."
+  }
+}

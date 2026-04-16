@@ -250,7 +250,8 @@
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R",
         "REVERSAL_AMEX": "R"
-      }
+      },
+      "maxLength": 15
     },
     "CONTROL_NUMBER": {
       "manualName": "NUMERO_CONTROL",
@@ -502,7 +503,8 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O",
         "REVERSAL_AMEX": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF2": {
       "manualName": "REF_CLIENTE2",
@@ -531,7 +533,8 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O",
         "REVERSAL_AMEX": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF3": {
       "manualName": "REF_CLIENTE3",
@@ -560,7 +563,8 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O",
         "REVERSAL_AMEX": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF4": {
       "manualName": "REF_CLIENTE4",
@@ -589,7 +593,8 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O",
         "REVERSAL_AMEX": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF5": {
       "manualName": "REF_CLIENTE5",
@@ -618,6 +623,102 @@
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O",
         "REVERSAL_AMEX": "O"
+      },
+      "maxLength": 30
+    },
+    "PLAN_TYPE": {
+      "manualName": "TIPO_PLAN",
+      "displayName": "Tipo de Plan (Diferidos Q6)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Q6 Pagos diferidos: 03=Sin intereses, 05=Diferido, 07=MSI",
+      "validValues": [
+        "03",
+        "05",
+        "07"
+      ],
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A",
+        "POSTAUTH_MC": "N/A",
+        "POSTAUTH_AMEX": "N/A",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "REFUND_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A",
+        "REVERSAL_AMEX": "N/A",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "VERIFY_AMEX": "N/A"
+      }
+    },
+    "PAYMENT_NUMBER": {
+      "manualName": "NUMERO_PAGOS",
+      "displayName": "Número de Pagos",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "maxLength": 2,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A",
+        "POSTAUTH_MC": "N/A",
+        "POSTAUTH_AMEX": "N/A",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "REFUND_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A",
+        "REVERSAL_AMEX": "N/A",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "VERIFY_AMEX": "N/A"
+      }
+    },
+    "INITIAL_DEFERMENT": {
+      "manualName": "DIFERIMIENTO_INICIAL",
+      "displayName": "Diferimiento Inicial",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "maxLength": 2,
+      "rules": {
+        "AUTH_VISA": "O",
+        "AUTH_MC": "O",
+        "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O",
+        "PREAUTH_MC": "O",
+        "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A",
+        "POSTAUTH_MC": "N/A",
+        "POSTAUTH_AMEX": "N/A",
+        "VOID_VISA": "N/A",
+        "VOID_MC": "N/A",
+        "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A",
+        "REFUND_MC": "N/A",
+        "REFUND_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A",
+        "REVERSAL_MC": "N/A",
+        "REVERSAL_AMEX": "N/A",
+        "VERIFY_VISA": "N/A",
+        "VERIFY_MC": "N/A",
+        "VERIFY_AMEX": "N/A"
       }
     }
   }

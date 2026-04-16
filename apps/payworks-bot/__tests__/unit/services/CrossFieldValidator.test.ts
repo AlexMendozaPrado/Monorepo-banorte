@@ -146,6 +146,65 @@ describe('CrossFieldValidator', () => {
     });
   });
 
+  describe('ShipTo_country ↔ TERMINAL_COUNTRY (regla 22)', () => {
+    it('no genera issue cuando países coinciden', () => {
+      const v = new CrossFieldValidator();
+      v.validateShipToCountryMatch(
+        makeEntity({ ShipTo_country: 'MX' }),
+        makeEntity({ TERMINAL_COUNTRY: 'MX' }),
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('genera issue cuando países no coinciden', () => {
+      const v = new CrossFieldValidator();
+      v.validateShipToCountryMatch(
+        makeEntity({ ShipTo_country: 'US' }),
+        makeEntity({ TERMINAL_COUNTRY: 'MX' }),
+      );
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('ShipTo_country↔TERMINAL_COUNTRY');
+      expect(issues[0].layer).toBe(ValidationLayer.CYBERSOURCE);
+    });
+
+    it('no genera issue cuando alguno de los campos no existe', () => {
+      const v = new CrossFieldValidator();
+      v.validateShipToCountryMatch(makeEntity({}), makeEntity({ TERMINAL_COUNTRY: 'MX' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
+
+  describe('Response fields validation (regla 21)', () => {
+    it('PASS cuando RESULTADO_PAYW es A (Aprobada)', () => {
+      const v = new CrossFieldValidator();
+      v.validateResponseFields(
+        makeEntity({ PAYW_RESULT: 'A' }),
+        [{ field: 'PAYW_RESULT', validValues: ['A', 'D', 'R', 'T'] }],
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('FAIL cuando RESULTADO_PAYW es un valor inválido', () => {
+      const v = new CrossFieldValidator();
+      v.validateResponseFields(
+        makeEntity({ PAYW_RESULT: 'X' }),
+        [{ field: 'PAYW_RESULT', validValues: ['A', 'D', 'R', 'T'] }],
+      );
+      expect(v.getIssues()).toHaveLength(1);
+      expect(v.getIssues()[0].detail).toContain('X');
+    });
+
+    it('no genera issue cuando campo de respuesta no existe', () => {
+      const v = new CrossFieldValidator();
+      v.validateResponseFields(
+        makeEntity({}),
+        [{ field: 'PAYW_RESULT', validValues: ['A', 'D', 'R', 'T'] }],
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
+
   describe('toFieldValidationResults()', () => {
     it('convierte issues a FieldValidationResult[]', () => {
       const v = new CrossFieldValidator();

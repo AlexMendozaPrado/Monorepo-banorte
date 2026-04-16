@@ -145,7 +145,8 @@
         "VOID_MC": "R",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 15
     },
     "CONTROL_NUMBER": {
       "manualName": "NUMERO_CONTROL",
@@ -255,7 +256,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 10
     },
     "CUSTOMER_REF1": {
       "manualName": "REF_CLIENTE1",
@@ -271,7 +273,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF3": {
       "manualName": "REF_CLIENTE3",
@@ -287,7 +290,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     }
   },
   "subEsquemas": {

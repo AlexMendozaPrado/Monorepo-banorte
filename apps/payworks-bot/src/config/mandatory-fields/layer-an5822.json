@@ -16,10 +16,19 @@
         "ambiguous": false,
         "note": "Valor fijo para CIT: U (Unscheduled Customer-Initiated). MasterCard-only; N/A para VISA/AMEX.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
-        }
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": [
+          "U"
+        ]
       },
       "AMOUNT_TYPE": {
         "manualName": "TIPO_MONTO",
@@ -28,10 +37,20 @@
         "ambiguous": false,
         "note": "Valores: V (Variable) | F (Fijo). MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
-        }
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": [
+          "F",
+          "V"
+        ]
       },
       "PAYMENT_INFO": {
         "manualName": "INFO_PAGO",
@@ -40,10 +59,19 @@
         "ambiguous": false,
         "note": "Valor fijo para CIT: 0. MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
-        }
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": [
+          "0"
+        ]
       }
     },
     "MIT": {
@@ -54,9 +82,15 @@
         "ambiguous": false,
         "note": "Referencia a credencial almacenada de la CIT previa. MasterCard-only. Para MOTO usar COF=4.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
         }
       },
       "PAYMENT_IND": {
@@ -66,10 +100,20 @@
         "ambiguous": false,
         "note": "Valor fijo para MIT: 8 (Merchant-Initiated). MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
-        }
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": [
+          "8",
+          "R"
+        ]
       },
       "AMOUNT_TYPE": {
         "manualName": "TIPO_MONTO",
@@ -78,10 +122,20 @@
         "ambiguous": false,
         "note": "Valores: V (Variable) | F (Fijo). MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
-        }
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": [
+          "F",
+          "V"
+        ]
       },
       "PAYMENT_INFO": {
         "manualName": "INFO_PAGO",
@@ -90,10 +144,20 @@
         "ambiguous": false,
         "note": "Valor fijo para MIT: 3 (Tradicional/Cargos Post/Agregadores) o 2 (MOTO). MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
-        }
+          "AUTH_VISA": "N/A",
+          "AUTH_MC": "R",
+          "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A",
+          "PREAUTH_MC": "R",
+          "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A",
+          "POSTAUTH_MC": "R",
+          "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": [
+          "2",
+          "3"
+        ]
       }
     }
   }

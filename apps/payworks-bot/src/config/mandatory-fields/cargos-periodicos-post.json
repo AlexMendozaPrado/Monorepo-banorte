@@ -146,7 +146,8 @@
         "VOID_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "maxLength": 15
     },
     "CONTROL_NUMBER": {
       "manualName": "NUMERO_CONTROL",
@@ -238,7 +239,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 10
     },
     "RESPONSE_LANGUAGE": {
       "manualName": "IDIOMA_RESPUESTA",
@@ -276,7 +278,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF2": {
       "manualName": "REF_CLIENTE2",
@@ -292,7 +295,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF3": {
       "manualName": "REF_CLIENTE3",
@@ -309,7 +313,8 @@
         "VOID_MC": "R",
         "REVERSAL_VISA": "R",
         "REVERSAL_MC": "R"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF4": {
       "manualName": "REF_CLIENTE4",
@@ -325,7 +330,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     },
     "CUSTOMER_REF5": {
       "manualName": "REF_CLIENTE5",
@@ -341,7 +347,8 @@
         "VOID_MC": "O",
         "REVERSAL_VISA": "O",
         "REVERSAL_MC": "O"
-      }
+      },
+      "maxLength": 30
     },
     "MARKETPLACE_TX": {
       "manualName": "MARKETPLACE_TX",

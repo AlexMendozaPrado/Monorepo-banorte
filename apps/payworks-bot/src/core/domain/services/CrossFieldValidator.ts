@@ -85,6 +85,41 @@ export class CrossFieldValidator {
     }
   }
 
+  validateShipToCountryMatch(
+    cybersourceLog: LogEntity | undefined,
+    servletRequest: LogEntity | undefined,
+  ): void {
+    if (!cybersourceLog || !servletRequest) return;
+    const shipCountry = cybersourceLog.getField('ShipTo_country');
+    const terminalCountry = servletRequest.getField('TERMINAL_COUNTRY');
+    if (shipCountry && terminalCountry && shipCountry.trim() !== terminalCountry.trim()) {
+      this.issues.push({
+        field: 'ShipTo_country↔TERMINAL_COUNTRY',
+        rule: 'País de envío Cybersource debe coincidir con país del terminal',
+        detail: `ShipTo_country: "${shipCountry}", TERMINAL_COUNTRY: "${terminalCountry}"`,
+        layer: ValidationLayer.CYBERSOURCE,
+      });
+    }
+  }
+
+  validateResponseFields(
+    servletResponse: LogEntity | undefined,
+    expectedResults: { field: string; validValues: string[] }[],
+  ): void {
+    if (!servletResponse) return;
+    for (const { field, validValues } of expectedResults) {
+      const value = servletResponse.getField(field);
+      if (value && !validValues.includes(value.trim())) {
+        this.issues.push({
+          field,
+          rule: `Campo de respuesta ${field} debe estar en [${validValues.join(', ')}]`,
+          detail: `Valor recibido: "${value.trim()}"`,
+          layer: ValidationLayer.SERVLET,
+        });
+      }
+    }
+  }
+
   getIssues(): CrossValidationIssue[] {
     return [...this.issues];
   }
