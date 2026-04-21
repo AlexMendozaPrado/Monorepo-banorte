@@ -1,6 +1,6 @@
 import { FieldSpec } from './MandatoryFieldsMatrix';
 
-export type FieldRule = 'R' | 'O' | 'N/A' | 'OI';
+export type FieldRule = 'R' | 'O' | 'N/A' | 'OI' | 'PROHIBITED';
 
 const FORBIDDEN_CHARS_REGEX = /[<>|\\{}[\]"*;:#$%&()=éúóü?+'\/]/;
 
@@ -13,7 +13,8 @@ export type FailReason =
   | 'fixed_value_mismatch'
   | 'exceeds_max_length'
   | 'not_masked'
-  | 'should_be_omitted';
+  | 'should_be_omitted'
+  | 'prohibited';
 
 export interface EvaluationResult {
   passes: boolean;
@@ -27,7 +28,7 @@ export class FieldRequirementValueObject {
   }
 
   private validate(): void {
-    if (!['R', 'O', 'N/A', 'OI'].includes(this.value)) {
+    if (!['R', 'O', 'N/A', 'OI', 'PROHIBITED'].includes(this.value)) {
       throw new Error(`Regla de campo invalida: ${this.value}`);
     }
   }
@@ -54,6 +55,17 @@ export class FieldRequirementValueObject {
 
   evaluateDetailed(fieldFound: boolean, fieldValue?: string, spec?: FieldSpec): EvaluationResult {
     if (this.value === 'N/A') return { passes: true };
+
+    if (this.value === 'PROHIBITED') {
+      if (fieldFound && (fieldValue ?? '').trim() !== '') {
+        return {
+          passes: false,
+          reason: 'prohibited',
+          detail: 'Campo no debe enviarse para esta marca/transacción (mandato)',
+        };
+      }
+      return { passes: true };
+    }
 
     if (this.value === 'R') {
       if (!fieldFound) return { passes: false, reason: 'missing' };
@@ -109,6 +121,7 @@ export class FieldRequirementValueObject {
       'O': 'Opcional',
       'N/A': 'No Aplica',
       'OI': 'Opcional (si aplica)',
+      'PROHIBITED': 'Prohibido (no debe enviarse)',
     };
     return names[this.value];
   }

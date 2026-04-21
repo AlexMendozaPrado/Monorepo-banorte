@@ -1,163 +1,193 @@
 {
   "_meta": {
-    "note": "Transversal layer — referenced by IntegrationType.supportedLayers. Mandato AN5822 MasterCard CIT/MIT. Solo aplica a transacciones MC (N/A para VISA/AMEX). CIT = primera transacción (Customer-Initiated), MIT = subsecuente (Merchant-Initiated)."
+    "note": "Transversal layer — Mandato AN5822 MasterCard CIT/MIT. Solo aplica a transacciones MC (N/A para VISA/AMEX). CORRIGE BUG CRÍTICO: IND_PAGO=8 era incorrecto — manuales dicen U (Ecommerce/MOTO/Agreg.CE) o R (Cargos Periódicos). Modela 3 flujos: firstCIT, subseqCIT, subseqMIT. COF=4 solo aplica a Cargos Periódicos Post y Agregadores CP.",
+    "sources": [
+      "Manual Ecommerce Tradicional v2.6.4 (23-Ene-2026) pág. 11-13",
+      "Manual MOTO v1.5 (19-Jun-2025) pág. 9-11",
+      "Manual Cargos Periódicos Post v2.1 (19-Jun-2025) pág. 10-12",
+      "Manual Agregadores CE v2.6.4 (23-Ene-2026) pág. 12-14",
+      "Manual Agregadores CP v2.6.4 (Ene-2026) pág. 11-13"
+    ],
+    "productMapping": {
+      "ECOMMERCE_TRADICIONAL": {
+        "firstCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "0", "COF": null },
+        "subseqCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "3", "COF": null },
+        "subseqMIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "2", "COF": null }
+      },
+      "MOTO": {
+        "firstCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "0", "COF": null },
+        "subseqCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "3", "COF": null },
+        "subseqMIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "2", "COF": null }
+      },
+      "CARGOS_PERIODICOS_POST": {
+        "firstCIT": { "PAYMENT_IND": "R", "AMOUNT_TYPE": ["F", "V"], "PAYMENT_INFO": "0", "COF": null },
+        "subseqMIT": { "PAYMENT_IND": "R", "AMOUNT_TYPE": ["F", "V"], "PAYMENT_INFO": "2", "COF": "4" }
+      },
+      "AGREGADORES_COMERCIO_ELECTRONICO": {
+        "firstCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "0", "COF": null },
+        "subseqCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "3", "COF": null },
+        "subseqMIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "2", "COF": null }
+      },
+      "AGREGADORES_CARGOS_PERIODICOS": {
+        "firstCIT": { "PAYMENT_IND": "R", "AMOUNT_TYPE": ["F", "V"], "PAYMENT_INFO": "0", "COF": null },
+        "subseqMIT": { "PAYMENT_IND": "R", "AMOUNT_TYPE": ["F", "V"], "PAYMENT_INFO": "2", "COF": "4" }
+      },
+      "VENTANA_COMERCIO_ELECTRONICO": {
+        "firstCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "0", "COF": null },
+        "subseqCIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "3", "COF": null },
+        "subseqMIT": { "PAYMENT_IND": "U", "AMOUNT_TYPE": ["V", "F"], "PAYMENT_INFO": "2", "COF": null }
+      }
+    }
   },
-  "integrationType": "ECOMMERCE_TRADICIONAL",
-  "manualVersion": "1.0",
-  "manualDate": "2025-06-19",
-  "displayName": "Capa AN5822 MasterCard CIT/MIT",
+  "integrationType": "LAYER_AN5822",
+  "manualVersion": "2.0",
+  "manualDate": "2026-01-23",
+  "displayName": "Capa AN5822 MasterCard CIT/MIT (3 flujos)",
   "servlet": {},
   "an5822": {
-    "CIT": {
+    "firstCIT": {
+      "_description": "Primera transacción donde el comercio almacena los datos de la tarjeta del cliente con autorización explícita.",
       "PAYMENT_IND": {
         "manualName": "IND_PAGO",
-        "displayName": "Indicador de Pago (CIT)",
+        "displayName": "Indicador de Pago (first CIT)",
         "dataType": "enum",
         "ambiguous": false,
-        "note": "Valor fijo para CIT: U (Unscheduled Customer-Initiated). MasterCard-only; N/A para VISA/AMEX.",
+        "note": "U = Unscheduled (Ecommerce/MOTO/Agreg.CE/VCE) | R = Recurrent (Cargos Periódicos Post y Agreg. CP). MasterCard-only. Valor dinámico por producto.",
         "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
         },
-        "validValues": [
-          "U"
-        ]
+        "validValues": ["U", "R"]
       },
       "AMOUNT_TYPE": {
         "manualName": "TIPO_MONTO",
-        "displayName": "Tipo de Monto (CIT)",
+        "displayName": "Tipo de Monto (first CIT)",
         "dataType": "enum",
         "ambiguous": false,
-        "note": "Valores: V (Variable) | F (Fijo). MasterCard-only.",
+        "note": "V = Variable | F = Fijo. MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
         },
-        "validValues": [
-          "F",
-          "V"
-        ]
+        "validValues": ["F", "V"]
       },
       "PAYMENT_INFO": {
         "manualName": "INFO_PAGO",
-        "displayName": "Información de Pago (CIT)",
-        "dataType": "numeric",
+        "displayName": "Información de Pago (first CIT)",
+        "dataType": "enum",
         "ambiguous": false,
-        "note": "Valor fijo para CIT: 0. MasterCard-only.",
+        "note": "Valor fijo: 0 (Transacción inicial enviada por el Tarjetahabiente). MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
         },
-        "validValues": [
-          "0"
-        ]
+        "validValues": ["0"],
+        "fixedValue": "0"
       }
     },
-    "MIT": {
-      "CIF": {
-        "manualName": "CIF",
-        "displayName": "CIF / COF - Credentials on File (MIT)",
-        "dataType": "alphanum",
-        "ambiguous": false,
-        "note": "Referencia a credencial almacenada de la CIT previa. MasterCard-only. Para MOTO usar COF=4.",
-        "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
-        }
-      },
+    "subseqCIT": {
+      "_description": "Transacción subsecuente iniciada por el tarjetahabiente (Customer-Initiated). Solo aplica a Ecommerce Tradicional, MOTO, Agregadores CE y VCE. NO aplica a Cargos Periódicos.",
+      "_appliesTo": ["ECOMMERCE_TRADICIONAL", "MOTO", "AGREGADORES_COMERCIO_ELECTRONICO", "VENTANA_COMERCIO_ELECTRONICO"],
       "PAYMENT_IND": {
         "manualName": "IND_PAGO",
-        "displayName": "Indicador de Pago (MIT)",
+        "displayName": "Indicador de Pago (subseq CIT)",
         "dataType": "enum",
         "ambiguous": false,
-        "note": "Valor fijo para MIT: 8 (Merchant-Initiated). MasterCard-only.",
+        "note": "Valor fijo: U (Transacción de Tarjetas almacenadas no programada). MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
         },
-        "validValues": [
-          "8",
-          "R"
-        ]
+        "validValues": ["U"],
+        "fixedValue": "U"
       },
       "AMOUNT_TYPE": {
         "manualName": "TIPO_MONTO",
-        "displayName": "Tipo de Monto (MIT)",
+        "displayName": "Tipo de Monto (subseq CIT)",
         "dataType": "enum",
         "ambiguous": false,
-        "note": "Valores: V (Variable) | F (Fijo). MasterCard-only.",
+        "note": "V = Variable | F = Fijo. MasterCard-only.",
         "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
         },
-        "validValues": [
-          "F",
-          "V"
-        ]
+        "validValues": ["F", "V"]
       },
       "PAYMENT_INFO": {
         "manualName": "INFO_PAGO",
-        "displayName": "Información de Pago (MIT)",
+        "displayName": "Información de Pago (subseq CIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "Valor fijo: 3 (Transacción Subsecuente enviada por el Tarjetahabiente). MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": ["3"],
+        "fixedValue": "3"
+      }
+    },
+    "subseqMIT": {
+      "_description": "Transacción subsecuente iniciada por el comercio (Merchant-Initiated). Aplica a todos los productos TNP. Para Cargos Periódicos requiere COF=4.",
+      "PAYMENT_IND": {
+        "manualName": "IND_PAGO",
+        "displayName": "Indicador de Pago (subseq MIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "BUG CORREGIDO: antes era 8 (incorrecto). Valores correctos: U (Ecommerce/MOTO/Agreg.CE/VCE) | R (Cargos Periódicos Post y Agreg. CP). MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": ["U", "R"]
+      },
+      "AMOUNT_TYPE": {
+        "manualName": "TIPO_MONTO",
+        "displayName": "Tipo de Monto (subseq MIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "V = Variable | F = Fijo. MasterCard-only.",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": ["F", "V"]
+      },
+      "PAYMENT_INFO": {
+        "manualName": "INFO_PAGO",
+        "displayName": "Información de Pago (subseq MIT)",
+        "dataType": "enum",
+        "ambiguous": false,
+        "note": "Valor fijo: 2 (Transacción Subsecuente enviada por el Comercio). MasterCard-only. MISMO VALOR EN TODOS LOS PRODUCTOS (corrige nota previa que decía 3 para Tradicional).",
+        "rules": {
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
+          "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",
+          "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "N/A"
+        },
+        "validValues": ["2"],
+        "fixedValue": "2"
+      },
+      "COF": {
+        "manualName": "COF",
+        "displayName": "Card on File indicator (solo Cargos Periódicos)",
         "dataType": "numeric",
         "ambiguous": false,
-        "note": "Valor fijo para MIT: 3 (Tradicional/Cargos Post/Agregadores) o 2 (MOTO). MasterCard-only.",
+        "note": "Valor fijo: 4 (Card on File). SOLO aplica a CARGOS_PERIODICOS_POST y AGREGADORES_CARGOS_PERIODICOS. En Ecommerce/MOTO/Agreg.CE/VCE es N/A (no aparece en manual). MasterCard-only.",
+        "_appliesTo": ["CARGOS_PERIODICOS_POST", "AGREGADORES_CARGOS_PERIODICOS"],
         "rules": {
-          "AUTH_VISA": "N/A",
-          "AUTH_MC": "R",
-          "AUTH_AMEX": "N/A",
-          "PREAUTH_VISA": "N/A",
-          "PREAUTH_MC": "R",
-          "PREAUTH_AMEX": "N/A",
-          "POSTAUTH_VISA": "N/A",
-          "POSTAUTH_MC": "R",
-          "POSTAUTH_AMEX": "N/A"
+          "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A"
         },
-        "validValues": [
-          "2",
-          "3"
-        ]
+        "validValues": ["4"],
+        "fixedValue": "4",
+        "maxLength": 1
       }
     }
   }

@@ -1,6 +1,7 @@
 {
   "_meta": {
-    "note": "F4 — Cargos Periódicos Post manual v2.1. Transactions: VTA (AUTH), DEV (REFUND), CAN (VOID), REV (REVERSAL). No PRE/POS/VERIFY. REF_CLIENTE3 es R. AN5822 MC via layer-an5822.json."
+    "note": "F4 — Cargos Periódicos Post manual v2.1 (19-Jun-2025). Transactions: VTA (AUTH), DEV (REFUND), CAN (VOID), REV (REVERSAL). NO soporta PRE/POS/VERIFY/AMEX. Cambios vs versión anterior: MERCHANT_ID maxLen 7, TERMINAL_ID maxLen 10 (específico de este producto) y ahora R, USER/MODE con maxLen, AMOUNT regex 18 dígitos, REFERENCE numérico 12, ENTRY_MODE solo [MANUAL], MARKETPLACE_TX con PROHIBITED para MC, nuevo ID_GATEWAY con PROHIBITED para VISA. ID_MAC como variable de retorno. AN5822: ver layer-an5822.json (valores correctos para este producto: PAYMENT_IND=R, COF=4 en MIT).",
+    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts"
   },
   "integrationType": "CARGOS_PERIODICOS_POST",
   "manualVersion": "2.1",
@@ -10,19 +11,16 @@
     "MERCHANT_ID": {
       "manualName": "ID_AFILIACION",
       "displayName": "ID Afiliación",
-      "dataType": "numeric(9)",
+      "dataType": "numeric",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
-      "maxLength": 15
+      "maxLength": 7,
+      "format": "^\\d{1,7}$"
     },
     "USER": {
       "manualName": "USUARIO",
@@ -30,139 +28,111 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+      },
+      "maxLength": 20
     },
     "PASSWORD": {
       "manualName": "CLAVE_USR",
       "displayName": "Clave de Usuario",
       "dataType": "alphanum",
       "ambiguous": true,
-      "note": "Masked in logs; mapping pending log confirmation. [PCI-DSS: no se logea, se valida solo al envío del comercio, no contra log]",
+      "note": "PCI-DSS: nunca en logs. Validado en envío del comercio, no contra log.",
       "rules": {
-        "AUTH_VISA": "N/A",
-        "AUTH_MC": "N/A",
-        "REFUND_VISA": "N/A",
-        "REFUND_MC": "N/A",
-        "VOID_VISA": "N/A",
-        "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A",
-        "REVERSAL_MC": "N/A"
-      }
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+      },
+      "maxLength": 20
     },
     "TERMINAL_ID": {
       "manualName": "ID_TERMINAL",
       "displayName": "ID Terminal",
-      "dataType": "numeric",
+      "dataType": "alphanum",
       "ambiguous": false,
+      "note": "FIX: Manual v2.1 dice 'Alfanumérico 10, Sí para cualquier transacción'. En otros productos es 15; en Cargos Periódicos Post es 10. Antes estaba como O/15.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
-      "maxLength": 15
+      "maxLength": 10
     },
     "CMD_TRANS": {
       "manualName": "CMD_TRANS",
       "displayName": "Comando Transacción",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Valores: VENTA | DEVOLUCION | CANCELACION | REVERSA",
+      "note": "Valores: VENTA|AUTH | DEVOLUCION|REFUND | CANCELACION|VOID | REVERSA|REVERSAL. No PREAUT/POSTAUT/VERIFY.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+      },
+      "maxLength": 20
     },
     "MODE": {
       "manualName": "MODO",
       "displayName": "Modo",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Valores: PRD|AUT|DEC|RND",
+      "note": "Alfanumérico 3. Valores: PRD|AUT|DEC|RND",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
-      "validValues": [
-        "PRD",
-        "AUT",
-        "DEC",
-        "RND"
-      ]
+      "validValues": ["PRD", "AUT", "DEC", "RND"],
+      "maxLength": 3
     },
     "AMOUNT": {
       "manualName": "MONTO",
       "displayName": "Monto",
       "dataType": "decimal",
       "ambiguous": false,
+      "note": "Manual: Numérico 18 dígitos y 2 decimales. maxLength 21 = 18 dígitos + '.' + 2 decimales.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "N/A",
-        "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A",
-        "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "format": "^\\d{1,16}(\\.\\d{1,2})?$",
-      "maxLength": 18
+      "format": "^\\d{1,18}(\\.\\d{1,2})?$",
+      "maxLength": 21
     },
     "REFERENCE": {
       "manualName": "REFERENCIA",
       "displayName": "Referencia",
-      "dataType": "alphanum",
+      "dataType": "numeric",
       "ambiguous": false,
+      "note": "Manual: Numérico 12. Cambió de alfanumérico 15 en versión previa.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
-      "maxLength": 15
+      "format": "^\\d{1,12}$",
+      "maxLength": 12
     },
     "CONTROL_NUMBER": {
       "manualName": "NUMERO_CONTROL",
       "displayName": "Número de Control",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual v2.1: Requerida para cualquier transacción o comando. Combinación MERCHANT_ID + CONTROL_NUMBER debe ser única (regla cruzada C7).",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
       "maxLength": 30
     },
@@ -172,15 +142,12 @@
       "dataType": "masked",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "N/A",
-        "REFUND_MC": "N/A",
-        "VOID_VISA": "N/A",
-        "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A",
-        "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
+      "maxLength": 20,
       "mustBeMasked": true
     },
     "EXP_DATE": {
@@ -188,60 +155,58 @@
       "displayName": "Fecha de Expiración",
       "dataType": "MMYY",
       "ambiguous": false,
+      "note": "PCI-DSS: no aparece en logs. Manual dice R para VENTA. Relajado a O por no verificabilidad.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "N/A",
-        "REFUND_MC": "N/A",
-        "VOID_VISA": "N/A",
-        "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A",
-        "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "format": "^\\d{4}$",
-      "maxLength": 4,
-      "note": "Relaxed R → O: FECHA_EXP no aparece en logs reales (PCI masking). Validado en envío del comercio, no contra log."
+      "format": "^(0[1-9]|1[0-2])[0-9]{2}$",
+      "maxLength": 4
+    },
+    "SECURITY_CODE": {
+      "manualName": "CODIGO_SEGURIDAD",
+      "displayName": "Código de Seguridad (CVV/CVC)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "PCI-DSS: nunca en logs.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+      },
+      "format": "^\\d{3,4}$",
+      "maxLength": 4
     },
     "ENTRY_MODE": {
       "manualName": "MODO_ENTRADA",
       "displayName": "Modo de Entrada",
       "dataType": "enum",
       "ambiguous": false,
+      "note": "Cargos Periódicos Post es canal e-commerce (tarjeta NO presente). Solo MANUAL aplica.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "N/A",
-        "REFUND_MC": "N/A",
-        "VOID_VISA": "N/A",
-        "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A",
-        "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "validValues": [
-        "MANUAL",
-        "BANDA",
-        "MAGSTRIPE",
-        "CHIP",
-        "CONTACTLESSCHIP",
-        "CONTACTLESSBANDA"
-      ]
+      "validValues": ["MANUAL"]
     },
     "BATCH": {
       "manualName": "LOTE",
       "displayName": "Lote",
-      "dataType": "numeric",
+      "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual: Alfanumérico, Opcional. En logs de Cargos Periódicos Post suele ser numérico corto.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
-      "maxLength": 10
+      "maxLength": 30
     },
     "RESPONSE_LANGUAGE": {
       "manualName": "IDIOMA_RESPUESTA",
@@ -249,21 +214,13 @@
       "dataType": "enum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
-      "validValues": [
-        "ES",
-        "EN",
-        "01",
-        "02"
-      ]
+      "validValues": ["ES", "EN", "01", "02"],
+      "maxLength": 2
     },
     "CUSTOMER_REF1": {
       "manualName": "REF_CLIENTE1",
@@ -271,14 +228,10 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
       "maxLength": 30
     },
@@ -287,35 +240,28 @@
       "displayName": "Referencia Cliente 2",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "FIX: maxLength era 30, manual dice 16.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
-      "maxLength": 30
+      "maxLength": 16
     },
     "CUSTOMER_REF3": {
       "manualName": "REF_CLIENTE3",
-      "displayName": "Referencia Cliente 3 (obligatoria en Cargos Periódicos)",
+      "displayName": "Referencia Cliente 3 (identificador del suscriptor)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "REF_CLIENTE3 es R en Cargos Periódicos Post (identifica al suscriptor).",
+      "note": "R en Cargos Periódicos Post: identifica al suscriptor. Manual: 'Número de contrato del Tarjetahabiente con el comercio'. Alfanumérico 20.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "REFUND_VISA": "R",
-        "REFUND_MC": "R",
-        "VOID_VISA": "R",
-        "VOID_MC": "R",
-        "REVERSAL_VISA": "R",
-        "REVERSAL_MC": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
-      "maxLength": 30
+      "maxLength": 20
     },
     "CUSTOMER_REF4": {
       "manualName": "REF_CLIENTE4",
@@ -323,14 +269,10 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
       "maxLength": 30
     },
@@ -340,33 +282,60 @@
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
       "maxLength": 30
     },
     "MARKETPLACE_TX": {
       "manualName": "MARKETPLACE_TX",
       "displayName": "Marketplace Transaction",
-      "dataType": "alphanum",
-      "ambiguous": true,
-      "note": "P6.2",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual Cargos Periódicos Post v2.1: Solo Visa, debe viajar en inicial y subsecuentes. NO con MC. Valor fijo = 1. PROHIBITED en MC.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "VOID_VISA": "O",
-        "VOID_MC": "O",
-        "REFUND_VISA": "O",
-        "REFUND_MC": "O",
-        "REVERSAL_VISA": "O",
-        "REVERSAL_MC": "O"
-      }
+        "AUTH_VISA": "O", "AUTH_MC": "PROHIBITED",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+      },
+      "fixedValue": "1",
+      "maxLength": 1
+    },
+    "ID_GATEWAY": {
+      "manualName": "ID_GATEWAY",
+      "displayName": "ID Gateway (Mandato 7118 MC)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Campo del Mandato 7118 MC: Solo MC, solo VENTA. Para agregadores/aliados con Gateway. PROHIBITED en VISA.",
+      "rules": {
+        "AUTH_VISA": "PROHIBITED", "AUTH_MC": "O",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+      },
+      "format": "^\\d{1,11}$",
+      "maxLength": 11
+    }
+  },
+  "responseFields": {
+    "_note": "Campos de retorno específicos de Cargos Periódicos Post v2.1",
+    "ID_MAC": {
+      "manualName": "ID_MAC",
+      "displayName": "ID MAC (Mandato AN7110 MasterCard)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Variable de RETORNO del autorizador. Solo transacciones internacionales MC. U=Prepago, V=Virtual.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "O"
+      },
+      "validValues": ["U", "V"],
+      "maxLength": 1
+    },
+    "PAYW_RESULT_Z": {
+      "_note": "RECORDATORIO: el dominio de PAYW_RESULT en response-rules.json debe incluir 'Z' (Reversa automática por timeout) que el manual v2.1 añade. Tu response-rules.json actual tiene solo [A, D, R, T]."
     }
   }
 }

@@ -1,170 +1,222 @@
 {
   "_meta": {
-    "note": "Reglas de validación de campos de RESPUESTA. Se aplican al log de respuesta del servlet, no al request. Uso futuro."
+    "note": "Reglas de validación de campos de RESPUESTA del servlet Payworks. Se aplican al log de respuesta, no al request. Cambios vs anterior: PAYW_RESULT añade Z (timeout), AUTH_RESULT completa tabla 00-99, PAYW_CODE añade códigos comunes del Anexo A/B, agregado ID_MAC (AN7110 MC), agregado ID_CYBERSOURCE, agregado CUST_RSP_DATE y AUTH_DATE.",
+    "sources": [
+      "Manual MOTO v1.5 pág. 5 (PAYW_RESULT)",
+      "Manual Ecommerce Tradicional v2.6.4 Anexo A (PAYW_CODE, campos de retorno)",
+      "Manual Cargos Periódicos Post v2.1 pág. 5 (Z - timeout)",
+      "Manual API PW2 Seguro v2.4 pág. 20 (tabla AUTH_RESULT)"
+    ]
   },
   "PAYW_RESULT": {
     "manualName": "RESULTADO_PAYW",
     "displayName": "Resultado Payworks",
     "dataType": "enum",
     "ambiguous": false,
-    "validValues": [
-      "A",
-      "D",
-      "R",
-      "T"
-    ],
-    "note": "A=Aprobada, D=Declinada, R=Rechazada, T=Sin respuesta"
+    "note": "FIX: agregado valor Z. Manual MOTO v1.5 y Cargos Periódicos Post v2.1 lo incluyen.",
+    "validValues": ["A", "D", "R", "T", "Z"],
+    "valueDescriptions": {
+      "A": "Aprobada",
+      "D": "Declinada",
+      "R": "Rechazada (por Payworks, no por emisor)",
+      "T": "Sin respuesta del autorizador",
+      "Z": "Reversa automática por timeout"
+    },
+    "maxLength": 1
   },
   "AUTH_RESULT": {
     "manualName": "RESULTADO_AUT",
-    "displayName": "Resultado Autorizador",
-    "dataType": "numeric(2)",
+    "displayName": "Resultado del Autorizador (emisor)",
+    "dataType": "numeric",
     "ambiguous": false,
+    "note": "FIX: tabla completa del Manual API PW2 Seguro v2.4 pág. 20 (y Anexo B de cada manual). Códigos retornados por el autorizador, no por Banorte.",
     "validValues": [
-      "00",
-      "01",
-      "02",
-      "03",
-      "04",
-      "05",
-      "06",
-      "07",
-      "08",
-      "09",
-      "10",
-      "11",
-      "12",
-      "13",
-      "14"
+      "00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
+      "10", "11", "12", "13", "14", "15", "30", "31", "33", "34",
+      "35", "36", "37", "38", "39", "41", "43", "51", "54", "57",
+      "58", "61", "65", "76", "77", "78", "79", "81", "82", "83",
+      "85", "89", "91", "92", "93", "94", "96"
     ],
-    "note": "00=Aprobada"
+    "valueDescriptions": {
+      "00": "Aprobada",
+      "01": "Consulte al emisor de la tarjeta",
+      "02": "Refer to issuer: special condition",
+      "03": "Comercio inválido",
+      "04": "Recoger tarjeta",
+      "05": "Declinado General",
+      "06": "Error",
+      "07": "Recoger tarjeta, condiciones especiales",
+      "08": "Declinado General",
+      "09": "Solicitud en proceso",
+      "10": "Parcialmente Aprobado",
+      "11": "Aprobado (VIP)",
+      "12": "Transacción inválida",
+      "13": "Monto inválido",
+      "14": "Número de tarjeta inválido",
+      "15": "Declinado General",
+      "30": "Formato Erróneo",
+      "31": "Declinado General",
+      "33": "Tarjeta vencida",
+      "34": "Sospecha de fraude",
+      "35": "Declinado General",
+      "36": "Tarjeta restringida",
+      "37": "Referida",
+      "38": "Número de intentos de NIP excedidos",
+      "39": "Sin cuenta de crédito",
+      "41": "Tarjeta perdida",
+      "43": "Tarjeta robada",
+      "51": "Fondos insuficientes",
+      "54": "Tarjeta expirada",
+      "57": "Transacción no permitida al tarjetahabiente",
+      "58": "Transacción no permitida a la terminal",
+      "61": "Monto excede límite",
+      "65": "Frecuencia excede límite",
+      "76": "Reversa aceptada",
+      "77": "Datos inconsistentes",
+      "78": "Cuenta desactivada",
+      "79": "Transacción duplicada",
+      "81": "Error de cifrado PIN",
+      "82": "Error CVV",
+      "83": "Error de autenticación",
+      "85": "Cuenta válida (para Verificación)",
+      "89": "Terminal inválida",
+      "91": "Emisor no disponible",
+      "92": "Error de ruteo",
+      "93": "Transacción no procesable (violación de ley)",
+      "94": "Transmisión duplicada",
+      "96": "Mal funcionamiento del sistema"
+    }
   },
   "AUTH_CODE": {
     "manualName": "CODIGO_AUT",
     "displayName": "Código de Autorización",
-    "dataType": "alphanum(6)",
+    "dataType": "alphanum",
     "ambiguous": false,
-    "maxLength": 6
+    "note": "Entregado solo cuando transacción aprobada (AUTH_RESULT=00).",
+    "maxLength": 10
+  },
+  "AUTH_DATE": {
+    "manualName": "FECHA_AUT",
+    "displayName": "Fecha y hora de respuesta del autorizador",
+    "dataType": "datetime",
+    "ambiguous": false,
+    "note": "CAMPO AGREGADO: Manual Ecommerce v2.6.4 — Formato AAAAMMDD HH:MM:SS.sss. Entregada para todas las transacciones para las que se recibió respuesta del autorizador.",
+    "format": "^\\d{8} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$",
+    "maxLength": 21
+  },
+  "CUST_RSP_DATE": {
+    "manualName": "FECHA_RSP_CTE",
+    "displayName": "Fecha y hora de respuesta al cliente",
+    "dataType": "datetime",
+    "ambiguous": false,
+    "note": "CAMPO AGREGADO: Manual Ecommerce v2.6.4 — Formato AAAAMMDD HH:MM:SS.sss. Entregada para todas las transacciones y comandos.",
+    "format": "^\\d{8} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$",
+    "maxLength": 21
   },
   "CARD_BRAND": {
     "manualName": "MARCA_TARJETA",
     "displayName": "Marca de Tarjeta",
     "dataType": "enum",
     "ambiguous": false,
-    "validValues": [
-      "VISA",
-      "MASTERCARD",
-      "AMEX"
-    ]
+    "validValues": ["VISA", "MASTERCARD", "AMEX"]
   },
   "CARD_TYPE": {
     "manualName": "TIPO_TARJETA",
-    "displayName": "Tipo de Tarjeta",
+    "displayName": "Tipo de Tarjeta (crédito/débito)",
     "dataType": "enum",
     "ambiguous": false,
-    "validValues": [
-      "CREDITO",
-      "DEBITO"
-    ]
+    "validValues": ["CREDITO", "DEBITO"],
+    "note": "Opcionalmente entregada por el autorizador. Diferente del CREDIT_TYPE de 3DS que es CR/DB."
   },
-  "AGGREGATOR_REF": {
-    "manualName": "REFERENCIA_AGREGADOR",
-    "displayName": "Referencia de Agregador",
+  "CARD_HOLDER": {
+    "manualName": "TARJETAHABIENTE",
+    "displayName": "Nombre del Tarjetahabiente",
     "dataType": "alphanum",
-    "ambiguous": true,
-    "note": "Regla 26: campo de respuesta para rastreo de agregadores. Nombre de log no confirmado."
+    "ambiguous": false,
+    "note": "Opcionalmente entregada por el autorizador.",
+    "maxLength": 50
+  },
+  "ISSUING_BANK": {
+    "manualName": "BANCO_EMISOR",
+    "displayName": "Banco Emisor",
+    "dataType": "alphanum",
+    "ambiguous": false,
+    "note": "Nombre del banco emisor de la tarjeta. Opcionalmente entregada.",
+    "maxLength": 20
   },
   "PAYW_CODE": {
     "manualName": "CODIGO_PAYW",
     "displayName": "Código Payworks",
-    "dataType": "numeric(3)",
+    "dataType": "numeric",
     "ambiguous": false,
-    "note": "Código de resultado: 000=Aprobada, 001-999=Rechazo/Error. Ver Anexo B de cada manual.",
+    "note": "Código de razón por la que Payworks rechazó o procesó la transacción. Ver Anexo A de cada manual. Entregado únicamente para transacciones o comandos rechazados por Payworks.",
     "validValues": [
-      "000",
-      "001",
-      "002",
-      "003",
-      "004",
-      "005",
-      "006",
-      "007",
-      "008",
-      "009",
-      "010",
-      "011",
-      "012",
-      "013",
-      "014",
-      "015",
-      "016",
-      "017",
-      "018",
-      "019",
-      "020",
-      "021",
-      "022",
-      "023",
-      "024",
-      "025",
-      "026",
-      "027",
-      "028",
-      "029",
-      "030",
-      "031",
-      "032",
-      "033",
-      "034",
-      "035",
-      "036",
-      "037",
-      "038",
-      "039",
-      "040",
-      "041",
-      "042",
-      "043",
-      "044",
-      "045",
-      "046",
-      "047",
-      "048",
-      "049",
-      "050",
-      "051",
-      "052",
-      "053",
-      "054",
-      "055",
-      "056",
-      "057",
-      "058",
-      "059",
-      "060",
-      "061",
-      "062",
-      "063",
-      "064",
-      "065",
-      "066",
-      "067",
-      "068",
-      "069",
-      "099"
-    ]
+      "000", "001", "002", "003", "004", "005", "006", "007", "008", "009",
+      "010", "011", "012", "013", "014", "015", "016", "017", "018", "019",
+      "020", "021", "022", "023", "024", "025", "026", "027", "028", "029",
+      "030", "031", "032", "033", "034", "035", "036", "037", "038", "039",
+      "040", "041", "042", "043", "044", "045", "046", "047", "048", "049",
+      "050", "051", "052", "053", "054", "055", "056", "057", "058", "059",
+      "060", "061", "062", "063", "064", "065", "066", "067", "068", "069",
+      "099", "101", "102", "110", "150",
+      "200", "201", "202", "204", "207", "208", "210", "211", "230", "231",
+      "400", "443", "444", "445", "500", "999"
+    ],
+    "maxLength": 3
   },
   "TEXT": {
     "manualName": "TEXTO",
     "displayName": "Texto de Resultado",
     "dataType": "alphanum",
     "ambiguous": false,
-    "note": "Texto descriptivo del resultado (Approved, Declined, etc.)"
+    "note": "Texto descriptivo del resultado (Approved, Declined, Expired card, etc.). Opcionalmente entregado.",
+    "maxLength": 200
   },
-  "ISSUING_BANK": {
-    "manualName": "BANCO_EMISOR",
-    "displayName": "Banco Emisor",
+  "REFERENCE": {
+    "manualName": "REFERENCIA",
+    "displayName": "Referencia generada por Payworks (RETORNO)",
+    "dataType": "numeric",
+    "ambiguous": false,
+    "note": "Regla cruzada C3: debe coincidir con Campo 37 de PROSA (RRN).",
+    "format": "^\\d{1,12}$",
+    "maxLength": 12
+  },
+  "ID_MAC": {
+    "manualName": "ID_MAC",
+    "displayName": "ID MAC (Mandato AN7110 MasterCard)",
     "dataType": "alphanum",
-    "ambiguous": false
+    "ambiguous": false,
+    "note": "CAMPO AGREGADO: Mandato AN7110 MC (v2.5.1 Junio 2024). Indica si tarjeta es prepago o virtual. Solo entregada para transacciones internacionales MasterCard.",
+    "validValues": ["U", "V"],
+    "valueDescriptions": {
+      "U": "Tarjeta Prepago",
+      "V": "Tarjeta Virtual de un solo uso"
+    },
+    "maxLength": 1
+  },
+  "ID_CYBERSOURCE": {
+    "manualName": "ID_CYBERSOURCE",
+    "displayName": "ID Cybersource (correlación con requestID)",
+    "dataType": "alphanum",
+    "ambiguous": false,
+    "note": "CAMPO AGREGADO: Identificador de Cybersource. Aplica cuando comercio tiene Cybersource contratado. El valor debe coincidir con requestID del retorno de Cybersource (regla cruzada C11 pendiente).",
+    "maxLength": 26
+  },
+  "ID_AGREGADOR": {
+    "manualName": "ID_AGREGADOR",
+    "displayName": "ID del Agregador (RETORNO)",
+    "dataType": "alphanum",
+    "ambiguous": false,
+    "note": "FIX: renombrado de AGGREGATOR_REF a ID_AGREGADOR (nombre en log real). Campo de respuesta para rastreo en operaciones de agregadores.",
+    "maxLength": 30
+  },
+  "MARKETPLACE_TX_RETURN": {
+    "manualName": "MARKETPLACE_TX",
+    "displayName": "Indicador Marketplace (eco en respuesta)",
+    "dataType": "enum",
+    "ambiguous": false,
+    "note": "Cuando el comercio envía MARKETPLACE_TX en el request, la respuesta lo ecoa. Solo presente para VISA en transacciones marketplace.",
+    "validValues": ["1"],
+    "maxLength": 1
   }
 }

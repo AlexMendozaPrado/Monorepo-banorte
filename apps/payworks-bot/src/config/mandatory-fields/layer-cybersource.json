@@ -1,679 +1,704 @@
 {
   "_meta": {
-    "note": "Transversal layer — referenced by IntegrationType.supportedLayers. Cybersource Direct v1.10. Aplica a Tradicional y Ventana CE. Todos los campos usan camelCase con prefijos (BillTo_, Card_)."
+    "note": "F4 — Capa Cybersource Direct manual v1.10 (18-Ene-2021). URL: https://via.banorte.com/bancyb/procesadorHttp.htm. Aplica a ECOMMERCE_TRADICIONAL y VENTANA_COMERCIO_ELECTRONICO. Cambios vs anterior: Card_cardType validValues corregido [001, 002] (NO soporta AMEX=003), agregado MerchantID con fixedValue=banorteixe, BillTo_ipAddress añadido como R (cambió de O a R en v1.6 Jul-2023), agregadas variables de RETORNO (decision, requestID, reasonCode, Bnte_code, afsReply_afsResult), agregado BillTo_httpBrowserEmail y Comments opcionales.",
+    "url": "https://via.banorte.com/bancyb/procesadorHttp.htm",
+    "decisionFlow": {
+      "ACCEPT": "Enviar a Payworks con ID_CYBERSOURCE = requestID",
+      "REVIEW": "Enviar a 3D Secure; si autenticación exitosa, enviar a Payworks con ID_CYBERSOURCE, STATUS_3D, ECI, XID (si no vacío), CAVV",
+      "REJECT": "Fin de operación. NO enviar a Payworks.",
+      "ERROR": "Fin de operación. NO enviar a Payworks."
+    },
+    "notSupported": "NO soporta American Express. Card_cardType solo VISA (001) y MasterCard (002).",
+    "deviceFingerprint": "Anexo 1 del manual describe el JavaScript que el comercio debe embeber en su página antes del botón de pago. DeviceFingerprintID debe ser un UUID/hash único por sesión. Dos ejemplos documentados: producción y pruebas."
   },
-  "integrationType": "ECOMMERCE_TRADICIONAL",
+  "integrationType": "LAYER_CYBERSOURCE",
   "manualVersion": "1.10",
-  "manualDate": "2025-06-19",
-  "displayName": "Capa Cybersource Direct",
+  "manualDate": "2021-01-18",
+  "displayName": "Capa Cybersource Direct (Prevención de Fraude)",
   "servlet": {},
   "cybersource": {
-    "BillTo_firstName": {
-      "manualName": "BillTo_firstName",
-      "displayName": "Nombre(s) del Cliente",
-      "dataType": "alphanum(60)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_lastName": {
-      "manualName": "BillTo_lastName",
-      "displayName": "Apellidos del Cliente",
-      "dataType": "alphanum(60)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_street": {
-      "manualName": "BillTo_street",
-      "displayName": "Calle",
-      "dataType": "alphanum(60)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_streetNumber": {
-      "manualName": "BillTo_streetNumber",
-      "displayName": "Número Exterior",
-      "dataType": "alphanum(10)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_streetNumber2": {
-      "manualName": "BillTo_streetNumber2",
-      "displayName": "Número Interior",
-      "dataType": "alphanum(10)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O",
-        "PREAUTH_MC": "O",
-        "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O",
-        "POSTAUTH_MC": "O",
-        "POSTAUTH_AMEX": "O"
-      }
-    },
-    "BillTo_street2Col": {
-      "manualName": "BillTo_street2Col",
-      "displayName": "Colonia",
-      "dataType": "alphanum(60)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_street2Del": {
-      "manualName": "BillTo_street2Del",
-      "displayName": "Delegación/Municipio",
-      "dataType": "alphanum(60)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_city": {
-      "manualName": "BillTo_city",
-      "displayName": "Ciudad",
-      "dataType": "alphanum(50)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_state": {
-      "manualName": "BillTo_state",
-      "displayName": "Estado",
-      "dataType": "alphanum(2)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_country": {
-      "manualName": "BillTo_country",
-      "displayName": "País (ISO 3166-1 alpha-2)",
-      "dataType": "alphanum(2)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_phoneNumber": {
-      "manualName": "BillTo_phoneNumber",
-      "displayName": "Teléfono",
-      "dataType": "numeric(15)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_postalCode": {
-      "manualName": "BillTo_postalCode",
-      "displayName": "Código Postal",
-      "dataType": "alphanum(10)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_email": {
-      "manualName": "BillTo_email",
-      "displayName": "Correo Electrónico",
-      "dataType": "email",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "BillTo_customerID": {
-      "manualName": "BillTo_customerID",
-      "displayName": "Customer ID",
+    "_sectionEnvio": "========= VARIABLES DE ENVÍO =========",
+    "MerchantID": {
+      "manualName": "MerchantID",
+      "displayName": "Merchant ID Cybersource (fijo='banorteixe')",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "CAMPO AGREGADO: Manual v1.10 pág. 6. Valor fijo='banorteixe' para todos los comercios Banorte que usan Cybersource. Este NO es el MERCHANT_ID de Payworks.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O",
-        "PREAUTH_MC": "O",
-        "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O",
-        "POSTAUTH_MC": "O",
-        "POSTAUTH_AMEX": "O"
-      }
-    },
-    "BillTo_customerPassword": {
-      "manualName": "BillTo_customerPassword",
-      "displayName": "Customer Password",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O",
-        "PREAUTH_MC": "O",
-        "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O",
-        "POSTAUTH_MC": "O",
-        "POSTAUTH_AMEX": "O"
-      }
-    },
-    "BillTo_dateOfBirth": {
-      "manualName": "BillTo_dateOfBirth",
-      "displayName": "Fecha de Nacimiento",
-      "dataType": "date",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O",
-        "PREAUTH_MC": "O",
-        "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O",
-        "POSTAUTH_MC": "O",
-        "POSTAUTH_AMEX": "O"
-      }
-    },
-    "BillTo_hostname": {
-      "manualName": "BillTo_hostname",
-      "displayName": "Hostname",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O",
-        "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "O",
-        "PREAUTH_MC": "O",
-        "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O",
-        "POSTAUTH_MC": "O",
-        "POSTAUTH_AMEX": "O"
-      }
-    },
-    "Card_accountNumber": {
-      "manualName": "Card_accountNumber",
-      "displayName": "Número de Tarjeta",
-      "dataType": "numeric(19)",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
-    },
-    "Card_cardType": {
-      "manualName": "Card_cardType",
-      "displayName": "Tipo de Tarjeta",
-      "dataType": "enum",
-      "ambiguous": false,
-      "note": "Valores: 001 (VISA) | 002 (MASTERCARD)",
-      "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
       },
-      "validValues": [
-        "001",
-        "002",
-        "003"
-      ]
+      "fixedValue": "banorteixe",
+      "maxLength": 10
     },
-    "Card_expirationMonth": {
-      "manualName": "Card_expirationMonth",
-      "displayName": "Mes de Expiración",
-      "dataType": "numeric(2)",
+    "Name": {
+      "manualName": "Name",
+      "displayName": "Nombre de usuario Cybersource",
+      "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 50
     },
-    "Card_expirationYear": {
-      "manualName": "Card_expirationYear",
-      "displayName": "Año de Expiración",
-      "dataType": "numeric(4)",
+    "Password": {
+      "manualName": "Password",
+      "displayName": "Password de usuario Cybersource",
+      "dataType": "alphanum",
+      "ambiguous": true,
+      "note": "PCI-DSS: nunca en logs aunque se envíe cifrado.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A"
+      },
+      "maxLength": 50
+    },
+    "MerchantNumber": {
+      "manualName": "MerchantNumber",
+      "displayName": "Número de Afiliación (Payworks)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Corresponde al MERCHANT_ID de Payworks del comercio. Manual: Numérico 9 (se refiere a la afiliación antigua, pero actualmente son 7).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 9
+    },
+    "TerminalId": {
+      "manualName": "TerminalId",
+      "displayName": "Terminal ID",
+      "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 15
+    },
+    "OrderId": {
+      "manualName": "OrderId",
+      "displayName": "Orden única del comercio",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Debe ser única por transacción. Se usa para correlación con la respuesta (regla cruzada C11 pendiente).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 50
+    },
+    "MerchantReferenceCode": {
+      "manualName": "MerchantReferenceCode",
+      "displayName": "Referencia única del comercio",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Debería coincidir con OrderId en la mayoría de implementaciones.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 50
     },
     "DeviceFingerprintID": {
       "manualName": "DeviceFingerprintID",
       "displayName": "Device Fingerprint ID",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "UUID/hash del device fingerprint generado por el JS embebido del Anexo 1. Crítico para análisis antifraude.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 40
     },
-    "Name": {
-      "manualName": "Name",
-      "displayName": "Usuario Payworks2",
+    "Comments": {
+      "manualName": "Comments",
+      "displayName": "Comentarios de la orden",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "CAMPO AGREGADO: opcional pero documentado en manual v1.10.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 255
+    },
+    "_billToSection": "========= BILL TO (dirección de facturación) =========",
+    "BillTo_firstName": {
+      "manualName": "BillTo_firstName",
+      "displayName": "Nombre del Cliente",
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 60
     },
-    "Password": {
-      "manualName": "Password",
-      "displayName": "Password Payworks2",
+    "BillTo_lastName": {
+      "manualName": "BillTo_lastName",
+      "displayName": "Apellidos del Cliente",
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 60
     },
-    "MerchantNumber": {
-      "manualName": "MerchantNumber",
-      "displayName": "Merchant Number (ID Afiliación)",
-      "dataType": "numeric(9)",
+    "BillTo_street": {
+      "manualName": "BillTo_street",
+      "displayName": "Calle",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual v1.10: String 40 (no 60 como anterior).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 40
+    },
+    "BillTo_streetNumber": {
+      "manualName": "BillTo_streetNumber",
+      "displayName": "Número Exterior",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual: String 6 (no 10).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 6
+    },
+    "BillTo_streetNumber2": {
+      "manualName": "BillTo_streetNumber2",
+      "displayName": "Número Interior",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual: NO (No enviar vacío). String 10.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "omitIfEmpty": true,
+      "maxLength": 10
+    },
+    "BillTo_street2Col": {
+      "manualName": "BillTo_street2Col",
+      "displayName": "Colonia",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual: String 30.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 30
+    },
+    "BillTo_street2Del": {
+      "manualName": "BillTo_street2Del",
+      "displayName": "Municipio o Delegación",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual: String 30.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 30
+    },
+    "BillTo_city": {
+      "manualName": "BillTo_city",
+      "displayName": "Ciudad",
+      "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 50
     },
-    "TerminalId": {
-      "manualName": "TerminalId",
-      "displayName": "Terminal ID",
+    "BillTo_state": {
+      "manualName": "BillTo_state",
+      "displayName": "Estado (ISO 2 dígitos)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^[A-Z]{2}$",
+      "maxLength": 2
+    },
+    "BillTo_country": {
+      "manualName": "BillTo_country",
+      "displayName": "País (ISO 2 dígitos)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^[A-Z]{2}$",
+      "maxLength": 2
+    },
+    "BillTo_phoneNumber": {
+      "manualName": "BillTo_phoneNumber",
+      "displayName": "Teléfono (sin espacios, paréntesis, guiones)",
       "dataType": "numeric",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^\\d{1,15}$",
+      "maxLength": 15
     },
-    "OrderId": {
-      "manualName": "OrderId",
-      "displayName": "Order ID",
+    "BillTo_postalCode": {
+      "manualName": "BillTo_postalCode",
+      "displayName": "Código Postal",
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R",
-        "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R",
-        "PREAUTH_MC": "R",
-        "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R",
-        "POSTAUTH_MC": "R",
-        "POSTAUTH_AMEX": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 10
     },
-    "ShipTo_firstName": {
-      "manualName": "ShipTo_firstName",
-      "displayName": "ShipTo First Name",
+    "BillTo_email": {
+      "manualName": "BillTo_email",
+      "displayName": "Correo del tarjetahabiente",
+      "dataType": "email",
+      "ambiguous": false,
+      "note": "Manual v1.10 pág. 6: 'SI - String (100). Asegurarse de enviar una cuenta de correo bien formada'.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 100
+    },
+    "BillTo_customerID": {
+      "manualName": "BillTo_customerID",
+      "displayName": "ID único del consumidor",
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 50
     },
-    "ShipTo_lastName": {
-      "manualName": "ShipTo_lastName",
-      "displayName": "ShipTo Last Name",
+    "BillTo_customerPassword": {
+      "manualName": "BillTo_customerPassword",
+      "displayName": "Password del consumidor (solo para reglas)",
+      "dataType": "alphanum",
+      "ambiguous": true,
+      "note": "Manual: 'Este valor solo es usado por las Reglas configuradas, no es almacenado, ni desplegado ni retornado'.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 255
+    },
+    "BillTo_dateOfBirth": {
+      "manualName": "BillTo_dateOfBirth",
+      "displayName": "Fecha nacimiento (YYYYMMDD)",
+      "dataType": "date",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "format": "^\\d{8}$",
+      "maxLength": 10
+    },
+    "BillTo_hostname": {
+      "manualName": "BillTo_hostname",
+      "displayName": "Host name del browser",
       "dataType": "alphanum",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 60
     },
-    "ShipTo_street": {
-      "manualName": "ShipTo_street",
-      "displayName": "ShipTo Street",
+    "BillTo_httpBrowserEmail": {
+      "manualName": "BillTo_httpBrowserEmail",
+      "displayName": "Email del browser (puede diferir de BillTo_email)",
+      "dataType": "email",
+      "ambiguous": false,
+      "note": "CAMPO AGREGADO: Manual v1.10: NO (opcional). Email visto en el header HTTP del browser.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 100
+    },
+    "BillTo_ipAddress": {
+      "manualName": "BillTo_ipAddress",
+      "displayName": "IP del tarjetahabiente",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "CAMPO AGREGADO: Manual v1.10 indica 'NO (No enviar vacío) String 15'. En v1.6 (Julio 2023) el comportamiento cambió: debe viajar requerida. Formato IP válido (IPv4).",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^((25[0-5]|2[0-4]\\d|[01]?\\d?\\d)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d?\\d)$",
+      "maxLength": 15
     },
-    "ShipTo_streetNumber": {
-      "manualName": "ShipTo_streetNumber",
-      "displayName": "ShipTo Street Number",
-      "dataType": "alphanum",
+    "_cardSection": "========= CARD (datos de tarjeta) =========",
+    "Card_accountNumber": {
+      "manualName": "Card_accountNumber",
+      "displayName": "Número de tarjeta completo (para análisis BIN)",
+      "dataType": "numeric",
       "ambiguous": false,
+      "note": "Manual v1.10: 'Sólo usar números. String 20'. NO lleva masking porque Cybersource necesita el BIN completo para análisis antifraude.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^\\d{13,20}$",
+      "maxLength": 20
     },
-    "ShipTo_city": {
-      "manualName": "ShipTo_city",
-      "displayName": "ShipTo City",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "ShipTo_state": {
-      "manualName": "ShipTo_state",
-      "displayName": "ShipTo State",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "ShipTo_country": {
-      "manualName": "ShipTo_country",
-      "displayName": "ShipTo Country",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "ShipTo_postalCode": {
-      "manualName": "ShipTo_postalCode",
-      "displayName": "ShipTo Postal Code",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "ShipTo_phoneNumber": {
-      "manualName": "ShipTo_phoneNumber",
-      "displayName": "ShipTo Phone Number",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "ShipTo_shippingMethod": {
-      "manualName": "ShipTo_shippingMethod",
-      "displayName": "ShipTo Shipping Method",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "ShipTo_email": {
-      "manualName": "ShipTo_email",
-      "displayName": "ShipTo Email",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
-      }
-    },
-    "PurchaseTotals_currency": {
-      "manualName": "PurchaseTotals_currency",
-      "displayName": "Purchase Currency",
+    "Card_cardType": {
+      "manualName": "Card_cardType",
+      "displayName": "Tipo de tarjeta",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Valores: MXN, USD",
+      "note": "FIX CRÍTICO: eran [001, 002, 003]. Manual v1.10 pág. 6: 'Tipo de tarjeta: 001 VISA, 002 MASTER CARD'. NO incluye 003 — Cybersource Banorte NO soporta AMEX.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
       },
-      "validValues": [
-        "MXN",
-        "USD"
-      ]
+      "validValues": ["001", "002"],
+      "maxLength": 3
+    },
+    "Card_expirationMonth": {
+      "manualName": "Card_expirationMonth",
+      "displayName": "Mes de expiración (MM)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^(0[1-9]|1[0-2])$",
+      "maxLength": 2
+    },
+    "Card_expirationYear": {
+      "manualName": "Card_expirationYear",
+      "displayName": "Año de expiración (YYYY)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual: YYYY (4 dígitos), no YY.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^\\d{4}$",
+      "maxLength": 4
+    },
+    "_purchaseSection": "========= PURCHASE (totales de compra) =========",
+    "PurchaseTotals_currency": {
+      "manualName": "PurchaseTotals_currency",
+      "displayName": "Moneda",
+      "dataType": "enum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "validValues": ["MXN", "USD"],
+      "maxLength": 3
     },
     "PurchaseTotals_grandTotalAmount": {
       "manualName": "PurchaseTotals_grandTotalAmount",
-      "displayName": "Purchase Grand Total",
+      "displayName": "Monto total",
       "dataType": "decimal",
       "ambiguous": false,
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "format": "^\\d{1,15}(\\.\\d{1,2})?$"
+    },
+    "_shipToSection": "========= SHIP TO (dirección envío - todos opcionales) =========",
+    "ShipTo_firstName": {
+      "manualName": "ShipTo_firstName",
+      "displayName": "Nombre receptor envío",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 60
+    },
+    "ShipTo_lastName": {
+      "manualName": "ShipTo_lastName",
+      "displayName": "Apellido receptor envío",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 60
+    },
+    "ShipTo_street": {
+      "manualName": "ShipTo_street",
+      "displayName": "Calle envío",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 40
+    },
+    "ShipTo_streetNumber": {
+      "manualName": "ShipTo_streetNumber",
+      "displayName": "Número exterior envío",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 6
+    },
+    "ShipTo_city": {
+      "manualName": "ShipTo_city",
+      "displayName": "Ciudad envío",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 50
+    },
+    "ShipTo_state": {
+      "manualName": "ShipTo_state",
+      "displayName": "Estado envío (ISO)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 2
+    },
+    "ShipTo_country": {
+      "manualName": "ShipTo_country",
+      "displayName": "País envío (ISO)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Regla cruzada C5: debe coincidir con TERMINAL_COUNTRY del servlet.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 2
+    },
+    "ShipTo_postalCode": {
+      "manualName": "ShipTo_postalCode",
+      "displayName": "CP envío",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 10
+    },
+    "ShipTo_phoneNumber": {
+      "manualName": "ShipTo_phoneNumber",
+      "displayName": "Teléfono envío",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 15
+    },
+    "ShipTo_shippingMethod": {
+      "manualName": "ShipTo_shippingMethod",
+      "displayName": "Método envío",
+      "dataType": "enum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "validValues": ["sameday", "oneday", "twoday", "threeday", "lowcost", "pickup", "other", "none"],
+      "maxLength": 8
+    },
+    "ShipTo_email": {
+      "manualName": "ShipTo_email",
+      "displayName": "Email contacto envío",
+      "dataType": "email",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 100
+    },
+    "_responseSection": "========= VARIABLES DE RETORNO =========",
+    "decision": {
+      "manualName": "decision",
+      "displayName": "Decisión Cybersource (RETORNO)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "CAMPO AGREGADO: Manual v1.10 pág. 11. Campo clave para el flujo: ACCEPT → enviar a Payworks con ID_CYBERSOURCE; REVIEW → enviar a 3DS primero; REJECT/ERROR → fin de operación.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "validValues": ["ACCEPT", "REVIEW", "REJECT", "ERROR"],
+      "maxLength": 6
+    },
+    "requestID": {
+      "manualName": "requestID",
+      "displayName": "Request ID de Cybersource (RETORNO - va a Payworks como ID_CYBERSOURCE)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "CAMPO AGREGADO: Manual v1.10: 'Si Decision=Accept, enviar a Payworks en la variable ID_CYBERSOURCE/CYBERSOURCE_ID el valor recibido en RequestID'. Correlación crítica.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "maxLength": 26
     },
     "reasonCode": {
       "manualName": "reasonCode",
-      "displayName": "Código de Razón Cybersource",
+      "displayName": "Código de razón (RETORNO)",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "Regla 25: 100=Success, 101=Missing fields, 102=Invalid data, 150=System error, 200+=Fraud",
-      "validValues": [
-        "100",
-        "101",
-        "102",
-        "110",
-        "150",
-        "151",
-        "152",
-        "200",
-        "201",
-        "202",
-        "203",
-        "204",
-        "205",
-        "207",
-        "208",
-        "210",
-        "211",
-        "221",
-        "222",
-        "230",
-        "231",
-        "232",
-        "233",
-        "234",
-        "236",
-        "240",
-        "250",
-        "400",
-        "450",
-        "451",
-        "452",
-        "453",
-        "454",
-        "455",
-        "456",
-        "457",
-        "458",
-        "459",
-        "460",
-        "475",
-        "476",
-        "481",
-        "520"
-      ],
+      "note": "Manual v1.10 pág. 12-13. 100=Accept. Códigos 1xx=Accept/Review, 2xx=Decline emisor, 4xx=Fraud/Risk.",
       "rules": {
-        "AUTH_VISA": "R",
-        "AUTH_MC": "R"
-      }
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R"
+      },
+      "validValues": [
+        "100", "101", "102", "110", "150", "151", "152",
+        "200", "201", "202", "203", "204", "205", "207", "208", "210", "211",
+        "221", "222", "230", "231", "232", "233", "234", "236", "240", "250",
+        "400", "450", "451", "452", "453", "454", "455", "456", "457", "458", "459", "460",
+        "475", "476", "481", "520"
+      ]
     },
     "afsReply_afsResult": {
       "manualName": "afsReply_afsResult",
-      "displayName": "AFS Reply Result",
+      "displayName": "Resultado AFS (Advanced Fraud Screen)",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "Fraud score resultado",
+      "note": "Score numérico de AFS. Opcional pero útil para análisis.",
       "rules": {
-        "AUTH_VISA": "O",
-        "AUTH_MC": "O"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
       }
+    },
+    "Bnte_code": {
+      "manualName": "Bnte_code",
+      "displayName": "Código Banorte Cybersource (RETORNO)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "CAMPO AGREGADO: visto en logs reales (ej. MUEVE CIUDAD: Bnte_code=00). 00=éxito.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O"
+      },
+      "maxLength": 4
     }
+  },
+  "reasonCodeDescriptions": {
+    "_description": "Códigos de razón Cybersource para mensajes de error claros.",
+    "100": "Exitoso",
+    "101": "Campos requeridos faltantes",
+    "102": "Datos de formato inválido",
+    "110": "Aprobación parcial permitida",
+    "150": "Error del sistema",
+    "151": "Timeout de la transacción",
+    "152": "Error del servicio",
+    "200": "Declinado por dirección facturación (AVS)",
+    "201": "Autorización declinada general",
+    "202": "Tarjeta expirada",
+    "203": "Declinada por emisor",
+    "204": "Fondos insuficientes",
+    "205": "Reportada como robada",
+    "207": "Emisor no disponible",
+    "208": "Tarjeta inactiva",
+    "210": "Límite de crédito excedido",
+    "211": "CVN inválido",
+    "221": "Cliente bloqueado en lista negra",
+    "230": "Declinada por CVN",
+    "231": "Número de tarjeta inválido",
+    "232": "Tipo de tarjeta no aceptado",
+    "233": "Declinada general por procesador",
+    "234": "Configuración Cybersource inválida",
+    "236": "Error de procesador",
+    "240": "Tipo de tarjeta inválido",
+    "400": "Score AFS excede umbral",
+    "450": "Verificación de dirección sin validación",
+    "451": "Verificación de velocidad sin validación",
+    "481": "Decisión REVIEW - marcado para revisión manual",
+    "520": "Regla de riesgo configurada del comercio"
   }
 }
