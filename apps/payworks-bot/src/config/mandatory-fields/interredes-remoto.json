@@ -1,9 +1,9 @@
 {
   "_meta": {
-    "note": "F4 — Interredes Remoto manual v1.7 (Julio 2025) — Tarjeta Presente con PinPad Ethernet/WiFi. SDK PPSet*/PPGet*. FIX ARQUITECTÓNICO: campos EMV de voucher (TVR/TSI/AID/APN/AL) se movieron a sección emvVoucher (no son de envío). Solo EMV_TAGS va al POST. Transacciones soportadas (Manual v1.7 Anexo III): VENTA, CASHBACK, PREAUTORIZACION, REAUTORIZACION, POSTAUTORIZACION, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION, DEVOLUCION_CLIENTE, VENTA_CON_VALIDACION, CANCELAR, OBTENER_LLAVE.",
+    "note": "Interredes Remoto manual v1.7 (Julio 2025) — Tarjeta Presente con PinPad Ethernet/WiFi. SDK PPSet*/PPGet*. Tags EMV del voucher (TVR/TSI/AID/APN/AL) en sección emvVoucher (no se validan contra log). Solo EMV_TAGS va al POST. 13 tipos de transacción (Anexo III): VENTA, CASHBACK, PREAUT, REAUT, POSTAUT, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION, DEVOLUCION_CLIENTE, VENTA_CON_VALIDACION, CANCELAR, OBTENER_LLAVE.",
+    "specSource": "Manual Interredes Remoto v1.7 (Jul-2025) + Anexos I-VII. Revisado contra PDF oficial el 2026-04-22. Fixes: PASSWORD → R_PCI; BATCH → GROUP rename. Variables adicionales del Anexo V Tabla de Parámetros pendientes (BANROTE_URL, TRANS_TIMEOUT, Q6 Pagos Diferidos, RESPONSE_LANGUAGE, QPS, CUSTOMER_REF2-5) — brecha documentada para alcance separado.",
     "fechaExpFormat": "Formato AAMM (Anexo V: PPGetCardExpireDate 'en formato AAMM')",
-    "vinculoPinPad": "Requisito previo: PinPad debe estar vinculado a la afiliación (enviar correo a L.soporte_payworks_Interredes@banorte.com con afiliación + número de serie PinPad)",
-    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts"
+    "vinculoPinPad": "Requisito previo: PinPad debe estar vinculado a la afiliación (enviar correo a L.soporte_payworks_Interredes@banorte.com con afiliación + número de serie PinPad)"
   },
   "integrationType": "INTERREDES_REMOTO",
   "manualVersion": "1.7",
@@ -53,18 +53,18 @@
       "manualName": "CLAVE_USR",
       "displayName": "Clave de Usuario (PPSetPassword)",
       "dataType": "alphanum",
-      "ambiguous": true,
-      "note": "PCI-DSS: nunca en logs.",
+      "ambiguous": false,
+      "note": "Manual v1.7 Anexo V: R siempre para cualquier transacción o comando. SDK: PPSetPassword(). PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
-        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
-        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
-        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
-        "CASHBACK_VISA": "N/A", "CASHBACK_MC": "N/A", "CASHBACK_AMEX": "N/A",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI", "PREAUTH_AMEX": "R_PCI",
+        "REAUTH_VISA": "R_PCI", "REAUTH_MC": "R_PCI", "REAUTH_AMEX": "R_PCI",
+        "POSTAUTH_VISA": "R_PCI", "POSTAUTH_MC": "R_PCI", "POSTAUTH_AMEX": "R_PCI",
+        "REFUND_VISA": "R_PCI", "REFUND_MC": "R_PCI", "REFUND_AMEX": "R_PCI",
+        "VOID_VISA": "R_PCI", "VOID_MC": "R_PCI", "VOID_AMEX": "R_PCI",
+        "REVERSAL_VISA": "R_PCI", "REVERSAL_MC": "R_PCI", "REVERSAL_AMEX": "R_PCI",
+        "CASHBACK_VISA": "R_PCI", "CASHBACK_MC": "R_PCI", "CASHBACK_AMEX": "R_PCI",
+        "VERIFY_VISA": "R_PCI", "VERIFY_MC": "R_PCI", "VERIFY_AMEX": "R_PCI"
       },
       "maxLength": 20
     },
@@ -199,18 +199,19 @@
       "format": "^\\d{1,12}$",
       "maxLength": 12
     },
-    "BATCH": {
+    "GROUP": {
       "manualName": "LOTE",
       "displayName": "Lote (PPSetGroup)",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual v1.7 Anexo V: AN(1..30). Opcional para PREAUT. Obligatorio para CIERRE_LOTE. (Antes BATCH — logName oficial del manual es GROUP.)",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
         "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
         "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
         "CASHBACK_VISA": "N/A", "CASHBACK_MC": "N/A", "CASHBACK_AMEX": "N/A",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
