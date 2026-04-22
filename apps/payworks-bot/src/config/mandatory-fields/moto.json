@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "note": "F4 — MOTO manual v1.5 (19/Jun/2025). Canal telefónico — NO soporta AMEX ni 3DS. AN5822 MC en layer-an5822.json. Cambios vs versión anterior: MERCHANT_ID maxLen 7 (no 15), REFERENCE numérico 12 (no alfanum 15), CUSTOMER_REF2 maxLen 16, USER/MODE con maxLen, ENTRY_MODE solo [MANUAL], MARKETPLACE_TX con reglas PROHIBITED para MC, AMOUNT regex 18 dígitos, TERMINAL_ID alphanum. Campos nuevos: GROUP, ID_MAC.",
-    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts — si el campo aparece con valor no vacío, FALLA. Si ausente, PASA."
+    "note": "MOTO (Mail Order / Telephone Order) manual v1.5 (19-Jun-2025). Alineado al PDF oficial. Canal telefónico — NO soporta AMEX ni 3DS. AN5822 MC en layer-an5822.json. MARKETPLACE_TX solo VISA+VENTA/PREAUT+fuera México. Pagos Diferidos Q6 (INITIAL_DEFERMENT + PAYMENTS_NUMBER + PLAN_TYPE) en manual p.11. Campos removidos (no en manual MOTO v1.5): GROUP (solo existe en Agregadores), ID_GATEWAY (solo Agregadores).",
+    "specSource": "Manual MOTO v1.5 (19-Jun-2025). Revisado contra PDF oficial el 2026-04-22. Fixes: TERMINAL_ID maxLen 15 → 10; PASSWORD/EXP_DATE/SECURITY_CODE → R_PCI; ENTRY_MODE/CARD_NUMBER en POSTAUT → N/A; CONTROL_NUMBER → R para todas; AMOUNT.REFUND → R; PAYMENT_NUMBER → PAYMENTS_NUMBER (rename al logName del manual); GROUP removido."
   },
   "integrationType": "MOTO",
   "manualVersion": "1.5",
@@ -45,16 +45,16 @@
       "manualName": "CLAVE_USR",
       "displayName": "Clave de Usuario",
       "dataType": "alphanum",
-      "ambiguous": true,
-      "note": "PCI-DSS: nunca en logs. Validado en envío del comercio, no contra log.",
+      "ambiguous": false,
+      "note": "Manual MOTO v1.5 p.6: Alfanumérico 20, R para cualquier transacción o comando. PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A",
-        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
+        "VOID_VISA": "R_PCI", "VOID_MC": "R_PCI",
+        "REFUND_VISA": "R_PCI", "REFUND_MC": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI",
+        "POSTAUTH_VISA": "R_PCI", "POSTAUTH_MC": "R_PCI",
+        "VERIFY_VISA": "R_PCI", "VERIFY_MC": "R_PCI",
+        "REVERSAL_VISA": "R_PCI", "REVERSAL_MC": "R_PCI"
       },
       "maxLength": 20
     },
@@ -63,7 +63,7 @@
       "displayName": "ID Terminal",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "Manual: Alfanumérico 15. Logs reales muestran valores como 'C8608575' (alfanuméricos).",
+      "note": "Manual MOTO v1.5 p.6: Alfanumérico 10, R para cualquier transacción (no comandos).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "VOID_VISA": "R", "VOID_MC": "R",
@@ -73,7 +73,7 @@
         "VERIFY_VISA": "R", "VERIFY_MC": "R",
         "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
-      "maxLength": 15
+      "maxLength": 10
     },
     "CMD_TRANS": {
       "manualName": "CMD_TRANS",
@@ -97,11 +97,11 @@
       "displayName": "Monto",
       "dataType": "decimal",
       "ambiguous": false,
-      "note": "Manual: Numérico 18 dígitos y 2 decimales. maxLength 21 = 18 dígitos + '.' + 2 decimales.",
+      "note": "Manual MOTO v1.5 p.6: Numérico 18 dígitos y 2 decimales. R para todas las transacciones excepto CANCELACION y REVERSA.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
         "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
@@ -151,14 +151,15 @@
       "displayName": "Número de Control",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual MOTO v1.5 p.7: Alfanumérico 30, R para cualquier transacción o comando. La combinación MERCHANT_ID + CONTROL_NUMBER debe ser única por transacción (C7).",
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
         "REFUND_VISA": "R", "REFUND_MC": "R",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "O", "VERIFY_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
       "maxLength": 30
     },
@@ -167,12 +168,13 @@
       "displayName": "Número de Tarjeta",
       "dataType": "masked",
       "ambiguous": false,
+      "note": "Manual MOTO v1.5 p.7: Alfanumérico 20, R solo para VENTA y PREAUTORIZACION.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
@@ -184,12 +186,12 @@
       "displayName": "Fecha de Expiración",
       "dataType": "MMYY",
       "ambiguous": false,
-      "note": "PCI-DSS: no aparece en logs por masking. Manual dice R para VENTA/PREAUT manuales. Relajado a O por no verificabilidad. Candidato a regla R_PCI cuando se implemente.",
+      "note": "Manual MOTO v1.5 p.7: Numérico 4 (MMAA), R para VENTA y PREAUTORIZACION. PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI",
         "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
@@ -202,12 +204,12 @@
       "displayName": "Código de Seguridad (CVV/CVC)",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "PCI-DSS: nunca en logs. Validado en envío del comercio. Candidato a regla R_PCI.",
+      "note": "Manual MOTO v1.5 p.7: Numérico 4, R para VENTA y PREAUTORIZACION. VISA/MC 3 dígitos. PCI-DSS: nunca en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI",
         "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
@@ -220,23 +222,25 @@
       "displayName": "Modo de Entrada",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "MOTO es canal telefónico (tarjeta NO presente). Solo MANUAL aplica. Los valores CHIP/BANDA/CONTACTLESS son exclusivos de API PW2 Seguro e Interredes Remoto.",
+      "note": "Manual MOTO v1.5 p.7: Alfanumérico 20. R solo para VENTA y PREAUTORIZACION. Valor: MANUAL (canal telefónico, tarjeta NO presente).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "validValues": ["MANUAL"]
+      "validValues": ["MANUAL"],
+      "maxLength": 20
     },
     "RESPONSE_LANGUAGE": {
       "manualName": "IDIOMA_RESPUESTA",
       "displayName": "Idioma de Respuesta",
       "dataType": "enum",
       "ambiguous": false,
+      "note": "Manual MOTO v1.5 p.7: Alfanumérico 2, Opcional. Default ES. Valores: ES, EN.",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O",
         "VOID_VISA": "O", "VOID_MC": "O",
@@ -246,25 +250,8 @@
         "VERIFY_VISA": "O", "VERIFY_MC": "O",
         "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
-      "validValues": ["ES", "EN", "01", "02"],
+      "validValues": ["ES", "EN"],
       "maxLength": 2
-    },
-    "GROUP": {
-      "manualName": "LOTE",
-      "displayName": "Lote",
-      "dataType": "alphanum",
-      "ambiguous": false,
-      "note": "CAMPO NUEVO: Manual lo define como 'Alfanumérico 30, Opcional para cualquier transacción'. Antes marcado como ambiguo.",
-      "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
-      },
-      "maxLength": 30
     },
     "CUSTOMER_REF1": {
       "manualName": "REF_CLIENTE1",
@@ -383,12 +370,12 @@
       },
       "maxLength": 2
     },
-    "PAYMENT_NUMBER": {
+    "PAYMENTS_NUMBER": {
       "manualName": "NUMERO_PAGOS",
       "displayName": "Número de Pagos",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "Valores: 03, 06, 09, 12, 18 o 24",
+      "note": "Manual MOTO v1.5 p.11: Q6 Pagos Diferidos. Numérico 2. Valores: 03, 06, 09, 12, 18 o 24. R solo para VENTA si incluye promoción.",
       "maxLength": 2,
       "validValues": ["03", "06", "09", "12", "18", "24"],
       "rules": {
