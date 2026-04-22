@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "note": "F4 — Agregadores Comercio Electrónico manual v2.6.4 (23-Ene-2026). Soporta 3 subEsquemas: ESQ_1 (Tasa Natural, sin campos extra), ESQ_4_SIN_AGP (con SUB_AFILIACION, ID_AGREGADOR), ESQ_4_CON_AGP (con 8 campos adicionales). Transactions: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL — solo VISA/MC (no AMEX). Cambios vs anterior: MERCHANT_ID maxLen 7, USER/MODE con maxLen, AMOUNT regex 18 dígitos, REFERENCE numérico 12, TERMINAL_ID alphanum, ENTRY_MODE solo [MANUAL], CUSTOMER_REF3 R (número de contrato), CUSTOMER_REF5 R (ID Agregador). Campos nuevos: MARKETPLACE_TX con reglas por marca, ID_GATEWAY para Mandato 7118 MC. Anexo D (reglas de contenido SUB_MERCHANT/DOMICILIO) pendiente de implementar como regla cruzada.",
-    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts",
-    "anexoD": "Reglas Anexo D: SUB_MERCHANT y DOMICILIO_COMERCIO solo aceptan A-Z, 0-9, '&', espacio. '*' solo para subafiliados (formato 7*14). '.' solo en domicilio. Sin dobles espacios, sin Ñ, sin acentos."
+    "note": "Agregadores Comercio Electrónico manual v2.6.4 (23-Ene-2026). Alineado al PDF oficial. Transactions: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL — solo VISA/MC (no AMEX). subEsquemas corregidos para coincidir con el manual: ESQ_4_CON_AGP solo requiere SUB_MERCHANT+AGGREGATOR_ID (2 campos, el subafiliado se genera en AGP PROSA); ESQ_4_SIN_AGP requiere 8 campos (el comercio genera todo). CUSTOMER_REF5 R (identificador del Agregador, manual p.9). MARKETPLACE_TX PROHIBITED en MC/AMEX (manual p.14 'NO se debe mandar con MC o AMEX'). ID_GATEWAY R para agregadores que operan con Gateway 7118 MC (manual p.15).",
+    "specSource": "Manual Comercio Electrónico Agregadores y Aliados v2.6.4 (23-Ene-2026). Revisado contra PDF oficial el 2026-04-22. Fixes: subEsquemas CON_AGP vs SIN_AGP estaban invertidos; CUSTOMER_REF3 era R (es Opcional per manual); CARD_NUMBER/ENTRY_MODE en POSTAUT eran R (manual solo V/PRE); AMOUNT.REFUND era O (es R); CONTROL_NUMBER era O en V/PRE/POS (es R); PASSWORD/EXP_DATE/SECURITY_CODE pasan a R_PCI; BATCH renombrado a GROUP (logName oficial).",
+    "anexoD": "Reglas Anexo D referidas por manual p.15-16: SUB_MERCHANT cumple formato 7*14; DOMICILIO_COMERCIO en MAYUSCULAS sin caracteres especiales. Implementadas en AnexoDValidator."
   },
   "integrationType": "AGREGADORES_COMERCIO_ELECTRONICO",
   "manualVersion": "2.6.4",
@@ -44,15 +44,15 @@
       "manualName": "CLAVE_USR",
       "displayName": "Clave de Usuario",
       "dataType": "alphanum",
-      "ambiguous": true,
-      "note": "PCI-DSS: nunca en logs.",
+      "ambiguous": false,
+      "note": "Manual v2.6.4 p.7: Alfanumérico 20. R para cualquier transacción o comando. PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
-        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A",
-        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI",
+        "POSTAUTH_VISA": "R_PCI", "POSTAUTH_MC": "R_PCI",
+        "REFUND_VISA": "R_PCI", "REFUND_MC": "R_PCI",
+        "VOID_VISA": "R_PCI", "VOID_MC": "R_PCI",
+        "REVERSAL_VISA": "R_PCI", "REVERSAL_MC": "R_PCI"
       },
       "maxLength": 20
     },
@@ -109,14 +109,14 @@
       "displayName": "Monto",
       "dataType": "decimal",
       "ambiguous": false,
-      "note": "Manual: Numérico 18 dígitos y 2 decimales.",
+      "note": "Manual v2.6.4 p.7: Numérico 18 dígitos y 2 decimales. R únicamente para transacciones (no comandos). Excepto CANCELACION y REVERSA.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
         "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
       "format": "^\\d{1,18}(\\.\\d{1,2})?$",
       "maxLength": 21
@@ -143,12 +143,13 @@
       "displayName": "Número de Control",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual v2.6.4 p.8: Alfanumérico 30. Requerida para VENTA/PREAUT/POSTAUT/CANCELACION/DEVOLUCION. Opcional para REVERSA. La combinación MERCHANT_ID + CONTROL_NUMBER debe ser única por transacción (C7).",
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
         "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
       "maxLength": 30
@@ -158,13 +159,14 @@
       "displayName": "Número de Tarjeta",
       "dataType": "masked",
       "ambiguous": false,
+      "note": "Manual v2.6.4 p.9: Alfanumérico 20. R solo para VENTA y PREAUTORIZACION cuando son MANUALES.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
       "maxLength": 20,
       "mustBeMasked": true
@@ -174,14 +176,14 @@
       "displayName": "Fecha de Expiración",
       "dataType": "MMYY",
       "ambiguous": false,
-      "note": "En logs de agregadores no aparece (PCI masking).",
+      "note": "Manual v2.6.4 p.9: Numérico 4, formato MMAA. R para VENTA/PREAUT manuales. PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
       "format": "^(0[1-9]|1[0-2])[0-9]{2}$",
       "maxLength": 4
@@ -191,10 +193,10 @@
       "displayName": "Código de Seguridad",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "PCI-DSS: nunca en logs.",
+      "note": "Manual v2.6.4 p.9: Numérico 4. R para VENTA/PREAUT manuales. PCI-DSS: nunca en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
-        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A",
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI",
         "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
@@ -208,22 +210,24 @@
       "displayName": "Modo de Entrada",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Agregadores CE es tarjeta NO presente. Solo MANUAL.",
+      "note": "Manual v2.6.4 p.9: Alfanumérico 20. R para VENTA/PREAUT. Valor: MANUAL (Agregadores CE es tarjeta NO presente).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "validValues": ["MANUAL"]
+      "validValues": ["MANUAL"],
+      "maxLength": 20
     },
-    "BATCH": {
+    "GROUP": {
       "manualName": "LOTE",
       "displayName": "Lote",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual v2.6.4 p.9: Alfanumérico 30. Opcional. Identificador asignado por el cliente que sirve para agrupar transacciones. (Antes estaba como 'BATCH' — logName en inglés del manual es GROUP.)",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
@@ -267,19 +271,19 @@
     },
     "CUSTOMER_REF3": {
       "manualName": "REF_CLIENTE3",
-      "displayName": "Referencia Cliente 3 (Número de contrato)",
+      "displayName": "Referencia Cliente 3",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "CAMPO AGREGADO: Manual v2.6.4 dice 'Número de contrato del Tarjetahabiente con el comercio. Alfanumérico 20. Requerida para todas las transacciones'.",
+      "note": "Manual v2.6.4 p.8: Alfanumérico 30, Opcional. Dato para uso exclusivo del cliente.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "AUTH_VISA": "O", "AUTH_MC": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O",
+        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O",
+        "REFUND_VISA": "O", "REFUND_MC": "O",
+        "VOID_VISA": "O", "VOID_MC": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
       },
-      "maxLength": 20
+      "maxLength": 30
     },
     "CUSTOMER_REF4": {
       "manualName": "REF_CLIENTE4",
@@ -365,27 +369,27 @@
   },
   "subEsquemas": {
     "ESQ_1": {
-      "displayName": "Esquema 1 - Tasa Natural",
-      "description": "El agregador opera bajo la afiliación padre. Sin campos adicionales.",
+      "displayName": "Esquema Natural / Natural por Excepción / Giro Agregador",
+      "description": "El agregador opera bajo la afiliación padre. SUB_MERCHANT y AGGREGATOR_ID no aplican (manual v2.6.4 p.15).",
       "required": []
     },
-    "ESQ_4_SIN_AGP": {
-      "displayName": "Esquema 4 Sin AGP PROSA",
-      "description": "Requiere SUB_AFILIACION (sub-comercio) y ID_AGREGADOR. El formato del nombre comercial debe cumplir con formato 7*14 (22 caracteres).",
-      "required": ["SUB_AFILIACION", "ID_AGREGADOR"]
-    },
     "ESQ_4_CON_AGP": {
-      "displayName": "Esquema 4 Con AGP PROSA",
-      "description": "Esquema 4 SIN AGP + 6 campos adicionales para AGP. Validar con Anexo D reglas de contenido.",
+      "displayName": "Esquema 4 Tasa Agregador Registrado con AGP PROSA",
+      "description": "Manual v2.6.4 p.15-16: requiere SOLO SUB_MERCHANT (alfanum 18) y AGGREGATOR_ID (numérico 19). El subafiliado se genera mediante la herramienta AGP de PROSA. Ver Anexo D reglas de contenido.",
+      "required": ["SUB_MERCHANT", "AGGREGATOR_ID"]
+    },
+    "ESQ_4_SIN_AGP": {
+      "displayName": "Esquema 4 Tasa Agregador Sin AGP",
+      "description": "Manual v2.6.4 p.16-17: el comercio genera SUB_MERCHANT directamente (sin AGP). Todas las variables adicionales son obligatorias para VENTA, PREAUT, POSTAUT, DEVOLUCION, CANCELACION y REVERSA. Ver Anexo D reglas de contenido.",
       "required": [
-        "SUB_AFILIACION",
-        "ID_AGREGADOR",
+        "SUB_MERCHANT",
+        "AGGREGATOR_ID",
         "MERCHANT_MCC",
         "DOMICILIO_COMERCIO",
-        "CODIGO_POSTAL",
-        "CIUDAD_TERMINAL",
+        "ZIP_CODE",
+        "TERMINAL_CITY",
         "ESTADO_TERMINAL",
-        "PAIS_TERMINAL"
+        "TERMINAL_COUNTRY"
       ]
     }
   },
