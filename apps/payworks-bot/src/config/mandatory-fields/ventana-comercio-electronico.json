@@ -64,7 +64,7 @@
       "displayName": "Modo",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Manual v1.8 dice Alfanumérico 30 (caso único vs. otros productos que son 3). Valores: PRD|AUT|DEC|RND",
+      "note": "Manual v1.8 p.8: Alfanumérico 30 (caso único vs. otros productos que son 3). Valores: PRD (Modo Producción), AUT (Modo Prueba). El manual VCE v1.8 solo lista estos 2 valores (no DEC/RND como otros productos).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
@@ -73,7 +73,7 @@
         "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
         "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
       },
-      "validValues": ["PRD", "AUT", "DEC", "RND"],
+      "validValues": ["PRD", "AUT"],
       "maxLength": 30
     },
     "controlNumber": {
@@ -161,17 +161,17 @@
       "displayName": "Monto",
       "dataType": "decimal",
       "ambiguous": false,
-      "note": "Numérico 18 dígitos y 2 decimales (formato 1.00 o 2.85).",
+      "note": "Manual v1.8 p.8: Numérico 15. Debe incluir los decimales a dos dígitos (ejemplo: 1.00, 2.85). R para cualquier transacción.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
         "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
         "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
-        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
       },
-      "format": "^\\d{1,18}(\\.\\d{1,2})?$",
-      "maxLength": 21
+      "format": "^\\d{1,12}(\\.\\d{1,2})?$",
+      "maxLength": 15
     },
     "customerRef1": {
       "manualName": "customerRef1",
