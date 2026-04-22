@@ -1,0 +1,1493 @@
+# Payworks Certification Bot - Reglas de Validacion Implementadas
+
+> Documento de conciliacion para comparar la logica implementada contra los manuales oficiales de integracion Banorte Payworks.
+> Actualizado: 2026-04-22 | Revision: Implementacion spec v5 cerrada al 100% (commits ee40c16 -> 18fdf1c)
+
+---
+
+## Tabla de contenidos
+
+1. [Objetivo del aplicativo](#1-objetivo-del-aplicativo)
+2. [Arquitectura de validacion](#2-arquitectura-de-validacion)
+3. [Catalogo de productos implementados](#3-catalogo-de-productos-implementados)
+4. [Tipos de transaccion soportados](#4-tipos-de-transaccion-soportados)
+5. [Capas de validacion (ValidationLayer)](#5-capas-de-validacion)
+6. [Motor de evaluacion de campos (pipeline secuencial)](#6-motor-de-evaluacion-de-campos-pipeline-secuencial)
+7. [Matrices R/O/N/A por producto](#7-matrices-rona-por-producto)
+8. [Capa 3D Secure v1.4](#8-capa-3d-secure-v14)
+9. [Capa Cybersource Direct v1.10](#9-capa-cybersource-direct-v110)
+10. [Capa AN5822 CIT/MIT MasterCard (refactorizada en v5)](#10-capa-an5822-citmit-mastercard-refactorizada-en-v5)
+11. [Esquemas de Agregadores + Anexo D](#11-esquemas-de-agregadores)
+12. [Validaciones cruzadas entre campos (C1-C12 + rate limit + Anexo D)](#12-validaciones-cruzadas-entre-campos)
+13. [Glosario de variables espanol-ingles](#13-glosario-de-variables-espanol-ingles)
+14. [Parsers de logs](#14-parsers-de-logs)
+15. [Parser de afiliaciones](#15-parser-de-afiliaciones)
+16. [Generacion de carta de certificacion](#16-generacion-de-carta-de-certificacion)
+17. [Flujo completo de certificacion](#17-flujo-completo-de-certificacion)
+18. [Reglas de respuesta (response-rules)](#18-reglas-de-respuesta)
+19. [Campos PCI-DSS y regla R_PCI](#19-campos-pci-dss-nunca-logueados)
+20. [Campos marcados como ambiguos](#20-campos-marcados-como-ambiguos)
+21. [Cobertura actual y brechas conocidas](#21-cobertura-actual-y-brechas-conocidas)
+
+---
+
+## 1. Objetivo del aplicativo
+
+El **Payworks Certification Bot** automatiza el proceso manual de certificacion de integraciones de pago contra la plataforma Banorte Payworks. El flujo que reemplaza es:
+
+1. El comercio envia una **matriz de pruebas** (Excel/CSV) con las transacciones ejecutadas en ambiente de certificacion.
+2. El validador humano revisa campo por campo cada transaccion contra los **manuales oficiales de integracion** para verificar que los campos requeridos (R), opcionales (O) y no aplicables (N/A) se envian correctamente.
+3. El validador contrasta los logs del **servlet Payworks** y del **autorizador PROSA** (ISO 8583) para confirmar que los valores coinciden.
+4. Si aplica, valida capas adicionales: **3D Secure**, **Cybersource**, campos **AN5822 CIT/MIT MasterCard**.
+5. Genera una **carta de certificacion oficial** (PDF) con el dictamen.
+
+El bot automatiza los pasos 2-5: recibe los archivos, ejecuta las validaciones programaticas, y emite el dictamen con la carta PDF.
+
+### Fuentes de reglas
+
+Las reglas implementadas provienen de **10 manuales oficiales de integracion** + **5 logs de ejemplo reales**:
+
+| Manual | Version | Fecha | Tipo |
+|---|---|---|---|
+| Comercio Electronico Tradicional | 2.6.4 | 23-Ene-2026 | TNP |
+| MOTO (Mail Order / Telephone Order) | 1.5 | 19-Jun-2025 | TNP |
+| Cargos Periodicos Post | 2.1 | 19-Jun-2025 | TNP |
+| Ventana de Comercio Electronico (Cifrada) | 1.8 | 24-Mar-2026 | TNP |
+| Comercio Electronico Agregadores y Aliados | 2.6.4 | 23-Ene-2026 | TNP |
+| Cargos Periodicos Agregadores | 2.6.4 | Ene-2026 | TNP |
+| API PW2 Seguro | 2.4 | Marzo 2023 | Tarjeta Presente |
+| Interredes Remoto | 1.7 | Julio 2025 | Tarjeta Presente |
+| 3D Secure 2 (capa transversal) | 1.4 | 29-Oct-2024 | Capa |
+| Cybersource Direct (capa transversal) | 1.10 | 18-Ene-2021 | Capa |
+| AN5822 CIT/MIT MasterCard (capa transversal) | — | — | Capa |
+
+---
+
+## 2. Arquitectura de validacion
+
+```
+                        +-----------------------+
+                        |  Usuario sube archivos|
+                        |  (matriz + logs + CSV)|
+                        +-----------+-----------+
+                                    |
+                        +-----------v-----------+
+                        | POST /api/certificacion|
+                        |       /validar        |
+                        +-----------+-----------+
+                                    |
+                        +-----------v-----------+
+                        | RunCertificationUseCase|
+                        |  (orquestador)        |
+                        +-----------+-----------+
+                                    |
+                    +---------------+---------------+
+                    |               |               |
+            +-------v------+ +-----v------+ +------v-------+
+            | MatrixParser | | LogParsers | | AfiliacionParser|
+            | (Excel/CSV)  | | (Servlet,  | | (CSV/TXT)    |
+            +--------------+ | PROSA,3DS, | +--------------+
+                             | Cybersource)|
+                             +-----+------+
+                                   |
+                        +----------v-----------+
+                        | ValidateTransaction   |
+                        | FieldsUseCase         |
+                        | (por cada transaccion)|
+                        +----------+-----------+
+                                   |
+               +-------------------+-------------------+
+               |                   |                   |
+      +--------v-------+  +-------v--------+  +-------v--------+
+      | Servlet Layer  |  | 3DS Layer      |  | Cybersource    |
+      | (siempre)      |  | (si aplica)    |  | Layer(si aplica)|
+      +--------+-------+  +-------+--------+  +-------+--------+
+               |                   |                   |
+               +-------------------+-------------------+
+                                   |
+                        +----------v-----------+
+                        | FieldRequirementVO    |
+                        | (motor 8 niveles)     |
+                        | por cada campo        |
+                        +----------+-----------+
+                                   |
+                        +----------v-----------+
+                        | CrossFieldValidator   |
+                        | (reglas cruzadas)     |
+                        +----------+-----------+
+                                   |
+                        +----------v-----------+
+                        | CertificationSession  |
+                        | (veredicto global)    |
+                        +----------+-----------+
+                                   |
+                        +----------v-----------+
+                        | Carta PDF (jsPDF)     |
+                        +----------------------+
+```
+
+### Veredicto global
+
+- Si **todas** las transacciones pasan: `APROBADO`
+- Si **alguna** transaccion falla: `RECHAZADO`
+- Si no hay transacciones: `PENDIENTE`
+
+Logica: "peor caso gana" -- una sola transaccion rechazada invalida la certificacion completa.
+
+---
+
+## 3. Catalogo de productos implementados
+
+| # | Clave interna | Display Name | Manual | Tipo | Capas soportadas |
+|---|---|---|---|---|---|
+| 1 | `ECOMMERCE_TRADICIONAL` | Comercio Electronico Tradicional | v2.5 | TNP | SERVLET, THREEDS, CYBERSOURCE, AN5822 |
+| 2 | `MOTO` | MOTO (Mail Order / Telephone Order) | v1.5 | TNP | SERVLET, AN5822 |
+| 3 | `CARGOS_PERIODICOS_POST` | Cargos Periodicos Post | v2.1 | TNP | SERVLET, AN5822 |
+| 4 | `VENTANA_COMERCIO_ELECTRONICO` | Ventana de Comercio Electronico (Cifrada) | v1.8 | TNP | SERVLET, THREEDS, CYBERSOURCE, AN5822 |
+| 5 | `AGREGADORES_COMERCIO_ELECTRONICO` | Agregadores - Comercio Electronico | v2.6.4 | TNP | SERVLET, AGREGADOR, THREEDS, AN5822 |
+| 6 | `AGREGADORES_CARGOS_PERIODICOS` | Agregadores - Cargos Periodicos | v2.6.4 | TNP | SERVLET, AGREGADOR, AN5822 |
+| 7 | `API_PW2_SEGURO` | API PW2 Seguro (Tarjeta Presente) | v2.4 | TP | SERVLET, EMV |
+| 8 | `INTERREDES_REMOTO` | Interredes Remoto (PinPad WiFi/LAN) | v1.7 | TP | SERVLET, EMV |
+
+### Reglas por producto
+
+- **Productos TNP (1-6)**: Validan campos en logs servlet con formato `NOMBRE: [valor]`
+- **Productos TP (7-8)**: Adicionalmente validan campos EMV (TVR, TSI, AID, APN, AL, EMV_TAGS)
+- **Solo Agregadores (5-6)**: Soportan 3 sub-esquemas (Esq.1, Esq.4 Sin AGP, Esq.4 Con AGP)
+- **MOTO (2)**: NO soporta 3DS (canal telefonico, sin browser)
+- **Cargos Periodicos Post (3)**: NO tiene PREAUTH/POSTAUTH (solo VTA/DEV/CAN/REV/VER)
+- **Ventana CE (4)**: Variables en camelCase (merchantId, name, password...) en vez de MAYUSCULAS_SNAKE
+
+---
+
+## 4. Tipos de transaccion soportados
+
+| Tipo | CMD_TRANS | Display | Pair PROSA | Solo TP? |
+|---|---|---|---|---|
+| `AUTH` | VTA | Venta | 0200/0210 | No |
+| `PREAUTH` | PRE | Preautorizacion | 0200/0210 | No |
+| `POSTAUTH` | POS | Postautorizacion | 0220/0230 | No |
+| `REFUND` | DEV | Devolucion | 0220/0230 | No |
+| `VOID` | CAN | Cancelacion | 0220/0230 | No |
+| `REVERSAL` | REV | Reversa | 0220/0230 | No |
+| `VERIFY` | VER | Verificacion | 0200/0210 | No |
+| `CASHBACK` | CSH | Cashback | 0200/0210 | Si |
+| `REAUTH` | REA | Reautorizacion | 0200/0210 | Si |
+
+### Mapeo de PROSA (ISO 8583)
+
+- **0200/0210**: Mensajes de autorizacion (AUTH, PREAUTH, VERIFY, REAUTH, CASHBACK)
+- **0220/0230**: Mensajes financieros (POSTAUTH, VOID, REFUND, REVERSAL)
+
+El parser PROSA busca el par correcto basado en el tipo de transaccion.
+
+### Parsing de CMD_TRANS
+
+El parser acepta multiples formatos de entrada para cada transaccion:
+
+| Tipo | Acepta |
+|---|---|
+| AUTH | `VTA`, `VENTA`, `AUTH` |
+| VOID | `CAN`, `CANCELACION`, `VOID` |
+| REFUND | `DEV`, `DEVOLUCION`, `REFUND` |
+| PREAUTH | `PRE`, `PREAUTORIZACION`, `PREAUTH` |
+| POSTAUTH | `POS`, `POSTAUTORIZACION`, `POSTAUTH` |
+| VERIFY | `VER`, `VERIFICACION`, `VERIFY` |
+| REVERSAL | `REV`, `REVERSA`, `REVERSAL` |
+| CASHBACK | `CSH`, `CASHBACK` |
+| REAUTH | `REA`, `REAUTORIZACION`, `REAUTH` |
+
+---
+
+## 5. Capas de validacion
+
+Cada producto soporta un conjunto de capas. La validacion es aditiva: la capa SERVLET siempre se ejecuta, y las demas se agregan segun el producto y la presencia de logs.
+
+| Capa | Display | Descripcion | Productos que la soportan |
+|---|---|---|---|
+| `SERVLET` | Servlet | Campos base del servlet Payworks | Todos (1-8) |
+| `THREEDS` | 3D Secure | Autenticacion 3D Secure 2 | 1 (Tradicional), 4 (Ventana CE), 5 (Agregadores CE) |
+| `CYBERSOURCE` | Cybersource | Validacion fraude Cybersource Direct | 1 (Tradicional), 4 (Ventana CE) |
+| `AGREGADOR` | Agregador | Campos adicionales de agregadores | 5 (Agregadores CE), 6 (Agregadores CP) |
+| `EMV` | EMV | Campos de chip/contactless | 7 (API PW2), 8 (Interredes) |
+| `AN5822` | AN5822 CIT/MIT | Mandato MasterCard CIT/MIT | 1-6 (todos los TNP) |
+
+### Logica de activacion de capas
+
+```
+Para cada transaccion:
+  1. SIEMPRE validar capa SERVLET
+  2. SI producto.supportsLayer(THREEDS) Y existe log 3DS → validar capa THREEDS
+  3. SI producto.supportsLayer(CYBERSOURCE) Y existe log Cybersource → validar capa CYBERSOURCE
+  4. Capas AN5822, AGREGADOR, EMV se validan segun campos presentes en el JSON del producto
+```
+
+---
+
+## 6. Motor de evaluacion de campos (pipeline secuencial)
+
+Cada campo de cada transaccion se evalua a traves de un pipeline secuencial. Si alguno falla, se retorna inmediatamente con el motivo de fallo.
+
+**Archivo**: `src/core/domain/value-objects/FieldRequirement.ts`
+
+### Tipos de regla
+
+| Regla | Significado | Comportamiento |
+|---|---|---|
+| `R` | Requerido | DEBE existir y NO estar vacio |
+| `O` | Opcional | Puede no existir; si existe, se validan niveles siguientes |
+| `OI` | Opcional si aplica | Igual que O (variante contextual) |
+| `N/A` | No Aplica | Siempre pasa (no se valida) |
+| `PROHIBITED` | **(v5)** Prohibido | Si aparece con valor no vacio → FALLA; si ausente → PASA |
+| `R_PCI` | **(v5)** Requerido PCI, no logueable | Contra log: pasa silenciosamente (campos PCI-sensibles no deben aparecer en logs). Documentado para consumo futuro por MatrixValidator. |
+
+**Proyeccion por marca** (v5): antes de invocar al evaluador, la aplicacion llama `resolveSpecForBrand(spec, brand)` que produce un `FieldSpec` efectivo con `validValues = spec.validValuesByBrand[brand]` si existe. El evaluador permanece agnostico a la marca — la aplicacion resuelve el contexto.
+
+### Pipeline de evaluacion (orden de precedencia)
+
+```
+Entrada: (regla, campoEncontrado, valorCampo, especEfectiva)
+
+NIVEL 1 - Regla N/A
+  Si regla === 'N/A' -> PASA (fin)
+
+NIVEL 2 - Regla PROHIBITED (v5)
+  Si regla === 'PROHIBITED':
+    Si campo encontrado con valor no vacio -> FALLA 'prohibited'
+    Si ausente o vacio -> PASA
+
+NIVEL 3 - Regla R_PCI (v5)
+  Si regla === 'R_PCI' -> PASA silenciosamente
+  (Los campos PCI nunca aparecen en logs. Cuando exista MatrixValidator
+   el tipo se comportara como R contra la matriz del comercio.)
+
+NIVEL 4 - Presencia requerida
+  Si regla === 'R':
+    Si campo NO encontrado -> FALLA 'missing'
+    Si campo encontrado pero vacio/solo espacios -> FALLA 'empty'
+
+NIVEL 5 - Campo opcional no encontrado
+  Si campo NO encontrado -> PASA (opcional ausente es valido)
+
+NIVEL 6 - OmitIfEmpty
+  Si spec.omitIfEmpty === true Y campo encontrado Y valor vacio:
+    -> FALLA 'should_be_omitted' ("Campo no debe enviarse vacio")
+
+NIVEL 7 - Valor vacio (optional short-circuit)
+  Si valor es falsy o solo espacios -> PASA
+
+NIVEL 8 - Caracteres prohibidos
+  Si spec.mustBeMasked NO es true:
+    Probar contra FORBIDDEN_CHARS_REGEX
+    Si hay match -> FALLA 'forbidden_chars' (detalle: char ofensor)
+  (Campos enmascarados con * se saltan esta prueba)
+
+NIVEL 9a - Valor fijo
+  Si spec.fixedValue existe Y valor.trim() !== fixedValue:
+    -> FALLA 'fixed_value_mismatch' ("Esperado: X, recibido: Y")
+
+NIVEL 9b - Valores validos (enum)
+  Si spec.validValues existe Y es no-vacio Y valor NO esta en la lista:
+    -> FALLA 'invalid_value' ("Valor X no esta en [A, B, C]")
+
+NIVEL 9c - Longitud maxima
+  Si spec.maxLength existe Y longitud del valor > maxLength:
+    -> FALLA 'exceeds_max_length' ("Longitud X excede maximo Y")
+
+NIVEL 9d - Formato (regex)
+  Si spec.format existe:
+    Compilar regex; si regex invalido -> ignorar (no bloquear por config rota)
+    Si regex no coincide -> FALLA 'invalid_format'
+
+NIVEL 10 - Enmascaramiento
+  Si spec.mustBeMasked === true Y valor NO contiene '*':
+    -> FALLA 'not_masked' ("Tarjeta debe estar enmascarada")
+
+-> Si llega aqui sin fallar: PASA
+```
+
+### Caracteres prohibidos (FORBIDDEN_CHARS_REGEX) — alineado a manual v5
+
+```regex
+/[<>|¡!¿?*+'\/\\{}[\]"¨;:,#$%&()=áéíóúÁÉÍÓÚñÑ]/
+```
+
+Caracteres bloqueados: `< > | ¡ ! ¿ ? * + ' / \ { } [ ] ¨ ; : , # $ % & ( ) =` + vocales acentuadas `á é í ó ú Á É Í Ó Ú` + `ñ Ñ`.
+
+**Cambios v5** respecto a versiones previas:
+- Removido `ü` (no esta listado como prohibido en los manuales vigentes).
+- Agregado set oficial completo del Manual VCE v1.8 §7 + Ecommerce v2.6.4: vocales acentuadas de ambas cajas, `¡ ! ¿ ¨ ,`.
+- Nombres validos como "MUEVE CIUDAD", "ECOFLOW", "PINGUINO" ahora pasan. Palabras con acentos (`CAFE`, `NIÑOS`, `MERIDA`) fallan correctamente.
+
+**Fuente manual**: Ventana CE v1.8 p.7, Ecommerce v2.6.4, MOTO v1.5 p.8, 3DS v1.4 p.6.
+
+**Excepcion**: Campos con `mustBeMasked: true` (como CARD_NUMBER) se saltan esta validacion porque el `*` del enmascaramiento dispararia un falso positivo.
+
+**Pendiente**: variante relajada para Agregadores (permite `*` y `&` como separadores formato 7*14). Se introducira con Anexo D en el commit que lo wire completo.
+
+### Motivos de fallo implementados
+
+| Codigo | Descripcion | Origen |
+|---|---|---|
+| `missing` | Campo requerido no encontrado en el log | Pipeline nivel 4 |
+| `empty` | Campo requerido encontrado pero vacio | Pipeline nivel 4 |
+| `prohibited` | **(v5)** Campo prohibido presente con valor | Pipeline nivel 2 |
+| `should_be_omitted` | Campo con omitIfEmpty encontrado vacio | Pipeline nivel 6 |
+| `forbidden_chars` | Caracteres especiales prohibidos detectados | Pipeline nivel 8 |
+| `fixed_value_mismatch` | Valor no coincide con valor fijo esperado | Pipeline nivel 9a |
+| `invalid_value` | Valor fuera del dominio enumerado | Pipeline nivel 9b |
+| `exceeds_max_length` | Valor excede longitud maxima permitida | Pipeline nivel 9c |
+| `invalid_format` | Valor no coincide con patron regex | Pipeline nivel 9d |
+| `not_masked` | Numero de tarjeta sin enmascarar | Pipeline nivel 10 |
+| `cross_field` | Fallo en validacion cruzada entre campos | CrossFieldValidator |
+| `duplicate` | Combinacion CONTROL_NUMBER+MERCHANT_ID duplicada | UniqueValidator |
+| `rate_limit_exceeded` | **(v5)** Ventana de 60s excede 200 tx (Cargos Periodicos) | RateLimitValidator |
+| `anexo_d_format` | **(v5)** SUB_MERCHANT no cumple formato 7*14 | AnexoDValidator |
+| `anexo_d_chars` | **(v5)** Campo Agregadores con charset invalido (acentos, Ñ, puntuacion no permitida) | AnexoDValidator |
+| `anexo_d_double_space` | **(v5)** Campo Agregadores con doble espacio | AnexoDValidator |
+| `anexo_d_leading_space` | **(v5)** Campo Agregadores empieza con espacio | AnexoDValidator |
+
+---
+
+## 7. Matrices R/O/N/A por producto
+
+Cada producto tiene un archivo JSON en `src/config/mandatory-fields/` con la matriz completa de campos. Los campos estan indexados por su **nombre en el log** (ingles) con alias al nombre del manual (espanol).
+
+> **NOTA v5**: Las tablas individuales por producto (7.1-7.8) reflejan las matrices originales importadas. Los **cambios v5 criticos** estan blindados por 43 asserts de content-regression en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts` y son la fuente autoritativa de la "delta" respecto a versiones previas. Los JSONs en `src/config/mandatory-fields/*.json` son la fuente unica de verdad en runtime.
+
+### Cambios clave v5 sobre las matrices (delta vs. v4)
+
+| Producto | Campo | Cambio v5 |
+|---|---|---|
+| Ecommerce Tradicional | `MERCHANT_ID` | maxLen 15 → **7**, format `^\d{1,7}$` |
+| Ecommerce Tradicional | `MARKETPLACE_TX` | **`PROHIBITED`** en MC/AMEX (antes O para todos) |
+| Ecommerce Tradicional | `ID_GATEWAY` | **Nuevo campo**: `PROHIBITED` en VISA/AMEX, `O` en MC (mandato Gateway 7118 MC) |
+| Ecommerce Tradicional | `CUSTOMER_REF3` | O → **R** |
+| Ecommerce Tradicional / MOTO | `ENTRY_MODE` | validValues restringido a **`["MANUAL"]`** para TNP |
+| Cargos Periodicos Post | `TERMINAL_ID` | maxLen 15 → **10**, regla **R** (no O) |
+| VCE | `merchantCity` | maxLen 13 → **40** (bug 3DS v1.0 corregido) |
+| VCE | Q6 MSI nuevo | `initialDeferment`, `paymentsNumber`, `planType` agregados |
+| API PW2 Seguro, Interredes | `TVR/TSI/AID/APN/AL` | Removidos de `servlet` → movidos a `emvVoucher` (no se validan) |
+| API PW2 Seguro, Interredes | `EMV_TAGS` | Unico campo EMV de envio real, permanece en `servlet` |
+| Interredes | `CMD_TRANS` | validValues extendido a 13 opciones (incluye `OBTENER_LLAVE`, `CASHBACK`) |
+| **Todos** | `CUSTOMER_REF2` | Si se usa, debe coincidir PRE↔POST (regla C8) |
+
+### 7.1 Comercio Electronico Tradicional (v2.6.4)
+
+**Archivo**: `ecommerce-tradicional.json`
+
+#### Transacciones soportadas (con marca)
+
+AUTH_VISA, AUTH_MC, AUTH_AMEX, PREAUTH_VISA, PREAUTH_MC, PREAUTH_AMEX, POSTAUTH_VISA, POSTAUTH_MC, POSTAUTH_AMEX, REFUND_VISA, REFUND_MC, REFUND_AMEX, VOID_VISA, VOID_MC, VOID_AMEX, REVERSAL_VISA, REVERSAL_MC, REVERSAL_AMEX, VERIFY_VISA, VERIFY_MC, VERIFY_AMEX
+
+#### Campos Servlet
+
+| Campo (logName) | Manual (ES) | AUTH | PREAUTH | POSTAUTH | REFUND | VOID | REVERSAL | VERIFY | maxLen | format | validValues | mustBeMasked | fixedValue |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| MERCHANT_ID | ID_AFILIACION | R | R | R | R | R | R | R | 15 | | | | |
+| USER | USUARIO | R | R | R | R | R | R | R | | | | | |
+| PASSWORD | CLAVE_USR | N/A | N/A | N/A | N/A | N/A | N/A | N/A | | | | | |
+| TERMINAL_ID | ID_TERMINAL | R | R | R | R | R | R | R | 15 | | | | |
+| CMD_TRANS | CMD_TRANS | R | R | R | R | R | R | R | | | VENTA\|AUTH, PREAUTH, POSTAUTH, DEVOLUCION\|REFUND, CANCELACION\|VOID, REVERSA\|REVERSAL, VERIFICACION\|VERIFY | | |
+| AMOUNT | MONTO | R | R | R | O | N/A | N/A | N/A | 18 | `^\d{1,16}(\.\d{1,2})?$` | | | |
+| MODE | MODO | R | R | R | R | R | R | R | | | PRD, AUT, DEC, RND | | |
+| REFERENCE | REFERENCIA | O | O | R | R | R | R | O | 15 | | | | |
+| CONTROL_NUMBER | NUMERO_CONTROL | O | O | O | R | O | O | O | 30 | | | | |
+| CARD_NUMBER | NUMERO_TARJETA | R | R | R | N/A | N/A | N/A | N/A | | | | true | |
+| EXP_DATE | FECHA_EXP | O | O | O | N/A | N/A | N/A | N/A | 4 | `^\d{4}$` | | | |
+| SECURITY_CODE | CODIGO_SEGURIDAD | N/A | N/A | N/A | N/A | N/A | N/A | N/A | 4 | `^\d{3,4}$` | | | |
+| ENTRY_MODE | MODO_ENTRADA | R | R | R | N/A | N/A | N/A | N/A | | | MANUAL, BANDA, MAGSTRIPE, CHIP, CONTACTLESSCHIP, CONTACTLESSBANDA | | |
+| MARKETPLACE_TX | MARKETPLACE_TX | O | O | O | O | O | O | O | | | | | |
+| RESPONSE_LANGUAGE | IDIOMA_RESPUESTA | O | O | O | O | O | O | O | | | ES, EN, 01, 02 | | |
+| CUSTOMER_REF1 | REF_CLIENTE1 | O | O | O | O | O | O | O | 30 | | | | |
+| CUSTOMER_REF2 | REF_CLIENTE2 | O | O | O | O | O | O | O | 30 | | | | |
+| CUSTOMER_REF3 | REF_CLIENTE3 | O | O | O | O | O | O | O | 30 | | | | |
+| CUSTOMER_REF4 | REF_CLIENTE4 | O | O | O | O | O | O | O | 30 | | | | |
+| CUSTOMER_REF5 | REF_CLIENTE5 | O | O | O | O | O | O | O | 30 | | | | |
+| PLAN_TYPE | TIPO_PLAN | O | O | N/A | N/A | N/A | N/A | N/A | | | 03, 05, 07 | | |
+| PAYMENT_NUMBER | NUMERO_PAGOS | O | O | N/A | N/A | N/A | N/A | N/A | 2 | | | | |
+| INITIAL_DEFERMENT | DIFERIMIENTO_INICIAL | O | O | N/A | N/A | N/A | N/A | N/A | 2 | | | | |
+
+**Nota**: Las reglas de AUTH/PREAUTH/POSTAUTH varian por marca (VISA/MC/AMEX) en el JSON real. La tabla simplificada muestra la regla comun.
+
+### 7.2 MOTO (v1.5)
+
+**Archivo**: `moto.json`
+
+Misma estructura que Tradicional **sin capas 3DS ni Cybersource** (canal telefonico, sin browser).
+
+Diferencias clave:
+- NO soporta 3D Secure
+- AN5822 para MC: CIT(`IND_PAGO`=U, `TIPO_MONTO`=V|F, `INFO_PAGO`=0), MIT(`COF`=4, `IND_PAGO`=8, `TIPO_MONTO`=V|F, `INFO_PAGO`=2)
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL, VERIFY (ambas marcas VISA/MC)
+
+### 7.3 Cargos Periodicos Post (v2.1)
+
+**Archivo**: `cargos-periodicos-post.json`
+
+Diferencias clave respecto a Tradicional:
+- **NO tiene PREAUTH/POSTAUTH** (solo AUTH, REFUND, VOID, REVERSAL, VERIFY)
+- **CUSTOMER_REF3 es R** (requerido) -- identificador del suscriptor
+- CONTROL_NUMBER es **R** (no O como en otros productos)
+- REFERENCE: AUTH=O, REFUND/VOID/REVERSAL=R
+- Transacciones: AUTH_VISA, AUTH_MC, REFUND_VISA, REFUND_MC, VOID_VISA, VOID_MC, REVERSAL_VISA, REVERSAL_MC
+
+### 7.4 Ventana de Comercio Electronico Cifrada (v1.8)
+
+**Archivo**: `ventana-comercio-electronico.json`
+
+Diferencias clave:
+- Variables en **camelCase** (no MAYUSCULAS_SNAKE): `merchantId`, `name`, `password`, `mode`, `controlNumber`, `terminalId`, `merchantName`, `merchantCity`, `lang`, `amount`, `customerRef1..5`
+- `password` es **R** (requerido, no N/A como en otros -- porque se envia cifrado)
+- `merchantName` y `merchantCity` son **R** (nombre y ciudad del comercio, usados por 3DS)
+- `lang` en vez de `RESPONSE_LANGUAGE`, validValues=[ES, EN]
+- Soporta 3DS + Cybersource + AN5822
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL (VISA/MC/AMEX)
+
+### 7.5 Agregadores - Comercio Electronico (v2.6.4)
+
+**Archivo**: `agregadores-comercio-electronico.json`
+
+Campos base servlet similares a Tradicional, mas campos de agregador segun esquema (ver seccion 11).
+
+Diferencias clave:
+- TERMINAL_ID: AUTH=R, resto=O
+- CARD_NUMBER: AUTH/PREAUTH/POSTAUTH=R, REFUND/VOID/REVERSAL=O
+- EXP_DATE: todo O (no en logs reales de agregadores)
+- Soporta sub-esquemas: ESQ_1, ESQ_4_SIN_AGP, ESQ_4_CON_AGP
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL (VISA/MC)
+
+### 7.6 Agregadores - Cargos Periodicos (v2.6.4)
+
+**Archivo**: `agregadores-cargos-periodicos.json`
+
+Similar a Agregadores CE pero sin PREAUTH/POSTAUTH:
+- Transacciones: AUTH, REFUND, VOID, REVERSAL (VISA/MC)
+- REFERENCE: AUTH=R, REFUND/VOID=R, REVERSAL=O
+- Mismos sub-esquemas que Agregadores CE
+
+### 7.7 API PW2 Seguro - Tarjeta Presente (v2.4)
+
+**Archivo**: `api-pw2-seguro.json`
+
+Campos completamente diferentes a los TNP:
+- CMD_TRANS: validValues=[VENTA, CASHBACK, VENTA_FORZADA, PREAUTORIZACION, REAUTORIZACION, POSTAUTORIZACION, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION]
+- CONTROL_NUMBER: **R** (siempre requerido)
+- REFERENCE: PREAUTH/REAUTH/POSTAUTH/REFUND/REVERSAL=R, AUTH/VOID/CASHBACK/VERIFY=N/A
+- BATCH (LOTE): AUTH=O, PREAUTH/VOID=R, resto=N/A
+- Campos EMV (ver abajo)
+- Transacciones: AUTH, PREAUTH, REAUTH, POSTAUTH, REFUND, VOID, REVERSAL, CASHBACK, VERIFY (VISA/MC/AMEX)
+
+Campos EMV adicionales:
+
+| Campo | AUTH | PREAUTH | REAUTH | POSTAUTH | REFUND | VOID | REVERSAL | CASHBACK | VERIFY |
+|---|---|---|---|---|---|---|---|---|---|
+| EMV_TAGS | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+| TVR (TAG 95) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+| TSI (TAG 9B) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+| AID (TAG 4F) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+| APN (TAG 9F12) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+| AL (TAG 50) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+
+### 7.8 Interredes Remoto (v1.7)
+
+**Archivo**: `interredes-remoto.json`
+
+Estructura similar a API PW2 Seguro con algunas diferencias:
+- CMD_TRANS sin VENTA_FORZADA
+- TSI es **O** (opcional en v1.7, requerido en PW2 v2.4)
+- Mismos campos EMV
+
+---
+
+## 8. Capa 3D Secure v1.4
+
+**Archivo**: `layer-3ds.json`
+**Aplica a**: Tradicional, Ventana CE, Agregadores CE (este ultimo fue agregado en v5 — gap `SUPPORTED_LAYERS` corregido)
+
+> **v5 — cambios criticos**:
+> - `CERTIFICACION_3D` (envio, `fixedValue="03"`) y `STATUS_3D` (retorno, valores `200` etc.) ahora estan **separados** en secciones distintas del JSON (`threeds` vs `threedsResponse`). Antes se confundian y causaban el bug "manual dice 200, log dice 03".
+> - **ECI tiene `validValuesByBrand`**: VISA/AMEX → `[05, 06, 07]`, MC → `[01, 02]`. El `validValues` global sigue existiendo como fallback. La aplicacion proyecta al subset correcto por marca via `resolveSpecForBrand`.
+> - 13 campos nuevos de envio agregados: `FORWARD_PATH`, `REFERENCE3D`, `CITY`, `COUNTRY`, `EMAIL`, `NAME`, `LAST_NAME`, `POSTAL_CODE`, `STATE`, `STREET`, `MOBILE_PHONE`, `THREED_VERSION`, `CREDIT_TYPE`.
+> - `STATUS_3D` tiene tabla completa de 40+ codigos en `validValues`.
+
+### Campos pre-3DS (entrada al servicio 3DS)
+
+| Campo (logName) | Manual (ES) | AUTH | PREAUTH | POSTAUTH |
+|---|---|---|---|---|
+| Card | NUMERO_TARJETA | R | R | R |
+| Total | MONTO | R | R | R |
+| CardType | MARCA_TARJETA | R | R | R |
+| MerchantId | ID_AFILIACION | R | R | R |
+| MerchantName | NOMBRE_COMERCIO | R | R | R |
+| MerchantCity | CIUDAD_COMERCIO | R | R | R |
+
+Nota: `Card` tiene `mustBeMasked: true`, `CardType` tiene `validValues: [VISA, MASTERCARD, AMEX]`
+
+### Campos post-3DS (resultado de autenticacion, se envian a Payworks)
+
+| Campo (logName) | Manual (ES) | AUTH | PREAUTH | POSTAUTH | Valor fijo | validValues | omitIfEmpty |
+|---|---|---|---|---|---|---|---|
+| Cert3D | ESTATUS_3D | R | R | R | 03 | | |
+| ECI | ECI | R | R | R | | 01, 02, 05, 06, 07 | |
+| XID | XID | R(VISA/AMEX), N/A(MC) | R(VISA/AMEX), N/A(MC) | R(VISA/AMEX), N/A(MC) | | | true |
+| CAVV | CAVV | R | R | R | | | true |
+| Version3D | VERSION_3D | R | R | R | 2 | | |
+| UCAF | UCAF | N/A(VISA), O(MC) | N/A(VISA), O(MC) | N/A(VISA), O(MC) | | | |
+
+### Reglas especiales 3DS implementadas
+
+1. **Cert3D = "03"** (fixedValue): El campo `3D_CERTIFICATION` en el POST hacia Payworks siempre debe ser "03"
+   - **ATENCION**: El manual dice `Status = 200` para autenticacion exitosa, pero eso es el campo de RETORNO `Status`, no el campo de envio `Cert3D`. Son DOS campos distintos. `Cert3D` siempre es "03". El campo `Status` ambiguo esta marcado como `ambiguous: true`.
+
+2. **Version3D = "2"** (fixedValue): Siempre la version 2 del protocolo
+
+3. **XID solo para VISA/AMEX**: MasterCard no retorna XID (campo es N/A para MC)
+
+4. **XID y CAVV con omitIfEmpty**: Si el servicio 3DS retorna valor nulo o blanco, NO se debe enviar el campo al POST de Payworks. Si el campo esta presente pero vacio, el motor de validacion lo marca como `should_be_omitted`.
+
+5. **ECI valores permitidos**: 05 (VISA autenticacion exitosa), 06 (VISA intento), 07 (VISA sin autenticacion), 01 (MC autenticacion exitosa), 02 (MC intento)
+
+---
+
+## 9. Capa Cybersource Direct v1.10
+
+**Archivo**: `layer-cybersource.json`
+**Aplica a**: Tradicional, Ventana CE, **Agregadores CE** (agregado en v5 — gap `SUPPORTED_LAYERS` corregido en `IntegrationType.ts`)
+
+> **v5 — cambios criticos**:
+> - `Card_cardType` `validValues` reducido a `["001", "002"]` (solo VISA y MasterCard). **AMEX ya no aplica** — Cybersource Banorte no soporta cardType `"003"`.
+> - `MerchantID` tiene `fixedValue: "banorteixe"`.
+> - `BillTo_ipAddress` ahora es `R` (era O en versiones previas segun manual v1.6+).
+> - Regla cruzada **C11a**: `ID_CYBERSOURCE` del servlet debe coincidir con `requestID` de Cybersource.
+> - Regla cruzada **C11b**: BIN (primeros 6 de `Card_accountNumber`, tolerante a masking con `*`) debe ser consistente con `Card_cardType`.
+
+### Campos BillTo (direccion de facturacion)
+
+| Campo | Regla | maxLen | Notas |
+|---|---|---|---|
+| BillTo_firstName | R | | |
+| BillTo_lastName | R | | |
+| BillTo_street | R | | |
+| BillTo_streetNumber | R | | |
+| BillTo_streetNumber2 | O | | |
+| BillTo_street2Col | R | | |
+| BillTo_street2Del | R | | |
+| BillTo_city | R | | |
+| BillTo_state | R | | |
+| BillTo_country | R | | |
+| BillTo_phoneNumber | R | | |
+| BillTo_postalCode | R | | |
+| BillTo_email | O | | |
+| BillTo_customerID | O | | |
+| BillTo_customerPassword | O | | |
+| BillTo_dateOfBirth | O | | |
+| BillTo_hostname | O | | |
+| BillTo_ipAddress | R | | |
+
+### Campos Card (datos de tarjeta)
+
+| Campo | Regla | validValues | Notas |
+|---|---|---|---|
+| Card_accountNumber | R | | |
+| Card_cardType | R | 001, 002 | 001=VISA, 002=MC |
+| Card_expirationMonth | R | | |
+| Card_expirationYear | R | | |
+
+### Campos de identificacion
+
+| Campo | Regla |
+|---|---|
+| DeviceFingerprintID | R |
+| Name | R |
+| Password | R |
+| MerchantNumber | R |
+| TerminalId | R |
+| OrderId | R |
+
+### Campos ShipTo (direccion de envio) - todos O
+
+ShipTo_firstName, ShipTo_lastName, ShipTo_street, ShipTo_streetNumber, ShipTo_city, ShipTo_state, ShipTo_country, ShipTo_postalCode, ShipTo_phoneNumber, ShipTo_shippingMethod, ShipTo_email
+
+### Campos de compra
+
+| Campo | Regla | validValues |
+|---|---|---|
+| PurchaseTotals_currency | R | MXN, USD |
+| PurchaseTotals_grandTotalAmount | R | |
+
+### Campos de respuesta Cybersource
+
+| Campo | Regla | validValues |
+|---|---|---|
+| decision | R | ACCEPT, REVIEW, REJECT, ERROR |
+| reasonCode | R | 100, 101, 102, 110, 150, 151, ... (60+ codigos) |
+| afsReply_afsResult | O | |
+
+---
+
+## 10. Capa AN5822 CIT/MIT MasterCard (refactorizada en v5)
+
+**Archivos**: `src/config/mandatory-fields/layer-an5822.json`, `src/core/domain/services/An5822FlowDetector.ts`, `src/core/domain/services/An5822Validator.ts`, `src/core/domain/value-objects/An5822Flow.ts`
+**Aplica a**: productos TNP (Ecommerce, MOTO, Cargos Periodicos Post, VCE, Agregadores CE, Agregadores CP), solo marca MC, excluye VOID/REVERSAL
+**No aplica a**: productos TP (API PW2 Seguro, Interredes Remoto), VISA, AMEX, tipos VOID/REVERSAL.
+
+### Bug legacy corregido
+
+v4 tenia un solo modelo "CIT/MIT" de 2 flujos y aceptaba `IND_PAGO=8` (valor inventado, no existe en manuales). Tambien usaba `U` como valor uniforme sin diferenciar entre Ecommerce y Cargos Periodicos.
+
+v5 modela los **3 flujos oficiales** y `IND_PAGO=8` queda rechazado con `invalid_value`.
+
+### 3 flujos del mandato
+
+| Flujo | Significado |
+|---|---|
+| `firstCIT` | Primera transaccion donde el comercio almacena credenciales con autorizacion explicita del tarjetahabiente |
+| `subseqCIT` | Transaccion subsecuente iniciada por el cliente (click explicito, ej. autocompletado) |
+| `subseqMIT` | Transaccion subsecuente iniciada por el comercio (cargo automatico) |
+
+### Valores esperados por producto y flujo
+
+| Producto | firstCIT | subseqCIT | subseqMIT |
+|---|---|---|---|
+| Ecommerce Tradicional | `IND_PAGO=U, TIPO_MONTO∈[V,F], INFO_PAGO=0` | `U, [V,F], 3` | `U, [V,F], 2` |
+| MOTO | `U, [V,F], 0` | `U, [V,F], 3` | `U, [V,F], 2` |
+| VCE | `U, [V,F], 0` | `U, [V,F], 3` | `U, [V,F], 2` |
+| Agregadores CE | `U, [V,F], 0` | `U, [V,F], 3` | `U, [V,F], 2` |
+| **Cargos Periodicos Post** | **`R`**, `[F,V], 0`, sin COF | (no aplica) | `R, [F,V], 2, COF=4` |
+| **Agregadores CP** | **`R`**, `[F,V], 0`, sin COF | (no aplica) | `R, [F,V], 2, COF=4` |
+
+Fuente: `layer-an5822.json` `_meta.productMapping`.
+
+### Detector de flujo (`An5822FlowDetector`)
+
+```
+Entrada: { declaredFlow, observedValues, brand, transactionType, product }
+
+1. Si brand != MC                           -> NOT_APPLICABLE (silencioso)
+2. Si transactionType in {VOID, REVERSAL}   -> NOT_APPLICABLE (silencioso)
+3. Si product in {API_PW2_SEGURO, INTERREDES_REMOTO} -> NOT_APPLICABLE
+4. Si matriz declaro flujo_an5822:
+     Si observacion contradice (PAYMENT_INFO distinto) -> FAIL C10
+     Retornar declaredFlow
+5. Si no hay declaracion:
+     Inferir por PAYMENT_INFO: 0->firstCIT, 3->subseqCIT, 2->subseqMIT
+     Emitir warning recomendando columna flujo_an5822
+6. Sin declaracion ni inferencia posible -> NOT_APPLICABLE con warning
+```
+
+### Validator (`An5822Validator`)
+
+Compara los 4 campos observados contra el mapping producto/flujo. Emite `An5822FieldFailure` por cada discrepancia:
+
+| Campo | Fail reason si difiere |
+|---|---|
+| `PAYMENT_IND` (IND_PAGO) | `invalid_value` o `missing` |
+| `AMOUNT_TYPE` (TIPO_MONTO) | `invalid_value` o `missing` |
+| `PAYMENT_INFO` (INFO_PAGO) | `invalid_value` o `missing` |
+| `COF` | `invalid_value` / `missing` en Cargos Periodicos MIT; `prohibited` en productos donde no aplica |
+
+### Matriz Excel: columna `flujo_an5822` (v5)
+
+El parser `ExcelMatrixParser` reconoce aliases tolerantes: `flujo_an5822`, `FLUJO_AN5822`, `Flujo AN5822`, `FLUJOAN5822`, `AN5822_FLOW`, `AN5822 FLOW`.
+
+Valores aceptados (case-insensitive): `firstCIT`, `subseqCIT`, `subseqMIT`, `N/A`, vacio. Cualquier otro valor lanza error con numero de fila.
+
+Semantica del parser:
+- **undefined** (columna ausente en la matriz) -> detector cae a inferencia.
+- **null** (columna presente pero valor vacio o `N/A`) -> detector tratara como no aplicable.
+- **An5822Flow** (valor declarado) -> detector lo usa con prioridad sobre inferencia.
+
+---
+
+## 11. Esquemas de Agregadores
+
+Los productos Agregadores (5 y 6) soportan 3 sub-esquemas que agregan campos requeridos adicionales al servlet base.
+
+### Esquema 1 - Tasa Natural
+
+- Sin campos adicionales (solo los del servlet base)
+- El agregador opera bajo la afiliacion padre
+
+### Esquema 4 - Sin AGP (Autorizacion de Garantia de Pago)
+
+Campos adicionales requeridos (R):
+
+| Campo (logName) | Manual (ES) | Tipo | maxLen |
+|---|---|---|---|
+| SUB_MERCHANT | SUB_AFILIACION | alfanum | 22 (formato `7*14`) |
+| ID_AGREGADOR | ID_AGREGADOR | num | 19 |
+
+### Esquema 4 - Con AGP PROSA
+
+Campos adicionales requeridos (R) = todos los de Sin AGP + 6 mas:
+
+| Campo (logName) | Manual (ES) | Tipo | maxLen |
+|---|---|---|---|
+| SUB_MERCHANT | SUB_AFILIACION | alfanum | 22 (formato `7*14`) |
+| ID_AGREGADOR | ID_AGREGADOR | num | 19 |
+| MERCHANT_MCC | MERCHANT_MCC | num | 4 |
+| DOMICILIO_COMERCIO | DOMICILIO_COMERCIO | alfanum | 25 |
+| ZIP_CODE | CODIGO_POSTAL | num | 10 |
+| CIUDAD_TERMINAL | CIUDAD_TERMINAL | alfanum | 13 |
+| ESTADO_TERMINAL | ESTADO_TERMINAL | alfanum | 3 |
+| PAIS_TERMINAL | PAIS_TERMINAL | alfanum | 2 |
+
+**Rename v5**: El campo `AGGREGATOR_ID` legacy se renombro a `ID_AGREGADOR` (tambien en `response-rules.json`: `AGGREGATOR_REF` -> `ID_AGREGADOR`). Cero consumidores quedan con el nombre viejo.
+
+### Anexo D — Reglas de contenido Agregadores (v5)
+
+**Archivo**: `src/core/domain/services/AnexoDValidator.ts`
+**Aplica a**: AGREGADORES_COMERCIO_ELECTRONICO, AGREGADORES_CARGOS_PERIODICOS
+**Fuente**: Manual Agregadores v2.6.4 §Anexo D
+
+Servicio de dominio puro (sin I/O) que valida el contenido de campos especificos a agregadores:
+
+| Campo | Regla |
+|---|---|
+| `SUB_MERCHANT` | Formato estricto `^[A-Z0-9&]{7}\*[A-Z0-9&]{14}$` (7 chars agregador + `*` + 14 chars subafiliado). Ejemplo valido: `OPLINEA*ESSENTIALMASSA` |
+| `ID_AGREGADOR`, `CIUDAD_TERMINAL`, `ESTADO_TERMINAL`, `PAIS_TERMINAL` | Charset: `A-Z`, `0-9`, `&`, espacio. Sin acentos, sin `Ñ`, sin puntuacion |
+| `DOMICILIO_COMERCIO` | Charset genericos + `.` (unico campo que admite punto) |
+| **Todos** | Sin dobles espacios consecutivos, sin espacio al inicio |
+
+Fail reasons emitidos: `anexo_d_format`, `anexo_d_chars`, `anexo_d_double_space`, `anexo_d_leading_space`.
+
+Integrado en `ValidateTransactionFieldsUseCase` via DI — se ejecuta automaticamente para cada transaccion de los 2 productos agregadores.
+
+---
+
+## 12. Validaciones cruzadas entre campos
+
+**Archivos**: `src/core/domain/services/CrossFieldValidator.ts`, `PreAuthPostAuthCorrelator.ts`, `RateLimitValidator.ts`
+
+Ademas del motor de pipeline por campo, existen validaciones que requieren comparar MULTIPLES campos o logs entre si, o agregar datos cross-transaccion. Se dividen en **per-tx** (corren en `ValidateTransactionFieldsUseCase`) y **cross-tx** (corren en `RunCertificationUseCase` tras el loop).
+
+### Regla C1: XID/CAVV no deben enviarse vacios
+
+**Fuente**: Manual 3DS v1.4, p.9 ("Si las Variables XID y/o CAVV retornaron valor Nulo o Blanco en la respuesta de la autenticacion 3D Secure, no enviar en el post hacia Payworks")
+
+```
+SI log 3DS tiene campo XID o CAVV:
+  SI el valor esta presente PERO vacio → FALLA
+  Detalle: "XID esta presente pero vacio -- no debe enviarse"
+  Capa: THREEDS
+```
+
+### Regla C2: POSTAUTH requiere AUTH_CODE de PREAUTH previo
+
+**Fuente**: Logica de negocio -- una postautorizacion necesita el codigo de autorizacion obtenido en la preautorizacion previa.
+
+```
+SI tipo transaccion === POSTAUTH:
+  Buscar AUTH_CODE (o CODIGO_AUT) en el request del servlet
+  SI no esta en el request:
+    Buscar en respuestas previas de la sesion
+    SI no se encuentra en ninguna parte → FALLA
+  Detalle: "No se encontro AUTH_CODE en request ni en respuestas previas"
+  Capa: SERVLET
+```
+
+### Regla C3: REFERENCIA servlet debe coincidir con Campo 37 PROSA
+
+**Fuente**: Validacion de integridad -- el Campo 37 de PROSA (Retrieval Reference Number) debe ser identico a la REFERENCIA del servlet.
+
+```
+SI existe respuesta servlet Y respuesta PROSA:
+  servletRef = response.REFERENCE o response.REFERENCIA
+  prosaRef = response.Campo37
+  SI ambos existen Y son diferentes → FALLA
+  Detalle: 'Servlet: "X", PROSA Campo 37: "Y"'
+  Capa: SERVLET
+```
+
+### Regla C4: Decision Cybersource valores validos
+
+**Fuente**: Manual Cybersource v1.10
+
+```
+SI existe log Cybersource:
+  SI campo 'decision' existe Y NO esta en [ACCEPT, REVIEW, REJECT, ERROR]:
+    → FALLA
+  Detalle: 'Valor recibido: "X"'
+  Capa: CYBERSOURCE
+```
+
+### Regla C5: Pais de envio debe coincidir con pais del terminal
+
+**Fuente**: Validacion de consistencia Cybersource
+
+```
+SI existe log Cybersource Y servlet request:
+  shipCountry = cybersource.ShipTo_country
+  terminalCountry = servlet.TERMINAL_COUNTRY
+  SI ambos existen Y son diferentes → FALLA
+  Detalle: 'ShipTo_country: "X", TERMINAL_COUNTRY: "Y"'
+  Capa: CYBERSOURCE
+```
+
+### Regla C6: Campos de respuesta en dominio valido
+
+```
+Para cada campo esperado con validValues:
+  SI campo presente en respuesta servlet Y valor NO esta en validValues:
+    → FALLA
+  Capa: SERVLET
+```
+
+### Regla C7: Unicidad CONTROL_NUMBER + MERCHANT_ID
+
+**Fuente**: Manual MOTO v1.5, p.7 ("La combinacion del numero de afiliacion con este numero de control debera ser unico e irrepetible por cada transaccion")
+**Servicio**: `UniqueValidator`
+**Granularidad**: cross-tx
+
+```
+Para cada transaccion procesada:
+  key = MERCHANT_ID + ":" + CONTROL_NUMBER
+  SI key ya fue vista previamente → FALLA (duplicado)
+  Detalle: "Combinacion X:Y aparece N veces -- debe ser unica"
+  Capa: SERVLET
+```
+
+### Regla C8: CUSTOMER_REF2 consistente entre PREAUT y POSTAUT (v5)
+
+**Fuente**: Manual Ecommerce Tradicional v2.6.4 p.10 ("Si se usa en operativa de PRE y POSTAUTORIZACION, el valor que envie en ambas transacciones debe ser igual")
+**Servicio**: `PreAuthPostAuthCorrelator`
+**Granularidad**: cross-tx (corre en RunCertificationUseCase tras el loop)
+
+```
+Para cada transaccion en la sesion:
+  Agrupar PREAUT por numeroControl
+Para cada POSTAUT:
+  Buscar PREAUT con mismo numeroControl
+  Si existe: comparar servletRequest.CUSTOMER_REF2 entre ambas
+    Si difieren -> FALLA 'inconsistent_customer_ref2'
+    Detalle incluye refs de PRE y POST + valores ("(vacio)" si ausente)
+    El fail se adjunta al ValidationResult de la POSTAUT
+```
+
+Politica: si ambos vacios → pasa; si solo uno trae valor → falla.
+
+### Regla C9: ECI validValues segun CARD_BRAND (v5)
+
+**Fuente**: `layer-3ds.json:476` — `validValuesByBrand` nuevo en FieldSpec
+**Granularidad**: per-tx (via proyeccion en `resolveSpecForBrand`)
+
+ECI en la respuesta 3DS se valida contra un subset segun la marca:
+
+| Marca | validValues ECI |
+|---|---|
+| VISA | `[05, 06, 07]` |
+| AMEX | `[05, 06, 07]` |
+| MC | `[01, 02]` |
+
+Cuando el `validValues` global de un campo coexiste con `validValuesByBrand`, la aplicacion resuelve al subset de marca **antes** de invocar al evaluador. Si el valor observado cae fuera, produce `invalid_value`.
+
+### Regla C10: Coherencia AN5822 declarado vs observado (v5)
+
+**Servicio**: `An5822FlowDetector`
+**Granularidad**: per-tx
+
+Si la matriz declara `flujo_an5822` en la transaccion Y el log observado sugiere otro flujo por `PAYMENT_INFO`, el detector emite un failure con `source: 'AN5822'` describiendo la inconsistencia (ej. declaracion `firstCIT` pero PAYMENT_INFO=`2` sugiere `subseqMIT`). Esto tambien activa logica defensiva en el validator AN5822 (no muta el flujo declarado, pero flaggea).
+
+### Regla C11: ID_CYBERSOURCE = requestID + BIN vs Card_cardType (v5)
+
+**Servicio**: `CrossFieldValidator.validateCybersourceIdAndBin`
+**Granularidad**: per-tx
+**source reportado**: `CYBERSOURCE`
+
+**C11a** — `ID_CYBERSOURCE` del servlet debe coincidir con `requestID` de la respuesta Cybersource. Si difieren: FAIL.
+
+**C11b** — BIN (primeros 6 digitos de `Card_accountNumber`, tolerante a masking con `*`) debe ser consistente con `Card_cardType`:
+- `001` (VISA): BIN debe empezar con `4`.
+- `002` (MC): BIN en rangos `510000-559999` o `222100-272099` (incluye nuevos ranges MC).
+
+AMEX no aplica (Cybersource Banorte no soporta Card_cardType=003 en v5).
+
+### Regla C12: Codigos de error PinPad documentados (v5)
+
+**Servicio**: `CrossFieldValidator.validatePinPadErrorCode`
+**Granularidad**: per-tx
+**Aplica a**: productos Tarjeta Presente con tabla `errorCodes` declarada (API PW2 Seguro, Interredes Remoto)
+**Fuente**: Manual Interredes Remoto Anexo VI, API PW2 Seguro §error codes
+
+Si el servlet log expone `ERROR_CODE` (o alias `CODIGO_ERROR`, `PINPAD_ERROR`) con valor no vacio distinto de `0`/`00`, verifica que el codigo este documentado en `errorCodes` del producto. Si no esta: FAIL.
+
+### Regla Rate Limit: 200 tx/min en Cargos Periodicos (v5)
+
+**Servicio**: `RateLimitValidator`
+**Granularidad**: cross-tx
+**Fuente**: Manual Cargos Periodicos Post v2.1 y Agregadores CP v2.6.4
+**Aplica a**: CARGOS_PERIODICOS_POST, AGREGADORES_CARGOS_PERIODICOS
+
+Ventana deslizante de 60 segundos. Si en alguna ventana el numero de transacciones supera 200, se reporta una violacion con el conjunto completo de refs dentro de la ventana. Cada tx afectada recibe un fail `rate_limit_exceeded` en su `ValidationResult`.
+
+Solo se reporta la **primera** violacion detectada por sesion (evitar ruido de sintoma repetido).
+
+### Regla Anexo D: Reglas de contenido Agregadores (v5)
+
+Ver [Seccion 11](#11-esquemas-de-agregadores) — Anexo D.
+
+Servicio: `AnexoDValidator`. Granularidad: per-tx. Solo aplica a los 2 productos agregadores.
+
+---
+
+## 13. Glosario de variables espanol-ingles
+
+**Archivo**: `src/config/variable-glossary.json`
+
+El problema: los manuales usan nombres en **espanol MAYUSCULAS** (ID_AFILIACION, USUARIO, MONTO) pero los logs del servlet usan nombres en **ingles MAYUSCULAS** (MERCHANT_ID, USER, AMOUNT). El glosario mapea entre ambos.
+
+### Seccion: Servlet (campos base)
+
+| Manual (ES) | Log (EN) | Display | Tipo | Ambiguo |
+|---|---|---|---|---|
+| ID_AFILIACION | MERCHANT_ID | ID Afiliacion | numeric(9) | No |
+| USUARIO | USER | Usuario | alphanum | No |
+| CLAVE_USR | (no se logea) | Clave Usuario | — | Si (PCI) |
+| ID_TERMINAL | TERMINAL_ID | ID Terminal | numeric | No |
+| CMD_TRANS | CMD_TRANS | Tipo Transaccion | enum | No |
+| MONTO | AMOUNT | Monto | decimal(18,2) | No |
+| MODO | MODE | Modo | enum | No |
+| REFERENCIA | REFERENCE | Referencia | alphanum | No |
+| NUMERO_CONTROL | CONTROL_NUMBER | Numero de Control | alphanum | No |
+| REF_CLIENTE1..5 | CUSTOMER_REF1..5 | Referencia Cliente 1..5 | alphanum | No |
+| NUMERO_TARJETA | CARD_NUMBER | Numero de Tarjeta | masked | No |
+| FECHA_EXP | CARD_EXP (probable) | Fecha Expiracion | date(MMAA) | **Si** |
+| CODIGO_SEGURIDAD | (no se logea) | Codigo de Seguridad | — | Si (PCI) |
+| MODO_ENTRADA | ENTRY_MODE | Modo de Entrada | enum | No |
+| IDIOMA_RESPUESTA | RESPONSE_LANGUAGE | Idioma Respuesta | enum | No |
+| LOTE | — | Lote | — | **Si** |
+| MARKETPLACE_TX | — | Marketplace TX | — | **Si** |
+
+### Seccion: Agregadores
+
+| Manual (ES) | Log (EN) | Tipo |
+|---|---|---|
+| SUB_AFILIACION | SUB_MERCHANT | alfanum(18) |
+| ID_AGREGADOR | AGGREGATOR_ID | num(19) |
+| MERCHANT_MCC | MERCHANT_MCC | num(4) |
+| DOMICILIO_COMERCIO | DOMICILIO_COMERCIO | alfanum(25) |
+| CODIGO_POSTAL | ZIP_CODE | num(10) |
+| CIUDAD_TERMINAL | TERMINAL_CITY | alfanum(13) |
+| ESTADO_TERMINAL | ESTADO_TERMINAL | alfanum(3) |
+| PAIS_TERMINAL | TERMINAL_COUNTRY | alfanum(2) |
+
+### Seccion: AN5822
+
+| Manual (ES) | Log (EN) | validValues |
+|---|---|---|
+| IND_PAGO | PAYMENT_IND | U, R, 8, 4 |
+| TIPO_MONTO | AMOUNT_TYPE | F, V |
+| INFO_PAGO | PAYMENT_INFO | 0, 2, 3 |
+| COF | COF | 4 |
+| CIF | CIF | (alfanum) |
+
+### Seccion: 3DS
+
+| Manual (ES) | Log 3DS | Notas |
+|---|---|---|
+| NUMERO_TARJETA | Card | enmascarado |
+| MONTO | Total | decimal |
+| MARCA_TARJETA | CardType | VISA/MASTERCARD |
+| ID_AFILIACION | MerchantId | |
+| NOMBRE_COMERCIO | MerchantName | |
+| CIUDAD_COMERCIO | MerchantCity | |
+| ESTATUS_3D | Cert3D | **Ambiguo**: manual=200, log=03 |
+| ECI | ECI | |
+| XID | XID | |
+| CAVV | CAVV | |
+| VERSION_3D | Version3D | |
+
+### Seccion: Cybersource
+
+Variables en camelCase con prefijos: `BillTo_`, `Card_`, `PurchaseTotals_`, `ShipTo_`
+Los nombres del manual coinciden con los del log.
+
+### Seccion: EMV
+
+| Nombre | TAG | Tipo |
+|---|---|---|
+| EMV_TAGS | — | hex |
+| TVR | TAG 95 | hex(10) |
+| TSI | TAG 9B | hex(4) |
+| AID | TAG 4F | hex |
+| APN | TAG 9F12 | alfanum |
+| AL | TAG 50 | alfanum |
+
+---
+
+## 14. Parsers de logs
+
+### 14.1 Parser Servlet
+
+**Archivo**: `src/infrastructure/log-parsers/PayworksServletLogParser.ts`
+
+#### Formato esperado del log
+
+```
+********************************************************************************
+[11/03/2026 18:02:25] SE RECIBIO POST HTTP DESDE LA IP: 99.80.99.245
+CARD_NUMBER:        [510125******2396]
+CMD_TRANS:          [AUTH]
+CONTROL_NUMBER:     [140802786372026031200022522]
+MERCHANT_ID:        [9885405]
+AMOUNT:             [98.39]
+MODE:               [AUT]
+ENTRY_MODE:         [MANUAL]
+...
+********************************************************************************
+
+[11/03/2026 18:02:26] SE ENVIO RESPUESTA HTTP HACIA LA IP: 99.80.99.245
+RESULTADO_PAYW:     [A]
+CODIGO_PAYW:        [000]
+AUTH_CODE:          [830125]
+REFERENCE:          [320146914713]
+...
+********************************************************************************
+```
+
+#### Algoritmo de parsing
+
+1. Dividir contenido por linea de asteriscos (`*{80}`)
+2. Para cada bloque:
+   - Extraer campos con regex: `^([A-Z_0-9]+)\s*:\s*\[([^\]]*)\]\s*$`
+   - Verificar si CONTROL_NUMBER o NUMERO_CONTROL coincide con el buscado
+   - Si coincide:
+     - Si header contiene "SE RECIBIO POST HTTP" → bloque REQUEST
+     - Si header contiene "SE ENVIO RESPUESTA HTTP" → bloque RESPONSE
+3. Extraer timestamp: `[DD/MM/YYYY HH:MM:SS]` → convertir a Date
+4. Extraer IP: `DESDE LA IP: X.X.X.X` o `HACIA LA IP: X.X.X.X`
+5. **Ambos bloques (request + response) son obligatorios** -- error si falta alguno
+
+### 14.2 Parser PROSA (ISO 8583)
+
+**Archivo**: `src/infrastructure/log-parsers/PayworksProsaLogParser.ts`
+
+#### Formato esperado del log
+
+```
+[11/03/2026 18:02:25] SE ENVIO MENSAJE HACIA EL AUTORIZADOR PROSA5 (/140.240.11.78:58701):
+Campo 0: [0200]
+Campo 2: [5101250000002396]
+Campo 3: [000000]
+Campo 4: [000000009839]
+Campo 37: [320146914713]
+Campo 38: [830125]
+...
+
+[11/03/2026 18:02:26] SE RECIBIO MENSAJE DESDE EL AUTORIZADOR PROSA5 (/140.240.11.78:58701):
+Campo 0: [0210]
+Campo 37: [320146914713]
+Campo 39: [00]
+...
+```
+
+#### Algoritmo de parsing
+
+1. Dividir en bloques por lineas de header (SE ENVIO/SE RECIBIO MENSAJE)
+2. Para cada bloque:
+   - Extraer campos ISO con regex: `^Campo\s+(\d+)\s*:\s*\[([^\]]*)\]\s*$`
+   - Verificar Campo 37 (RRN/REFERENCIA) coincide con referencia buscada
+   - Verificar Campo 0 (Message Type) coincide con par esperado:
+     - Request: Campo 0 = messagePair.request (ej. "0200") Y header = "SE ENVIO MENSAJE HACIA"
+     - Response: Campo 0 = messagePair.response (ej. "0210") Y header = "SE RECIBIO MENSAJE DESDE"
+3. **Doble validacion**: tanto el tipo de mensaje como la direccion del header deben coincidir
+4. Extraer timestamp y direccion IP:puerto del header
+5. **Ambos mensajes (request + response) son obligatorios** -- error si falta alguno
+
+### 14.3 Correlacion entre parsers
+
+| Log | Clave de busqueda | Campo de correlacion |
+|---|---|---|
+| Servlet | CONTROL_NUMBER | CONTROL_NUMBER o NUMERO_CONTROL en campos del bloque |
+| PROSA | REFERENCIA | Campo 37 (RRN) |
+| 3DS | Folio/REFERENCIA | Por folio de transaccion |
+| Cybersource | OrderId/REFERENCIA | Por OrderId |
+
+La **referencia** de la transaccion en la matriz Excel es la que une todos los logs: se usa para buscar en el servlet (via CONTROL_NUMBER del registro de BD) y en PROSA (via Campo 37).
+
+---
+
+## 15. Parser de afiliaciones
+
+**Archivo**: `src/infrastructure/parsers/AfiliacionFileParser.ts`
+
+### Formatos aceptados
+
+- CSV con separador `,` o `;`
+- TXT con pipes `|`
+- Encoding: UTF-8 o Latin-1 (auto-detectado)
+
+### Deteccion automatica
+
+1. **Encoding**: Si UTF-8 produce caracteres de reemplazo (`\uFFFD`), re-decodifica como Latin-1
+2. **Separador**: Prioridad para .txt con pipes; sino, usa el separador mas frecuente en las primeras 3 lineas
+3. **Headers**: Normalizacion tolerante que remueve acentos, espacios, guiones bajos y convierte a mayusculas
+
+### Mapeo de columnas (alias tolerantes)
+
+| Campo canonico | Aliases aceptados |
+|---|---|
+| idAfiliacion | ID_AFILIACION, AFILIACION, ID AFILIACION, MERCHANT_ID |
+| nombreComercio | NOMBRE_COMERCIO, NOMBRE COMERCIO, NOMBRE, MERCHANT_NAME |
+| razonSocial | RAZON_SOCIAL, RAZON SOCIAL, RAZONSOCIAL |
+| rfc | RFC |
+| numeroCliente | NUMERO_CLIENTE, NUMERO CLIENTE, ID_CLIENTE, NUMCLIENTE |
+| giro | GIRO |
+| mccDescripcion | MCC_DESCRIPCION, MCC, GIRO_MCC |
+| esquema | ESQUEMA |
+| tipoIntegracion | TIPO_INTEGRACION, TIPO INTEGRACION, INTEGRATION_TYPE |
+| direccion | DIRECCION, DOMICILIO |
+| ciudad | CIUDAD |
+| estado | ESTADO |
+| codigoPostal | CP, CODIGO_POSTAL, CODIGO POSTAL, ZIP, ZIP_CODE |
+| email | EMAIL, CORREO, CORREO_ELECTRONICO |
+| telefono | TELEFONO, TEL, PHONE |
+| usuario | USUARIO, USER |
+| status | STATUS, ESTATUS |
+
+Las columnas no reconocidas se preservan en un mapa `extras` para flexibilidad.
+
+---
+
+## 16. Generacion de carta de certificacion
+
+**Archivo**: `src/presentation/utils/generateCertificationLetterPDF.ts`
+
+### Estructura de 3 paginas (jsPDF)
+
+#### Pagina 1 - Portada
+
+- Fondo cafe/marron con logo BANORTE
+- Titulo: "CERTIFICACION {PRODUCTO} {CAPAS}"
+  - Ejemplo: "CERTIFICACION COMERCIO ELECTRONICO CON 3D SECURE"
+- Fecha de emision (DD/MM/YYYY)
+- Version del manual
+- Colores: rojo #EB0029, oscuro #323E48, gris #5B6670
+
+#### Pagina 2 - Contenido principal
+
+- **Coordinador de certificacion** (ingresado por el usuario)
+- **Parrafo introductorio** con datos de afiliacion
+- **Tabla de datos de afiliacion**: Nombre Comercio, RFC, Numero Cliente, Afiliacion
+- **9 bullets de informacion tecnica**:
+  1. Esquema (ej. "PAYWORKS 2 - AGREGADORES CON 3D SECURE")
+  2. Modo de transmision (TCP/IP/TLS)
+  3. Mensajeria (HTTP)
+  4. Lenguaje (proporcionado por usuario o "NO PROPORCIONADO")
+  5. Tarjetas procesadas (detectadas de las transacciones reales: VISA, MASTERCARD, AMEX)
+  6. Giro (del CSV de afiliaciones o "—")
+  7. Modo de lectura (CHIP/BANDA/CONTACTLESS para TP, MANUAL para TNP)
+  8. Version de aplicacion (proporcionada por usuario)
+  9. Responsable tecnico (nombre, email, telefono, direccion del CSV de afiliaciones)
+- **Matriz de pruebas** (tabla):
+  - Columnas: Referencia | Tipo Transaccion | Marca | Veredicto
+  - Una fila por transaccion validada
+- **URL de subdominio** (si proporcionada)
+
+#### Pagina 3 - Notas y firma
+
+- **6 notas tecnicas**:
+  1. Manual utilizado y version
+  2. Variables CIT/MIT enviadas (si aplica AN5822)
+  3. Responsabilidades del comercio
+  4. Aclaracion sobre modo PRD
+  5. Manuales de referencia utilizados
+  6. Disclaimer
+- **Lista de manuales utilizados** (detectados automaticamente segun capas activas)
+- **Firma**: Nombre y rol ("Soporte Tecnico Payworks")
+- **Codigo de certificado**: Formato `CE{PREFIJO}-{CONSECUTIVO}_{AFILIACION}`
+
+### Codigo de certificado
+
+**Formato**: `CE{PREFIX}-{CONSECUTIVO}_{AFILIACION}`
+
+| Producto | Prefijo |
+|---|---|
+| ECOMMERCE_TRADICIONAL | 3DS |
+| MOTO | MTO |
+| CARGOS_PERIODICOS_POST | CPP |
+| VENTANA_COMERCIO_ELECTRONICO | VCE |
+| AGREGADORES_COMERCIO_ELECTRONICO | AEC |
+| AGREGADORES_CARGOS_PERIODICOS | ACP |
+| API_PW2_SEGURO | PW2 |
+| INTERREDES_REMOTO | INT |
+
+**Consecutivo**: Hash deterministico de 7 digitos derivado del sessionId:
+```
+hash = 0
+para cada caracter del sessionId:
+  hash = (hash * 31 + charCode) >>> 0  (unsigned 32-bit)
+consecutivo = (hash % 9999999).toString().padStart(7, '0')
+```
+
+**Ejemplo**: `CE3DS-0003652_9885405`
+
+---
+
+## 17. Flujo completo de certificacion
+
+### Endpoint: POST `/api/certificacion/validar`
+
+**Archivo**: `src/app/api/certificacion/validar/route.ts`
+
+#### Entradas (multipart/form-data)
+
+| Campo | Tipo | Requerido | Descripcion |
+|---|---|---|---|
+| `matriz` | File | Si | Matriz de pruebas (Excel/CSV) |
+| `integrationType` | string | Si | Clave del producto (ej. `AGREGADORES_COMERCIO_ELECTRONICO`) |
+| `operationMode` | string | No | `semi` (default) o `auto` |
+| `merchantName` | string | No | Nombre del comercio (override) |
+| `coordinadorCertificacion` | string | No | Nombre del coordinador |
+| `lenguaje` | string | No | Lenguaje de la aplicacion del comercio |
+| `versionAplicacion` | string | No | Version de la app del comercio |
+| `urlSubdominio` | string | No | URL/subdominio del comercio |
+| `servletLog` | File | No | Log del servlet Payworks |
+| `prosaLog` | File | No | Log del autorizador PROSA |
+| `threeDSLog` | File | No | Log de 3D Secure |
+| `cybersourceLog` | File | No | Log de Cybersource |
+| `afiliaciones` | File | No | CSV/TXT de afiliaciones |
+| `csvBD` | File | No | CSV de transacciones BD |
+
+#### Flujo de ejecucion
+
+```
+1. Validar inputs obligatorios (matriz + integrationType)
+
+2. Cargar archivos en repositorios in-memory:
+   - CSV de BD → TransactionRepository.loadFromCSV()
+   - Servlet log → LogRetrieval.setServletLog()
+   - PROSA log → LogRetrieval.setProsaLog()
+   - 3DS log → LogRetrieval.setThreeDSLog()
+   - Cybersource log → LogRetrieval.setCybersourceLog()
+   - Afiliaciones → AfiliacionRepository.loadFromFile()
+
+3. Ejecutar RunCertificationUseCase.execute():
+
+   3.1 Parsear matriz Excel/CSV → lista de transacciones
+       Cada transaccion tiene: referencia, tipoTransaccion, cardBrand
+
+   3.2 Para CADA transaccion en la matriz:
+
+       3.2.1 Buscar registro en BD por referencia
+             → Obtener: numeroControl, numero (afiliacion), fechas
+
+       3.2.2 Resolver nombre del comercio:
+             Prioridad: parametro > CSV afiliaciones > registro BD
+
+       3.2.3 Parsear log Servlet por CONTROL_NUMBER
+             → Obtener: request (campos enviados) + response (campos recibidos)
+
+       3.2.4 Parsear log PROSA por REFERENCIA + par de mensaje
+             → Obtener: request (ISO 8583 enviado) + response (ISO 8583 recibido)
+
+       3.2.5 [Si producto soporta 3DS] Parsear log 3DS por folio
+             → Obtener: campos de autenticacion 3DS
+
+       3.2.6 [Si producto soporta Cybersource] Parsear log Cybersource por OrderId
+             → Obtener: campos de validacion fraude
+
+       3.2.7 VALIDAR todos los campos:
+             Para la capa SERVLET:
+               transactionKey = "{tipo}_{marca}" (ej. "AUTH_VISA")
+               Para CADA campo en la matriz del producto:
+                 regla = spec.rules[transactionKey] ?? 'N/A'
+                 encontrado = servletRequest.hasField(logName)
+                 valor = servletRequest.getField(logName)
+                 resultado = FieldRequirementVO(regla).evaluateDetailed(encontrado, valor, spec)
+                 → PASS o FAIL con motivo especifico
+
+             Para la capa THREEDS (si aplica):
+               Mismo proceso contra campos de layer-3ds.json
+
+             Para la capa CYBERSOURCE (si aplica):
+               Mismo proceso contra campos de layer-cybersource.json
+
+       3.2.8 Agregar resultado de validacion a la lista
+
+   3.3 Crear CertificationSession con todos los resultados
+   3.4 Persistir sesion (InMemoryCertificationRepository)
+   3.5 Retornar sesion con ID para consultar carta
+
+4. Retornar JSON con:
+   - id de sesion
+   - veredicto global (APROBADO/RECHAZADO/PENDIENTE)
+   - conteo aprobadas/rechazadas
+   - tasa de aprobacion (%)
+   - detalle campo por campo de cada transaccion
+```
+
+### Endpoint: GET `/api/certificacion/carta/[id]`
+
+**Archivo**: `src/app/api/certificacion/carta/[id]/route.ts`
+
+#### Flujo
+
+```
+1. Buscar sesion por ID en el repositorio
+
+2. Derivar datos de la carta:
+   - Buscar afiliacion del primer MERCHANT_ID
+   - Construir codigo de certificado
+   - Contar aprobadas/rechazadas
+   - Determinar veredicto global
+   - Detectar capas activas (3DS, Cybersource) de los resultados
+   - Construir nombre de esquema completo
+   - Detectar marcas de tarjeta usadas
+   - Detectar tipos de transaccion certificados
+
+3. Armar CertificationLetterData con 22+ campos
+
+4. Generar PDF con jsPDF (3 paginas)
+
+5. Retornar PDF como descarga
+   Content-Type: application/pdf
+   Content-Disposition: attachment; filename="CE{codigo}.pdf"
+```
+
+---
+
+## 18. Reglas de respuesta
+
+**Archivo**: `src/config/mandatory-fields/response-rules.json`
+
+Campos validados en la respuesta del servlet:
+
+| Campo | Tipo | Descripcion | validValues |
+|---|---|---|---|
+| PAYW_RESULT | enum | Resultado Payworks | **A** (Aprobada), **D** (Declinada), **R** (Rechazada), **T** (Sin respuesta), **Z** (v5 — Reversa automatica por timeout) |
+| AUTH_RESULT | num(2) | Codigo autorizacion | Tabla completa de 47 valores (00-99, incluye 00, 51, 54, 57, 62, 96, etc.) |
+| AUTH_CODE | alfanum(6) | Codigo de autorizacion | — |
+| CARD_BRAND | enum | Marca de tarjeta | VISA, MASTERCARD, AMEX |
+| CARD_TYPE | enum | Tipo de tarjeta | CREDITO, DEBITO |
+| PAYW_CODE | num(3) | Codigo Payworks | 000=Aprobada; tabla extendida con 101, 102, 110, 150, 200s, 400s, 500s, 999 |
+| **ID_MAC** *(v5)* | enum | Indicador AN7110 | `U` / `V` |
+| **ID_CYBERSOURCE** *(v5)* | string | requestID del retorno Cybersource | (validado por regla C11a) |
+| **AUTH_DATE** *(v5)* | fecha | Fecha de autorizacion | — |
+| **CUST_RSP_DATE** *(v5)* | fecha | Fecha de respuesta al cliente | — |
+| **CARD_HOLDER** *(v5)* | alfanum | Tarjetahabiente | — |
+| **REFERENCE** *(v5)* | num(12) | Referencia como respuesta | — |
+| **MARKETPLACE_TX_RETURN** *(v5)* | enum | Retorno marketplace | — |
+| **ID_AGREGADOR** *(v5, rename)* | num(19) | ID del agregador (antes `AGGREGATOR_REF`) | — |
+
+### Codigos PAYW_CODE implementados (60+)
+
+- 000: Approved (Aprobada)
+- 001: Refer to card issuer
+- 003: Invalid merchant
+- 004: Capture card
+- 005: Do not honor
+- 012: Invalid transaction
+- 013: Invalid amount
+- 014: Invalid card number
+- 030: Format error
+- 041: Lost card
+- 043: Stolen card
+- 051: Insufficient funds
+- 054: Expired card
+- 057: Transaction not permitted
+- 076: Reversal accepted
+- 078: Deactivated card
+- 089: Invalid terminal
+- 091: Issuer unavailable
+- 092: Routing error
+- 096: System malfunction
+- Y mas...
+
+---
+
+## 19. Campos PCI-DSS (nunca logueados)
+
+Los siguientes campos son **requeridos por los manuales** pero nunca aparecen en los logs por razones de seguridad PCI-DSS:
+
+| Campo | Manual (ES) | Regla v5 | Razon |
+|---|---|---|---|
+| PASSWORD | CLAVE_USR | `R_PCI` (candidato) / `N/A` hoy | Credencial — nunca se logea |
+| SECURITY_CODE | CODIGO_SEGURIDAD | `R_PCI` (candidato) / `N/A` hoy | CVV/CVC — nunca se logea |
+| EXP_DATE | FECHA_EXP | `R_PCI` (candidato) / `O` hoy | Dato sensible — rara vez en logs |
+
+**Estado v5**:
+- El tipo **`R_PCI`** esta disponible en `FieldRule` y semanticamente **pasa silenciosamente** cuando se evalua contra log (comportamiento equivalente a `N/A`).
+- Los JSONs actuales aun marcan estos campos con `N/A` + nota (`"Candidato a regla R_PCI cuando se implemente"`) por decision conservadora.
+- Cuando exista un `MatrixValidator` que lea la matriz del comercio (fuera del scope v5), la regla `R_PCI` se comportara como `R` contra esa fuente — validando que el comercio declaro el campo aunque no aparezca en el log del servlet.
+
+**Implementacion actual**: `FieldRequirementValueObject.evaluateDetailed` maneja `R_PCI` en el nivel 3 del pipeline (entre `PROHIBITED` y `R`). `getDisplayName()` retorna `"Requerido (PCI — no logueable)"`.
+
+---
+
+## 20. Campos marcados como ambiguos
+
+Los siguientes campos tienen `"ambiguous": true` en el glosario o en las matrices, indicando que su mapeo no esta 100% confirmado con logs reales:
+
+| Campo | Ambiguedad | Estado |
+|---|---|---|
+| FECHA_EXP / EXP_DATE | Nombre en log no confirmado (hipotesis: CARD_EXP) | Marcado O (tolerante) |
+| LOTE / BATCH | No visto en logs TNP | Marcado O |
+| MARKETPLACE_TX | No visto en logs, no claro cuando aplica | Marcado O |
+| ESTATUS_3D / Cert3D | Manual dice "200" pero log muestra "03" | fixedValue=03, ambiguous=true |
+| UCAF | Presente para MC pero rara vez en logs | Marcado O, ambiguous=true |
+| NUMERO_BIN | Solo en logs de agregadores, no en manual | No validado |
+| GATEWAY_ID | Solo en Esquema 1 (ZIGU) | No validado |
+
+---
+
+## 21. Cobertura actual y brechas conocidas
+
+### Cobertura implementada tras spec v5 (~92% manuales + 100% cambios P0)
+
+- 8/8 productos con matrices R/O/N/A/PROHIBITED/R_PCI completas (v5)
+- 9/9 tipos de transaccion
+- 3/3 esquemas de agregadores
+- Capa 3DS: envio y retorno **separados** (`threeds` vs `threedsResponse`), ECI por marca, 13+ campos de envio
+- Capa Cybersource: 28+ campos, sin AMEX, `MerchantID="banorteixe"`
+- **Capa AN5822 refactorizada**: 3 flujos (firstCIT/subseqCIT/subseqMIT) con mapping por producto, bug `IND_PAGO=8` eliminado
+- Campos EMV separados: `servlet.EMV_TAGS` (envio) vs `emvVoucher.*` (documental)
+- Pipeline evaluacion con `PROHIBITED` y `R_PCI`
+- **10 reglas cruzadas activas** (antes solo 7 implementadas; algunas no wired a runtime):
+  - **Per-tx**: C3, C5, C9, C10, C11, C12, XID/CAVV, POSTAUTH, Cybersource decision, Anexo D
+  - **Cross-tx**: C7 (UniqueValidator), C8 (PreAuthPostAuthCorrelator), Rate limit
+- Regex forbidden_chars alineado a manual (v5)
+- Matriz Excel con columna `flujo_an5822` + aliases tolerantes
+- Content-regression: 43 asserts blindando los cambios v5
+- Suite de regresion con 4 casos reales (MUEVE CIUDAD, DLOCAL, OPENLINEA, ZIGU) + smoke por producto
+- Carta PDF de 3 paginas
+- Parser de afiliaciones tolerante
+
+### Commits de la implementacion v5
+
+| # | Hash | Alcance |
+|---|---|---|
+| 1 | `ee40c16` | JSONs v5 + PROHIBITED + borra 5 legacy |
+| 2 | `6ee6b86` | regex chars + validValuesByBrand + fixture |
+| 3 | `2fce458` | AN5822 (detector + validator + wiring) |
+| 4 | `2c90eb5` | EmvVoucherSection typed |
+| 5 | `d28df28` | Matriz Excel columna `flujo_an5822` |
+| 6 | `da85dfb` | CrossField wiring + C11 + Anexo D |
+| 7 | `23e1a07` | Agreg.CE + Cybersource + content-regression |
+| 8 | `e2f386e` | R_PCI + C8 + C12 + rate limit |
+| 9 | `18fdf1c` | Fase 7 regresion (4 casos + smoke) |
+
+Total: **417/417 tests verdes**, typecheck limpio, 19 suites.
+
+### Brechas conocidas remanentes (~8%)
+
+| Brecha | Impacto | Siguiente paso |
+|---|---|---|
+| `MatrixValidator` (validacion contra matriz del comercio) | R_PCI no valida presencia en matriz; hoy solo pasa silencioso | Introducir port + adapter cuando haya fuente de matriz field-by-field |
+| MerchantDefinedData de Cybersource (campos dinamicos) | No estandarizables por producto | Mecanismo de campos declarados por comercio |
+| Policy `validValues` invalido: FAIL vs WARN | Recomendacion: FAIL si R, WARN si O | Decision de negocio + implementacion tercer estado `WARN` |
+| Deteccion automatica esquema agregador | Hoy el comercio lo declara | Inferir por campos SUB_MERCHANT/MERCHANT_MCC |
+| Regla consecutivo de certificado | Hash deterministico vs. secuencia global | Decision de negocio |
+| Variante regex TNP vs Agregador | Unificada hoy (TNP); Agregador permite `*` y `&` en SUB_MERCHANT | Split en commit que amplie Anexo D a caracteres |
+| Validacion cifrado VCE (AES/CTR) | Bot no valida estructura del JSON cifrado | Requiere credenciales de cifrado |
+| Policy Postautorizacion por operativa (retail/restaurant/hotel) | Reglas adicionales condicionales por MCC | Pregunta abierta + MCC-aware validator |
+
+### Preguntas pendientes para Ramsses
+
+Documentadas en `docs/preguntas-ramsses.md` y en `docs/PENDIENTES-FIXES-JSONS-V5.md`. La mayoria de ambiguedades iniciales de los manuales quedaron resueltas durante la revision v5.
+
+---
+
+> **Fuente autoritativa en runtime**: los JSONs en `src/config/mandatory-fields/*.json`. La delta clave v5 esta blindada por 43 asserts en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts`.
+> **Casos de regresion**: `__tests__/integration/regression/regression-cases.test.ts` reproduce los 4 escenarios operativos identificados en la revision Banorte.
