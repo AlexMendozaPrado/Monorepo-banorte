@@ -122,6 +122,16 @@ export interface MandatoryFieldsMatrix {
    * Documental — NO se valida contra el log. Ver {@link EmvVoucherSection}.
    */
   emvVoucher?: EmvVoucherSection;
+  /**
+   * Mapa de códigos de error documentados por el manual del producto
+   * (Anexo VI en Interredes Remoto, tabla de error codes en API PW2).
+   * La clave es el código tal como aparece en el log (e.g. `"01"`,
+   * `"EMV_DECLINE"`) y el valor es la descripción humana.
+   *
+   * Usado por la regla cruzada C12 para validar que cualquier
+   * `ERROR_CODE` observado en el servlet log esté documentado.
+   */
+  errorCodes?: Record<string, string>;
   subEsquemas?: Record<string, SubSchemeSpec>;
 }
 

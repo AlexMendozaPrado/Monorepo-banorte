@@ -128,6 +128,9 @@ export class ValidateTransactionFieldsUseCase {
     cross.validateCybersourceDecisionFlow(command.cybersourceLog);
     cross.validateShipToCountryMatch(command.cybersourceLog, command.servletRequest);
     cross.validateCybersourceIdAndBin(command.servletRequest, command.cybersourceLog);
+    // C12 — PinPad error codes (solo productos TP con errorCodes en su matriz).
+    const productMatrix = this.mandatoryFields.getMatrix(command.integrationType);
+    cross.validatePinPadErrorCode(command.servletRequest, productMatrix.errorCodes);
     return cross.toFieldValidationResults();
   }
 

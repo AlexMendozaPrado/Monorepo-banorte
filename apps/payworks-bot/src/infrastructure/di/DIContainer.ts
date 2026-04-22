@@ -20,6 +20,8 @@ import { LayerAn5822Config } from '@/core/domain/value-objects/An5822Flow';
 import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
 import { An5822Validator } from '@/core/domain/services/An5822Validator';
 import { AnexoDValidator } from '@/core/domain/services/AnexoDValidator';
+import { PreAuthPostAuthCorrelator } from '@/core/domain/services/PreAuthPostAuthCorrelator';
+import { RateLimitValidator } from '@/core/domain/services/RateLimitValidator';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
 import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
@@ -57,6 +59,8 @@ export class DIContainer {
   private _an5822Detector?: An5822FlowDetector;
   private _an5822Validator?: An5822Validator;
   private _anexoDValidator?: AnexoDValidator;
+  private _preAuthPostAuthCorrelator?: PreAuthPostAuthCorrelator;
+  private _rateLimitValidator?: RateLimitValidator;
 
   // Use Cases
   private _validateFieldsUseCase?: ValidateTransactionFieldsUseCase;
@@ -178,6 +182,20 @@ export class DIContainer {
     return this._anexoDValidator;
   }
 
+  get preAuthPostAuthCorrelator(): PreAuthPostAuthCorrelator {
+    if (!this._preAuthPostAuthCorrelator) {
+      this._preAuthPostAuthCorrelator = new PreAuthPostAuthCorrelator();
+    }
+    return this._preAuthPostAuthCorrelator;
+  }
+
+  get rateLimitValidator(): RateLimitValidator {
+    if (!this._rateLimitValidator) {
+      this._rateLimitValidator = new RateLimitValidator();
+    }
+    return this._rateLimitValidator;
+  }
+
   // --- Getters de Use Cases ---
 
   get validateFieldsUseCase(): ValidateTransactionFieldsUseCase {
@@ -207,6 +225,8 @@ export class DIContainer {
         this.afiliacionRepository,
         layer3ds as unknown as MandatoryFieldsMatrix,
         layerCybersource as unknown as MandatoryFieldsMatrix,
+        this.preAuthPostAuthCorrelator,
+        this.rateLimitValidator,
       );
     }
     return this._runCertificationUseCase;

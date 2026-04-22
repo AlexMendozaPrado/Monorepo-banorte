@@ -10,7 +10,9 @@ import { CertificationRepositoryPort } from '@/core/domain/ports/CertificationRe
 import { AfiliacionRepositoryPort } from '@/core/domain/ports/AfiliacionRepositoryPort';
 import { ValidateTransactionFieldsUseCase } from './ValidateTransactionFieldsUseCase';
 import { CertificationSessionEntity, OperationMode } from '@/core/domain/entities/CertificationSession';
-import { ValidationResult } from '@/core/domain/entities/ValidationResult';
+import { ValidationResult, FieldValidationResult } from '@/core/domain/entities/ValidationResult';
+import { PreAuthPostAuthCorrelator, CorrelationInput } from '@/core/domain/services/PreAuthPostAuthCorrelator';
+import { RateLimitValidator } from '@/core/domain/services/RateLimitValidator';
 import { ThreeDSLogEntity } from '@/core/domain/entities/ThreeDSLog';
 import { CybersourceLogEntity } from '@/core/domain/entities/CybersourceLog';
 import { IntegrationType, IntegrationTypeValueObject } from '@/core/domain/value-objects/IntegrationType';
@@ -46,6 +48,8 @@ export class RunCertificationUseCase {
     private readonly afiliacionRepo: AfiliacionRepositoryPort,
     private readonly threeDSMatrix?: MandatoryFieldsMatrix,
     private readonly cybersourceMatrix?: MandatoryFieldsMatrix,
+    private readonly preAuthPostAuthCorrelator?: PreAuthPostAuthCorrelator,
+    private readonly rateLimitValidator?: RateLimitValidator,
   ) {}
 
   async execute(command: RunCertificationCommand): Promise<CertificationSessionEntity> {
@@ -61,6 +65,11 @@ export class RunCertificationUseCase {
 
     const results: ValidationResult[] = [];
     let merchantName = command.merchantName || '';
+
+    // Inputs para validaciones cross-tx (C8, rate limit). Se llenan dentro
+    // del loop per-tx con datos crudos observados en la matriz + servlet.
+    const correlationInputs: CorrelationInput[] = [];
+    const rateLimitInputs: { transactionRef: string; timestamp: Date }[] = [];
 
     for (const txn of matrixTransactions) {
       try {
@@ -147,9 +156,69 @@ export class RunCertificationUseCase {
         });
 
         results.push(validation);
+
+        // Recopilar inputs para las reglas cross-tx que corren al final.
+        correlationInputs.push({
+          transactionRef: txn.referencia,
+          numeroControl: txn.numeroControl,
+          transactionType: txn.tipoTransaccion,
+          customerRef2: servletLogs.request.getField('CUSTOMER_REF2'),
+        });
+        rateLimitInputs.push({
+          transactionRef: txn.referencia,
+          timestamp: servletLogs.request.timestamp,
+        });
       } catch (error) {
         console.error(`Error validando transaccion ${txn.referencia}:`, error);
         throw error;
+      }
+    }
+
+    // --- Cross-tx: C8 CUSTOMER_REF2 PREAUT↔POSTAUT ---
+    if (this.preAuthPostAuthCorrelator) {
+      const c8Issues = this.preAuthPostAuthCorrelator.correlate(correlationInputs);
+      for (const issue of c8Issues) {
+        const target = results.find(r => r.transactionRef === issue.postAuthRef);
+        if (!target) continue;
+        target.fieldResults.push({
+          field: 'CUSTOMER_REF2↔PRE/POST',
+          rule: 'R',
+          found: true,
+          value: issue.detail,
+          verdict: 'FAIL',
+          failReason: 'cross_field',
+          failDetail: issue.detail,
+          source: 'SERVLET',
+          layer: ValidationLayer.SERVLET,
+        });
+      }
+    }
+
+    // --- Cross-tx: Rate limit 200 tx/min (solo Cargos Periódicos) ---
+    if (this.rateLimitValidator) {
+      const violations = this.rateLimitValidator.validate({
+        product: command.integrationType,
+        transactions: rateLimitInputs,
+      });
+      for (const v of violations) {
+        // Adjuntar a todas las transacciones que caen en la ventana
+        // violada. La UI puede así mostrar "esta tx forma parte del
+        // clúster X que excedió 200/min".
+        for (const ref of v.transactionRefs) {
+          const target = results.find(r => r.transactionRef === ref);
+          if (!target) continue;
+          target.fieldResults.push({
+            field: '_rate_limit',
+            rule: 'R',
+            found: true,
+            value: v.detail,
+            verdict: 'FAIL',
+            failReason: 'rate_limit_exceeded',
+            failDetail: v.detail,
+            source: 'SERVLET',
+            layer: ValidationLayer.SERVLET,
+          });
+        }
       }
     }
 

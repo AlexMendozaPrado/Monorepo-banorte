@@ -174,6 +174,42 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * C12 — Códigos de error PinPad válidos (Interredes Remoto Anexo VI,
+   * API PW2 Seguro §error codes). Si el servlet log expone un campo
+   * `ERROR_CODE` (o alias) con un valor no-vacío distinto de `"0"` /
+   * `"00"`, comprueba que el código esté documentado en el
+   * `errorCodes` del producto. Si no está, emite un issue — señal de
+   * que el SDK está devolviendo algo fuera de catálogo.
+   *
+   * Si `knownErrorCodes` es `undefined` o vacío (producto sin tabla de
+   * errores documentada), la regla no corre.
+   */
+  validatePinPadErrorCode(
+    servletRequest: LogEntity | undefined,
+    knownErrorCodes: Record<string, string> | undefined,
+  ): void {
+    if (!servletRequest) return;
+    if (!knownErrorCodes || Object.keys(knownErrorCodes).length === 0) return;
+
+    const observed =
+      servletRequest.getField('ERROR_CODE') ??
+      servletRequest.getField('CODIGO_ERROR') ??
+      servletRequest.getField('PINPAD_ERROR');
+    if (!observed) return;
+    const trimmed = observed.trim();
+    if (trimmed === '' || trimmed === '0' || trimmed === '00') return;
+
+    if (!(trimmed in knownErrorCodes)) {
+      this.issues.push({
+        field: 'ERROR_CODE',
+        rule: 'C12: código de error PinPad debe estar documentado en el manual del producto',
+        detail: `Código observado: "${trimmed}" no aparece en la tabla del producto.`,
+        layer: ValidationLayer.EMV,
+      });
+    }
+  }
+
   validateResponseFields(
     servletResponse: LogEntity | undefined,
     expectedResults: { field: string; validValues: string[] }[],

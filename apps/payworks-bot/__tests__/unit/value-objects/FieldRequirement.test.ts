@@ -420,12 +420,29 @@ describe('FieldRequirementValueObject', () => {
   // =========================================================================
   // 10. HELPERS
   // =========================================================================
+  describe('Regla R_PCI (campo PCI-sensible, no logueable)', () => {
+    it('pasa sin valor (no debería aparecer en el log)', () => {
+      const vo = new FieldRequirementValueObject('R_PCI');
+      expect(vo.evaluate(false, undefined)).toBe(true);
+    });
+
+    it('pasa aunque tenga valor (evaluación silenciosa contra log)', () => {
+      const vo = new FieldRequirementValueObject('R_PCI');
+      expect(vo.evaluate(true, '1227')).toBe(true);
+    });
+
+    it('getDisplayName indica PCI', () => {
+      expect(new FieldRequirementValueObject('R_PCI').getDisplayName()).toBe('Requerido (PCI — no logueable)');
+    });
+  });
+
   describe('Helpers', () => {
     it('getDisplayName() retorna nombre correcto para cada regla', () => {
       expect(new FieldRequirementValueObject('R').getDisplayName()).toBe('Requerido');
       expect(new FieldRequirementValueObject('O').getDisplayName()).toBe('Opcional');
       expect(new FieldRequirementValueObject('N/A').getDisplayName()).toBe('No Aplica');
       expect(new FieldRequirementValueObject('OI').getDisplayName()).toBe('Opcional (si aplica)');
+      expect(new FieldRequirementValueObject('R_PCI').getDisplayName()).toBe('Requerido (PCI — no logueable)');
     });
 
     it('isRequired/isOptional/isNotApplicable', () => {

@@ -1,6 +1,6 @@
 import { FieldSpec } from './MandatoryFieldsMatrix';
 
-export type FieldRule = 'R' | 'O' | 'N/A' | 'OI' | 'PROHIBITED';
+export type FieldRule = 'R' | 'O' | 'N/A' | 'OI' | 'PROHIBITED' | 'R_PCI';
 
 // Caracteres prohibidos según Manual VCE v1.8 §7 y Ecommerce Tradicional v2.6.4.
 // Incluye: símbolos `< > | ¡ ! ¿ ? * + ' / \ { } [ ] ¨ ; : " , # $ % & ( ) =`,
@@ -34,7 +34,7 @@ export class FieldRequirementValueObject {
   }
 
   private validate(): void {
-    if (!['R', 'O', 'N/A', 'OI', 'PROHIBITED'].includes(this.value)) {
+    if (!['R', 'O', 'N/A', 'OI', 'PROHIBITED', 'R_PCI'].includes(this.value)) {
       throw new Error(`Regla de campo invalida: ${this.value}`);
     }
   }
@@ -61,6 +61,14 @@ export class FieldRequirementValueObject {
 
   evaluateDetailed(fieldFound: boolean, fieldValue?: string, spec?: FieldSpec): EvaluationResult {
     if (this.value === 'N/A') return { passes: true };
+
+    // R_PCI — campo requerido por manual pero PCI-sensible, nunca
+    // aparece en los logs. Hoy solo validamos contra el log, así que
+    // pasa silenciosamente. Cuando exista un MatrixValidator que lea
+    // la matriz del comercio, ahí se comportará como R. El tipo queda
+    // disponible para que los JSONs puedan declarar la regla hoy sin
+    // romper runtime.
+    if (this.value === 'R_PCI') return { passes: true };
 
     if (this.value === 'PROHIBITED') {
       if (fieldFound && (fieldValue ?? '').trim() !== '') {
@@ -128,6 +136,7 @@ export class FieldRequirementValueObject {
       'N/A': 'No Aplica',
       'OI': 'Opcional (si aplica)',
       'PROHIBITED': 'Prohibido (no debe enviarse)',
+      'R_PCI': 'Requerido (PCI — no logueable)',
     };
     return names[this.value];
   }

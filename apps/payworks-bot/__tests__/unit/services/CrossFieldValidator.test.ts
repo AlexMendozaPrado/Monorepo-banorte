@@ -301,6 +301,54 @@ describe('CrossFieldValidator', () => {
       expect(v.getIssues().filter(i => i.field === 'Card_cardType↔BIN')).toHaveLength(0);
     });
   });
+
+  describe('C12 — Códigos error PinPad', () => {
+    const codes = { '01': 'Timeout', '05': 'Cancelado por usuario', 'EMV_DECLINE': 'Rechazo EMV' };
+
+    it('pasa con ERROR_CODE documentado', () => {
+      const v = new CrossFieldValidator();
+      v.validatePinPadErrorCode(makeEntity({ ERROR_CODE: '01' }), codes);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('pasa con ERROR_CODE = "0" o "00" (sin error)', () => {
+      const v = new CrossFieldValidator();
+      v.validatePinPadErrorCode(makeEntity({ ERROR_CODE: '0' }), codes);
+      v.validatePinPadErrorCode(makeEntity({ ERROR_CODE: '00' }), codes);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('falla con ERROR_CODE no documentado', () => {
+      const v = new CrossFieldValidator();
+      v.validatePinPadErrorCode(makeEntity({ ERROR_CODE: 'XYZ' }), codes);
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('ERROR_CODE');
+      expect(issues[0].rule).toContain('C12');
+    });
+
+    it('reconoce alias CODIGO_ERROR y PINPAD_ERROR', () => {
+      const v1 = new CrossFieldValidator();
+      v1.validatePinPadErrorCode(makeEntity({ CODIGO_ERROR: 'XYZ' }), codes);
+      expect(v1.getIssues()).toHaveLength(1);
+
+      const v2 = new CrossFieldValidator();
+      v2.validatePinPadErrorCode(makeEntity({ PINPAD_ERROR: 'BAD' }), codes);
+      expect(v2.getIssues()).toHaveLength(1);
+    });
+
+    it('no corre cuando el producto no tiene errorCodes (TNP)', () => {
+      const v = new CrossFieldValidator();
+      v.validatePinPadErrorCode(makeEntity({ ERROR_CODE: 'XYZ' }), undefined);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('no corre sin servlet log', () => {
+      const v = new CrossFieldValidator();
+      v.validatePinPadErrorCode(undefined, codes);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
 });
 
 describe('UniqueValidator', () => {
