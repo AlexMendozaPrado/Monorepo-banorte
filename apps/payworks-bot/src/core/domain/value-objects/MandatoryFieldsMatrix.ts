@@ -1,5 +1,6 @@
 import { IntegrationType } from './IntegrationType';
 import { FieldRule } from './FieldRequirement';
+import { CardBrand } from './CardBrand';
 
 /**
  * Transaction key used to index a field's rule inside `FieldSpec.rules`.
@@ -37,6 +38,14 @@ export interface FieldSpec {
   format?: string;
   /** Allowed values — field fails if value is present and NOT in this list. */
   validValues?: string[];
+  /**
+   * Brand-specific allowed values (narrower than `validValues`). When the
+   * transaction brand is a key in this map, the orchestrator projects the
+   * spec via {@link resolveSpecForBrand} so the evaluator sees only the
+   * per-brand subset. Used by ECI in `layer-3ds.json` (VISA/AMEX→[05,06,07],
+   * MC→[01,02]).
+   */
+  validValuesByBrand?: Partial<Record<CardBrand, string[]>>;
   /** If set, field value must equal this exact string (e.g. VERSION_3D = "2"). */
   fixedValue?: string;
   /** If true, field must contain masked card pattern (e.g. `******`). */
@@ -77,4 +86,20 @@ export interface MandatoryFieldsMatrix {
   cybersource?: Record<string, FieldSpec>;
   an5822?: An5822Matrix;
   subEsquemas?: Record<string, SubSchemeSpec>;
+}
+
+/**
+ * Projects a `FieldSpec` so the evaluator sees brand-scoped `validValues`
+ * when `validValuesByBrand` declares values for the given brand. Pure: the
+ * source spec is not mutated and, if no narrowing applies, it's returned
+ * as-is. Keeps {@link FieldRequirementValueObject.evaluateDetailed} free of
+ * brand context — the application layer resolves the projection before
+ * invoking the value object.
+ */
+export function resolveSpecForBrand(spec: FieldSpec, cardBrand: CardBrand): FieldSpec {
+  const byBrand = spec.validValuesByBrand?.[cardBrand];
+  if (byBrand && byBrand.length > 0) {
+    return { ...spec, validValues: byBrand };
+  }
+  return spec;
 }

@@ -20,7 +20,7 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
 
   function makeServletRequest(overrides: Record<string, string> = {}): ServletLogEntity {
     const fields = new Map<string, string>([
-      ['MERCHANT_ID', '7004145530'],
+      ['MERCHANT_ID', '9607773'],
       ['USER', 'payworks_user'],
       ['PASSWORD', '****'],
       ['TERMINAL_ID', '12345678'],
@@ -70,7 +70,7 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
         ['Card', '411111******1111'],
         ['Total', '1500.00'],
         ['CardType', 'VISA'],
-        ['MerchantId', '7004145530'],
+        ['MerchantId', '9607773'],
         ['MerchantName', 'MUEVE CIUDAD'],
         ['MerchantCity', 'GDL'],
         ['Cert3D', '03'],
@@ -119,7 +119,7 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
         ['DeviceFingerprintID', 'dfp'],
         ['Name', 'user'],
         ['Password', 'x'],
-        ['MerchantNumber', '7004145530'],
+        ['MerchantNumber', '9607773'],
         ['TerminalId', '1'],
         ['OrderId', 'REF-001'],
       ]),

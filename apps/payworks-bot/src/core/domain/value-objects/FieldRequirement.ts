@@ -2,7 +2,13 @@ import { FieldSpec } from './MandatoryFieldsMatrix';
 
 export type FieldRule = 'R' | 'O' | 'N/A' | 'OI' | 'PROHIBITED';
 
-const FORBIDDEN_CHARS_REGEX = /[<>|\\{}[\]"*;:#$%&()=éúóü?+'\/]/;
+// Caracteres prohibidos según Manual VCE v1.8 §7 y Ecommerce Tradicional v2.6.4.
+// Incluye: símbolos `< > | ¡ ! ¿ ? * + ' / \ { } [ ] ¨ ; : " , # $ % & ( ) =`,
+// vocales acentuadas `á é í ó ú` (ambas cajas) y `ñ Ñ`. NO incluye `ü` (no está
+// listado como prohibido en los manuales vigentes; listar `ü` rechazaba palabras
+// válidas como "pingüino"). La variante relajada para Agregadores (permite `*`
+// y `&` como separadores del formato 7*14) se introducirá con Anexo D.
+const FORBIDDEN_CHARS_REGEX = /[<>|¡!¿?*+'\/\\{}[\]"¨;:,#$%&()=áéíóúÁÉÍÓÚñÑ]/;
 
 export type FailReason =
   | 'missing'

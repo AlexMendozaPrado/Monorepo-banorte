@@ -1,5 +1,6 @@
 import { FieldRequirementValueObject, FieldRule } from '@/core/domain/value-objects/FieldRequirement';
-import { FieldSpec } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
+import { FieldSpec, resolveSpecForBrand } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
+import { CardBrand } from '@/core/domain/value-objects/CardBrand';
 
 function makeSpec(overrides: Partial<FieldSpec> = {}): FieldSpec {
   return {
@@ -75,7 +76,16 @@ describe('FieldRequirementValueObject', () => {
   // 2. CARACTERES PROHIBIDOS
   // =========================================================================
   describe('Regla 2: Caracteres prohibidos', () => {
-    const chars = ['<', '>', '|', '\\', '{', '}', '[', ']', '"', '*', ';', ':', '#', '$', '%', '&', '(', ')', '=', 'é', 'ú', 'ó', 'ü', '?', '+', "'", '/'];
+    // Set alineado a Manual VCE v1.8 §7 y Ecommerce Tradicional v2.6.4.
+    // `ü` fue removido (no figura en los manuales vigentes). Se añaden
+    // vocales acentuadas faltantes, ñ/Ñ, y los signos ¡ ! ¿ ¨ ,.
+    const chars = [
+      '<', '>', '|', '\\', '{', '}', '[', ']', '"',
+      '*', ';', ':', '#', '$', '%', '&', '(', ')', '=',
+      '?', '+', "'", '/', ',',
+      'á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú',
+      'ñ', 'Ñ', '¡', '!', '¿', '¨',
+    ];
 
     for (const c of chars) {
       it(`FAIL con caracter prohibido: "${c}"`, () => {
@@ -90,6 +100,24 @@ describe('FieldRequirementValueObject', () => {
     it('PASS con valor limpio (sin caracteres especiales)', () => {
       const vo = new FieldRequirementValueObject('R');
       expect(vo.evaluate(true, 'VALOR_LIMPIO_123')).toBe(true);
+    });
+
+    // Nombres reales de comercios que deben pasar. Contienen E, U, O
+    // (letras sin acento) y deben distinguirse de las vocales acentuadas.
+    it.each([
+      ['MUEVE CIUDAD'],
+      ['ECOFLOW'],
+      ['OPENLINEA'],
+      ['DLOCAL'],
+      ['ZIGU TECHNOLOGIES'],
+    ])('PASS con nombre real de comercio: "%s"', (name) => {
+      const vo = new FieldRequirementValueObject('R');
+      expect(vo.evaluate(true, name)).toBe(true);
+    });
+
+    it('PASS con "ü" (no está prohibido en los manuales vigentes)', () => {
+      const vo = new FieldRequirementValueObject('R');
+      expect(vo.evaluate(true, 'PINGÜINO')).toBe(true);
     });
 
     it('PASS con campo O que tiene caracteres prohibidos y está vacío', () => {
@@ -123,11 +151,14 @@ describe('FieldRequirementValueObject', () => {
       expect(new FieldRequirementValueObject('R').evaluate(true, '37999', spec)).toBe(true);
     });
 
-    it('MONTO — FAIL con comas "1,500.00" (formato incorrecto, comas no permitidas)', () => {
+    it('MONTO — FAIL con comas "1,500.00" (comas prohibidas por manual)', () => {
       const spec = makeSpec({ format: '^\\d{1,16}(\\.\\d{1,2})?$' });
       const r = new FieldRequirementValueObject('R').evaluateDetailed(true, '1,500.00', spec);
       expect(r.passes).toBe(false);
-      expect(r.reason).toBe('invalid_format');
+      // La coma ahora está en el set de caracteres prohibidos (VCE v1.8 §7),
+      // así que la regla 2 (forbidden_chars) se activa antes que la regla 3
+      // (format). Comportamiento más específico y correcto semánticamente.
+      expect(r.reason).toBe('forbidden_chars');
     });
 
     it('FECHA_EXP — PASS "1227" (diciembre 2027)', () => {
@@ -403,5 +434,79 @@ describe('FieldRequirementValueObject', () => {
       expect(new FieldRequirementValueObject('OI').isOptional()).toBe(true);
       expect(new FieldRequirementValueObject('N/A').isNotApplicable()).toBe(true);
     });
+  });
+});
+
+// ===========================================================================
+// resolveSpecForBrand — proyección de FieldSpec a validValues por marca
+// ===========================================================================
+describe('resolveSpecForBrand', () => {
+  // Simula el FieldSpec de ECI en layer-3ds.json:476.
+  const eciSpec: FieldSpec = {
+    manualName: 'ECI',
+    displayName: 'ECI',
+    dataType: 'numeric',
+    ambiguous: false,
+    rules: { AUTH_VISA: 'R', AUTH_MC: 'R' },
+    validValues: ['01', '02', '05', '06', '07'],
+    validValuesByBrand: {
+      [CardBrand.VISA]: ['05', '06', '07'],
+      [CardBrand.MASTERCARD]: ['01', '02'],
+    },
+  };
+
+  it('VISA proyecta validValues a [05,06,07]', () => {
+    const out = resolveSpecForBrand(eciSpec, CardBrand.VISA);
+    expect(out.validValues).toEqual(['05', '06', '07']);
+  });
+
+  it('MC proyecta validValues a [01,02]', () => {
+    const out = resolveSpecForBrand(eciSpec, CardBrand.MASTERCARD);
+    expect(out.validValues).toEqual(['01', '02']);
+  });
+
+  it('no muta el spec original', () => {
+    const snapshot = JSON.stringify(eciSpec);
+    resolveSpecForBrand(eciSpec, CardBrand.VISA);
+    expect(JSON.stringify(eciSpec)).toBe(snapshot);
+  });
+
+  it('fallback a validValues global cuando no hay validValuesByBrand', () => {
+    const simple: FieldSpec = { ...eciSpec, validValuesByBrand: undefined };
+    const out = resolveSpecForBrand(simple, CardBrand.VISA);
+    expect(out.validValues).toEqual(['01', '02', '05', '06', '07']);
+  });
+
+  it('fallback a validValues global cuando la marca no está mapeada', () => {
+    const partial: FieldSpec = {
+      ...eciSpec,
+      validValuesByBrand: { [CardBrand.VISA]: ['05', '06', '07'] },
+    };
+    const out = resolveSpecForBrand(partial, CardBrand.MASTERCARD);
+    expect(out.validValues).toEqual(['01', '02', '05', '06', '07']);
+  });
+
+  it('fallback cuando byBrand[brand] está vacío', () => {
+    const empty: FieldSpec = {
+      ...eciSpec,
+      validValuesByBrand: { [CardBrand.VISA]: [] },
+    };
+    const out = resolveSpecForBrand(empty, CardBrand.VISA);
+    expect(out.validValues).toEqual(['01', '02', '05', '06', '07']);
+  });
+
+  // Integración con el evaluador: el VO sólo ve los valores proyectados.
+  it('integración: evaluador rechaza ECI=01 en VISA tras proyección', () => {
+    const projected = resolveSpecForBrand(eciSpec, CardBrand.VISA);
+    const r = new FieldRequirementValueObject('R').evaluateDetailed(true, '01', projected);
+    expect(r.passes).toBe(false);
+    expect(r.reason).toBe('invalid_value');
+    expect(r.detail).toContain('05');
+  });
+
+  it('integración: evaluador acepta ECI=01 en MC tras proyección', () => {
+    const projected = resolveSpecForBrand(eciSpec, CardBrand.MASTERCARD);
+    const r = new FieldRequirementValueObject('R').evaluateDetailed(true, '01', projected);
+    expect(r.passes).toBe(true);
   });
 });

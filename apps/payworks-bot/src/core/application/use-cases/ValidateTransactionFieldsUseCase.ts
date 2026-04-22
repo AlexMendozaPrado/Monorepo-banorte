@@ -4,7 +4,11 @@ import { TransactionType } from '@/core/domain/value-objects/TransactionType';
 import { CardBrand } from '@/core/domain/value-objects/CardBrand';
 import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { FieldRequirementValueObject } from '@/core/domain/value-objects/FieldRequirement';
-import { FieldSpec, MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
+import {
+  FieldSpec,
+  MandatoryFieldsMatrix,
+  resolveSpecForBrand,
+} from '@/core/domain/value-objects/MandatoryFieldsMatrix';
 import { ServletLogEntity } from '@/core/domain/entities/ServletLog';
 import { ProsaLogEntity } from '@/core/domain/entities/ProsaLog';
 import { ThreeDSLogEntity } from '@/core/domain/entities/ThreeDSLog';
@@ -49,6 +53,7 @@ export function buildTransactionKey(type: TransactionType, brand: CardBrand): st
 function validateAgainstSpecMap(
   specMap: Record<string, FieldSpec> | undefined,
   transactionKey: string,
+  cardBrand: CardBrand,
   entity: { hasField(n: string): boolean; getField(n: string): string | undefined } | undefined,
   layer: ValidationLayer,
   source: FieldValidationResult['source'],
@@ -60,7 +65,8 @@ function validateAgainstSpecMap(
     const rule = spec.rules[transactionKey] ?? 'N/A';
     const found = entity.hasField(logName);
     const value = entity.getField(logName);
-    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, spec);
+    const effectiveSpec = resolveSpecForBrand(spec, cardBrand);
+    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec);
     out.push({
       field: logName,
       manualName: spec.manualName,
@@ -94,7 +100,8 @@ export class ValidateTransactionFieldsUseCase {
       const rule = spec?.rules[transactionKey] ?? 'N/A';
       const found = command.servletRequest.hasField(logName);
       const value = command.servletRequest.getField(logName);
-      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, spec);
+      const effectiveSpec = spec ? resolveSpecForBrand(spec, command.cardBrand) : undefined;
+      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec);
       servletResults.push({
         field: logName,
         manualName: spec?.manualName,
@@ -114,6 +121,7 @@ export class ValidateTransactionFieldsUseCase {
     const threeDSResults = validateAgainstSpecMap(
       command.threeDSMatrix?.threeds,
       transactionKey,
+      command.cardBrand,
       command.threeDSLog,
       ValidationLayer.THREEDS,
       'THREEDS',
@@ -123,6 +131,7 @@ export class ValidateTransactionFieldsUseCase {
     const cybersourceResults = validateAgainstSpecMap(
       command.cybersourceMatrix?.cybersource,
       transactionKey,
+      command.cardBrand,
       command.cybersourceLog,
       ValidationLayer.CYBERSOURCE,
       'CYBERSOURCE',
