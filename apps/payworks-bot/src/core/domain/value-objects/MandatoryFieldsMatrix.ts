@@ -55,6 +55,46 @@ export interface FieldSpec {
 }
 
 /**
+ * Tag EMV de SALIDA del SDK PinPad (PPGetTVR, PPGetTSI, PPGetAID, etc.).
+ * Solo se imprime en el voucher físico y NO viaja al POST hacia Banorte.
+ *
+ * Semánticamente distinto de un `FieldSpec`: no tiene `rules` (R/O/N/A/
+ * PROHIBITED) porque no se valida contra el log servlet. El motor
+ * `ValidateTransactionFieldsUseCase` NUNCA itera sobre esta sección — se
+ * mantiene solo como referencia documental (por ejemplo para renderizar
+ * el glosario en la UI cuando exista el consumidor).
+ */
+export interface EmvVoucherField {
+  /** Nombre oficial del tag EMV (e.g. `TVR`). */
+  manualName: string;
+  /** Etiqueta humana (e.g. `Terminal Verification Results (Tag 95)`). */
+  displayName: string;
+  /** Tipo de dato documental (e.g. `hex`, `alphanum`). */
+  dataType: string;
+  /** Longitud máxima declarada por el manual. */
+  maxLength?: number;
+  /** Función del SDK PinPad que devuelve este tag (e.g. `PPGetTVR`). */
+  sdkFunction?: string;
+  /** Nota libre del manual. */
+  note?: string;
+}
+
+/**
+ * Bloque `emvVoucher` del JSON de producto (solo Tarjeta Presente:
+ * API PW2 Seguro e Interredes Remoto). Las claves con prefijo `_` son
+ * metadatos (e.g. `_description`, `_source`) y deben ignorarse al
+ * enumerar campos.
+ *
+ * NO se valida contra el log servlet — ver `EmvVoucherField`. El único
+ * campo EMV de ENVÍO real vive en `servlet.EMV_TAGS` (TLV hex).
+ */
+export interface EmvVoucherSection {
+  _description?: string;
+  _source?: string;
+  [fieldName: string]: EmvVoucherField | string | undefined;
+}
+
+/**
  * Sub-scheme extra required fields (agregadores only).
  */
 export interface SubSchemeSpec {
@@ -77,6 +117,11 @@ export interface MandatoryFieldsMatrix {
   servlet: Record<string, FieldSpec>;
   threeds?: Record<string, FieldSpec>;
   cybersource?: Record<string, FieldSpec>;
+  /**
+   * Tags EMV de SALIDA del SDK (solo API PW2 Seguro e Interredes Remoto).
+   * Documental — NO se valida contra el log. Ver {@link EmvVoucherSection}.
+   */
+  emvVoucher?: EmvVoucherSection;
   subEsquemas?: Record<string, SubSchemeSpec>;
 }
 
