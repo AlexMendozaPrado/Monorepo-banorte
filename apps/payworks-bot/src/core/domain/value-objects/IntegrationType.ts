@@ -89,7 +89,13 @@ const METADATA: Record<IntegrationType, IntegrationTypeMetadata> = {
       TransactionType.AUTH, TransactionType.PREAUTH, TransactionType.POSTAUTH,
       TransactionType.REFUND, TransactionType.VOID, TransactionType.REVERSAL,
     ],
-    supportedLayers: [ValidationLayer.SERVLET, ValidationLayer.AGREGADOR, ValidationLayer.THREEDS, ValidationLayer.AN5822],
+    supportedLayers: [
+      ValidationLayer.SERVLET,
+      ValidationLayer.AGREGADOR,
+      ValidationLayer.THREEDS,
+      ValidationLayer.CYBERSOURCE,
+      ValidationLayer.AN5822,
+    ],
     supportsAggregatorSchemes: true,
   },
   [IntegrationType.AGREGADORES_CARGOS_PERIODICOS]: {
