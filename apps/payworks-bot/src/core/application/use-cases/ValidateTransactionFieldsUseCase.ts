@@ -17,6 +17,8 @@ import { ValidationResultEntity, FieldValidationResult } from '@/core/domain/ent
 import { An5822Flow } from '@/core/domain/value-objects/An5822Flow';
 import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
 import { An5822Validator, An5822FieldFailure } from '@/core/domain/services/An5822Validator';
+import { CrossFieldValidator } from '@/core/domain/services/CrossFieldValidator';
+import { AnexoDValidator } from '@/core/domain/services/AnexoDValidator';
 
 export interface ValidateFieldsCommand {
   integrationType: IntegrationType;
@@ -98,7 +100,71 @@ export class ValidateTransactionFieldsUseCase {
     private readonly mandatoryFields: MandatoryFieldsPort,
     private readonly an5822Detector?: An5822FlowDetector,
     private readonly an5822Validator?: An5822Validator,
+    private readonly anexoDValidator?: AnexoDValidator,
   ) {}
+
+  private buildCrossFieldResults(command: ValidateFieldsCommand): FieldValidationResult[] {
+    // Instanciamos por transacción: el validator mantiene estado mutable
+    // (`issues`) y su ciclo de vida es per-tx. Las reglas que requieren
+    // correlación cross-tx (C7 unique, C8 PRE/POST, rate limit) viven en
+    // un nivel superior (RunCertificationUseCase) — no aquí.
+    const cross = new CrossFieldValidator();
+    cross.validateXidCavvConditional(command.threeDSLog);
+    cross.validatePostAuthRequiresAuthCode(
+      command.transactionType,
+      command.servletRequest,
+      [],
+    );
+    // Adapter: `ProsaLogEntity` expone `campos` por número ISO; el
+    // contrato `LogEntity` del validator espera `hasField/getField` por
+    // string. Adaptamos inline (campo '37' es el único que C3 consume).
+    const prosaAsLog = command.prosaResponse
+      ? {
+          hasField: (n: string) => command.prosaResponse!.campos.has(Number(n)),
+          getField: (n: string) => command.prosaResponse!.getCampo(Number(n)),
+        }
+      : undefined;
+    cross.validateProsaReferenceMatch(command.servletResponse, prosaAsLog);
+    cross.validateCybersourceDecisionFlow(command.cybersourceLog);
+    cross.validateShipToCountryMatch(command.cybersourceLog, command.servletRequest);
+    cross.validateCybersourceIdAndBin(command.servletRequest, command.cybersourceLog);
+    return cross.toFieldValidationResults();
+  }
+
+  private buildAnexoDResults(command: ValidateFieldsCommand): FieldValidationResult[] {
+    if (!this.anexoDValidator) return [];
+
+    // Los campos candidato a Anexo D se leen del servlet request por su
+    // logName. Si el log no los expone, `AnexoDValidator.validate` los
+    // trata como ausentes (skip silencioso) — no inventa fallas.
+    const observed: Record<string, string | undefined> = {
+      SUB_MERCHANT: command.servletRequest.getField('SUB_MERCHANT'),
+      ID_AGREGADOR: command.servletRequest.getField('ID_AGREGADOR'),
+      CIUDAD_TERMINAL: command.servletRequest.getField('CIUDAD_TERMINAL'),
+      ESTADO_TERMINAL: command.servletRequest.getField('ESTADO_TERMINAL'),
+      PAIS_TERMINAL: command.servletRequest.getField('PAIS_TERMINAL'),
+      DOMICILIO_COMERCIO: command.servletRequest.getField('DOMICILIO_COMERCIO'),
+    };
+
+    const failures = this.anexoDValidator.validate({
+      product: command.integrationType,
+      fields: observed,
+    });
+
+    return failures.map(f => ({
+      field: f.field,
+      manualName: f.field,
+      displayName: f.field,
+      rule: 'R',
+      found: true,
+      value: observed[f.field],
+      verdict: 'FAIL',
+      failReason: f.reason,
+      failDetail: f.detail,
+      source: 'SERVLET',
+      layer: ValidationLayer.AGREGADOR,
+    }));
+  }
 
   private buildAn5822Results(command: ValidateFieldsCommand): FieldValidationResult[] {
     if (!this.an5822Detector || !this.an5822Validator) return [];
@@ -217,11 +283,24 @@ export class ValidateTransactionFieldsUseCase {
     // --- Transversal AN5822 layer (MC-only; no-op for other brands/products) ---
     const an5822Results = this.buildAn5822Results(command);
 
+    // --- Reglas cruzadas per-tx (C3, C5, C11, decision, XID/CAVV, POSTAUTH) ---
+    const crossResults = this.buildCrossFieldResults(command);
+
+    // --- Anexo D (Agregadores only; no-op para otros productos) ---
+    const anexoDResults = this.buildAnexoDResults(command);
+
     return new ValidationResultEntity(
       command.transactionRef,
       command.transactionType,
       command.cardBrand,
-      [...servletResults, ...threeDSResults, ...cybersourceResults, ...an5822Results],
+      [
+        ...servletResults,
+        ...threeDSResults,
+        ...cybersourceResults,
+        ...an5822Results,
+        ...crossResults,
+        ...anexoDResults,
+      ],
     );
   }
 }

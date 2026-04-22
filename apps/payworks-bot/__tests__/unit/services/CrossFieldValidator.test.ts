@@ -215,6 +215,91 @@ describe('CrossFieldValidator', () => {
       expect(results[0].failReason).toBe('cross_field');
       expect(results[0].layer).toBe(ValidationLayer.THREEDS);
     });
+
+    it('respeta issue.source cuando se especifica (no hard-codea SERVLET)', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        makeEntity({ ID_CYBERSOURCE: 'REQ-X' }),
+        makeEntity({ requestID: 'REQ-Y', Card_accountNumber: '4111111111111111', Card_cardType: '001' }),
+      );
+      const results = v.toFieldValidationResults();
+      expect(results.some(r => r.source === 'CYBERSOURCE')).toBe(true);
+    });
+  });
+
+  describe('C11 — Cybersource ID + BIN vs CardType', () => {
+    it('C11a: pasa cuando ID_CYBERSOURCE y requestID coinciden', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        makeEntity({ ID_CYBERSOURCE: 'REQ-001' }),
+        makeEntity({ requestID: 'REQ-001', Card_accountNumber: '4111111111111111', Card_cardType: '001' }),
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('C11a: falla cuando difieren', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        makeEntity({ ID_CYBERSOURCE: 'REQ-AAA' }),
+        makeEntity({ requestID: 'REQ-BBB', Card_accountNumber: '4111111111111111', Card_cardType: '001' }),
+      );
+      const issues = v.getIssues();
+      expect(issues.some(i => i.field === 'ID_CYBERSOURCE↔requestID')).toBe(true);
+      expect(issues.find(i => i.field === 'ID_CYBERSOURCE↔requestID')?.source).toBe('CYBERSOURCE');
+    });
+
+    it('C11b: Card_cardType=001 (VISA) con BIN no-VISA falla', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        undefined,
+        makeEntity({ Card_accountNumber: '5555555555554444', Card_cardType: '001' }),
+      );
+      const issue = v.getIssues().find(i => i.field === 'Card_cardType↔BIN');
+      expect(issue?.rule).toContain('C11b');
+      expect(issue?.rule).toContain('VISA');
+    });
+
+    it('C11b: Card_cardType=002 (MC) con BIN VISA falla', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        undefined,
+        makeEntity({ Card_accountNumber: '4111111111111111', Card_cardType: '002' }),
+      );
+      expect(v.getIssues().find(i => i.field === 'Card_cardType↔BIN')?.rule).toContain('MC');
+    });
+
+    it('C11b: MC en rango 222100-272099 (nuevo BIN range) pasa', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        undefined,
+        makeEntity({ Card_accountNumber: '2221001234567890', Card_cardType: '002' }),
+      );
+      expect(v.getIssues().filter(i => i.field === 'Card_cardType↔BIN')).toHaveLength(0);
+    });
+
+    it('C11b: MC en rango 51-55 pasa', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        undefined,
+        makeEntity({ Card_accountNumber: '5300001234567890', Card_cardType: '002' }),
+      );
+      expect(v.getIssues().filter(i => i.field === 'Card_cardType↔BIN')).toHaveLength(0);
+    });
+
+    it('C11: no se ejecuta sin log Cybersource', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(makeEntity({ ID_CYBERSOURCE: 'X' }), undefined);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('C11b: acepta BIN enmascarado (masking con *) extrayendo los 6 primeros dígitos reales', () => {
+      const v = new CrossFieldValidator();
+      v.validateCybersourceIdAndBin(
+        undefined,
+        makeEntity({ Card_accountNumber: '411111******1111', Card_cardType: '001' }),
+      );
+      expect(v.getIssues().filter(i => i.field === 'Card_cardType↔BIN')).toHaveLength(0);
+    });
   });
 });
 

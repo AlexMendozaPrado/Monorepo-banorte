@@ -11,6 +11,8 @@ import { MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFiel
 import { An5822Flow, LayerAn5822Config } from '@/core/domain/value-objects/An5822Flow';
 import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
 import { An5822Validator } from '@/core/domain/services/An5822Validator';
+import { AnexoDValidator } from '@/core/domain/services/AnexoDValidator';
+import { ProsaLogEntity } from '@/core/domain/entities/ProsaLog';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
 import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
@@ -22,6 +24,7 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
     config,
     new An5822FlowDetector(),
     new An5822Validator(an5822Config),
+    new AnexoDValidator(),
   );
 
   const threeDSMatrix = layer3ds as unknown as MandatoryFieldsMatrix;
@@ -245,6 +248,98 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
       });
       const an5822 = result.fieldResults.filter(f => f.source === 'AN5822');
       expect(an5822).toHaveLength(0);
+    });
+  });
+
+  describe('Fase 6 — Cross-field + Anexo D wiring', () => {
+    it('C3: REFERENCE servlet ≠ Campo 37 PROSA produce cross_field fail', () => {
+      const prosaResponse = new ProsaLogEntity(
+        new Date(), 'RESPONSE', '0210', '1.2.3.4',
+        new Map<number, string>([[37, 'PROSA-REF-DIFF']]),
+      );
+      const servletResponseWithRef = new ServletLogEntity(
+        new Date(), 'RESPONSE', '1.2.3.4',
+        new Map([['CODIGO_PAYW', '000'], ['REFERENCE', 'SERVLET-REF']]),
+      );
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.VISA,
+        transactionRef: 'REF-C3',
+        servletRequest: makeServletRequest(),
+        servletResponse: servletResponseWithRef,
+        prosaResponse,
+      });
+      const c3 = result.fieldResults.find(f => f.field === 'REFERENCE↔Campo37');
+      expect(c3?.verdict).toBe('FAIL');
+      expect(c3?.failReason).toBe('cross_field');
+    });
+
+    it('C11a: ID_CYBERSOURCE ≠ requestID produce fail con source=CYBERSOURCE', () => {
+      const servletReq = makeServletRequest({ ID_CYBERSOURCE: 'REQ-X' });
+      const csLog = new CybersourceLogEntity(
+        new Date(), 'REQUEST',
+        new Map<string, string>([
+          ['requestID', 'REQ-Y'],
+          ['Card_accountNumber', '411111******1111'],
+          ['Card_cardType', '001'],
+          ['MerchantID', 'banorteixe'],
+        ]),
+      );
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.VISA,
+        transactionRef: 'REF-C11A',
+        servletRequest: servletReq,
+        servletResponse: makeServletResponse(),
+        cybersourceLog: csLog,
+      });
+      const c11 = result.fieldResults.find(f => f.field === 'ID_CYBERSOURCE↔requestID');
+      expect(c11?.verdict).toBe('FAIL');
+      expect(c11?.source).toBe('CYBERSOURCE');
+    });
+
+    it('Anexo D: SUB_MERCHANT inválido en agregador produce fail', () => {
+      const servletReq = new ServletLogEntity(
+        new Date(), 'REQUEST', '1.2.3.4',
+        new Map([
+          ['MERCHANT_ID', '8016732'],
+          ['CMD_TRANS', 'VENTA'],
+          ['AMOUNT', '100.00'],
+          ['CARD_NUMBER', '411111******1111'],
+          ['SUB_MERCHANT', 'ABCDE*FGH'], // formato inválido
+          ['CIUDAD_TERMINAL', 'MONTERREY'],
+        ]),
+      );
+      const result = useCase.execute({
+        integrationType: IntegrationType.AGREGADORES_COMERCIO_ELECTRONICO,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.VISA,
+        transactionRef: 'REF-ANEXOD',
+        servletRequest: servletReq,
+        servletResponse: makeServletResponse(),
+      });
+      const anexoD = result.fieldResults.find(f => f.field === 'SUB_MERCHANT' && f.failReason === 'anexo_d_format');
+      expect(anexoD).toBeDefined();
+      expect(anexoD?.verdict).toBe('FAIL');
+      expect(anexoD?.layer).toBe(ValidationLayer.AGREGADOR);
+    });
+
+    it('Anexo D: producto NO agregador NO ejecuta validación', () => {
+      const servletReq = makeServletRequest({ SUB_MERCHANT: 'BAD!!!', CIUDAD_TERMINAL: 'MÉRIDA' });
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.VISA,
+        transactionRef: 'REF-TNP',
+        servletRequest: servletReq,
+        servletResponse: makeServletResponse(),
+      });
+      const anexoDFails = result.fieldResults.filter(
+        f => f.failReason?.startsWith('anexo_d_'),
+      );
+      expect(anexoDFails).toHaveLength(0);
     });
   });
 });

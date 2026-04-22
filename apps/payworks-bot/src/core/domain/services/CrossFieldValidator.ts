@@ -11,6 +11,12 @@ export interface CrossValidationIssue {
   rule: string;
   detail: string;
   layer: ValidationLayer;
+  /**
+   * Fuente a reportar en el `FieldValidationResult`. Opcional para
+   * mantener retrocompatibilidad — si no se especifica, se asume
+   * `'SERVLET'` (el default histórico).
+   */
+  source?: FieldValidationResult['source'];
 }
 
 export class CrossFieldValidator {
@@ -102,6 +108,72 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * C11 — Consistencia Cybersource:
+   *   C11a: `ID_CYBERSOURCE` del servlet debe coincidir con `requestID`
+   *         del retorno Cybersource.
+   *   C11b: El BIN (primeros 6 dígitos de `Card_accountNumber` o
+   *         `CARD_NUMBER` antes del masking) debe ser consistente con
+   *         `Card_cardType` (001 VISA → prefijo 4; 002 MC → rangos
+   *         51-55 o 2221-2720). AMEX no aplica porque Cybersource
+   *         Banorte no soporta cardType 003.
+   *
+   * Se reporta con `source: 'CYBERSOURCE'` / `layer: CYBERSOURCE`.
+   */
+  validateCybersourceIdAndBin(
+    servletRequest: LogEntity | undefined,
+    cybersourceLog: LogEntity | undefined,
+  ): void {
+    if (!cybersourceLog) return;
+
+    // --- C11a ---
+    if (servletRequest) {
+      const idCyber = servletRequest.getField('ID_CYBERSOURCE') ?? servletRequest.getField('CYBERSOURCE_ID');
+      const requestID = cybersourceLog.getField('requestID');
+      if (idCyber && requestID && idCyber.trim() !== requestID.trim()) {
+        this.issues.push({
+          field: 'ID_CYBERSOURCE↔requestID',
+          rule: 'C11a: ID_CYBERSOURCE del servlet debe coincidir con requestID de Cybersource',
+          detail: `Servlet: "${idCyber.trim()}", Cybersource requestID: "${requestID.trim()}"`,
+          layer: ValidationLayer.CYBERSOURCE,
+          source: 'CYBERSOURCE',
+        });
+      }
+    }
+
+    // --- C11b ---
+    const cardNum = cybersourceLog.getField('Card_accountNumber') ?? '';
+    const cardType = cybersourceLog.getField('Card_cardType');
+    const bin = cardNum.replace(/\D/g, '').substring(0, 6);
+
+    if (bin.length === 6 && cardType) {
+      const trimmedType = cardType.trim();
+      const isVisaBin = bin.startsWith('4');
+      const isMcBin =
+        (bin >= '510000' && bin <= '559999') ||
+        (bin >= '222100' && bin <= '272099');
+
+      if (trimmedType === '001' && !isVisaBin) {
+        this.issues.push({
+          field: 'Card_cardType↔BIN',
+          rule: 'C11b: Card_cardType=001 (VISA) requiere BIN con prefijo 4',
+          detail: `BIN observado: "${bin}"`,
+          layer: ValidationLayer.CYBERSOURCE,
+          source: 'CYBERSOURCE',
+        });
+      }
+      if (trimmedType === '002' && !isMcBin) {
+        this.issues.push({
+          field: 'Card_cardType↔BIN',
+          rule: 'C11b: Card_cardType=002 (MC) requiere BIN en rangos 51-55 o 2221-2720',
+          detail: `BIN observado: "${bin}"`,
+          layer: ValidationLayer.CYBERSOURCE,
+          source: 'CYBERSOURCE',
+        });
+      }
+    }
+  }
+
   validateResponseFields(
     servletResponse: LogEntity | undefined,
     expectedResults: { field: string; validValues: string[] }[],
@@ -133,7 +205,7 @@ export class CrossFieldValidator {
       verdict: 'FAIL' as const,
       failReason: 'cross_field',
       failDetail: issue.rule,
-      source: 'SERVLET' as const,
+      source: issue.source ?? 'SERVLET',
       layer: issue.layer,
     }));
   }

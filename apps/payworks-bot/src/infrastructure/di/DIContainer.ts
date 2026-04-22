@@ -19,6 +19,7 @@ import { MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFiel
 import { LayerAn5822Config } from '@/core/domain/value-objects/An5822Flow';
 import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
 import { An5822Validator } from '@/core/domain/services/An5822Validator';
+import { AnexoDValidator } from '@/core/domain/services/AnexoDValidator';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
 import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
@@ -55,6 +56,7 @@ export class DIContainer {
   private _logRetrieval?: FileUploadLogRetrieval;
   private _an5822Detector?: An5822FlowDetector;
   private _an5822Validator?: An5822Validator;
+  private _anexoDValidator?: AnexoDValidator;
 
   // Use Cases
   private _validateFieldsUseCase?: ValidateTransactionFieldsUseCase;
@@ -169,6 +171,13 @@ export class DIContainer {
     return this._an5822Validator;
   }
 
+  get anexoDValidator(): AnexoDValidator {
+    if (!this._anexoDValidator) {
+      this._anexoDValidator = new AnexoDValidator();
+    }
+    return this._anexoDValidator;
+  }
+
   // --- Getters de Use Cases ---
 
   get validateFieldsUseCase(): ValidateTransactionFieldsUseCase {
@@ -177,6 +186,7 @@ export class DIContainer {
         this.mandatoryFields,
         this.an5822Detector,
         this.an5822Validator,
+        this.anexoDValidator,
       );
     }
     return this._validateFieldsUseCase;
