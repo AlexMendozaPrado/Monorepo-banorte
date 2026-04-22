@@ -1,8 +1,7 @@
 {
   "_meta": {
-    "note": "F4 — Agregadores Cargos Periódicos manual v2.6.4 (Ene-2026). Mismos 3 subEsquemas que Agregadores CE pero SIN PREAUT/POSTAUT (cargos recurrentes no usan esas operativas). Transactions: AUTH (VTA), REFUND (DEV), VOID (CAN), REVERSAL (REV) — solo VISA/MC (no AMEX). REFERENCIA es R en VTA (necesaria para identificar la primera venta del suscriptor). AN5822: IND_PAGO=R y COF=4 en MIT (ver layer-an5822.json). Cambios vs anterior: MERCHANT_ID maxLen 7, USER/MODE con maxLen, AMOUNT regex 18 dígitos, TERMINAL_ID alphanum, ENTRY_MODE solo [MANUAL], CUSTOMER_REF3 R con maxLen 20, CUSTOMER_REF5 R (ID Agregador), MARKETPLACE_TX con reglas por marca, ID_GATEWAY para Mandato 7118 MC.",
-    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts",
-    "anexoD": "Reglas Anexo D aplican igual que en Agregadores CE."
+    "note": "Agregadores Cargos Periódicos manual v2.6.4 (Ene-2026, última mod. 21-Nov-2025). Alineado al PDF oficial. Transacciones: VENTA, DEVOLUCION, CANCELACION, REVERSA, VERIFICACION — solo VISA/MC (no AMEX), sin PREAUT/POSTAUT. CUSTOMER_REF3 R (Número de contrato, p.8), CUSTOMER_REF5 R (Identificador del Agregador, p.8). AN5822 MIT: IND_PAGO=R, COF=4 en subseqMIT (p.10-11). subEsquemas corregidos: ESQ_4_CON_AGP=2 campos, ESQ_4_SIN_AGP=8 campos (Anexo D real en p.36 del manual).",
+    "specSource": "Manual Cargos Periódicos Agregadores v2.6.4 (Ene-2026). Revisado contra PDF oficial el 2026-04-22. Fixes: PASSWORD → R_PCI; EXP_DATE → R_PCI VENTA; SECURITY_CODE removido (manual v2.6.4 p.6-8 NO lo lista — cargos periódicos es MIT recurrente); ENTRY_MODE/CARD_NUMBER N/A en no-VENTA; AMOUNT.REFUND → R, VOID/REV → N/A; BATCH → GROUP rename; esquemas CON_AGP/SIN_AGP desinvertidos (manual p.15-17)."
   },
   "integrationType": "AGREGADORES_CARGOS_PERIODICOS",
   "manualVersion": "2.6.4",
@@ -40,13 +39,13 @@
       "manualName": "CLAVE_USR",
       "displayName": "Clave de Usuario",
       "dataType": "alphanum",
-      "ambiguous": true,
-      "note": "PCI-DSS: nunca en logs.",
+      "ambiguous": false,
+      "note": "Manual v2.6.4 p.6: R para cualquier transacción o comando. PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
+        "REFUND_VISA": "R_PCI", "REFUND_MC": "R_PCI",
+        "VOID_VISA": "R_PCI", "VOID_MC": "R_PCI",
+        "REVERSAL_VISA": "R_PCI", "REVERSAL_MC": "R_PCI"
       },
       "maxLength": 20
     },
@@ -55,12 +54,12 @@
       "displayName": "ID Terminal",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "Manual v2.6.4: Alfanumérico 15.",
+      "note": "Manual v2.6.4 p.7: Alfanumérico 15. Únicamente para transacciones (no para comandos).",
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "AUTH_VISA": "R", "AUTH_MC": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "R", "VOID_MC": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
       },
       "maxLength": 15
     },
@@ -98,12 +97,12 @@
       "displayName": "Monto",
       "dataType": "decimal",
       "ambiguous": false,
-      "note": "Manual: Numérico 18 dígitos y 2 decimales.",
+      "note": "Manual v2.6.4 p.7: Numérico 18 dígitos y 2 decimales. Únicamente para las transacciones (no comandos). Excepto CANCELACION y REVERSA.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "REFUND_VISA": "R", "REFUND_MC": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
       "format": "^\\d{1,18}(\\.\\d{1,2})?$",
       "maxLength": 21
@@ -141,11 +140,12 @@
       "displayName": "Número de Tarjeta",
       "dataType": "masked",
       "ambiguous": false,
+      "note": "Manual v2.6.4 p.8: Alfanumérico 20, R solo para VENTA (transacciones manuales).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
       "maxLength": 20,
       "mustBeMasked": true
@@ -155,29 +155,14 @@
       "displayName": "Fecha de Expiración",
       "dataType": "MMYY",
       "ambiguous": false,
-      "note": "En logs de agregadores no aparece (PCI masking).",
+      "note": "Manual v2.6.4 p.8: Numérico 4 (MMAA), R para VENTA manuales. PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "O", "AUTH_MC": "O",
-        "REFUND_VISA": "O", "REFUND_MC": "O",
-        "VOID_VISA": "O", "VOID_MC": "O",
-        "REVERSAL_VISA": "O", "REVERSAL_MC": "O"
-      },
-      "format": "^(0[1-9]|1[0-2])[0-9]{2}$",
-      "maxLength": 4
-    },
-    "SECURITY_CODE": {
-      "manualName": "CODIGO_SEGURIDAD",
-      "displayName": "Código de Seguridad",
-      "dataType": "numeric",
-      "ambiguous": false,
-      "note": "PCI-DSS: nunca en logs.",
-      "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A",
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "format": "^\\d{3,4}$",
+      "format": "^(0[1-9]|1[0-2])[0-9]{2}$",
       "maxLength": 4
     },
     "ENTRY_MODE": {
@@ -185,20 +170,22 @@
       "displayName": "Modo de Entrada",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Agregadores CP es tarjeta NO presente. Solo MANUAL.",
+      "note": "Manual v2.6.4 p.8: Alfanumérico 20. R solo para VENTA. Valor: MANUAL (tarjeta NO presente).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
-        "REFUND_VISA": "R", "REFUND_MC": "R",
-        "VOID_VISA": "R", "VOID_MC": "R",
-        "REVERSAL_VISA": "R", "REVERSAL_MC": "R"
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "validValues": ["MANUAL"]
+      "validValues": ["MANUAL"],
+      "maxLength": 20
     },
-    "BATCH": {
+    "GROUP": {
       "manualName": "LOTE",
       "displayName": "Lote",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual v2.6.4 p.8: Alfanumérico 30, Opcional. (Antes BATCH — logName oficial del manual es GROUP.)",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O",
         "REFUND_VISA": "O", "REFUND_MC": "O",
@@ -322,27 +309,27 @@
   },
   "subEsquemas": {
     "ESQ_1": {
-      "displayName": "Esquema 1 - Tasa Natural",
-      "description": "Sin campos adicionales de agregador.",
+      "displayName": "Esquema Natural / Natural por Excepción / Giro Agregador",
+      "description": "El agregador opera bajo la afiliación padre. SUB_MERCHANT y AGGREGATOR_ID no aplican.",
       "required": []
     },
-    "ESQ_4_SIN_AGP": {
-      "displayName": "Esquema 4 Sin AGP PROSA",
-      "description": "Requiere SUB_AFILIACION y ID_AGREGADOR.",
-      "required": ["SUB_AFILIACION", "ID_AGREGADOR"]
-    },
     "ESQ_4_CON_AGP": {
-      "displayName": "Esquema 4 Con AGP PROSA",
-      "description": "SIN AGP + 6 campos AGP adicionales.",
+      "displayName": "Esquema 4 Tasa Agregador Registrado con AGP PROSA",
+      "description": "Manual v2.6.4 (paralelo a Agregadores CE p.15): requiere SOLO SUB_MERCHANT y AGGREGATOR_ID. El subafiliado se genera mediante AGP PROSA. Ver Anexo D p.36 reglas de contenido.",
+      "required": ["SUB_MERCHANT", "AGGREGATOR_ID"]
+    },
+    "ESQ_4_SIN_AGP": {
+      "displayName": "Esquema 4 Tasa Agregador Sin AGP",
+      "description": "Manual v2.6.4 (paralelo a Agregadores CE p.16-17): el comercio genera todos los campos. Obligatorios para VENTA, DEVOLUCION, CANCELACION, REVERSA. Ver Anexo D p.36.",
       "required": [
-        "SUB_AFILIACION",
-        "ID_AGREGADOR",
+        "SUB_MERCHANT",
+        "AGGREGATOR_ID",
         "MERCHANT_MCC",
         "DOMICILIO_COMERCIO",
-        "CODIGO_POSTAL",
-        "CIUDAD_TERMINAL",
+        "ZIP_CODE",
+        "TERMINAL_CITY",
         "ESTADO_TERMINAL",
-        "PAIS_TERMINAL"
+        "TERMINAL_COUNTRY"
       ]
     }
   },
