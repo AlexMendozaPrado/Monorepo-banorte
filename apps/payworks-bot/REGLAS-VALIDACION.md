@@ -1,7 +1,10 @@
 # Payworks Certification Bot - Reglas de Validacion Implementadas
 
 > Documento de conciliacion para comparar la logica implementada contra los manuales oficiales de integracion Banorte Payworks.
-> Actualizado: 2026-04-22 | Revision: Implementacion spec v5 cerrada al 100% (commits ee40c16 -> 18fdf1c)
+>
+> **Actualizado: 2026-04-22** | Estado: **validado contra PDFs oficiales en `Downloads/ConsolidadoManualesyLogs/`**
+>
+> **Historial**: spec v5 cerrada al 100% (ee40c16 → 18fdf1c) + validación campo por campo contra los 10 manuales oficiales (a3abfb5 → 5cf3ffd).
 
 ---
 
@@ -27,6 +30,7 @@
 18. [Reglas de respuesta (response-rules)](#18-reglas-de-respuesta)
 19. [Campos PCI-DSS y regla R_PCI](#19-campos-pci-dss-nunca-logueados)
 20. [Campos marcados como ambiguos](#20-campos-marcados-como-ambiguos)
+20-BIS. [Estado actual por JSON (validado contra PDFs)](#20-bis-estado-actual-por-json-validado-contra-pdfs-oficiales)
 21. [Cobertura actual y brechas conocidas](#21-cobertura-actual-y-brechas-conocidas)
 
 ---
@@ -45,21 +49,27 @@ El bot automatiza los pasos 2-5: recibe los archivos, ejecuta las validaciones p
 
 ### Fuentes de reglas
 
-Las reglas implementadas provienen de **10 manuales oficiales de integracion** + **5 logs de ejemplo reales**:
+Las reglas implementadas provienen de **10 manuales oficiales de integracion** + **5 logs de ejemplo reales**. Todos validados contra los PDFs en `C:\Users\fluid\Downloads\ConsolidadoManualesyLogs\`:
 
-| Manual | Version | Fecha | Tipo |
-|---|---|---|---|
-| Comercio Electronico Tradicional | 2.5 | 19-Jun-2025 | TNP |
-| MOTO (Mail Order / Telephone Order) | 1.5 | 19-Jun-2025 | TNP |
-| Cargos Periodicos Post | 2.1 | 19-Jun-2025 | TNP |
-| Ventana de Comercio Electronico (Cifrada) | 1.8 | 24-Mar-2026 | TNP |
-| Comercio Electronico Agregadores y Aliados | 2.6.4 | 23-Ene-2026 | TNP |
-| Cargos Periodicos Agregadores | 2.6.4 | Ene-2026 | TNP |
-| API PW2 Seguro | 2.4 | Marzo 2023 | Tarjeta Presente |
-| Interredes Remoto | 1.7 | Julio 2025 | Tarjeta Presente |
-| 3D Secure 2 (capa transversal) | 1.4 | 29-Oct-2024 | Capa |
-| Cybersource Direct (capa transversal) | 1.10 | 18-Ene-2021 | Capa |
-| AN5822 CIT/MIT MasterCard (capa transversal) | — | — | Capa |
+| # | Manual | Version | Fecha | Tipo | JSON implementado |
+|---|---|---|---|---|---|
+| 1 | Comercio Electronico Tradicional | **2.5** | 19-Jun-2025 | TNP | `ecommerce-tradicional.json` ✅ |
+| 2 | MOTO (Mail Order / Telephone Order) | **1.5** | 19-Jun-2025 | TNP | `moto.json` ✅ |
+| 3 | Cargos Periodicos Post | **2.1** | 19-Jun-2025 | TNP | `cargos-periodicos-post.json` ✅ |
+| 4 | Ventana de Comercio Electronico (Cifrada) | **1.8** | 24-Mar-2026 | TNP | `ventana-comercio-electronico.json` ✅ |
+| 5 | Comercio Electronico Agregadores y Aliados | **2.6.4** | 23-Ene-2026 | TNP | `agregadores-comercio-electronico.json` ✅ |
+| 6 | Cargos Periodicos Agregadores | **2.6.4** | Ene-2026 | TNP | `agregadores-cargos-periodicos.json` ✅ |
+| 7 | API PW2 Seguro | **2.4** | Marzo 2023 | Tarjeta Presente | `api-pw2-seguro.json` ✅ |
+| 8 | Interredes Remoto | **1.7** | Julio 2025 | Tarjeta Presente | `interredes-remoto.json` ✅ |
+| 9 | 3D Secure 2 (capa transversal) | **1.4** | 29-Oct-2024 | Capa | `layer-3ds.json` ✅ |
+| 10 | Cybersource Direct (capa transversal) | **1.10** | 18-Ene-2021 | Capa | `layer-cybersource.json` ✅ |
+| — | AN5822 CIT/MIT MasterCard (capa transversal) | consolidado | — | Capa | `layer-an5822.json` (cita 5 manuales) ✅ |
+| — | Reglas de respuesta (consolidado) | — | — | — | `response-rules.json` (cita 4 manuales) ✅ |
+
+Cada JSON declara en su `_meta`:
+- `manualVersion` y `manualDate` del PDF oficial validado
+- `_meta.note` con el contexto del producto
+- `_meta.specSource` con el historial de la validación y los fixes aplicados
 
 ---
 
@@ -353,24 +363,48 @@ Caracteres bloqueados: `< > | ¡ ! ¿ ? * + ' / \ { } [ ] ¨ ; : , # $ % & ( ) =
 
 Cada producto tiene un archivo JSON en `src/config/mandatory-fields/` con la matriz completa de campos. Los campos estan indexados por su **nombre en el log** (ingles) con alias al nombre del manual (espanol).
 
-> **NOTA v5**: Las tablas individuales por producto (7.1-7.8) reflejan las matrices originales importadas. Los **cambios v5 criticos** estan blindados por 43 asserts de content-regression en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts` y son la fuente autoritativa de la "delta" respecto a versiones previas. Los JSONs en `src/config/mandatory-fields/*.json` son la fuente unica de verdad en runtime.
+> **NOTA**: Las tablas individuales por producto (7.1-7.8) tienen el esquema de v4. El **estado actual en runtime** está en los JSONs y se documenta arriba — cada cambio crítico está blindado por asserts en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts`.
 
-### Cambios clave v5 sobre las matrices (delta vs. v4)
+### Cambios clave vs. v4 original (ya en runtime)
 
-| Producto | Campo | Cambio v5 |
-|---|---|---|
-| Ecommerce Tradicional | `MERCHANT_ID` | maxLen 15 → **7**, format `^\d{1,7}$` |
-| Ecommerce Tradicional | `MARKETPLACE_TX` | **`PROHIBITED`** en MC/AMEX (antes O para todos) |
-| Ecommerce Tradicional | `ID_GATEWAY` | **Nuevo campo**: `PROHIBITED` en VISA/AMEX, `O` en MC (mandato Gateway 7118 MC) |
-| Ecommerce Tradicional | `CUSTOMER_REF3` | O → **R** |
-| Ecommerce Tradicional / MOTO | `ENTRY_MODE` | validValues restringido a **`["MANUAL"]`** para TNP |
-| Cargos Periodicos Post | `TERMINAL_ID` | maxLen 15 → **10**, regla **R** (no O) |
-| VCE | `merchantCity` | maxLen 13 → **40** (bug 3DS v1.0 corregido) |
-| VCE | Q6 MSI nuevo | `initialDeferment`, `paymentsNumber`, `planType` agregados |
-| API PW2 Seguro, Interredes | `TVR/TSI/AID/APN/AL` | Removidos de `servlet` → movidos a `emvVoucher` (no se validan) |
-| API PW2 Seguro, Interredes | `EMV_TAGS` | Unico campo EMV de envio real, permanece en `servlet` |
-| Interredes | `CMD_TRANS` | validValues extendido a 13 opciones (incluye `OBTENER_LLAVE`, `CASHBACK`) |
-| **Todos** | `CUSTOMER_REF2` | Si se usa, debe coincidir PRE↔POST (regla C8) |
+| Producto | Campo | Cambio vs v4 | Fuente |
+|---|---|---|---|
+| Ecommerce Tradicional | `MERCHANT_ID` | maxLen 15 → **7**, format `^\d{1,7}$` | Manual v2.5 p.6 |
+| Ecommerce Tradicional | `TERMINAL_ID` | maxLen 15 → **10** | Manual v2.5 p.6 |
+| Ecommerce Tradicional | `MARKETPLACE_TX` | **`PROHIBITED`** en MC/AMEX | Manual v2.5 p.8 (solo VISA) |
+| Ecommerce Tradicional | `PASSWORD` / `EXP_DATE` / `SECURITY_CODE` | N/A → **`R_PCI`** | Manual v2.5 dice R, PCI no loggeable |
+| Ecommerce Tradicional | `ID_GATEWAY` / `GROUP` / `PLAN_TYPE` / etc. | **REMOVIDOS** — no pertenecen a Tradicional | Solo existen en Agregadores v2.6.4 |
+| MOTO | `TERMINAL_ID` | maxLen 15 → **10** | Manual v1.5 p.6 |
+| MOTO | `PAYMENT_NUMBER` | rename a **`PAYMENTS_NUMBER`** | Manual v1.5 p.11 (logName oficial) |
+| MOTO | `GROUP` | **REMOVIDO** | No existe en Manual v1.5 |
+| Cargos Periodicos Post | `SECURITY_CODE` / `ID_GATEWAY` | **REMOVIDOS** | Manual v2.1 p.6-8 no los lista |
+| Cargos Periodicos Post | `BATCH` | rename a **`GROUP`** | Manual v2.1 p.8 (logName oficial) |
+| Cargos Periodicos Post | `CUSTOMER_REF3` | O → **R 20** ("Número de contrato") | Manual v2.1 p.7 |
+| VCE | `merchantCity` | maxLen 13 → **40** | Manual v1.8 p.8 |
+| VCE | `amount` | maxLen 21 → **15** | Manual v1.8 p.8 (Numérico 15 total) |
+| VCE | `mode.validValues` | [PRD,AUT,DEC,RND] → **[PRD, AUT]** | Manual v1.8 p.8 |
+| VCE | Q6 MSI | `initialDeferment` + `paymentsNumber` + `planType` | Manual v1.8 p.11 |
+| Agregadores CE | **Esquemas 4 CON/SIN AGP** | **DESINVERTIDOS**: CON_AGP=2 campos, SIN_AGP=8 campos | Manual v2.6.4 p.15-17 |
+| Agregadores CE | `CUSTOMER_REF5` | O → **R** ("Identificador del Agregador") | Manual v2.6.4 p.9 |
+| Agregadores CE / CP | `CUSTOMER_REF3` | R → **O** (solo en Tradicional/MOTO/Agreg — sí es R en Cargos Periódicos Post y Agreg. CP) | Manual v2.6.4 p.8 |
+| Agregadores CP | Esquemas 4 CON/SIN AGP | **DESINVERTIDOS** igual que CE | Manual v2.6.4 |
+| API PW2 Seguro, Interredes | `TVR/TSI/AID/APN/AL` | Removidos de `servlet` → `emvVoucher` | Anexo V: son outputs del SDK, no envío |
+| API PW2 Seguro, Interredes | `EMV_TAGS` | Único campo EMV de envío real en `servlet` | Anexo V |
+| API PW2 Seguro, Interredes | `BATCH` | rename a **`GROUP`** | Manual oficial |
+| API PW2 Seguro, Interredes | `PASSWORD` | N/A → `R_PCI` | Manual v2.4/v1.7 Anexo V dice R |
+| Interredes | `CMD_TRANS` | validValues extendido a **13 opciones** | Manual v1.7 Anexo III |
+| **Todos los TNP** | `CUSTOMER_REF2` | maxLen 30 → **16** | Todos los manuales |
+| **Todos los TNP** | `RESPONSE_LANGUAGE` | validValues `[ES, EN, 01, 02]` → **`[ES, EN]`** | Todos los manuales |
+| **Todos los TNP** | `PASSWORD` / `EXP_DATE` / `SECURITY_CODE` | N/A/O → **`R_PCI`** en VENTA/PREAUT | Manual dice R, PCI no loggeable |
+| 3DS | `ECI` | validValues globales → **`validValuesByBrand`** (VISA/AMEX: [05,06,07], MC: [01,02]) | Manual 3DS v1.4 |
+| 3DS | `CERTIFICACION_3D` / `STATUS_3D` | **separados** envío vs retorno | Bug histórico corregido |
+| Cybersource | `Card_cardType` | validValues `[001, 002, 003]` → **`[001, 002]`** (sin AMEX) | Manual v1.10 |
+| Cybersource | `MerchantID` | variable → **fixedValue `"banorteixe"`** | Manual v1.10 |
+| AN5822 | 2 flujos (CIT/MIT) → **3 flujos** | firstCIT / subseqCIT / subseqMIT | Mandato MasterCard |
+| AN5822 | `IND_PAGO` | `8` → **`U`** (Ecommerce/MOTO/VCE/Agreg.CE) o **`R`** (Cargos Periódicos + Agreg.CP) | 5 manuales TNP |
+| AN5822 | `COF` | nuevo campo | MC AN5822 en Cargos Periódicos |
+| response-rules | `PAYW_RESULT.validValues` | agregado **`Z`** (Reversa automática por timeout) | Manual MOTO v1.5 p.5 |
+| response-rules | `AGGREGATOR_REF` → **`ID_AGREGADOR`** | rename (logName oficial) | Manual Agregadores |
 
 ### 7.1 Comercio Electronico Tradicional (v2.5)
 
@@ -1432,6 +1466,172 @@ Los siguientes campos tienen `"ambiguous": true` en el glosario o en las matrice
 
 ---
 
+## 20-BIS. Estado actual por JSON (validado contra PDFs oficiales)
+
+Esta sección documenta el estado **real en runtime** de cada archivo JSON en `src/config/mandatory-fields/`, con referencia al manual oficial validado y al commit en el que se alineó. Es la fuente autoritativa después de la validación exhaustiva del 2026-04-22.
+
+### 20-BIS.1 `ecommerce-tradicional.json`
+
+- **Manual**: Comercio Electrónico Tradicional **v2.5** (19-Jun-2025)
+- **Commit alineado**: `37711ae`
+- **Servlet fields**: 20 campos (coincide con tabla p.6-9 del manual)
+- **Transacciones**: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL, VERIFY × VISA/MC/AMEX = 21 combinaciones
+- **Campos PCI**: `PASSWORD`, `EXP_DATE`, `SECURITY_CODE` con regla **`R_PCI`** (manual dice R pero PCI no loggeable)
+- **Caracteres especiales** (manual p.9): `" , / \ & % $ ! ¡ | ? ¿ ' * - _ # ( )` + NOTA 2 recomienda sin acentos
+- **Capas que aplican**: Servlet + 3DS + Cybersource + AN5822
+- **Brechas**: variables AMEX adicionales (DOMICILIO, CODIGO_POSTAL, TELEFONO, DOMICILIO_ENTREGA, etc. — manual p.9) pendientes de agregar
+
+### 20-BIS.2 `moto.json`
+
+- **Manual**: MOTO (Mail Order / Telephone Order) **v1.5** (19-Jun-2025)
+- **Commit alineado**: `645fa32`
+- **Servlet fields**: 23 campos (20 base p.6-8 + 3 Q6 p.11)
+- **Transacciones**: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL, VERIFY × VISA/MC (sin AMEX)
+- **Campos PCI**: `PASSWORD`, `EXP_DATE`, `SECURITY_CODE` con regla `R_PCI`
+- **Q6 Pagos Diferidos**: `INITIAL_DEFERMENT`, `PAYMENTS_NUMBER` (no singular), `PLAN_TYPE`
+- **Capas que aplican**: Servlet + AN5822
+- **Brechas**: ninguna crítica
+
+### 20-BIS.3 `cargos-periodicos-post.json`
+
+- **Manual**: Cargos Periódicos Post **v2.1** (19-Jun-2025)
+- **Commit alineado**: `5b644b1`
+- **Servlet fields**: 20 campos (coincide con manual p.6-8)
+- **Transacciones**: AUTH, REFUND, VOID, REVERSAL, VERIFY × VISA/MC (sin AMEX, sin PREAUT/POSTAUT)
+- **Campo distintivo**: `CUSTOMER_REF3` R 20 ("Número de contrato del Tarjetahabiente con el comercio" — sí es del manual)
+- **Removido vs v4**: `SECURITY_CODE` (cargos recurrentes no piden CVV), `ID_GATEWAY` (pertenece a Agregadores)
+- **AN5822**: `PAYMENT_IND=R` (Recurrente), `COF=4` en subseqMIT
+- **Rate limit**: **200 tx/min** (manual p.6)
+- **Capas que aplican**: Servlet + AN5822
+
+### 20-BIS.4 `ventana-comercio-electronico.json`
+
+- **Manual**: Ventana de Comercio Electrónico Cifrada (VCE) **v1.8** (24-Mar-2026)
+- **Commit alineado**: `77d090e`
+- **Servlet fields**: 21 campos (incluye Q6 MSI + tokenización)
+- **Formato nombres**: camelCase (merchantId, merchantName, customerRef1, etc. — distinto de otros manuales)
+- **Transacciones**: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL × VISA/MC/AMEX = 18 combinaciones
+- **Distintivos**:
+  - `password` R (no R_PCI — viaja **cifrado AES** dentro del JSON)
+  - `merchantCity` maxLen **40** (bug de 3DS v1.0 corregido)
+  - `mode.validValues` **`[PRD, AUT]`** (solo 2, no DEC/RND como otros)
+  - `amount` maxLen **15** (Numérico total incluyendo decimales)
+- **Tokenización**: `usarTokenizacion`, `idUsrComercio`, `correoUsrComercio` (manual v1.2 changelog)
+- **Capas que aplican**: Servlet + 3DS + Cybersource + AN5822
+
+### 20-BIS.5 `agregadores-comercio-electronico.json`
+
+- **Manual**: Comercio Electrónico Agregadores y Aliados **v2.6.4** (23-Ene-2026)
+- **Commit alineado**: `f8aeebb`
+- **Servlet fields**: 22 campos
+- **Transacciones**: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL × VISA/MC (sin AMEX)
+- **subEsquemas** (corregidos, antes estaban invertidos):
+  - `ESQ_1` (Natural / Giro Agregador): sin campos adicionales
+  - `ESQ_4_CON_AGP`: SUB_MERCHANT + AGGREGATOR_ID (2 campos — subafiliado vía AGP PROSA)
+  - `ESQ_4_SIN_AGP`: 8 campos (SUB_MERCHANT, AGGREGATOR_ID, MERCHANT_MCC, DOMICILIO_COMERCIO, ZIP_CODE, TERMINAL_CITY, ESTADO_TERMINAL, TERMINAL_COUNTRY)
+- **Campo distintivo**: `CUSTOMER_REF5` R 30 ("Identificador o nombre del Agregador o Integrador" — sí es del manual)
+- **MARKETPLACE_TX** `PROHIBITED` en MC/AMEX (manual p.14)
+- **ID_GATEWAY** para Gateway 7118 MC (manual p.15)
+- **Capas que aplican**: Servlet + Agregador + 3DS + Cybersource + AN5822
+
+### 20-BIS.6 `agregadores-cargos-periodicos.json`
+
+- **Manual**: Cargos Periódicos Agregadores **v2.6.4** (Ene-2026)
+- **Commit alineado**: `1087746`
+- **Servlet fields**: 21 campos
+- **Transacciones**: AUTH, REFUND, VOID, REVERSAL × VISA/MC (sin AMEX/PREAUT/POSTAUT)
+- **subEsquemas**: mismos que Agregadores CE pero desinvertidos igual
+- **CUSTOMER_REF3 R 20** (Número de contrato — sí es del manual)
+- **CUSTOMER_REF5 R 30** (ID Agregador — sí es del manual)
+- **AN5822**: `PAYMENT_IND=R`, `COF=4` en subseqMIT
+- **Rate limit**: 200 tx/min
+- **Removido vs v4**: `SECURITY_CODE`, `BATCH` → `GROUP`
+- **Anexo D oficial existe en manual p.36** (reglas de contenido SUB_MERCHANT)
+- **Capas que aplican**: Servlet + Agregador + AN5822
+
+### 20-BIS.7 `api-pw2-seguro.json`
+
+- **Manual**: API PW2 Seguro **v2.4** (Mar-2023) + Anexo V Tabla de Parámetros
+- **Commit alineado**: `4b5ca7d`
+- **Servlet fields**: 13 campos (básicos)
+- **emvVoucher fields**: 5 tags EMV documentales (TVR/TSI/AID/APN/AL — outputs del SDK, no se validan)
+- **Transacciones** (manual Anexo V Tabla 8): VENTA, CASHBACK, VENTA_FORZADA, PREAUT, REAUT, POSTAUT, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION, SUSPENSION, REACTIVACION, CIERRE_AFILIACION × VISA/MC/AMEX
+- **Único campo EMV de envío**: `EMV_TAGS` (TLV hex concatenado, permanece en servlet)
+- **BATCH → GROUP** rename aplicado
+- **PASSWORD → R_PCI**
+- **Brechas (alcance separado)**: variables del Anexo V pendientes — CASHBACK_AMOUNT, PAGO_MOVIL, AUTH_CODE, BANROTE_URL, TRANS_TIMEOUT, Q6, RESPONSE_LANGUAGE, QPS, CUSTOMER_REF2-5
+- **Capas que aplican**: Servlet + EMV (no 3DS, no AN5822)
+
+### 20-BIS.8 `interredes-remoto.json`
+
+- **Manual**: Interredes Remoto **v1.7** (Jul-2025) + Anexos I-VII
+- **Commit alineado**: `5cf3ffd`
+- **Servlet fields**: 14 campos (incluye `CASHBACK_AMOUNT`, `PIN_REQUESTED`)
+- **emvVoucher fields**: 5 tags EMV
+- **Transacciones (Anexo III)**: 13 tipos, incluye `OBTENER_LLAVE`, `CASHBACK`, `DEVOLUCION_CLIENTE`, `VENTA_CON_VALIDACION`, `CANCELAR` + estándares
+- **errorCodes**: tabla PinPad del Anexo VI (usado por regla cruzada C12)
+- **Fixes paralelos a API PW2 Seguro**: PASSWORD→R_PCI, BATCH→GROUP
+- **Capas que aplican**: Servlet + EMV
+
+### 20-BIS.9 `layer-3ds.json`
+
+- **Manual**: 3D Secure 2 Banorte **v1.4** (29-Oct-2024)
+- **Estructura**:
+  - `threeds`: variables de **envío** al servicio 3DS (13+ campos: FORWARD_PATH, REFERENCE3D, CITY, COUNTRY, EMAIL, NAME, LAST_NAME, POSTAL_CODE, STATE, STREET, MOBILE_PHONE, CREDIT_TYPE, THREED_VERSION, CERTIFICACION_3D fixedValue="03")
+  - `threedsResponse`: variables de **retorno** (STATUS_3D con 40+ códigos, ECI, XID, CAVV)
+- **Cambio crítico**: `CERTIFICACION_3D` (envío, fijo 03) y `STATUS_3D` (retorno, 200=éxito) **separados**
+- **ECI `validValuesByBrand`**: VISA/AMEX → `[05, 06, 07]`, MC → `[01, 02]`
+- **Aplica a**: Ecommerce Tradicional, VCE, Agregadores CE
+
+### 20-BIS.10 `layer-cybersource.json`
+
+- **Manual**: Cybersource Direct **v1.10** (18-Ene-2021)
+- **Servlet fields**: 28+ campos (BillTo + Card + ShipTo + Purchase + retorno)
+- **`Card_cardType.validValues`**: **`["001", "002"]`** (solo VISA/MC — sin AMEX)
+- **`MerchantID.fixedValue`**: **`"banorteixe"`**
+- **`BillTo_ipAddress`**: R desde v1.6
+- **Reason codes**: tabla completa en `reasonCodeDescriptions`
+- **Aplica a**: Ecommerce Tradicional, VCE, Agregadores CE (gap corregido en spec v5)
+
+### 20-BIS.11 `layer-an5822.json`
+
+- **Consolidado de 5 manuales TNP** (citas en `_meta.sources`):
+  - Ecommerce Tradicional v2.5 p.11-13
+  - MOTO v1.5 p.9-11
+  - Cargos Periódicos Post v2.1 p.10-12
+  - Agregadores CE v2.6.4 p.12-14
+  - Agregadores CP v2.6.4 p.11-13
+- **3 flujos**: `firstCIT`, `subseqCIT`, `subseqMIT`
+- **productMapping**: valores esperados (`PAYMENT_IND`, `AMOUNT_TYPE`, `PAYMENT_INFO`, `COF`) por producto y flujo
+- **Bug corregido**: `IND_PAGO=8` era inválido; valores reales son `U` (Ecommerce/MOTO/VCE/Agreg.CE) y `R` (Cargos Periódicos Post + Agreg.CP)
+- **COF=4** solo en Cargos Periódicos MIT
+
+### 20-BIS.12 `response-rules.json`
+
+- **Consolidado de 4 fuentes** (citas en `_meta.sources`):
+  - MOTO v1.5 p.5 (PAYW_RESULT)
+  - Ecommerce Tradicional v2.5 Anexo A (PAYW_CODE, campos retorno)
+  - Cargos Periódicos Post v2.1 p.5 (Z - timeout)
+  - API PW2 Seguro v2.4 p.20 (tabla AUTH_RESULT)
+- **Campos validados**: `PAYW_RESULT` (A/D/R/T/Z), `AUTH_RESULT` (tabla completa), `PAYW_CODE` (400s/500s/999), `ID_MAC`, `ID_CYBERSOURCE`, `AUTH_DATE`, `CUST_RSP_DATE`, `CARD_HOLDER`, `MARKETPLACE_TX_RETURN`, `ID_AGREGADOR` (renombrado)
+
+### Resumen de fixes por patrón recurrente
+
+1. **`manualVersion`** — corregida la confusión Tradicional v2.5 vs Agregadores v2.6.4.
+2. **`PASSWORD` N/A → R_PCI** — aplicado en 8 JSONs TNP/TP (todos salvo VCE que mantiene R).
+3. **`EXP_DATE` / `SECURITY_CODE`** → `R_PCI` V/PRE donde el manual lo pide.
+4. **`BATCH` → `GROUP`** rename — aplicado en 5 JSONs (Cargos Periódicos Post, Agreg.CP, API PW2 Seguro, Interredes).
+5. **`SECURITY_CODE` removido** de Cargos Periódicos Post y Agregadores CP (manuales no lo listan — MIT recurrente).
+6. **`ID_GATEWAY` / `GROUP`** removidos de Tradicional/MOTO (solo existen en Agregadores).
+7. **Esquemas 4 CON/SIN AGP desinvertidos** en ambos Agregadores (CE y CP).
+8. **`required` en subEsquemas** cambiado de nombres en español a logNames en inglés.
+9. **`CUSTOMER_REF2` maxLen 30 → 16** en todos los TNP.
+10. **`RESPONSE_LANGUAGE.validValues`** `[ES, EN, 01, 02]` → `[ES, EN]`.
+11. **Pipeline v5**: `PROHIBITED` + `R_PCI` añadidos al evaluador (FieldRequirement.ts).
+12. **Regex `FORBIDDEN_CHARS`**: alineado al superset de manual VCE v1.8 / Ecommerce v2.6.4.
+
+---
+
 ## 21. Cobertura actual y brechas conocidas
 
 ### Cobertura implementada tras spec v5 (~92% manuales + 100% cambios P0)
@@ -1454,7 +1654,7 @@ Los siguientes campos tienen `"ambiguous": true` en el glosario o en las matrice
 - Carta PDF de 3 paginas
 - Parser de afiliaciones tolerante
 
-### Commits de la implementacion v5
+### Commits de la implementacion v5 (Fases 1-7)
 
 | # | Hash | Alcance |
 |---|---|---|
@@ -1468,7 +1668,21 @@ Los siguientes campos tienen `"ambiguous": true` en el glosario o en las matrice
 | 8 | `e2f386e` | R_PCI + C8 + C12 + rate limit |
 | 9 | `18fdf1c` | Fase 7 regresion (4 casos + smoke) |
 
-Total: **417/417 tests verdes**, typecheck limpio, 19 suites.
+### Commits de validación vs PDFs oficiales (2026-04-22)
+
+| # | Hash | JSON | Manual validado |
+|---|---|---|---|
+| 1 | `a3abfb5` | (metadata) | Fix confusión Tradicional v2.5 vs Agregadores v2.6.4 |
+| 2 | `37711ae` | `ecommerce-tradicional.json` | v2.5 (19-Jun-2025) |
+| 3 | `f8aeebb` | `agregadores-comercio-electronico.json` | v2.6.4 (23-Ene-2026) — esquemas desinvertidos |
+| 4 | `645fa32` | `moto.json` | v1.5 (19-Jun-2025) |
+| 5 | `5b644b1` | `cargos-periodicos-post.json` | v2.1 (19-Jun-2025) |
+| 6 | `77d090e` | `ventana-comercio-electronico.json` | v1.8 (24-Mar-2026) |
+| 7 | `1087746` | `agregadores-cargos-periodicos.json` | v2.6.4 (Ene-2026) |
+| 8 | `4b5ca7d` | `api-pw2-seguro.json` | v2.4 (Mar-2023) + Anexo V |
+| 9 | `5cf3ffd` | `interredes-remoto.json` | v1.7 (Jul-2025) + Anexos I-VII |
+
+Total acumulado: **425/425 tests verdes**, typecheck limpio, 19 suites, **11/11 JSONs validados contra PDFs oficiales**.
 
 ### Brechas conocidas remanentes (~8%)
 
