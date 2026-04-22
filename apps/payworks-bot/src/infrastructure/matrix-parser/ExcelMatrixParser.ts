@@ -4,6 +4,7 @@ import { TransactionType } from '@/core/domain/value-objects/TransactionType';
 import { TransactionTypeValueObject } from '@/core/domain/value-objects/TransactionType';
 import { CardBrand } from '@/core/domain/value-objects/CardBrand';
 import { CardBrandValueObject } from '@/core/domain/value-objects/CardBrand';
+import { An5822Flow } from '@/core/domain/value-objects/An5822Flow';
 
 /**
  * Parser de Matriz de Pruebas Excel
@@ -28,7 +29,49 @@ export class ExcelMatrixParser implements MatrixParserPort {
     'DATE': 'fecha',
     'HORA': 'hora',
     'TIME': 'hora',
+    'FLUJO_AN5822': 'flujoAn5822',
+    'FLUJO AN5822': 'flujoAn5822',
+    'FLUJOAN5822': 'flujoAn5822',
+    'AN5822_FLOW': 'flujoAn5822',
+    'AN5822 FLOW': 'flujoAn5822',
   };
+
+  /**
+   * Normalización tolerante del valor declarado en la columna
+   * `flujo_an5822`. Acepta las 4 formas canónicas del enum (sensibles a
+   * caja) más variantes típicas de escritura humana (todo minúsculas,
+   * todo mayúsculas, con o sin underscores).
+   *
+   * Retorna:
+   *   - `undefined` si la columna NO existía en la matriz (caller: la
+   *     entrada `raw` vino sin definir).
+   *   - `null` si la columna estaba presente pero vacía o con `N/A`.
+   *   - un `An5822Flow` concreto si el valor es válido.
+   *   - lanza `Error` para valores no reconocidos (caller debe propagar).
+   */
+  private static parseFlujoAn5822(raw: string | undefined, rowIndex: number): An5822Flow | null | undefined {
+    if (raw === undefined) return undefined;
+    const trimmed = raw.trim();
+    if (trimmed === '' || trimmed.toUpperCase() === 'N/A') return null;
+
+    const normalized = trimmed.toLowerCase();
+    const map: Record<string, An5822Flow> = {
+      'firstcit': An5822Flow.FIRST_CIT,
+      'first_cit': An5822Flow.FIRST_CIT,
+      'subseqcit': An5822Flow.SUBSEQ_CIT,
+      'subseq_cit': An5822Flow.SUBSEQ_CIT,
+      'subseqmit': An5822Flow.SUBSEQ_MIT,
+      'subseq_mit': An5822Flow.SUBSEQ_MIT,
+    };
+    const flow = map[normalized];
+    if (!flow) {
+      throw new Error(
+        `Fila ${rowIndex + 2}: valor inválido en columna flujo_an5822: '${raw}'. ` +
+        'Valores permitidos: firstCIT, subseqCIT, subseqMIT, N/A o vacío.',
+      );
+    }
+    return flow;
+  }
 
   async parse(buffer: Buffer): Promise<MatrixTransaction[]> {
     const workbook = XLSX.read(buffer, { type: 'buffer' });
@@ -74,6 +117,8 @@ export class ExcelMatrixParser implements MatrixParserPort {
       cardBrand = CardBrand.VISA;
     }
 
+    const flujoAn5822 = ExcelMatrixParser.parseFlujoAn5822(mapped['flujoAn5822'], index);
+
     return {
       referencia,
       numeroControl,
@@ -82,6 +127,7 @@ export class ExcelMatrixParser implements MatrixParserPort {
       monto,
       fecha,
       hora,
+      ...(flujoAn5822 !== undefined ? { flujoAn5822 } : {}),
     };
   }
 

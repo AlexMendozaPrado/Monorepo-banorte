@@ -143,6 +143,7 @@ export class RunCertificationUseCase {
           cybersourceLog,
           threeDSMatrix: this.threeDSMatrix,
           cybersourceMatrix: this.cybersourceMatrix,
+          declaredAn5822Flow: txn.flujoAn5822 ?? null,
         });
 
         results.push(validation);
