@@ -44,11 +44,57 @@ describe('Product configs v5 — cambios clave', () => {
       expect(spec?.rules.AUTH_VISA).toBe('O');
     });
 
-    it('ID_GATEWAY: PROHIBITED en VISA/AMEX, O en MC', () => {
-      const spec = m.servlet.ID_GATEWAY;
-      expect(spec?.rules.AUTH_VISA).toBe('PROHIBITED');
-      expect(spec?.rules.AUTH_AMEX).toBe('PROHIBITED');
-      expect(spec?.rules.AUTH_MC).toBe('O');
+    it('ID_GATEWAY NO existe en Tradicional (pertenece a Agregadores v2.6.4)', () => {
+      expect(m.servlet.ID_GATEWAY).toBeUndefined();
+    });
+
+    it('TERMINAL_ID: maxLength 10 (manual v2.5 p.6)', () => {
+      expect(m.servlet.TERMINAL_ID?.maxLength).toBe(10);
+    });
+
+    it('CUSTOMER_REF3 y CUSTOMER_REF5: Opcional (no R — eso viene de Agregadores)', () => {
+      expect(m.servlet.CUSTOMER_REF3?.rules.AUTH_VISA).toBe('O');
+      expect(m.servlet.CUSTOMER_REF5?.rules.AUTH_VISA).toBe('O');
+    });
+
+    it('CONTROL_NUMBER: R para todas las transacciones (manual v2.5 p.7)', () => {
+      const r = m.servlet.CONTROL_NUMBER?.rules;
+      expect(r?.AUTH_VISA).toBe('R');
+      expect(r?.VOID_VISA).toBe('R');
+      expect(r?.REFUND_VISA).toBe('R');
+      expect(r?.VERIFY_VISA).toBe('R');
+    });
+
+    it('AMOUNT: R en REFUND (manual excluye solo CANCELACION y REVERSA)', () => {
+      expect(m.servlet.AMOUNT?.rules.REFUND_VISA).toBe('R');
+      expect(m.servlet.AMOUNT?.rules.VOID_VISA).toBe('N/A');
+      expect(m.servlet.AMOUNT?.rules.REVERSAL_VISA).toBe('N/A');
+    });
+
+    it('PASSWORD, EXP_DATE, SECURITY_CODE: R_PCI (no logueables pero requeridos por manual)', () => {
+      expect(m.servlet.PASSWORD?.rules.AUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.EXP_DATE?.rules.AUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.EXP_DATE?.rules.PREAUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.SECURITY_CODE?.rules.AUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.SECURITY_CODE?.rules.PREAUTH_VISA).toBe('R_PCI');
+    });
+
+    it('CARD_NUMBER y ENTRY_MODE: N/A en POSTAUTH (manual v2.5)', () => {
+      expect(m.servlet.CARD_NUMBER?.rules.POSTAUTH_VISA).toBe('N/A');
+      expect(m.servlet.ENTRY_MODE?.rules.POSTAUTH_VISA).toBe('N/A');
+    });
+
+    it('RESPONSE_LANGUAGE: validValues solo [ES, EN] (manual v2.5 p.8)', () => {
+      expect(m.servlet.RESPONSE_LANGUAGE?.validValues).toEqual(['ES', 'EN']);
+    });
+
+    it('servlet solo contiene los 20 campos del manual v2.5 p.6-8', () => {
+      const keys = Object.keys(m.servlet).filter(k => !k.startsWith('_'));
+      expect(keys).toHaveLength(20);
+      expect(keys).not.toContain('GROUP');
+      expect(keys).not.toContain('PLAN_TYPE');
+      expect(keys).not.toContain('PAYMENT_NUMBER');
+      expect(keys).not.toContain('INITIAL_DEFERMENT');
     });
   });
 
