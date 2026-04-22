@@ -55,14 +55,6 @@ export interface FieldSpec {
 }
 
 /**
- * AN5822 (MasterCard CIT/MIT mandate) sub-matrix.
- */
-export interface An5822Matrix {
-  CIT?: Record<string, FieldSpec>;
-  MIT?: Record<string, FieldSpec>;
-}
-
-/**
  * Sub-scheme extra required fields (agregadores only).
  */
 export interface SubSchemeSpec {
@@ -73,8 +65,9 @@ export interface SubSchemeSpec {
 }
 
 /**
- * Root matrix for a product. Keys of `servlet`, `threeds`, `cybersource`,
- * `an5822.CIT|MIT` are all `logName`.
+ * Root matrix for a product. Keys of `servlet`, `threeds`, `cybersource`
+ * are all `logName`. AN5822 is a transversal layer modelled separately in
+ * `An5822Flow.ts` / `layer-an5822.json`.
  */
 export interface MandatoryFieldsMatrix {
   integrationType: IntegrationType;
@@ -84,7 +77,6 @@ export interface MandatoryFieldsMatrix {
   servlet: Record<string, FieldSpec>;
   threeds?: Record<string, FieldSpec>;
   cybersource?: Record<string, FieldSpec>;
-  an5822?: An5822Matrix;
   subEsquemas?: Record<string, SubSchemeSpec>;
 }
 

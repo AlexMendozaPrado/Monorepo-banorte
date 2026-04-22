@@ -8,12 +8,21 @@ import { TransactionType } from '@/core/domain/value-objects/TransactionType';
 import { CardBrand } from '@/core/domain/value-objects/CardBrand';
 import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
+import { An5822Flow, LayerAn5822Config } from '@/core/domain/value-objects/An5822Flow';
+import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
+import { An5822Validator } from '@/core/domain/services/An5822Validator';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
+import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
 
 describe('ValidateTransactionFieldsUseCase multi-layer', () => {
   const config = new MandatoryFieldsConfig();
-  const useCase = new ValidateTransactionFieldsUseCase(config);
+  const an5822Config = layerAn5822 as unknown as LayerAn5822Config;
+  const useCase = new ValidateTransactionFieldsUseCase(
+    config,
+    new An5822FlowDetector(),
+    new An5822Validator(an5822Config),
+  );
 
   const threeDSMatrix = layer3ds as unknown as MandatoryFieldsMatrix;
   const cybersourceMatrix = layerCybersource as unknown as MandatoryFieldsMatrix;
@@ -153,5 +162,89 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
     });
 
     expect(result.fieldResults.every(f => f.layer === ValidationLayer.SERVLET)).toBe(true);
+  });
+
+  describe('AN5822 integration', () => {
+    function makeMcServletRequest(overrides: Record<string, string> = {}): ServletLogEntity {
+      const fields = new Map<string, string>([
+        ['MERCHANT_ID', '9607773'],
+        ['USER', 'payworks_user'],
+        ['PASSWORD', '****'],
+        ['TERMINAL_ID', '12345678'],
+        ['CMD_TRANS', 'VENTA'],
+        ['AMOUNT', '1500.00'],
+        ['MODE', 'PRD'],
+        ['CARD_NUMBER', '5555556******4444'],
+        ['EXP_DATE', '1227'],
+        ['ENTRY_MODE', 'MANUAL'],
+        ['RESPONSE_LANGUAGE', 'ES'],
+        ['PAYMENT_IND', 'U'],
+        ['AMOUNT_TYPE', 'V'],
+        ['PAYMENT_INFO', '0'],
+        ...Object.entries(overrides),
+      ]);
+      return new ServletLogEntity(new Date('2026-03-11T18:02:25Z'), 'REQUEST', '1.2.3.4', fields);
+    }
+
+    it('MC firstCIT válido produce resultados AN5822 sin failures', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.MASTERCARD,
+        transactionRef: 'REF-MC-1',
+        servletRequest: makeMcServletRequest(),
+        servletResponse: makeServletResponse(),
+        declaredAn5822Flow: An5822Flow.FIRST_CIT,
+      });
+      const an5822 = result.fieldResults.filter(f => f.source === 'AN5822');
+      // Sin failures (valores correctos), AN5822 layer aporta 0 resultados.
+      expect(an5822.filter(f => f.verdict === 'FAIL')).toHaveLength(0);
+    });
+
+    it('MC con PAYMENT_IND=8 (bug legacy) falla con source=AN5822', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.MASTERCARD,
+        transactionRef: 'REF-MC-BAD',
+        servletRequest: makeMcServletRequest({ PAYMENT_IND: '8' }),
+        servletResponse: makeServletResponse(),
+        declaredAn5822Flow: An5822Flow.FIRST_CIT,
+      });
+      const paymentInd = result.fieldResults.find(
+        f => f.source === 'AN5822' && f.field === 'PAYMENT_IND',
+      );
+      expect(paymentInd?.verdict).toBe('FAIL');
+      expect(paymentInd?.layer).toBe(ValidationLayer.AN5822);
+    });
+
+    it('C10: declaración contradice observación produce fallo AN5822', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.MASTERCARD,
+        transactionRef: 'REF-C10',
+        servletRequest: makeMcServletRequest({ PAYMENT_INFO: '2' }),
+        servletResponse: makeServletResponse(),
+        declaredAn5822Flow: An5822Flow.FIRST_CIT,
+      });
+      const c10 = result.fieldResults.find(f => f.field === '_an5822_flow');
+      expect(c10?.verdict).toBe('FAIL');
+      expect(c10?.failDetail).toContain('C10');
+    });
+
+    it('VISA no produce resultados AN5822', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.VISA,
+        transactionRef: 'REF-VISA',
+        servletRequest: makeServletRequest(),
+        servletResponse: makeServletResponse(),
+        declaredAn5822Flow: An5822Flow.FIRST_CIT,
+      });
+      const an5822 = result.fieldResults.filter(f => f.source === 'AN5822');
+      expect(an5822).toHaveLength(0);
+    });
   });
 });

@@ -16,8 +16,12 @@ import { PayworksProsaLogParser } from '../log-parsers/PayworksProsaLogParser';
 import { CybersourceLogParser } from '../log-parsers/CybersourceLogParser';
 import { ThreeDSLogParser } from '../log-parsers/ThreeDSLogParser';
 import { MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
+import { LayerAn5822Config } from '@/core/domain/value-objects/An5822Flow';
+import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
+import { An5822Validator } from '@/core/domain/services/An5822Validator';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
+import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
 import { ExcelMatrixParser } from '../matrix-parser/ExcelMatrixParser';
 import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig';
 import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
@@ -49,6 +53,8 @@ export class DIContainer {
   private _transactionRepo?: InMemoryTransactionRepository;
   private _certificationRepo?: CertificationRepositoryPort;
   private _logRetrieval?: FileUploadLogRetrieval;
+  private _an5822Detector?: An5822FlowDetector;
+  private _an5822Validator?: An5822Validator;
 
   // Use Cases
   private _validateFieldsUseCase?: ValidateTransactionFieldsUseCase;
@@ -147,12 +153,30 @@ export class DIContainer {
     return this._logRetrieval;
   }
 
+  get an5822Detector(): An5822FlowDetector {
+    if (!this._an5822Detector) {
+      this._an5822Detector = new An5822FlowDetector();
+    }
+    return this._an5822Detector;
+  }
+
+  get an5822Validator(): An5822Validator {
+    if (!this._an5822Validator) {
+      this._an5822Validator = new An5822Validator(
+        layerAn5822 as unknown as LayerAn5822Config,
+      );
+    }
+    return this._an5822Validator;
+  }
+
   // --- Getters de Use Cases ---
 
   get validateFieldsUseCase(): ValidateTransactionFieldsUseCase {
     if (!this._validateFieldsUseCase) {
       this._validateFieldsUseCase = new ValidateTransactionFieldsUseCase(
         this.mandatoryFields,
+        this.an5822Detector,
+        this.an5822Validator,
       );
     }
     return this._validateFieldsUseCase;

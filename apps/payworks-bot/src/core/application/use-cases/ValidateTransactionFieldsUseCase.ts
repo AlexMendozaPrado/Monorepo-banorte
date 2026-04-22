@@ -14,6 +14,9 @@ import { ProsaLogEntity } from '@/core/domain/entities/ProsaLog';
 import { ThreeDSLogEntity } from '@/core/domain/entities/ThreeDSLog';
 import { CybersourceLogEntity } from '@/core/domain/entities/CybersourceLog';
 import { ValidationResultEntity, FieldValidationResult } from '@/core/domain/entities/ValidationResult';
+import { An5822Flow } from '@/core/domain/value-objects/An5822Flow';
+import { An5822FlowDetector } from '@/core/domain/services/An5822FlowDetector';
+import { An5822Validator, An5822FieldFailure } from '@/core/domain/services/An5822Validator';
 
 export interface ValidateFieldsCommand {
   integrationType: IntegrationType;
@@ -36,6 +39,12 @@ export interface ValidateFieldsCommand {
    */
   threeDSMatrix?: MandatoryFieldsMatrix;
   cybersourceMatrix?: MandatoryFieldsMatrix;
+  /**
+   * Flujo AN5822 declarado por la matriz del comercio. `null` si la
+   * matriz no trae columna o el valor es N/A. Se usa con prioridad
+   * sobre la inferencia heurística por `PAYMENT_INFO`.
+   */
+  declaredAn5822Flow?: An5822Flow | null;
 }
 
 /**
@@ -87,7 +96,75 @@ function validateAgainstSpecMap(
 export class ValidateTransactionFieldsUseCase {
   constructor(
     private readonly mandatoryFields: MandatoryFieldsPort,
+    private readonly an5822Detector?: An5822FlowDetector,
+    private readonly an5822Validator?: An5822Validator,
   ) {}
+
+  private buildAn5822Results(command: ValidateFieldsCommand): FieldValidationResult[] {
+    if (!this.an5822Detector || !this.an5822Validator) return [];
+
+    const observed = {
+      PAYMENT_IND: command.servletRequest.getField('PAYMENT_IND'),
+      AMOUNT_TYPE: command.servletRequest.getField('AMOUNT_TYPE'),
+      PAYMENT_INFO: command.servletRequest.getField('PAYMENT_INFO'),
+      COF: command.servletRequest.getField('COF'),
+    };
+
+    const detection = this.an5822Detector.detect({
+      declaredFlow: command.declaredAn5822Flow ?? null,
+      observedValues: observed,
+      brand: command.cardBrand,
+      transactionType: command.transactionType,
+      product: command.integrationType,
+    });
+
+    const results: FieldValidationResult[] = [];
+
+    detection.failures.forEach(detail => {
+      results.push({
+        field: '_an5822_flow',
+        manualName: 'AN5822',
+        displayName: 'AN5822 flujo',
+        rule: 'R',
+        found: true,
+        value: observed.PAYMENT_INFO,
+        verdict: 'FAIL',
+        failReason: 'invalid_value',
+        failDetail: detail,
+        source: 'AN5822',
+        layer: ValidationLayer.AN5822,
+      });
+    });
+
+    if (detection.flow === An5822Flow.NOT_APPLICABLE) {
+      return results;
+    }
+
+    const failures: An5822FieldFailure[] = this.an5822Validator.validate({
+      product: command.integrationType,
+      flow: detection.flow,
+      brand: command.cardBrand,
+      fields: observed,
+    });
+
+    failures.forEach(f => {
+      results.push({
+        field: f.field,
+        manualName: f.manualName,
+        displayName: f.displayName,
+        rule: 'R',
+        found: f.value !== undefined && (f.value ?? '').trim() !== '',
+        value: f.value,
+        verdict: 'FAIL',
+        failReason: f.reason,
+        failDetail: f.detail,
+        source: 'AN5822',
+        layer: ValidationLayer.AN5822,
+      });
+    });
+
+    return results;
+  }
 
   execute(command: ValidateFieldsCommand): ValidationResultEntity {
     const transactionKey = buildTransactionKey(command.transactionType, command.cardBrand);
@@ -137,11 +214,14 @@ export class ValidateTransactionFieldsUseCase {
       'CYBERSOURCE',
     );
 
+    // --- Transversal AN5822 layer (MC-only; no-op for other brands/products) ---
+    const an5822Results = this.buildAn5822Results(command);
+
     return new ValidationResultEntity(
       command.transactionRef,
       command.transactionType,
       command.cardBrand,
-      [...servletResults, ...threeDSResults, ...cybersourceResults],
+      [...servletResults, ...threeDSResults, ...cybersourceResults, ...an5822Results],
     );
   }
 }
