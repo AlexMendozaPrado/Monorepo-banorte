@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "note": "F4 — API PW2 Seguro manual v2.4 (Marzo 2023) — Tarjeta Presente. 9 transacciones: AUTH, PREAUTH, REAUTH, POSTAUTH, REFUND, VOID, REVERSAL, CASHBACK, VERIFY. FIX ARQUITECTÓNICO CRÍTICO: los campos EMV del voucher (TVR Tag 95, TSI Tag 9B, AID Tag 4F, APN Tag 9F12, AL Tag 50) NO son de envío al POST — son outputs del SDK para imprimir el voucher físico. Solo EMV_TAGS (hex TLV concatenado) va al POST. Fuente: Manual API PW2 Seguro v2.4 Anexo 'Generación de vouchers por parte del comercio'. Los campos de voucher se movieron a sección emvVoucher (no validables contra log de servlet).",
-    "fechaExpFormat": "Manual API PW2 Seguro usa formato AAMM (invertido vs TNP que es MMAA). Fuente: Anexo V - Tabla de parámetros, función PPGetCardExpireDate().",
-    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts"
+    "note": "API PW2 Seguro manual v2.4 (Marzo 2023) — Tarjeta Presente PinPad. Variables en Anexo V - Tabla 8. Soporta 10+ tipos de transacción: VENTA, CASHBACK, VENTA_FORZADA, PREAUT, REAUT, POSTAUT, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION, SUSPENSION, REACTIVACION, CIERRE_AFILIACION. TVR/TSI/AID/APN/AL (tags EMV de salida del SDK para voucher físico) viven en sección emvVoucher — NO se validan contra log del servlet (solo EMV_TAGS va al POST).",
+    "specSource": "Manual API PW2 Seguro v2.4 (Mar-2023) + Anexo V Tabla de Parámetros. Revisado contra PDF oficial el 2026-04-22. Fixes: PASSWORD → R_PCI; BATCH → GROUP rename. Variables adicionales listadas en el manual que no están en el JSON actual (CASHBACK_AMOUNT, PAGO_MOVIL, AUTH_CODE para VENTA_FORZADA, BANROTE_URL, TRANS_TIMEOUT, INITIAL_DEFERMENT, PAYMENTS_NUMBER, PLAN_TYPE, RESPONSE_LANGUAGE, QPS, CUSTOMER_REF2-5) quedan como brecha — agregar cuando el bot reciba logs reales de API PW2 Seguro para validar contra comercios certificados.",
+    "fechaExpFormat": "Manual API PW2 Seguro usa formato AAMM (invertido vs TNP que es MMAA). Fuente: Anexo V - Tabla de parámetros, función PPGetCardExpireDate()."
   },
   "integrationType": "API_PW2_SEGURO",
   "manualVersion": "2.4",
@@ -52,18 +52,18 @@
       "manualName": "CLAVE_USR",
       "displayName": "Clave de Usuario (PPSetPassword)",
       "dataType": "alphanum",
-      "ambiguous": true,
-      "note": "PCI-DSS: nunca en logs. SDK: PPSetPassword(). Validado en envío del comercio.",
+      "ambiguous": false,
+      "note": "Manual v2.4 Anexo V Tabla 8: R siempre para cualquier transacción o comando. SDK: PPSetPassword(). PCI-DSS: no aparece en logs, por eso R_PCI.",
       "rules": {
-        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
-        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
-        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
-        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
-        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
-        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
-        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
-        "CASHBACK_VISA": "N/A", "CASHBACK_MC": "N/A", "CASHBACK_AMEX": "N/A",
-        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI", "PREAUTH_AMEX": "R_PCI",
+        "REAUTH_VISA": "R_PCI", "REAUTH_MC": "R_PCI", "REAUTH_AMEX": "R_PCI",
+        "POSTAUTH_VISA": "R_PCI", "POSTAUTH_MC": "R_PCI", "POSTAUTH_AMEX": "R_PCI",
+        "REFUND_VISA": "R_PCI", "REFUND_MC": "R_PCI", "REFUND_AMEX": "R_PCI",
+        "VOID_VISA": "R_PCI", "VOID_MC": "R_PCI", "VOID_AMEX": "R_PCI",
+        "REVERSAL_VISA": "R_PCI", "REVERSAL_MC": "R_PCI", "REVERSAL_AMEX": "R_PCI",
+        "CASHBACK_VISA": "R_PCI", "CASHBACK_MC": "R_PCI", "CASHBACK_AMEX": "R_PCI",
+        "VERIFY_VISA": "R_PCI", "VERIFY_MC": "R_PCI", "VERIFY_AMEX": "R_PCI"
       },
       "maxLength": 20
     },
@@ -180,18 +180,19 @@
       "format": "^\\d{1,12}$",
       "maxLength": 12
     },
-    "BATCH": {
+    "GROUP": {
       "manualName": "LOTE",
       "displayName": "Lote (PPSetGroup)",
       "dataType": "alphanum",
       "ambiguous": false,
+      "note": "Manual v2.4 Anexo V Tabla 8: AN(1..30). Opcional para PREAUTORIZACION. Obligatorio para CIERRE_LOTE. (Antes BATCH — logName oficial del manual es GROUP.)",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
         "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
         "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
         "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
-        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
         "CASHBACK_VISA": "N/A", "CASHBACK_MC": "N/A", "CASHBACK_AMEX": "N/A",
         "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
