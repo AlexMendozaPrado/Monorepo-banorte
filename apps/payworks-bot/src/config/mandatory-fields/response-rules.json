@@ -3,7 +3,7 @@
     "note": "Reglas de validación de campos de RESPUESTA del servlet Payworks. Se aplican al log de respuesta, no al request. Cambios vs anterior: PAYW_RESULT añade Z (timeout), AUTH_RESULT completa tabla 00-99, PAYW_CODE añade códigos comunes del Anexo A/B, agregado ID_MAC (AN7110 MC), agregado ID_CYBERSOURCE, agregado CUST_RSP_DATE y AUTH_DATE.",
     "sources": [
       "Manual MOTO v1.5 pág. 5 (PAYW_RESULT)",
-      "Manual Ecommerce Tradicional v2.6.4 Anexo A (PAYW_CODE, campos de retorno)",
+      "Manual Ecommerce Tradicional v2.5 Anexo A (PAYW_CODE, campos de retorno)",
       "Manual Cargos Periódicos Post v2.1 pág. 5 (Z - timeout)",
       "Manual API PW2 Seguro v2.4 pág. 20 (tabla AUTH_RESULT)"
     ]

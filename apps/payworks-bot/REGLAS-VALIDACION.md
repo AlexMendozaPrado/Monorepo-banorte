@@ -49,7 +49,7 @@ Las reglas implementadas provienen de **10 manuales oficiales de integracion** +
 
 | Manual | Version | Fecha | Tipo |
 |---|---|---|---|
-| Comercio Electronico Tradicional | 2.6.4 | 23-Ene-2026 | TNP |
+| Comercio Electronico Tradicional | 2.5 | 19-Jun-2025 | TNP |
 | MOTO (Mail Order / Telephone Order) | 1.5 | 19-Jun-2025 | TNP |
 | Cargos Periodicos Post | 2.1 | 19-Jun-2025 | TNP |
 | Ventana de Comercio Electronico (Cifrada) | 1.8 | 24-Mar-2026 | TNP |
@@ -372,7 +372,7 @@ Cada producto tiene un archivo JSON en `src/config/mandatory-fields/` con la mat
 | Interredes | `CMD_TRANS` | validValues extendido a 13 opciones (incluye `OBTENER_LLAVE`, `CASHBACK`) |
 | **Todos** | `CUSTOMER_REF2` | Si se usa, debe coincidir PRE↔POST (regla C8) |
 
-### 7.1 Comercio Electronico Tradicional (v2.6.4)
+### 7.1 Comercio Electronico Tradicional (v2.5)
 
 **Archivo**: `ecommerce-tradicional.json`
 
@@ -850,7 +850,7 @@ Para cada transaccion procesada:
 
 ### Regla C8: CUSTOMER_REF2 consistente entre PREAUT y POSTAUT (v5)
 
-**Fuente**: Manual Ecommerce Tradicional v2.6.4 p.10 ("Si se usa en operativa de PRE y POSTAUTORIZACION, el valor que envie en ambas transacciones debe ser igual")
+**Fuente**: Manual Ecommerce Tradicional v2.5 p.10 ("Si se usa en operativa de PRE y POSTAUTORIZACION, el valor que envie en ambas transacciones debe ser igual")
 **Servicio**: `PreAuthPostAuthCorrelator`
 **Granularidad**: cross-tx (corre en RunCertificationUseCase tras el loop)
 

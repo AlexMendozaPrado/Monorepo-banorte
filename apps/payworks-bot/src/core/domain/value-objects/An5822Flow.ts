@@ -9,7 +9,7 @@ import { FieldSpec } from './MandatoryFieldsMatrix';
  * no-aplicable para VISA/AMEX, productos Tarjeta Presente, o tipos
  * de transacción fuera del alcance del mandato (VOID/REVERSAL).
  *
- * Fuente: Manual Ecommerce Tradicional v2.6.4 §11-13, MOTO v1.5 §9-11,
+ * Fuente: Manual Ecommerce Tradicional v2.5 §11-13, MOTO v1.5 §9-11,
  * Cargos Periódicos Post v2.1 §10-12, Agregadores v2.6.4 §12-14.
  */
 export enum An5822Flow {

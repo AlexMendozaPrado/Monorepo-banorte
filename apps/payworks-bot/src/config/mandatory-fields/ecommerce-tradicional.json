@@ -1,11 +1,12 @@
 {
   "_meta": {
-    "note": "F4 — Comercio Electrónico Tradicional. Actualizado al Manual v2.6.4 (23 Enero 2026). Cambios vs versión anterior: MERCHANT_ID maxLen 7 (no 15), REFERENCE numérico 12 (no alfanum 15), CUSTOMER_REF2 maxLen 16, CUSTOMER_REF3 maxLen 20 y R para todas, CUSTOMER_REF5 R para todas, USER/MODE con maxLen, ENTRY_MODE solo [MANUAL], MARKETPLACE_TX PROHIBITED para MC/AMEX, AMOUNT regex 18 dígitos, TERMINAL_ID alphanum. Campos nuevos: GROUP, ID_GATEWAY, ID_MAC (retorno).",
-    "pendingRule": "PROHIBITED: requiere soporte en FieldRequirement.ts — si el campo aparece con valor no vacío, FALLA. Si ausente, PASA."
+    "note": "F4 — Comercio Electrónico Tradicional. Manual v2.5 (19 Junio 2025). Cambios aplicados en la implementación v5: MERCHANT_ID maxLen 7 (no 15), REFERENCE numérico 12 (no alfanum 15), CUSTOMER_REF2 maxLen 16, CUSTOMER_REF3 maxLen 20 y R para todas, CUSTOMER_REF5 R para todas, USER/MODE con maxLen, ENTRY_MODE solo [MANUAL], MARKETPLACE_TX PROHIBITED para MC/AMEX, AMOUNT regex 18 dígitos, TERMINAL_ID alphanum. Campos nuevos declarados por la spec v5: GROUP, ID_GATEWAY, ID_MAC (retorno).",
+    "specSource": "Manual Comercio Electrónico Tradicional v2.5 (19-Jun-2025). Nota: durante la implementación v5 algunas referencias internas citaban 'v2.6.4' por confusión con el manual de Agregadores; se unificaron a v2.5 el 2026-04-22 tras verificación con Ramsses.",
+    "pendingRule": "PROHIBITED: soporte añadido en FieldRequirement.ts — si el campo aparece con valor no vacío, FALLA. Si ausente, PASA."
   },
   "integrationType": "ECOMMERCE_TRADICIONAL",
-  "manualVersion": "2.6.4",
-  "manualDate": "2026-01-23",
+  "manualVersion": "2.5",
+  "manualDate": "2025-06-19",
   "displayName": "Comercio Electrónico Tradicional",
   "servlet": {
     "MERCHANT_ID": {
@@ -133,7 +134,7 @@
       "displayName": "Referencia",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "Manual v2.6.4: Numérico 12. Cambió de alfanumérico 15 en versión previa del aplicativo.",
+      "note": "Manual v2.5: Numérico 12. Cambió de alfanumérico 15 en versión previa del aplicativo.",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
@@ -238,7 +239,7 @@
       "displayName": "Marketplace Transaction",
       "dataType": "numeric",
       "ambiguous": false,
-      "note": "Manual Ecommerce v2.6.4: Solo aplica Visa, solo VENTA/PREAUT. NO se debe mandar con MC ni AMEX. Valor fijo = 1. PROHIBITED requiere soporte en FieldRequirement.ts.",
+      "note": "Manual Ecommerce v2.5: Solo aplica Visa, solo VENTA/PREAUT. NO se debe mandar con MC ni AMEX. Valor fijo = 1. PROHIBITED requiere soporte en FieldRequirement.ts.",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "PROHIBITED", "AUTH_AMEX": "PROHIBITED",
         "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
@@ -291,7 +292,7 @@
       "displayName": "Lote",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "CAMPO NUEVO: Manual Ecommerce v2.6.4 lo define como 'Alfanumérico 30, Opcional para cualquier transacción'.",
+      "note": "CAMPO NUEVO: Manual Ecommerce v2.5 lo define como 'Alfanumérico 30, Opcional para cualquier transacción'.",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
@@ -324,7 +325,7 @@
       "displayName": "Referencia Cliente 2",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "FIX: maxLength era 30, manual v2.6.4 dice 16. Si se usa en operativa PRE/POST, el valor debe ser IGUAL en ambas transacciones (regla cruzada pendiente C8).",
+      "note": "FIX: maxLength era 30, manual v2.5 dice 16. Si se usa en operativa PRE/POST, el valor debe ser IGUAL en ambas transacciones (regla cruzada C8).",
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
@@ -341,7 +342,7 @@
       "displayName": "Referencia Cliente 3 (Número de contrato)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "FIX CRÍTICO: Manual v2.6.4 dice 'Número de contrato del Tarjetahabiente con el comercio. Alfanumérico 20. Requerida para todas las transacciones'. Antes estaba como O/30.",
+      "note": "FIX CRÍTICO: Manual v2.5 dice 'Número de contrato del Tarjetahabiente con el comercio. Alfanumérico 20. Requerida para todas las transacciones'. Antes estaba como O/30.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
@@ -374,7 +375,7 @@
       "displayName": "Referencia Cliente 5 (ID Agregador)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "FIX CRÍTICO: Manual v2.6.4 dice 'Identificador o nombre del Agregador. Requerida para todas las transacciones'. Antes estaba como O.",
+      "note": "FIX CRÍTICO: Manual v2.5 dice 'Identificador o nombre del Agregador. Requerida para todas las transacciones'. Antes estaba como O.",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
@@ -442,7 +443,7 @@
     }
   },
   "responseFields": {
-    "_note": "Campos de retorno específicos de Ecommerce Tradicional v2.6.4 que complementan response-rules.json global",
+    "_note": "Campos de retorno específicos de Ecommerce Tradicional v2.5 que complementan response-rules.json global",
     "ID_MAC": {
       "manualName": "ID_MAC",
       "displayName": "ID MAC (Mandato AN7110 MasterCard)",

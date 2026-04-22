@@ -2,7 +2,7 @@ import { FieldSpec } from './MandatoryFieldsMatrix';
 
 export type FieldRule = 'R' | 'O' | 'N/A' | 'OI' | 'PROHIBITED' | 'R_PCI';
 
-// Caracteres prohibidos según Manual VCE v1.8 §7 y Ecommerce Tradicional v2.6.4.
+// Caracteres prohibidos según Manual VCE v1.8 §7 y Ecommerce Tradicional v2.5.
 // Incluye: símbolos `< > | ¡ ! ¿ ? * + ' / \ { } [ ] ¨ ; : " , # $ % & ( ) =`,
 // vocales acentuadas `á é í ó ú` (ambas cajas) y `ñ Ñ`. NO incluye `ü` (no está
 // listado como prohibido en los manuales vigentes; listar `ü` rechazaba palabras

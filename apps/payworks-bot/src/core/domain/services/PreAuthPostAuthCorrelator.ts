@@ -21,7 +21,7 @@ export interface CorrelationIssue {
 }
 
 /**
- * Regla cruzada **C8** (Manual Ecommerce Tradicional v2.6.4 pág. 10):
+ * Regla cruzada **C8** (Manual Ecommerce Tradicional v2.5 pág. 10):
  * *"Si se usa en operativa de PRE y POSTAUTORIZACION, el valor que
  * envíe en ambas transacciones debe ser igual."*
  *

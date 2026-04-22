@@ -2,7 +2,7 @@
   "_meta": {
     "note": "Transversal layer — Mandato AN5822 MasterCard CIT/MIT. Solo aplica a transacciones MC (N/A para VISA/AMEX). CORRIGE BUG CRÍTICO: IND_PAGO=8 era incorrecto — manuales dicen U (Ecommerce/MOTO/Agreg.CE) o R (Cargos Periódicos). Modela 3 flujos: firstCIT, subseqCIT, subseqMIT. COF=4 solo aplica a Cargos Periódicos Post y Agregadores CP.",
     "sources": [
-      "Manual Ecommerce Tradicional v2.6.4 (23-Ene-2026) pág. 11-13",
+      "Manual Ecommerce Tradicional v2.5 (19-Jun-2025) pág. 11-13",
       "Manual MOTO v1.5 (19-Jun-2025) pág. 9-11",
       "Manual Cargos Periódicos Post v2.1 (19-Jun-2025) pág. 10-12",
       "Manual Agregadores CE v2.6.4 (23-Ene-2026) pág. 12-14",
