@@ -47,12 +47,13 @@
   "an5822": {
     "firstCIT": {
       "_description": "Primera transacción donde el comercio almacena los datos de la tarjeta del cliente con autorización explícita.",
+      "_rulesNote": "Las reglas PREAUTH/POSTAUTH solo aplican a productos que soportan esas transacciones (Ecommerce Tradicional, MOTO, VCE, Agregadores CE). Para CARGOS_PERIODICOS_POST y AGREGADORES_CARGOS_PERIODICOS, el CMD_TRANS.validValues de cada producto previene que lleguen PREAUT/POSTAUT al evaluador — los manuales de cargos periódicos solo citan 'Requerida únicamente para transacción de tipo VENTA'. Ver _meta.productMapping para el scoping efectivo por producto.",
       "PAYMENT_IND": {
         "manualName": "IND_PAGO",
         "displayName": "Indicador de Pago (first CIT)",
         "dataType": "enum",
         "ambiguous": false,
-        "note": "U = Unscheduled (Ecommerce/MOTO/Agreg.CE/VCE) | R = Recurrent (Cargos Periódicos Post y Agreg. CP). MasterCard-only. Valor dinámico por producto.",
+        "note": "U = Unscheduled (Ecommerce/MOTO/Agreg.CE/VCE) | R = Recurrent (Cargos Periódicos Post y Agreg. CP). MasterCard-only. Valor dinámico por producto — resolver via _meta.productMapping.",
         "rules": {
           "AUTH_VISA": "N/A", "AUTH_MC": "R", "AUTH_AMEX": "N/A",
           "PREAUTH_VISA": "N/A", "PREAUTH_MC": "R", "PREAUTH_AMEX": "N/A",

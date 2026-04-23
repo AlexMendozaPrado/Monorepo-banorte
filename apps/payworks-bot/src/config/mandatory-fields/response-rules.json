@@ -1,11 +1,17 @@
 {
   "_meta": {
-    "note": "Reglas de validación de campos de RESPUESTA del servlet Payworks. Se aplican al log de respuesta, no al request. Cambios vs anterior: PAYW_RESULT añade Z (timeout), AUTH_RESULT completa tabla 00-99, PAYW_CODE añade códigos comunes del Anexo A/B, agregado ID_MAC (AN7110 MC), agregado ID_CYBERSOURCE, agregado CUST_RSP_DATE y AUTH_DATE.",
+    "integrationType": "LAYER_RESPONSE",
+    "manualVersion": "compiled-v1.0",
+    "manualDate": "2026-04-22",
+    "displayName": "Reglas de Respuesta (compiladas de 4 manuales)",
+    "note": "Reglas de validación de campos de RESPUESTA del servlet Payworks. Se aplican al log de respuesta, no al request. PAYW_RESULT incluye Z (timeout). AUTH_RESULT tabla completa 65 códigos. ID_MAC con valores U/V/X (X introducido v2.5 Jun-2025). ID_AGREGADOR, ID_CYBERSOURCE, AUTH_DATE, CUST_RSP_DATE, MARKETPLACE_TX_RETURN.",
     "sources": [
       "Manual MOTO v1.5 pág. 5 (PAYW_RESULT)",
       "Manual Ecommerce Tradicional v2.5 Anexo A (PAYW_CODE, campos de retorno)",
       "Manual Cargos Periódicos Post v2.1 pág. 5 (Z - timeout)",
-      "Manual API PW2 Seguro v2.4 pág. 20 (tabla AUTH_RESULT)"
+      "Manual API PW2 Seguro v2.4 pág. 20 (tabla AUTH_RESULT)",
+      "Manual Agregadores v2.6.4 pág. 12 (AUTH_DATE, CUST_RSP_DATE)",
+      "Manual Tradicional v2.5 changelog (ID_MAC valor X introducido)"
     ]
   },
   "PAYW_RESULT": {
@@ -29,13 +35,15 @@
     "displayName": "Resultado del Autorizador (emisor)",
     "dataType": "numeric",
     "ambiguous": false,
-    "note": "FIX: tabla completa del Manual API PW2 Seguro v2.4 pág. 20 (y Anexo B de cada manual). Códigos retornados por el autorizador, no por Banorte.",
+    "note": "Tabla completa del Anexo B de todos los manuales (Tradicional v2.5, Agregadores v2.6.4, API PW2 Seguro v2.4). Códigos retornados por el autorizador, no por Banorte. 65 códigos documentados.",
     "validValues": [
       "00", "01", "02", "03", "04", "05", "06", "07", "08", "09",
-      "10", "11", "12", "13", "14", "15", "30", "31", "33", "34",
-      "35", "36", "37", "38", "39", "41", "43", "51", "54", "57",
-      "58", "61", "65", "76", "77", "78", "79", "81", "82", "83",
-      "85", "89", "91", "92", "93", "94", "96"
+      "10", "11", "12", "13", "14", "15", "19", "23", "26", "30",
+      "31", "33", "34", "35", "36", "37", "38", "39", "41", "43",
+      "45", "46", "47", "49", "50", "51", "54", "55", "56", "57",
+      "58", "59", "60", "61", "62", "63", "65", "67", "68", "70",
+      "75", "76", "77", "78", "79", "81", "82", "83", "85", "89",
+      "91", "92", "93", "94", "96"
     ],
     "valueDescriptions": {
       "00": "Aprobada",
@@ -54,6 +62,9 @@
       "13": "Monto inválido",
       "14": "Número de tarjeta inválido",
       "15": "Declinado General",
+      "19": "Reintentar la transacción",
+      "23": "Tarifa inaceptable",
+      "26": "Reintentar después de 2 días",
       "30": "Formato Erróneo",
       "31": "Declinado General",
       "33": "Tarjeta vencida",
@@ -65,12 +76,27 @@
       "39": "Sin cuenta de crédito",
       "41": "Tarjeta perdida",
       "43": "Tarjeta robada",
+      "45": "Reservado",
+      "46": "Cuenta Cerrada",
+      "47": "Reservado",
+      "49": "Reservado",
+      "50": "Reservado",
       "51": "Fondos insuficientes",
       "54": "Tarjeta expirada",
+      "55": "Número de identificación personal incorrecto",
+      "56": "Tarjeta sin registro",
       "57": "Transacción no permitida al tarjetahabiente",
       "58": "Transacción no permitida a la terminal",
+      "59": "Sospecha de fraude",
+      "60": "Contactar al Adquirente",
       "61": "Monto excede límite",
+      "62": "Tarjeta restringida",
+      "63": "Violación de la seguridad",
       "65": "Frecuencia excede límite",
+      "67": "Captura Dura - ATM",
+      "68": "Respuesta recibida demasiado tarde",
+      "70": "Se requiere PIN",
+      "75": "Intentos excedidos al ingresar número PIN",
       "76": "Reversa aceptada",
       "77": "Datos inconsistentes",
       "78": "Cuenta desactivada",
@@ -100,7 +126,7 @@
     "displayName": "Fecha y hora de respuesta del autorizador",
     "dataType": "datetime",
     "ambiguous": false,
-    "note": "CAMPO AGREGADO: Manual Ecommerce v2.6.4 — Formato AAAAMMDD HH:MM:SS.sss. Entregada para todas las transacciones para las que se recibió respuesta del autorizador.",
+    "note": "Campo de retorno documentado en Manual Agregadores v2.6.4 (p.12 tabla variables de retorno). Heredado operativamente por Tradicional/MOTO/Cargos Post. Formato AAAAMMDD HH:MM:SS.sss. Entregada para todas las transacciones que recibieron respuesta del autorizador.",
     "format": "^\\d{8} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$",
     "maxLength": 21
   },
@@ -109,7 +135,7 @@
     "displayName": "Fecha y hora de respuesta al cliente",
     "dataType": "datetime",
     "ambiguous": false,
-    "note": "CAMPO AGREGADO: Manual Ecommerce v2.6.4 — Formato AAAAMMDD HH:MM:SS.sss. Entregada para todas las transacciones y comandos.",
+    "note": "Campo de retorno documentado en Manual Agregadores v2.6.4 (p.12). Heredado operativamente por Tradicional/MOTO/Cargos Post. Formato AAAAMMDD HH:MM:SS.sss. Entregada para todas las transacciones y comandos.",
     "format": "^\\d{8} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$",
     "maxLength": 21
   },
@@ -186,11 +212,12 @@
     "displayName": "ID MAC (Mandato AN7110 MasterCard)",
     "dataType": "alphanum",
     "ambiguous": false,
-    "note": "CAMPO AGREGADO: Mandato AN7110 MC (v2.5.1 Junio 2024). Indica si tarjeta es prepago o virtual. Solo entregada para transacciones internacionales MasterCard.",
-    "validValues": ["U", "V"],
+    "note": "Mandato AN7110 MC. Indica tipo de tarjeta prepago/virtual. Solo entregada para transacciones internacionales MasterCard. Valor 'X' introducido en v2.5 (19-Jun-2025 — changelog Manual Tradicional v2.5: 'Nuevo valor en variable de respuesta ID_MAC / MAC_ID'). Fuente original: Manual API PW2 Seguro v2.4 pág. 12.",
+    "validValues": ["U", "V", "X"],
     "valueDescriptions": {
       "U": "Tarjeta Prepago",
-      "V": "Tarjeta Virtual de un solo uso"
+      "V": "Tarjeta Virtual de un solo uso",
+      "X": "Tarjeta Virtual multiuso"
     },
     "maxLength": 1
   },
