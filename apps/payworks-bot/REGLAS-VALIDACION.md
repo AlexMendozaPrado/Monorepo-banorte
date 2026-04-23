@@ -2,9 +2,12 @@
 
 > Documento de conciliacion para comparar la logica implementada contra los manuales oficiales de integracion Banorte Payworks.
 >
-> **Actualizado: 2026-04-22** | Estado: **validado contra PDFs oficiales en `Downloads/ConsolidadoManualesyLogs/`**
+> **Actualizado: 2026-04-22** | Estado: **validado contra PDFs oficiales + auditoria iter 2 cerrada (P0 + P2 resueltos)**
 >
-> **Historial**: spec v5 cerrada al 100% (ee40c16 → 18fdf1c) + validación campo por campo contra los 10 manuales oficiales (a3abfb5 → 5cf3ffd).
+> **Historial**:
+> 1. Spec v5 cerrada al 100% (`ee40c16` → `18fdf1c`) — 9 commits
+> 2. Validación campo por campo contra los 10 manuales oficiales (`a3abfb5` → `5cf3ffd`) — 9 commits
+> 3. Auditoría iter 2 (`58ad282`) — P0 bloqueantes + P2 documentales pre-certificación
 
 ---
 
@@ -1388,18 +1391,20 @@ consecutivo = (hash % 9999999).toString().padStart(7, '0')
 
 Campos validados en la respuesta del servlet:
 
+`response-rules.json._meta` (iter 2) declara: `integrationType: LAYER_RESPONSE`, `manualVersion: compiled-v1.0`, `manualDate: 2026-04-22`, con 6 fuentes citadas. Esto permite al dictamen PDF incluir "Reglas de respuesta compiladas el 22-Abr-2026 a partir de [manuales...]".
+
 | Campo | Tipo | Descripcion | validValues |
 |---|---|---|---|
 | PAYW_RESULT | enum | Resultado Payworks | **A** (Aprobada), **D** (Declinada), **R** (Rechazada), **T** (Sin respuesta), **Z** (v5 — Reversa automatica por timeout) |
-| AUTH_RESULT | num(2) | Codigo autorizacion | Tabla completa de 47 valores (00-99, incluye 00, 51, 54, 57, 62, 96, etc.) |
+| **AUTH_RESULT** *(iter 2)* | num(2) | Codigo autorizacion | **Tabla completa de 65 valores** — +18 codigos del Anexo B que faltaban (19, 23, 26, 45, 46, 47, 49, 50, 55, 56, 59, 60, 62, 63, 67, 68, 70, 75). Sin esto, declinaciones validas del autorizador eran rechazadas como `invalid_value`. |
 | AUTH_CODE | alfanum(6) | Codigo de autorizacion | — |
 | CARD_BRAND | enum | Marca de tarjeta | VISA, MASTERCARD, AMEX |
 | CARD_TYPE | enum | Tipo de tarjeta | CREDITO, DEBITO |
 | PAYW_CODE | num(3) | Codigo Payworks | 000=Aprobada; tabla extendida con 101, 102, 110, 150, 200s, 400s, 500s, 999 |
-| **ID_MAC** *(v5)* | enum | Indicador AN7110 | `U` / `V` |
+| **ID_MAC** *(iter 2)* | enum | Indicador AN7110 MC (Mandato AN7110) | `U` (Prepago) / `V` (Virtual de un solo uso) / **`X`** (Virtual multiuso — **nuevo iter 2**, introducido en Manual Tradicional v2.5 changelog Jun-2025). Sin el valor X, transacciones MC internacionales eran rechazadas. |
 | **ID_CYBERSOURCE** *(v5)* | string | requestID del retorno Cybersource | (validado por regla C11a) |
-| **AUTH_DATE** *(v5)* | fecha | Fecha de autorizacion | — |
-| **CUST_RSP_DATE** *(v5)* | fecha | Fecha de respuesta al cliente | — |
+| **AUTH_DATE** *(v5, nota corregida iter 2)* | fecha | Fecha de autorizacion | Formato AAAAMMDD HH:MM:SS.sss. Documentado en Manual Agregadores v2.6.4 p.12, heredado operativamente por Tradicional/MOTO/Cargos Post. |
+| **CUST_RSP_DATE** *(v5, nota corregida iter 2)* | fecha | Fecha de respuesta al cliente | Idem AUTH_DATE — fuente Manual Agregadores v2.6.4 p.12. |
 | **CARD_HOLDER** *(v5)* | alfanum | Tarjetahabiente | — |
 | **REFERENCE** *(v5)* | num(12) | Referencia como respuesta | — |
 | **MARKETPLACE_TX_RETURN** *(v5)* | enum | Retorno marketplace | — |
@@ -1608,12 +1613,20 @@ Esta sección documenta el estado **real en runtime** de cada archivo JSON en `s
 
 ### 20-BIS.12 `response-rules.json`
 
-- **Consolidado de 4 fuentes** (citas en `_meta.sources`):
+- **Metadata iter 2**: `integrationType: LAYER_RESPONSE`, `manualVersion: compiled-v1.0`, `manualDate: 2026-04-22`, `displayName` declarados en `_meta` (para que el dictamen PDF pueda citar "compilado el 22-Abr-2026").
+- **Consolidado de 6 fuentes** (citas en `_meta.sources`):
   - MOTO v1.5 p.5 (PAYW_RESULT)
   - Ecommerce Tradicional v2.5 Anexo A (PAYW_CODE, campos retorno)
   - Cargos Periódicos Post v2.1 p.5 (Z - timeout)
   - API PW2 Seguro v2.4 p.20 (tabla AUTH_RESULT)
-- **Campos validados**: `PAYW_RESULT` (A/D/R/T/Z), `AUTH_RESULT` (tabla completa), `PAYW_CODE` (400s/500s/999), `ID_MAC`, `ID_CYBERSOURCE`, `AUTH_DATE`, `CUST_RSP_DATE`, `CARD_HOLDER`, `MARKETPLACE_TX_RETURN`, `ID_AGREGADOR` (renombrado)
+  - **Agregadores v2.6.4 p.12** (AUTH_DATE, CUST_RSP_DATE — añadido iter 2)
+  - **Tradicional v2.5 changelog** (ID_MAC valor X introducido — añadido iter 2)
+- **Campos validados**:
+  - `PAYW_RESULT` (A/D/R/T/Z)
+  - `AUTH_RESULT` — **tabla de 65 códigos** (47 → 65 en iter 2: +18 del Anexo B)
+  - `PAYW_CODE` (400s/500s/999)
+  - `ID_MAC` — **validValues `[U, V, X]`** (U=Prepago, V=Virtual un solo uso, X=Virtual multiuso — X añadido iter 2)
+  - `ID_CYBERSOURCE`, `AUTH_DATE`, `CUST_RSP_DATE`, `CARD_HOLDER`, `MARKETPLACE_TX_RETURN`, `ID_AGREGADOR` (renombrado)
 
 ### Resumen de fixes por patrón recurrente
 
@@ -1629,6 +1642,20 @@ Esta sección documenta el estado **real en runtime** de cada archivo JSON en `s
 10. **`RESPONSE_LANGUAGE.validValues`** `[ES, EN, 01, 02]` → `[ES, EN]`.
 11. **Pipeline v5**: `PROHIBITED` + `R_PCI` añadidos al evaluador (FieldRequirement.ts).
 12. **Regex `FORBIDDEN_CHARS`**: alineado al superset de manual VCE v1.8 / Ecommerce v2.6.4.
+13. **(iter 2) `AUTH_RESULT`**: tabla ampliada a 65 códigos oficiales del Anexo B (incluye 19, 23, 26, 45-50, 55-56, 59-63, 67-68, 70, 75).
+14. **(iter 2) `ID_MAC`**: agregado valor `X` (Tarjeta Virtual multiuso, introducido en changelog Tradicional v2.5 Jun-2025).
+15. **(iter 2) `response-rules._meta`**: agregados `integrationType`, `manualVersion`, `manualDate` para que el dictamen PDF pueda citar la capa de retorno.
+16. **(iter 2) notas `AUTH_DATE`/`CUST_RSP_DATE`** corregidas: citaban "Manual Ecommerce v2.6.4" inexistente → ahora apuntan al Manual Agregadores v2.6.4 p.12 (fuente real, heredada operativamente).
+17. **(iter 2) `layer-an5822.firstCIT._rulesNote`** documental añadida explicando scoping PREAUTH/POSTAUTH por producto.
+
+### Preguntas abiertas para Ramsses (Q1-Q4 de auditoría iter 2)
+
+No son bugs — son decisiones de negocio:
+
+- **Q1**: ¿Existe un Manual Tradicional v2.6.4 como documento interno? (el PDF publicado es v2.5)
+- **Q2**: ¿Se certifica algún comercio Tradicional con reglas operativas de Agregadores v2.6.4? (ej. marketplaces certificados como Tradicional por volumen)
+- **Q3**: ¿`AUTH_DATE`/`CUST_RSP_DATE` son entregados por Banorte en Tradicional/MOTO aunque el manual del producto no los mencione?
+- **Q4**: ¿El regex Anexo D de `SUB_MERCHANT` (formato 7*14) es requisito duro o recomendación?
 
 ---
 
@@ -1682,7 +1709,19 @@ Esta sección documenta el estado **real en runtime** de cada archivo JSON en `s
 | 8 | `4b5ca7d` | `api-pw2-seguro.json` | v2.4 (Mar-2023) + Anexo V |
 | 9 | `5cf3ffd` | `interredes-remoto.json` | v1.7 (Jul-2025) + Anexos I-VII |
 
-Total acumulado: **425/425 tests verdes**, typecheck limpio, 19 suites, **11/11 JSONs validados contra PDFs oficiales**.
+### Commits de auditoría iter 2 (pre-certificación 2026-04-22)
+
+| # | Hash | Alcance |
+|---|---|---|
+| 1 | `58ad282` | **P0**: ID_MAC +X, AUTH_RESULT 47→65 códigos; **P2**: notas AUTH_DATE/CUST_RSP_DATE, `response-rules._meta` con integrationType+manualVersion, `layer-an5822._rulesNote` |
+
+Total acumulado: **425/425 tests verdes**, typecheck limpio, 19 suites, **11/11 JSONs validados contra PDFs oficiales + auditoría iter 2 cerrada**.
+
+### Estado listo para certificación
+
+- ✅ 2/2 P0 bloqueantes resueltos (ID_MAC `X`, AUTH_RESULT 65 códigos)
+- ✅ 5/5 P2 documentales aplicados
+- ⏸️ 4/4 Q de negocio documentadas para sesión con Ramsses (no bloquean)
 
 ### Brechas conocidas remanentes (~8%)
 
