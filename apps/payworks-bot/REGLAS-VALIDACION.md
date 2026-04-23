@@ -390,7 +390,8 @@ Cada producto tiene un archivo JSON en `src/config/mandatory-fields/` con la mat
 | VCE | Q6 MSI | `initialDeferment` + `paymentsNumber` + `planType` | Manual v1.8 p.11 |
 | Agregadores CE | **Esquemas 4 CON/SIN AGP** | **DESINVERTIDOS**: CON_AGP=2 campos, SIN_AGP=8 campos | Manual v2.6.4 p.15-17 |
 | Agregadores CE | `CUSTOMER_REF5` | O → **R** ("Identificador del Agregador") | Manual v2.6.4 p.9 |
-| Agregadores CE / CP | `CUSTOMER_REF3` | R → **O** (solo en Tradicional/MOTO/Agreg — sí es R en Cargos Periódicos Post y Agreg. CP) | Manual v2.6.4 p.8 |
+| Tradicional / MOTO / Agregadores CE | `CUSTOMER_REF3` | R 20 → **O 30** (es "Dato para uso exclusivo del cliente" en estos 3 productos) | Manual Tradicional v2.5 Anexo C, MOTO v1.5 Anexo C, Agreg.CE v2.6.4 p.9 |
+| Cargos Post / Agregadores CP | `CUSTOMER_REF3` | → **R 20** ("Número de contrato del Tarjetahabiente con el comercio") | Manual Cargos Post v2.1 p.7, Agreg.CP v2.6.4 p.8 |
 | Agregadores CP | Esquemas 4 CON/SIN AGP | **DESINVERTIDOS** igual que CE | Manual v2.6.4 |
 | API PW2 Seguro, Interredes | `TVR/TSI/AID/APN/AL` | Removidos de `servlet` → `emvVoucher` | Anexo V: son outputs del SDK, no envío |
 | API PW2 Seguro, Interredes | `EMV_TAGS` | Único campo EMV de envío real en `servlet` | Anexo V |
@@ -962,8 +963,8 @@ El problema: los manuales usan nombres en **espanol MAYUSCULAS** (ID_AFILIACION,
 | CODIGO_SEGURIDAD | (no se logea) | Codigo de Seguridad | — | Si (PCI) |
 | MODO_ENTRADA | ENTRY_MODE | Modo de Entrada | enum | No |
 | IDIOMA_RESPUESTA | RESPONSE_LANGUAGE | Idioma Respuesta | enum | No |
-| LOTE | — | Lote | — | **Si** |
-| MARKETPLACE_TX | — | Marketplace TX | — | **Si** |
+| LOTE | GROUP | Lote | alphanum(30) | No (renombrado a `GROUP` en v5 — `logName` oficial del manual) |
+| MARKETPLACE_TX | MARKETPLACE_TX | Marketplace TX | num(1) | No (regla `PROHIBITED` en MC/AMEX, `O` con `fixedValue="1"` en VISA — ver §6 pipeline nivel 2) |
 
 ### Seccion: Agregadores
 
@@ -998,7 +999,8 @@ El problema: los manuales usan nombres en **espanol MAYUSCULAS** (ID_AFILIACION,
 | ID_AFILIACION | MerchantId | |
 | NOMBRE_COMERCIO | MerchantName | |
 | CIUDAD_COMERCIO | MerchantCity | |
-| ESTATUS_3D | Cert3D | **Ambiguo**: manual=200, log=03 |
+| CERTIFICACION_3D (envío) | Cert3D | Variable de envío al servicio 3DS. `fixedValue="03"` (indicador de certificación 3DS 2.0 activa). Ver §8. |
+| STATUS_3D (retorno) | Status | Variable de retorno del servicio 3DS. `validValues=[200, 201, 202, 421-448]` (40+ códigos Anexo D VCE v1.8). Resuelto en v5 — antes se confundía con Cert3D. |
 | ECI | ECI | |
 | XID | XID | |
 | CAVV | CAVV | |
@@ -1369,7 +1371,7 @@ Campos validados en la respuesta del servlet:
 | AUTH_CODE | alfanum(6) | Codigo de autorizacion | — |
 | CARD_BRAND | enum | Marca de tarjeta | VISA, MASTERCARD, AMEX |
 | CARD_TYPE | enum | Tipo de tarjeta | CREDITO, DEBITO |
-| PAYW_CODE | num(3) | Codigo Payworks | 000=Aprobada; tabla extendida con 101, 102, 110, 150, 200s, 400s, 500s, 999 |
+| PAYW_CODE | num(3) | Código Payworks | 000=Aprobada. Tabla completa (~105 códigos) incluye: 000-069 (errores de validación), 099, 101, 102, 110, 150, 200-211, 230, 231, 400, 443-445, 500, 999. Solo entregado cuando Payworks rechaza la transacción. Dominio exacto en `response-rules.json.PAYW_CODE.validValues`. |
 | **ID_MAC** *(iter 2)* | enum | Indicador AN7110 MC (Mandato AN7110) | `U` (Prepago) / `V` (Virtual de un solo uso) / **`X`** (Virtual multiuso — **nuevo iter 2**, introducido en Manual Tradicional v2.5 changelog Jun-2025). Sin el valor X, transacciones MC internacionales eran rechazadas. |
 | **ID_CYBERSOURCE** *(v5)* | string | requestID del retorno Cybersource | (validado por regla C11a) |
 | **AUTH_DATE** *(v5, nota corregida iter 2)* | fecha | Fecha de autorizacion | Formato AAAAMMDD HH:MM:SS.sss. Documentado en Manual Agregadores v2.6.4 p.12, heredado operativamente por Tradicional/MOTO/Cargos Post. |
