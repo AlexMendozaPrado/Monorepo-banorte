@@ -35,6 +35,7 @@
 20. [Campos marcados como ambiguos](#20-campos-marcados-como-ambiguos)
 20-BIS. [Estado actual por JSON (validado contra PDFs)](#20-bis-estado-actual-por-json-validado-contra-pdfs-oficiales)
 21. [Cobertura actual y brechas conocidas](#21-cobertura-actual-y-brechas-conocidas)
+22. [Changelog del documento](#22-changelog-del-documento)
 
 ---
 
@@ -157,7 +158,7 @@ Logica: "peor caso gana" -- una sola transaccion rechazada invalida la certifica
 | 2 | `MOTO` | MOTO (Mail Order / Telephone Order) | v1.5 | TNP | SERVLET, AN5822 |
 | 3 | `CARGOS_PERIODICOS_POST` | Cargos Periodicos Post | v2.1 | TNP | SERVLET, AN5822 |
 | 4 | `VENTANA_COMERCIO_ELECTRONICO` | Ventana de Comercio Electronico (Cifrada) | v1.8 | TNP | SERVLET, THREEDS, CYBERSOURCE, AN5822 |
-| 5 | `AGREGADORES_COMERCIO_ELECTRONICO` | Agregadores - Comercio Electronico | v2.6.4 | TNP | SERVLET, AGREGADOR, THREEDS, AN5822 |
+| 5 | `AGREGADORES_COMERCIO_ELECTRONICO` | Agregadores - Comercio Electrónico | v2.6.4 | TNP | SERVLET, AGREGADOR, THREEDS, CYBERSOURCE, AN5822 |
 | 6 | `AGREGADORES_CARGOS_PERIODICOS` | Agregadores - Cargos Periodicos | v2.6.4 | TNP | SERVLET, AGREGADOR, AN5822 |
 | 7 | `API_PW2_SEGURO` | API PW2 Seguro (Tarjeta Presente) | v2.4 | TP | SERVLET, EMV |
 | 8 | `INTERREDES_REMOTO` | Interredes Remoto (PinPad WiFi/LAN) | v1.7 | TP | SERVLET, EMV |
@@ -409,131 +410,97 @@ Cada producto tiene un archivo JSON en `src/config/mandatory-fields/` con la mat
 | response-rules | `PAYW_RESULT.validValues` | agregado **`Z`** (Reversa automática por timeout) | Manual MOTO v1.5 p.5 |
 | response-rules | `AGGREGATOR_REF` → **`ID_AGREGADOR`** | rename (logName oficial) | Manual Agregadores |
 
-### 7.1 Comercio Electronico Tradicional (v2.5)
+### 7.1 Comercio Electrónico Tradicional (v2.5)
 
 **Archivo**: `ecommerce-tradicional.json`
+**Estado detallado**: ver §20-BIS.1 para el inventario campo a campo alineado al PDF oficial v2.5 (19-Jun-2025).
 
-#### Transacciones soportadas (con marca)
-
-AUTH_VISA, AUTH_MC, AUTH_AMEX, PREAUTH_VISA, PREAUTH_MC, PREAUTH_AMEX, POSTAUTH_VISA, POSTAUTH_MC, POSTAUTH_AMEX, REFUND_VISA, REFUND_MC, REFUND_AMEX, VOID_VISA, VOID_MC, VOID_AMEX, REVERSAL_VISA, REVERSAL_MC, REVERSAL_AMEX, VERIFY_VISA, VERIFY_MC, VERIFY_AMEX
-
-#### Campos Servlet
-
-| Campo (logName) | Manual (ES) | AUTH | PREAUTH | POSTAUTH | REFUND | VOID | REVERSAL | VERIFY | maxLen | format | validValues | mustBeMasked | fixedValue |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| MERCHANT_ID | ID_AFILIACION | R | R | R | R | R | R | R | 15 | | | | |
-| USER | USUARIO | R | R | R | R | R | R | R | | | | | |
-| PASSWORD | CLAVE_USR | N/A | N/A | N/A | N/A | N/A | N/A | N/A | | | | | |
-| TERMINAL_ID | ID_TERMINAL | R | R | R | R | R | R | R | 15 | | | | |
-| CMD_TRANS | CMD_TRANS | R | R | R | R | R | R | R | | | VENTA\|AUTH, PREAUTH, POSTAUTH, DEVOLUCION\|REFUND, CANCELACION\|VOID, REVERSA\|REVERSAL, VERIFICACION\|VERIFY | | |
-| AMOUNT | MONTO | R | R | R | O | N/A | N/A | N/A | 18 | `^\d{1,16}(\.\d{1,2})?$` | | | |
-| MODE | MODO | R | R | R | R | R | R | R | | | PRD, AUT, DEC, RND | | |
-| REFERENCE | REFERENCIA | O | O | R | R | R | R | O | 15 | | | | |
-| CONTROL_NUMBER | NUMERO_CONTROL | O | O | O | R | O | O | O | 30 | | | | |
-| CARD_NUMBER | NUMERO_TARJETA | R | R | R | N/A | N/A | N/A | N/A | | | | true | |
-| EXP_DATE | FECHA_EXP | O | O | O | N/A | N/A | N/A | N/A | 4 | `^\d{4}$` | | | |
-| SECURITY_CODE | CODIGO_SEGURIDAD | N/A | N/A | N/A | N/A | N/A | N/A | N/A | 4 | `^\d{3,4}$` | | | |
-| ENTRY_MODE | MODO_ENTRADA | R | R | R | N/A | N/A | N/A | N/A | | | MANUAL, BANDA, MAGSTRIPE, CHIP, CONTACTLESSCHIP, CONTACTLESSBANDA | | |
-| MARKETPLACE_TX | MARKETPLACE_TX | O | O | O | O | O | O | O | | | | | |
-| RESPONSE_LANGUAGE | IDIOMA_RESPUESTA | O | O | O | O | O | O | O | | | ES, EN, 01, 02 | | |
-| CUSTOMER_REF1 | REF_CLIENTE1 | O | O | O | O | O | O | O | 30 | | | | |
-| CUSTOMER_REF2 | REF_CLIENTE2 | O | O | O | O | O | O | O | 30 | | | | |
-| CUSTOMER_REF3 | REF_CLIENTE3 | O | O | O | O | O | O | O | 30 | | | | |
-| CUSTOMER_REF4 | REF_CLIENTE4 | O | O | O | O | O | O | O | 30 | | | | |
-| CUSTOMER_REF5 | REF_CLIENTE5 | O | O | O | O | O | O | O | 30 | | | | |
-| PLAN_TYPE | TIPO_PLAN | O | O | N/A | N/A | N/A | N/A | N/A | | | 03, 05, 07 | | |
-| PAYMENT_NUMBER | NUMERO_PAGOS | O | O | N/A | N/A | N/A | N/A | N/A | 2 | | | | |
-| INITIAL_DEFERMENT | DIFERIMIENTO_INICIAL | O | O | N/A | N/A | N/A | N/A | N/A | 2 | | | | |
-
-**Nota**: Las reglas de AUTH/PREAUTH/POSTAUTH varian por marca (VISA/MC/AMEX) en el JSON real. La tabla simplificada muestra la regla comun.
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL, VERIFY × VISA/MC/AMEX = 21 combinaciones.
+- Capas activas: Servlet + 3DS + Cybersource + AN5822.
+- Campos PCI (R_PCI): `PASSWORD`, `EXP_DATE`, `SECURITY_CODE`.
+- Mandatos implementados: AN5822 (3 flujos vía `layer-an5822`), Marketplace VISA (`MARKETPLACE_TX` PROHIBITED en MC/AMEX), AN7110 (ID_MAC retorno).
+- **Ver `ecommerce-tradicional.json` para la matriz R/O/N/A/PROHIBITED/R_PCI completa por transacción y marca.** Los valores están blindados por asserts en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts`.
 
 ### 7.2 MOTO (v1.5)
 
 **Archivo**: `moto.json`
 
-Misma estructura que Tradicional **sin capas 3DS ni Cybersource** (canal telefonico, sin browser).
+Misma estructura que Tradicional **sin capas 3DS ni Cybersource** (canal telefónico, sin browser).
 
 Diferencias clave:
-- NO soporta 3D Secure
-- AN5822 para MC: CIT(`IND_PAGO`=U, `TIPO_MONTO`=V|F, `INFO_PAGO`=0), MIT(`COF`=4, `IND_PAGO`=8, `TIPO_MONTO`=V|F, `INFO_PAGO`=2)
-- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL, VERIFY (ambas marcas VISA/MC)
+- NO soporta 3D Secure (canal telefónico sin navegador del tarjetahabiente)
+- NO soporta AMEX (solo VISA/MC)
+- AN5822 para MC: ver `layer-an5822.json._meta.productMapping.MOTO` — 3 flujos (`firstCIT`/`subseqCIT`/`subseqMIT`) con `PAYMENT_IND=U`, `PAYMENT_INFO`=0/3/2 respectivamente. MOTO **no usa** `COF` (exclusivo de Cargos Periódicos).
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL, VERIFY × VISA/MC
 
-### 7.3 Cargos Periodicos Post (v2.1)
+### 7.3 Cargos Periódicos Post (v2.1)
 
 **Archivo**: `cargos-periodicos-post.json`
+**Estado detallado**: ver §20-BIS.3 para el inventario campo a campo alineado al PDF oficial v2.1 (19-Jun-2025).
 
-Diferencias clave respecto a Tradicional:
-- **NO tiene PREAUTH/POSTAUTH** (solo AUTH, REFUND, VOID, REVERSAL, VERIFY)
-- **CUSTOMER_REF3 es R** (requerido) -- identificador del suscriptor
-- CONTROL_NUMBER es **R** (no O como en otros productos)
-- REFERENCE: AUTH=O, REFUND/VOID/REVERSAL=R
-- Transacciones: AUTH_VISA, AUTH_MC, REFUND_VISA, REFUND_MC, VOID_VISA, VOID_MC, REVERSAL_VISA, REVERSAL_MC
+- Transacciones: AUTH, REFUND, VOID, REVERSAL, VERIFY × VISA/MC = 10 combinaciones (sin AMEX/PREAUT/POSTAUT).
+- Capas activas: Servlet + AN5822.
+- Campo distintivo: `CUSTOMER_REF3` R 20 ("Número de contrato" — sí es del manual).
+- Removidos v5: `SECURITY_CODE` (cargos recurrentes no piden CVV), `ID_GATEWAY` (pertenece a Agregadores).
+- AN5822: `PAYMENT_IND=R` (Recurrente), `COF=4` en subseqMIT. Rate limit 200 tx/min.
+- **Ver `cargos-periodicos-post.json` para la matriz completa.** Blindado por `ProductConfigsV5.test.ts`.
 
-### 7.4 Ventana de Comercio Electronico Cifrada (v1.8)
+### 7.4 Ventana de Comercio Electrónico Cifrada (v1.8)
 
 **Archivo**: `ventana-comercio-electronico.json`
+**Estado detallado**: ver §20-BIS.4 para el inventario campo a campo alineado al PDF oficial v1.8 (24-Mar-2026).
 
-Diferencias clave:
-- Variables en **camelCase** (no MAYUSCULAS_SNAKE): `merchantId`, `name`, `password`, `mode`, `controlNumber`, `terminalId`, `merchantName`, `merchantCity`, `lang`, `amount`, `customerRef1..5`
-- `password` es **R** (requerido, no N/A como en otros -- porque se envia cifrado)
-- `merchantName` y `merchantCity` son **R** (nombre y ciudad del comercio, usados por 3DS)
-- `lang` en vez de `RESPONSE_LANGUAGE`, validValues=[ES, EN]
-- Soporta 3DS + Cybersource + AN5822
-- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL (VISA/MC/AMEX)
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL × VISA/MC/AMEX = 18 combinaciones.
+- Capas activas: Servlet + 3DS + Cybersource + AN5822.
+- Formato de nombres: **camelCase** (merchantId, customerRef1-5 — distinto de otros manuales).
+- Distintivos: `password` R (viaja cifrado AES); `merchantCity` maxLen 40; `mode.validValues=[PRD, AUT]`; `amount` maxLen 15.
+- Tokenización: `usarTokenizacion`, `idUsrComercio`, `correoUsrComercio`.
+- **Ver `ventana-comercio-electronico.json` para la matriz completa.** Blindado por `ProductConfigsV5.test.ts`.
 
-### 7.5 Agregadores - Comercio Electronico (v2.6.4)
+### 7.5 Agregadores - Comercio Electrónico (v2.6.4)
 
 **Archivo**: `agregadores-comercio-electronico.json`
+**Estado detallado**: ver §20-BIS.5 para el inventario campo a campo alineado al PDF oficial v2.6.4 (23-Ene-2026).
 
-Campos base servlet similares a Tradicional, mas campos de agregador segun esquema (ver seccion 11).
+- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL × VISA/MC = 12 combinaciones (sin AMEX).
+- Capas activas: Servlet + Agregador + 3DS + Cybersource + AN5822.
+- subEsquemas (corregidos en v5): `ESQ_1` (sin campos extra), `ESQ_4_CON_AGP` (2 campos), `ESQ_4_SIN_AGP` (8 campos).
+- Distintivos: `CUSTOMER_REF5` R ("Identificador del Agregador"); `MARKETPLACE_TX` PROHIBITED en MC/AMEX; `ID_GATEWAY` para Gateway 7118 MC.
+- **Ver `agregadores-comercio-electronico.json` para la matriz completa.** Blindado por `ProductConfigsV5.test.ts`.
 
-Diferencias clave:
-- TERMINAL_ID: AUTH=R, resto=O
-- CARD_NUMBER: AUTH/PREAUTH/POSTAUTH=R, REFUND/VOID/REVERSAL=O
-- EXP_DATE: todo O (no en logs reales de agregadores)
-- Soporta sub-esquemas: ESQ_1, ESQ_4_SIN_AGP, ESQ_4_CON_AGP
-- Transacciones: AUTH, PREAUTH, POSTAUTH, REFUND, VOID, REVERSAL (VISA/MC)
-
-### 7.6 Agregadores - Cargos Periodicos (v2.6.4)
+### 7.6 Agregadores - Cargos Periódicos (v2.6.4)
 
 **Archivo**: `agregadores-cargos-periodicos.json`
+**Estado detallado**: ver §20-BIS.6 para el inventario campo a campo alineado al PDF oficial v2.6.4 (Ene-2026).
 
-Similar a Agregadores CE pero sin PREAUTH/POSTAUTH:
-- Transacciones: AUTH, REFUND, VOID, REVERSAL (VISA/MC)
-- REFERENCE: AUTH=R, REFUND/VOID=R, REVERSAL=O
-- Mismos sub-esquemas que Agregadores CE
+- Transacciones: AUTH, REFUND, VOID, REVERSAL × VISA/MC = 8 combinaciones (sin AMEX/PREAUT/POSTAUT).
+- Capas activas: Servlet + Agregador + AN5822.
+- Mismos subEsquemas que Agregadores CE.
+- Distintivos: `CUSTOMER_REF3` R 20 y `CUSTOMER_REF5` R 30. AN5822 con `PAYMENT_IND=R`, `COF=4` en subseqMIT. Rate limit 200 tx/min. Anexo D oficial en manual p.36.
+- Removidos: `SECURITY_CODE`, `BATCH`→`GROUP`.
+- **Ver `agregadores-cargos-periodicos.json` para la matriz completa.** Blindado por `ProductConfigsV5.test.ts`.
 
 ### 7.7 API PW2 Seguro - Tarjeta Presente (v2.4)
 
 **Archivo**: `api-pw2-seguro.json`
+**Estado detallado**: ver §20-BIS.7 para el inventario campo a campo alineado al PDF oficial v2.4 (Mar-2023) + Anexo V.
 
-Campos completamente diferentes a los TNP:
-- CMD_TRANS: validValues=[VENTA, CASHBACK, VENTA_FORZADA, PREAUTORIZACION, REAUTORIZACION, POSTAUTORIZACION, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION]
-- CONTROL_NUMBER: **R** (siempre requerido)
-- REFERENCE: PREAUTH/REAUTH/POSTAUTH/REFUND/REVERSAL=R, AUTH/VOID/CASHBACK/VERIFY=N/A
-- BATCH (LOTE): AUTH=O, PREAUTH/VOID=R, resto=N/A
-- Campos EMV (ver abajo)
-- Transacciones: AUTH, PREAUTH, REAUTH, POSTAUTH, REFUND, VOID, REVERSAL, CASHBACK, VERIFY (VISA/MC/AMEX)
-
-Campos EMV adicionales:
-
-| Campo | AUTH | PREAUTH | REAUTH | POSTAUTH | REFUND | VOID | REVERSAL | CASHBACK | VERIFY |
-|---|---|---|---|---|---|---|---|---|---|
-| EMV_TAGS | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
-| TVR (TAG 95) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
-| TSI (TAG 9B) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
-| AID (TAG 4F) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
-| APN (TAG 9F12) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
-| AL (TAG 50) | R | R | N/A | N/A | O | N/A | N/A | R | N/A |
+- Transacciones (Anexo V Tabla 8): 13 tipos incluyendo VENTA, CASHBACK, VENTA_FORZADA, PREAUT, REAUT, POSTAUT, DEVOLUCION, REVERSA, CIERRE_LOTE, VERIFICACION, SUSPENSION, REACTIVACION, CIERRE_AFILIACION × VISA/MC/AMEX.
+- Capas activas: Servlet + EMV (no 3DS, no AN5822 — es Tarjeta Presente).
+- Separación crítica: `EMV_TAGS` (único campo EMV de envío real, en `servlet`) vs `TVR/TSI/AID/APN/AL` (tags EMV documentales outputs del SDK, en `emvVoucher` — no se validan contra log).
+- Brechas: ~13 variables del Anexo V pendientes de agregar cuando haya logs reales (CASHBACK_AMOUNT, PAGO_MOVIL, AUTH_CODE, BANROTE_URL, TRANS_TIMEOUT, Q6 MSI, RESPONSE_LANGUAGE, QPS, CUSTOMER_REF2-5).
+- **Ver `api-pw2-seguro.json` para la matriz completa.**
 
 ### 7.8 Interredes Remoto (v1.7)
 
 **Archivo**: `interredes-remoto.json`
+**Estado detallado**: ver §20-BIS.8 para el inventario campo a campo alineado al PDF oficial v1.7 (Jul-2025) + Anexos I-VII.
 
-Estructura similar a API PW2 Seguro con algunas diferencias:
-- CMD_TRANS sin VENTA_FORZADA
-- TSI es **O** (opcional en v1.7, requerido en PW2 v2.4)
-- Mismos campos EMV
+- Transacciones (Anexo III): 13 tipos incluyendo OBTENER_LLAVE, CASHBACK, DEVOLUCION_CLIENTE, VENTA_CON_VALIDACION, CANCELAR + estándares × VISA/MC/AMEX.
+- Capas activas: Servlet + EMV.
+- Distintivos: campo `PIN_REQUESTED` nuevo; `errorCodes` del Anexo VI (usado por regla cruzada C12).
+- Mismos fixes que API PW2 Seguro: PASSWORD→R_PCI, BATCH→GROUP, tags EMV en `emvVoucher`.
+- **Ver `interredes-remoto.json` para la matriz completa.**
 
 ---
 
@@ -574,8 +541,10 @@ Nota: `Card` tiene `mustBeMasked: true`, `CardType` tiene `validValues: [VISA, M
 
 ### Reglas especiales 3DS implementadas
 
-1. **Cert3D = "03"** (fixedValue): El campo `3D_CERTIFICATION` en el POST hacia Payworks siempre debe ser "03"
-   - **ATENCION**: El manual dice `Status = 200` para autenticacion exitosa, pero eso es el campo de RETORNO `Status`, no el campo de envio `Cert3D`. Son DOS campos distintos. `Cert3D` siempre es "03". El campo `Status` ambiguo esta marcado como `ambiguous: true`.
+1. **`CERTIFICACION_3D` = `"03"`** (fixedValue, envío): El campo de envío hacia Payworks siempre debe ser `"03"` (indicador de que la certificación 3DS 2.0 está activa).
+   - **Histórico**: hasta v4 había un único campo `"3D_STATUS"` que mezclaba el valor de envío (03) con el de retorno (200=autenticación exitosa, 201-448=otros códigos). Esto causaba falsos rechazos porque la validación no sabía contra qué dominio comparar.
+   - **Resuelto en v5**: el JSON `layer-3ds.json` separa ahora `threeds.CERTIFICACION_3D` (envío, `fixedValue="03"`) y `threedsResponse.STATUS_3D` (retorno, `validValues=[200, 201, 202, 421, 422, 423, ...]` — 40+ códigos del Anexo D del manual VCE v1.8).
+   - Blindado por test: `ProductConfigsV5.test.ts` → `CERTIFICACION_3D en envío con fixedValue 03 (no confundir con STATUS_3D de retorno)` y `STATUS_3D en retorno (no en envío)`.
 
 2. **Version3D = "2"** (fixedValue): Siempre la version 2 del protocolo
 
@@ -1011,13 +980,13 @@ El problema: los manuales usan nombres en **espanol MAYUSCULAS** (ID_AFILIACION,
 
 ### Seccion: AN5822
 
-| Manual (ES) | Log (EN) | validValues |
-|---|---|---|
-| IND_PAGO | PAYMENT_IND | U, R, 8, 4 |
-| TIPO_MONTO | AMOUNT_TYPE | F, V |
-| INFO_PAGO | PAYMENT_INFO | 0, 2, 3 |
-| COF | COF | 4 |
-| CIF | CIF | (alfanum) |
+| Manual (ES) | Log (EN) | validValues | Notas |
+|---|---|---|---|
+| IND_PAGO | PAYMENT_IND | U, R | **U** en Ecommerce/MOTO/VCE/Agreg.CE; **R** en Cargos Periódicos Post + Agreg.CP. El valor `8` era el bug legacy v4, eliminado en v5. |
+| TIPO_MONTO | AMOUNT_TYPE | F, V | F=Fijo, V=Variable. |
+| INFO_PAGO | PAYMENT_INFO | 0, 2, 3 | 0=firstCIT, 3=subseqCIT, 2=subseqMIT. |
+| COF | COF | 4 | Card on File indicator. Solo aplica a Cargos Periódicos Post y Agreg.CP en subseqMIT. |
+| CIF | CIF | (alfanum) | Customer Initial Frequency — documentado en Anexo V pero raro en logs. |
 
 ### Seccion: 3DS
 
@@ -1440,34 +1409,41 @@ Campos validados en la respuesta del servlet:
 
 Los siguientes campos son **requeridos por los manuales** pero nunca aparecen en los logs por razones de seguridad PCI-DSS:
 
-| Campo | Manual (ES) | Regla v5 | Razon |
-|---|---|---|---|
-| PASSWORD | CLAVE_USR | `R_PCI` (candidato) / `N/A` hoy | Credencial — nunca se logea |
-| SECURITY_CODE | CODIGO_SEGURIDAD | `R_PCI` (candidato) / `N/A` hoy | CVV/CVC — nunca se logea |
-| EXP_DATE | FECHA_EXP | `R_PCI` (candidato) / `O` hoy | Dato sensible — rara vez en logs |
+| Campo | Manual (ES) | Regla v5 | Aplicado en | Razón |
+|---|---|---|---|---|
+| PASSWORD | CLAVE_USR | `R_PCI` | Tradicional, MOTO, Cargos Post, Agreg.CE, Agreg.CP, API PW2 Seguro, Interredes Remoto (7 JSONs TNP/TP) | Credencial — nunca se loguea. Excepción: VCE mantiene `R` porque viaja cifrado AES dentro del JSON. |
+| SECURITY_CODE | CODIGO_SEGURIDAD | `R_PCI` / removido | Tradicional, MOTO, Agreg.CE (aplicado como R_PCI en V/PRE). Removido de Cargos Post y Agreg.CP (MIT recurrente no pide CVV). | CVV/CVC — nunca se loguea. |
+| EXP_DATE | FECHA_EXP | `R_PCI` | Tradicional, MOTO, Cargos Post, Agreg.CE, Agreg.CP (en V/PRE) | Dato sensible — rara vez en logs. |
 
-**Estado v5**:
-- El tipo **`R_PCI`** esta disponible en `FieldRule` y semanticamente **pasa silenciosamente** cuando se evalua contra log (comportamiento equivalente a `N/A`).
-- Los JSONs actuales aun marcan estos campos con `N/A` + nota (`"Candidato a regla R_PCI cuando se implemente"`) por decision conservadora.
-- Cuando exista un `MatrixValidator` que lea la matriz del comercio (fuera del scope v5), la regla `R_PCI` se comportara como `R` contra esa fuente — validando que el comercio declaro el campo aunque no aparezca en el log del servlet.
+**Estado actual (post iter 2)**:
+- El tipo **`R_PCI`** está implementado en `FieldRule` y **pasa silenciosamente** cuando se evalúa contra log (comportamiento correcto: el campo PCI nunca debe aparecer en el log del servlet).
+- Los JSONs v5 **ya marcan** estos campos con `R_PCI` en las transacciones donde el manual los pide (VENTA, PREAUTORIZACIÓN cuando aplica).
+- **Brecha pendiente**: cuando exista un `MatrixValidator` que lea la matriz del comercio (fuera del scope v5 — documentado en sección 21), la regla `R_PCI` se comportará como `R` contra esa fuente — validando que el comercio declaró el campo aunque no aparezca en el log del servlet.
 
-**Implementacion actual**: `FieldRequirementValueObject.evaluateDetailed` maneja `R_PCI` en el nivel 3 del pipeline (entre `PROHIBITED` y `R`). `getDisplayName()` retorna `"Requerido (PCI — no logueable)"`.
+**Implementación actual**: `FieldRequirementValueObject.evaluateDetailed` maneja `R_PCI` en el nivel 3 del pipeline (entre `PROHIBITED` y `R`). `getDisplayName()` retorna `"Requerido (PCI — no logueable)"`.
+
+**Commits que aplicaron R_PCI**: `37711ae` (Tradicional), `645fa32` (MOTO), `5b644b1` (Cargos Post), `f8aeebb` (Agreg.CE), `1087746` (Agreg.CP), `4b5ca7d` (API PW2), `5cf3ffd` (Interredes).
 
 ---
 
 ## 20. Campos marcados como ambiguos
 
-Los siguientes campos tienen `"ambiguous": true` en el glosario o en las matrices, indicando que su mapeo no esta 100% confirmado con logs reales:
+Los siguientes campos tienen `"ambiguous": true` en el glosario o en las matrices, indicando que su mapeo con el log real del servlet no está 100% confirmado por falta de casos operativos suficientes. Se mantienen tolerantes (`O`) o con notas de seguimiento:
 
-| Campo | Ambiguedad | Estado |
+| Campo | Ambigüedad | Estado actual |
 |---|---|---|
-| FECHA_EXP / EXP_DATE | Nombre en log no confirmado (hipotesis: CARD_EXP) | Marcado O (tolerante) |
-| LOTE / BATCH | No visto en logs TNP | Marcado O |
-| MARKETPLACE_TX | No visto en logs, no claro cuando aplica | Marcado O |
-| ESTATUS_3D / Cert3D | Manual dice "200" pero log muestra "03" | fixedValue=03, ambiguous=true |
-| UCAF | Presente para MC pero rara vez en logs | Marcado O, ambiguous=true |
-| NUMERO_BIN | Solo en logs de agregadores, no en manual | No validado |
-| GATEWAY_ID | Solo en Esquema 1 (ZIGU) | No validado |
+| FECHA_EXP / EXP_DATE / CARD_EXP | Nombre en log: hipótesis `CARD_EXP`. Formato MMAA (TNP) vs AAMM (API PW2 Seguro) — ver `_meta.fechaExpFormat` por producto. | `R_PCI` en V/PRE — pasa silenciosamente contra log (PCI no loggeable). |
+| UCAF | Presente para MC pero rara vez en logs reales | Marcado `O`, `ambiguous: true` |
+| NUMERO_BIN | Aparece en logs de agregadores pero no lo documenta el manual base | No validado (sin regla) |
+
+**Resueltos en v5** (ya no son ambiguos):
+
+| Campo | Estado previo | Resolución |
+|---|---|---|
+| ~~LOTE / BATCH~~ | "No visto en logs TNP" | Renombrado a `GROUP` (`logName` oficial). Opcional en todos los productos. |
+| ~~MARKETPLACE_TX~~ | "No claro cuándo aplica" | Implementada regla `PROHIBITED` en MC/AMEX, `O` con `fixedValue="1"` en VISA. Ver §6 pipeline nivel 2. |
+| ~~ESTATUS_3D / Cert3D~~ | "Manual dice 200 pero log 03" | Separados en `CERTIFICACION_3D` (envío, fijo 03) y `STATUS_3D` (retorno, 200=éxito). Ver §8. |
+| ~~GATEWAY_ID~~ | "Solo en Esquema 1 (ZIGU)" | Implementado como `ID_GATEWAY` con scope por producto (solo Agregadores CE/CP + Cargos Post MC). `PROHIBITED` en VISA/AMEX. Removido de Tradicional/MOTO. |
 
 ---
 
@@ -1742,5 +1718,21 @@ Documentadas en `docs/preguntas-ramsses.md` y en `docs/PENDIENTES-FIXES-JSONS-V5
 
 ---
 
-> **Fuente autoritativa en runtime**: los JSONs en `src/config/mandatory-fields/*.json`. La delta clave v5 esta blindada por 43 asserts en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts`.
-> **Casos de regresion**: `__tests__/integration/regression/regression-cases.test.ts` reproduce los 4 escenarios operativos identificados en la revision Banorte.
+---
+
+## 22. Changelog del documento
+
+- **2026-04-22 (iter 2, commit `58ad282` + doc fixes)**: Auditoría pre-certificación cerrada.
+  - **P0 aplicados**: `response-rules.ID_MAC.validValues` +`X` (Tarjeta Virtual multiuso); `response-rules.AUTH_RESULT.validValues` ampliado de 47 a 65 códigos (+18 del Anexo B del manual API PW2 Seguro).
+  - **P2 aplicados**: notas de `AUTH_DATE`/`CUST_RSP_DATE` corregidas (citaban manual inexistente, ahora apuntan a Agregadores v2.6.4 p.12); `_meta` de `response-rules.json` con `integrationType: LAYER_RESPONSE` + `manualVersion: compiled-v1.0` + `manualDate`; `_rulesNote` documental en `layer-an5822.firstCIT`.
+  - **Fixes documentales al MD**: sección 20-BIS añadida con estado autoritativo por JSON; tablas 7.1-7.8 simplificadas (pointer a 20-BIS); glosario AN5822 limpio; sección 19 actualizada a "R_PCI aplicado" en vez de "candidato"; sección 8 bug Cert3D/Status reformulado como histórico resuelto; sección 20 distingue ambiguos reales vs resueltos; tabla §3 completada con CYBERSOURCE en Agregadores CE.
+  - Preguntas operativas Q1-Q4 para Ramsses documentadas (no bloquean).
+
+- **2026-04-19 → 2026-04-21 (spec v5 cerrada, commits `ee40c16` → `5cf3ffd`)**: 12 JSONs alineados contra 10 PDFs oficiales + 1 Consolidado. Pipeline v5 (`PROHIBITED` + `R_PCI`), AN5822 refactorizada (3 flujos firstCIT/subseqCIT/subseqMIT), Anexo D implementado, 10 reglas cruzadas wired (C1-C12 + rate limit). 425/425 tests verdes, 19 suites.
+
+- **Previo a v5 (legacy v4, deprecado)**: un único modelo "CIT/MIT" de 2 flujos aceptando `IND_PAGO=8` (valor inventado que no existe en manuales); campos EMV (TVR/TSI/AID/APN/AL) mezclados en el servlet en vez de diferenciar envío (EMV_TAGS) vs voucher físico (salida del SDK); `Cert3D` vs `Status` ambiguos en la misma sección del JSON 3DS; Cybersource aceptaba `Card_cardType=003` (AMEX, no soportado por Banorte); subesquemas Agregadores 4 CON/SIN AGP invertidos.
+
+---
+
+> **Fuente autoritativa en runtime**: los JSONs en `src/config/mandatory-fields/*.json`. La delta clave v5 está blindada por 43 asserts en `__tests__/unit/infrastructure/ProductConfigsV5.test.ts`.
+> **Casos de regresión**: `__tests__/integration/regression/regression-cases.test.ts` reproduce los 4 escenarios operativos identificados en la revisión Banorte.
