@@ -110,8 +110,7 @@ export function UploadCard() {
         throw new Error(data.error || 'Error en la certificacion');
       }
 
-      // Guardar resultado en sessionStorage y navegar a resultados
-      sessionStorage.setItem(`certification_${data.data.id}`, JSON.stringify(data.data));
+      // Navegar a resultados — la pagina lee del endpoint GET /api/certificacion/[id].
       router.push(`/resultados/${data.data.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');

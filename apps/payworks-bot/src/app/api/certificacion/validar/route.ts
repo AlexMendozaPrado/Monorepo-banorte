@@ -3,6 +3,7 @@ import { DIContainer } from '@/infrastructure/di/DIContainer';
 import { IntegrationType } from '@/core/domain/value-objects/IntegrationType';
 import { OperationMode } from '@/core/domain/entities/CertificationSession';
 import { ApiResponse, CertificationResponse } from '@/shared/types/api';
+import { toCertificationResponse } from '@/shared/mappers/certificationResponseMapper';
 
 export async function POST(
   request: NextRequest
@@ -79,38 +80,7 @@ export async function POST(
       urlSubdominio,
     });
 
-    const response: CertificationResponse = {
-      id: session.id,
-      merchantName: session.merchantName,
-      integrationType: session.integrationType,
-      operationMode: session.operationMode,
-      verdict: session.getVerdict(),
-      totalTransactions: session.getTotalTransactions(),
-      approvedCount: session.getApprovedCount(),
-      rejectedCount: session.getRejectedCount(),
-      approvalRate: session.getApprovalRate(),
-      results: session.results.map((r) => ({
-        transactionRef: r.transactionRef,
-        transactionType: r.transactionType,
-        cardBrand: r.cardBrand,
-        verdict: r.verdict,
-        passedCount: 'getPassedCount' in r ? (r as any).getPassedCount() : 0,
-        failedCount: 'getFailedCount' in r ? (r as any).getFailedCount() : 0,
-        totalValidated: 'getTotalValidated' in r ? (r as any).getTotalValidated() : 0,
-        fieldResults: r.fieldResults.map((f) => ({
-          field: f.field,
-          manualName: f.manualName,
-          displayName: f.displayName,
-          rule: f.rule,
-          found: f.found,
-          value: f.value,
-          verdict: f.verdict,
-          source: f.source,
-          layer: f.layer,
-        })),
-      })),
-      createdAt: session.createdAt.toISOString(),
-    };
+    const response: CertificationResponse = toCertificationResponse(session);
 
     return NextResponse.json({
       success: true,
