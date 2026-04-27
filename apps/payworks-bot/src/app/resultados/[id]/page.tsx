@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Download, CheckCircle, XCircle, FileText } from 'lucide-react';
-import { Button, Card } from '@banorte/ui';
+import { ArrowLeft, Download, FileText } from 'lucide-react';
+import { Button } from '@banorte/ui';
 import { Header } from '@/presentation/components/Header';
 import { TransactionAccordion } from '@/presentation/components/TransactionAccordion';
 import { CertificationResponse } from '@/shared/types/api';
 import { generateCertificationPDF } from '@/presentation/utils/generateCertificationPDF';
+import { useCertificationDetail } from '@/presentation/hooks/useCertificationDetail';
 
 const INTEGRATION_NAMES: Record<string, string> = {
   ECOMMERCE_TRADICIONAL: 'Comercio Electrónico Tradicional',
@@ -47,15 +48,10 @@ function groupByType(results: CertificationResponse['results']) {
 export default function ResultadosPage() {
   const params = useParams();
   const id = params.id as string;
-  const [data, setData] = useState<CertificationResponse | null>(null);
   const [filter, setFilter] = useState<'all' | 'failed'>('all');
+  const state = useCertificationDetail(id);
 
-  useEffect(() => {
-    const stored = sessionStorage.getItem(`certification_${id}`);
-    if (stored) setData(JSON.parse(stored));
-  }, [id]);
-
-  if (!data) {
+  if (state.kind === 'loading') {
     return (
       <div className="flex flex-col min-h-screen bg-banorte-bg">
         <Header />
@@ -66,6 +62,39 @@ export default function ResultadosPage() {
     );
   }
 
+  if (state.kind === 'notFound') {
+    return (
+      <div className="flex flex-col min-h-screen bg-banorte-bg">
+        <Header />
+        <main className="flex-1 p-8 max-w-6xl mx-auto w-full">
+          <Link href="/dashboard" className="inline-flex items-center text-banorte-red hover:underline font-medium mb-4">
+            <ArrowLeft className="w-4 h-4 mr-1" /> Volver al Dashboard
+          </Link>
+          <h1 className="text-2xl font-bold text-banorte-dark mb-2">Certificacion no encontrada</h1>
+          <p className="text-banorte-secondary">
+            La certificacion con ID <span className="font-mono">{id}</span> no existe o fue eliminada.
+          </p>
+        </main>
+      </div>
+    );
+  }
+
+  if (state.kind === 'error') {
+    return (
+      <div className="flex flex-col min-h-screen bg-banorte-bg">
+        <Header />
+        <main className="flex-1 p-8 max-w-6xl mx-auto w-full">
+          <Link href="/dashboard" className="inline-flex items-center text-banorte-red hover:underline font-medium mb-4">
+            <ArrowLeft className="w-4 h-4 mr-1" /> Volver al Dashboard
+          </Link>
+          <h1 className="text-2xl font-bold text-banorte-dark mb-2">No se pudo cargar la certificacion</h1>
+          <p className="text-banorte-error">{state.message}</p>
+        </main>
+      </div>
+    );
+  }
+
+  const data: CertificationResponse = state.data;
   const approvalRate = data.totalTransactions > 0 ? Math.round((data.approvedCount / data.totalTransactions) * 100) : 0;
   const isApproved = data.verdict === 'APROBADO';
   const byType = groupByType(data.results);
