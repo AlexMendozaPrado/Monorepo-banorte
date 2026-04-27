@@ -3,15 +3,10 @@
 import React, { useState } from 'react';
 import { ChevronDown, Check, X } from 'lucide-react';
 import { cn } from '@banorte/ui';
-import { FieldValidationTable } from './FieldValidationTable';
+import { TransactionRuleTree } from './TransactionRuleTree';
+import { FieldResultResponse } from '@/shared/types/api';
 
-interface FieldResult {
-  field: string;
-  rule: string;
-  found: boolean;
-  value?: string;
-  verdict: 'PASS' | 'FAIL';
-}
+type FieldResult = FieldResultResponse;
 
 interface TransactionAccordionProps {
   name: string;
@@ -88,7 +83,7 @@ export function TransactionAccordion({
               </div>
             </div>
           )}
-          <FieldValidationTable fields={fieldResults} />
+          <TransactionRuleTree fieldResults={fieldResults} />
         </div>
       )}
     </div>
