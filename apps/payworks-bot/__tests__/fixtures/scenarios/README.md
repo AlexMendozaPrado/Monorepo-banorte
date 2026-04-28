@@ -37,3 +37,20 @@ Los logs vienen tal cual del equipo — **no se inventan happy paths ni se inyec
 ## Bundle viejo (no tocado)
 
 `__tests__/fixtures/matriz_pruebas_liverpool.xlsx` y los logs originales (`servlet_http.log`, `prosa_http.log`, etc.) siguen disponibles para los tests existentes que los usan.
+
+## TODO — productos sin cobertura
+
+El equipo entregó logs para 4 de los 8 productos soportados por el aplicativo. Los 4 productos restantes quedan **sin fixture hasta que el equipo entregue logs reales** (la regla del PR es no inventar data).
+
+| Producto | Estado en Downloads | Acción pendiente |
+|---|---|---|
+| `MOTO` | Solo manual `ManualDeIntegración_MOTO_V1.5.pdf` | Pedir log productivo de una tx MOTO |
+| `CARGOS_PERIODICOS_POST` | Solo manual `ManualDeIntegración_CargosPeriódicosPost_V2.1.pdf` | Pedir log productivo (idealmente con campos AN5822 `subseqMIT` + `COF=4`) |
+| `VENTANA_COMERCIO_ELECTRONICO` | Solo manual `Manual de Integración Ventana de Comercio Electrónico_v1.8.pdf` | Pedir log productivo (debe traer 3DS + Cybersource) |
+| `AGREGADORES_CARGOS_PERIODICOS` | Solo manual `ManualDeIntegración_CargosPeriódicos_Agregadores_V2.6.4.pdf` | Pedir log productivo (con SUB_MERCHANT + AN5822) |
+| `API_PW2_SEGURO` | Hay `Anexo IV - Ejemplos de Integración Java y .Net.pdf` (ejemplos en código, no log RT) | Opción A: pedir log productivo. Opción B: transcribir ejemplos del Anexo IV |
+| `INTERREDES_REMOTO` | Hay `Anexo IV - Ejemplo de Integración.pdf` | Mismo caso |
+
+**Cuando el equipo entregue logs nuevos**, se agrega un `scripts/scenarios/05-<nombre>.ts` con los datos transcritos y se corre `pnpm fixtures:generate`. Los builders ya soportan los 8 productos sin cambios.
+
+**No agregar bundles inventados.** El verdict que devuelve el aplicativo solo es información valiosa si los datos vienen del equipo.
