@@ -264,10 +264,11 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
       </span>
       <span className="text-[10px] text-banorte-secondary shrink-0">·</span>
       <span className="font-mono text-[10px] text-banorte-secondary w-7 shrink-0">{field.rule}</span>
-      <span className="text-banorte-dark truncate flex-1">{label}</span>
+      <span className="text-banorte-dark truncate flex-1" title={label}>{label}</span>
       <span
+        title={detail}
         className={cn(
-          'text-[11px] truncate max-w-[260px]',
+          'text-[11px] truncate max-w-[260px] cursor-help',
           status === 'pass' && 'text-banorte-secondary',
           status === 'fail' && 'text-banorte-error font-medium',
           status === 'skip' && 'text-banorte-secondary italic',
