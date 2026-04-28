@@ -244,16 +244,7 @@ function LayerGroup({ source, fields, isLast }: LayerGroupProps) {
 function RuleLine({ field }: { field: FieldResultResponse }) {
   const status = getStatus(field);
   const label = field.displayName || field.manualName || field.field;
-  const detail =
-    status === 'skip'
-      ? 'Fuera de alcance'
-      : status === 'pass'
-      ? field.value
-        ? `Valor: ${shorten(field.value)}`
-        : 'Cumple'
-      : field.found
-      ? 'Valor inválido'
-      : 'No encontrado en el log';
+  const detail = describeStatus(field, status);
 
   return (
     <div
@@ -291,4 +282,24 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
 function shorten(value: string, max = 28): string {
   if (value.length <= max) return value;
   return value.slice(0, max - 1) + '…';
+}
+
+/**
+ * Genera el texto de la columna 'detail' del árbol con la mejor info
+ * disponible: prefiere `failDetail` del dominio cuando existe, cae a
+ * mensajes derivados de `found` y `value` cuando no.
+ */
+function describeStatus(field: FieldResultResponse, status: Status): string {
+  if (status === 'skip') return 'Fuera de alcance';
+  if (status === 'pass') {
+    return field.value ? `Valor: ${shorten(field.value)}` : 'Cumple';
+  }
+  // fail
+  if (field.failDetail) return field.failDetail;
+  if (field.found) {
+    return field.value
+      ? `Valor inválido: "${shorten(field.value)}"`
+      : 'Valor inválido';
+  }
+  return 'No encontrado en el log';
 }

@@ -33,6 +33,17 @@ function buildSession(): CertificationSessionEntity {
         source: 'SERVLET',
         layer: ValidationLayer.SERVLET,
       },
+      {
+        field: 'ENTRY_MODE',
+        rule: 'R',
+        found: true,
+        value: 'CONTACTLESSCHIP',
+        verdict: 'FAIL',
+        failReason: 'invalid_value',
+        failDetail: 'Valor "CONTACTLESSCHIP" no permitido. Valores válidos: MANUAL, CHIP, CONTACTLESS',
+        source: 'SERVLET',
+        layer: ValidationLayer.SERVLET,
+      },
     ],
   );
 
@@ -72,7 +83,7 @@ describe('toCertificationResponse', () => {
     const dto = toCertificationResponse(session);
     const fields = dto.results[0].fieldResults;
 
-    expect(fields).toHaveLength(2);
+    expect(fields).toHaveLength(3);
     expect(fields[0]).toMatchObject({
       field: 'CARD_NUMBER',
       manualName: 'CARD_NUMBER',
@@ -94,7 +105,30 @@ describe('toCertificationResponse', () => {
     const result = dto.results[0];
 
     expect(result.passedCount).toBe(1);
-    expect(result.failedCount).toBe(1);
-    expect(result.totalValidated).toBe(2);
+    expect(result.failedCount).toBe(2);
+    expect(result.totalValidated).toBe(3);
+  });
+
+  it('propaga failReason y failDetail desde el dominio al DTO', () => {
+    const session = buildSession();
+    const dto = toCertificationResponse(session);
+    const fields = dto.results[0].fieldResults;
+
+    // Campo missing — sin failDetail explicito
+    expect(fields[1]).toMatchObject({
+      field: 'CVV2',
+      verdict: 'FAIL',
+      found: false,
+    });
+    expect(fields[1].failDetail).toBeUndefined();
+
+    // Campo con valor invalido — domain provee failDetail rico
+    expect(fields[2]).toMatchObject({
+      field: 'ENTRY_MODE',
+      verdict: 'FAIL',
+      found: true,
+      failReason: 'invalid_value',
+      failDetail: expect.stringContaining('CONTACTLESSCHIP'),
+    });
   });
 });

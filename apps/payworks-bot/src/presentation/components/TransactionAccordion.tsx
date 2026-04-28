@@ -14,7 +14,6 @@ interface TransactionAccordionProps {
   verdict: 'APROBADO' | 'RECHAZADO';
   requiredPassed: number;
   requiredTotal: number;
-  failedFields: { field: string; message: string }[];
   fieldResults: FieldResult[];
   defaultOpen?: boolean;
 }
@@ -25,12 +24,14 @@ export function TransactionAccordion({
   verdict,
   requiredPassed,
   requiredTotal,
-  failedFields,
   fieldResults,
   defaultOpen = false,
 }: TransactionAccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen || verdict === 'RECHAZADO');
   const isApproved = verdict === 'APROBADO';
+  const observationsCount = fieldResults.filter(
+    (f) => f.verdict === 'FAIL' && f.rule !== 'N/A',
+  ).length;
 
   return (
     <div className={cn(
@@ -61,7 +62,9 @@ export function TransactionAccordion({
         </div>
         <div className="flex items-center gap-3">
           <span className={cn('text-xs font-medium', isApproved ? 'text-banorte-success' : 'text-banorte-error')}>
-            {isApproved ? `${requiredPassed}/${requiredTotal} campos R` : `${failedFields.length} faltante(s)`}
+            {isApproved
+              ? `${requiredPassed}/${requiredTotal} campos R`
+              : `${observationsCount} observación${observationsCount === 1 ? '' : 'es'}`}
           </span>
           <ChevronDown className={cn(
             'w-4 h-4 text-banorte-secondary transition-transform duration-200',
@@ -70,19 +73,12 @@ export function TransactionAccordion({
         </div>
       </button>
 
-      {/* Expandable content */}
+      {/* Expandable content — el TransactionRuleTree muestra el detalle real
+          de cada falla (ausente, valor inválido, formato, etc.). El banner
+          amarillo previo se eliminó porque colapsaba todos los modos en
+          'No encontrado en el LOG Servlet'. */}
       {isOpen && (
         <div className="bg-white border-t border-gray-100">
-          {failedFields.length > 0 && (
-            <div className="bg-[#FFF4F4] px-5 py-3 text-sm text-banorte-error flex items-start gap-2 border-b border-red-100">
-              <X className="w-4 h-4 mt-0.5 shrink-0" />
-              <div>
-                {failedFields.map((f) => (
-                  <p key={f.field}><strong>{f.field}</strong> (Requerido): {f.message}</p>
-                ))}
-              </div>
-            </div>
-          )}
           <TransactionRuleTree fieldResults={fieldResults} />
         </div>
       )}

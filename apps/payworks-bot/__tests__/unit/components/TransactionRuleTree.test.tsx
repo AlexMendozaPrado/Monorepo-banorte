@@ -81,4 +81,55 @@ describe('TransactionRuleTree', () => {
     // Tras colapsar, el source ya no debe estar visible
     expect(screen.queryByText('Anexo D §3.1')).not.toBeInTheDocument();
   });
+
+  it('muestra failDetail del dominio cuando esta disponible', () => {
+    const fieldsWithDetail: FieldResultResponse[] = [
+      {
+        field: 'ENTRY_MODE',
+        displayName: 'Modo de Entrada',
+        rule: 'R',
+        found: true,
+        value: 'CONTACTLESSCHIP',
+        verdict: 'FAIL',
+        source: 'Anexo D §2.4',
+        layer: 'SERVLET',
+        failReason: 'invalid_value',
+        failDetail: 'Valor "CONTACTLESSCHIP" no permitido. Valores válidos: MANUAL, CHIP, CONTACTLESS',
+      },
+    ];
+    render(<TransactionRuleTree fieldResults={fieldsWithDetail} />);
+    expect(screen.getByText(/no permitido. Valores válidos: MANUAL, CHIP, CONTACTLESS/)).toBeInTheDocument();
+  });
+
+  it('para field con found=true sin failDetail muestra "Valor invalido" con el valor', () => {
+    const fields: FieldResultResponse[] = [
+      {
+        field: 'SUB_MERCHANT',
+        rule: 'R',
+        found: true,
+        value: 'ESSENTIALMASSA',
+        verdict: 'FAIL',
+        source: 'Anexo D',
+        layer: 'AGREGADOR',
+      },
+    ];
+    render(<TransactionRuleTree fieldResults={fields} />);
+    expect(screen.getByText(/Valor inválido: "ESSENTIALMASSA"/)).toBeInTheDocument();
+  });
+
+  it('para field con found=false muestra "No encontrado en el log"', () => {
+    const fields: FieldResultResponse[] = [
+      {
+        field: 'CARD_NUMBER',
+        rule: 'R',
+        found: false,
+        value: undefined,
+        verdict: 'FAIL',
+        source: 'SERVLET',
+        layer: 'SERVLET',
+      },
+    ];
+    render(<TransactionRuleTree fieldResults={fields} />);
+    expect(screen.getByText('No encontrado en el log')).toBeInTheDocument();
+  });
 });
