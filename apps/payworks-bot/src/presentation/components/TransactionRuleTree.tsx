@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { ChevronDown, Check, X, Circle, Shield, BookOpen } from 'lucide-react';
-import { cn } from '@banorte/ui';
+import { cn, Tooltip } from '@banorte/ui';
 import { FieldResultResponse } from '@/shared/types/api';
 
 const LAYER_INFO: Record<string, { label: string; bg: string; tone: string }> = {
@@ -264,18 +264,21 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
       </span>
       <span className="text-[10px] text-banorte-secondary shrink-0">·</span>
       <span className="font-mono text-[10px] text-banorte-secondary w-7 shrink-0">{field.rule}</span>
-      <span className="text-banorte-dark truncate flex-1" title={label}>{label}</span>
-      <span
-        title={detail}
-        className={cn(
-          'text-[11px] truncate max-w-[260px] cursor-help',
-          status === 'pass' && 'text-banorte-secondary',
-          status === 'fail' && 'text-banorte-error font-medium',
-          status === 'skip' && 'text-banorte-secondary italic',
-        )}
-      >
-        {detail}
-      </span>
+      <Tooltip content={label} placement="top" className="flex-1 min-w-0">
+        <span className="text-banorte-dark truncate w-full">{label}</span>
+      </Tooltip>
+      <Tooltip content={detail} placement="top" className="max-w-[260px] min-w-0">
+        <span
+          className={cn(
+            'text-[11px] truncate w-full cursor-help',
+            status === 'pass' && 'text-banorte-secondary',
+            status === 'fail' && 'text-banorte-error font-medium',
+            status === 'skip' && 'text-banorte-secondary italic',
+          )}
+        >
+          {detail}
+        </span>
+      </Tooltip>
     </div>
   );
 }

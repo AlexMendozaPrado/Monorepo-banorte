@@ -18,6 +18,7 @@ export {
   TableRow,
   TableHead,
   TableCell,
+  Tooltip,
 } from './components';
 
 export type {
@@ -40,6 +41,8 @@ export type {
   TableRowProps,
   TableHeadProps,
   TableCellProps,
+  TooltipProps,
+  TooltipPlacement,
 } from './components';
 
 // Tokens

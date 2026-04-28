@@ -46,3 +46,7 @@ export type {
   TableHeadProps,
   TableCellProps,
 } from './Table';
+
+// Tooltip
+export { Tooltip } from './Tooltip';
+export type { TooltipProps, TooltipPlacement } from './Tooltip';
