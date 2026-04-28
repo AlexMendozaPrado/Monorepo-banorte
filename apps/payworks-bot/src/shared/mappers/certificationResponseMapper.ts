@@ -50,6 +50,8 @@ export function toCertificationResponse(session: CertificationSession): Certific
           verdict: f.verdict,
           source: f.source,
           layer: f.layer,
+          failReason: f.failReason,
+          failDetail: f.failDetail,
         })),
       };
     }),

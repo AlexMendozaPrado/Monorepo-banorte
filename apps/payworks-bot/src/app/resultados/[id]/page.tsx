@@ -225,9 +225,6 @@ export default function ResultadosPage() {
           {filteredResults.map((txn) => {
             const requiredFields = txn.fieldResults.filter(f => f.rule === 'R');
             const requiredPassed = requiredFields.filter(f => f.verdict === 'PASS').length;
-            const failedFields = txn.fieldResults
-              .filter(f => f.verdict === 'FAIL')
-              .map(f => ({ field: f.field, message: 'No encontrado en el LOG Servlet' }));
 
             return (
               <TransactionAccordion
@@ -237,7 +234,6 @@ export default function ResultadosPage() {
                 verdict={txn.verdict === 'APROBADO' ? 'APROBADO' : 'RECHAZADO'}
                 requiredPassed={requiredPassed}
                 requiredTotal={requiredFields.length}
-                failedFields={failedFields}
                 fieldResults={txn.fieldResults}
               />
             );

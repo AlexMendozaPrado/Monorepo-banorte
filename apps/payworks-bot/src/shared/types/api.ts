@@ -41,4 +41,8 @@ export interface FieldResultResponse {
   source: string;
   /** Validation layer: SERVLET | THREEDS | CYBERSOURCE | AGREGADOR | EMV | AN5822 */
   layer?: string;
+  /** Razón categórica de la falla (ej. 'missing', 'invalid_format', 'invalid_value'). */
+  failReason?: string;
+  /** Mensaje legible compuesto por el dominio describiendo la falla específica. */
+  failDetail?: string;
 }
