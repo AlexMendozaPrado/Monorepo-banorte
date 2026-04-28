@@ -1,0 +1,116 @@
+VENTA LOG DE ENTRADA
+********************************************************************************
+[27/05/2025 16:08:26] SE RECIBIO POST HTTP DESDE LA IP:  99.80.135.225
+CARD_NUMBER:          [518899******7492]
+CMD_TRANS:            [AUTH]
+MERCHANT_ID:          [9342244]
+SUB_MERCHANT:         [ECOFLOWCOM]
+RESPONSE_LANGUAGE:    [EN]
+CONTROL_NUMBER:       [94784155462025052722082685]
+TERMINAL_ID:          [93422441]
+AGGREGATOR_ID:        [5299825]
+USER:                 [a9342244]
+AMOUNT:               [37999.00]
+CUSTOMER_REF3:        [9478415546]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [DLOCAL]
+MODE:                 [PRD]
+NUMERO_BIN:           [518899]
+********************************************************************************
+
+VENTA LOG DE SALIDA
+********************************************************************************
+[27/05/2025 16:08:27] SE ENVIO RESPUESTA HTTP HACIA LA IP:  99.80.135.225
+AUTH_CODE:            [010431]
+CUST_RSP_DATE:        [20250527 16:08:27.673]
+AUTH_RSP_DATE:        [20250527 16:08:27.670]
+CARD_TYPE:            [CREDITO   ]
+TEXT:                 [Approved]
+ISSUING_BANK:         [BANAMEX   ]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [94784155462025052722082685]
+CUST_REQ_DATE:        [20250527 16:08:26.949]
+REFERENCE:            [140374723108]
+AUTH_RESULT:          [00]
+CARD_BRAND:           [MASTERCARD]
+MERCHANT_ID:          [9342244]
+AUTH_REQ_DATE:        [20250527 16:08:26.974]
+NUMERO_BIN:           [518899]
+********************************************************************************
+
+PREAUTH LOG DE ENTRADA
+********************************************************************************
+[27/05/2025 00:33:23] SE RECIBIO POST HTTP DESDE LA IP:  99.80.135.225
+CARD_NUMBER:          [481516******4815]
+USER:                 [a9351533]
+CMD_TRANS:            [PREAUTH]
+MERCHANT_ID:          [9351533]
+SUB_MERCHANT:         [SIMPLEAPP]
+RESPONSE_LANGUAGE:    [EN]
+CONTROL_NUMBER:       [94719577962025052706332389]
+TERMINAL_ID:          [93515331]
+AGGREGATOR_ID:        [5059634]
+AMOUNT:               [499.00]
+CUSTOMER_REF3:        [9471957796]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [DLOCAL]
+MODE:                 [PRD]
+NUMERO_BIN:           [481516]
+********************************************************************************
+
+PREAUTH LOG DE ENVIO
+********************************************************************************
+[27/05/2025 00:33:24] SE ENVIO RESPUESTA HTTP HACIA LA IP:  99.80.135.225
+AUTH_CODE:            [015247]
+CUST_RSP_DATE:        [20250527 00:33:24.289]
+AUTH_RSP_DATE:        [20250527 00:33:24.286]
+CARD_TYPE:            [DEBITO    ]
+TEXT:                 [Approved]
+ISSUING_BANK:         [BANCOMER  ]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [94719577962025052706332389]
+CUST_REQ_DATE:        [20250527 00:33:23.996]
+REFERENCE:            [190369542582]
+AUTH_RESULT:          [00]
+CARD_BRAND:           [VISA------]
+MERCHANT_ID:          [9351533]
+AUTH_REQ_DATE:        [20250527 00:33:24.028]
+NUMERO_BIN:           [481516]
+********************************************************************************
+
+POST LOG DE ENTRADA
+********************************************************************************
+[27/05/2025 00:33:25] SE RECIBIO POST HTTP DESDE LA IP:  99.80.135.225
+TERMINAL_ID:          [93515331]
+CMD_TRANS:            [POSTAUTH]
+MERCHANT_ID:          [9351533]
+SUB_MERCHANT:         [SIMPLEAPP]
+RESPONSE_LANGUAGE:    [EN]
+CONTROL_NUMBER:       [22989775632025052706332526]
+AGGREGATOR_ID:        [5059634]
+REFERENCE:            [190369542582]
+USER:                 [a9351533]
+AMOUNT:               [499.00]
+CUSTOMER_REF3:        [9471957796]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [DLOCAL]
+MODE:                 [PRD]
+NUMERO_BIN:           [481516]
+********************************************************************************
+
+POST LOG DE ENVIO
+********************************************************************************
+[27/05/2025 00:33:25] SE ENVIO RESPUESTA HTTP HACIA LA IP:  99.80.135.225
+AUTH_CODE:            [015247]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [22989775632025052706332526]
+CUST_RSP_DATE:        [20250527 00:33:25.405]
+CUST_REQ_DATE:        [20250527 00:33:25.359]
+REFERENCE:            [100370918744]
+AUTH_RSP_DATE:        [20250527 00:33:25.400]
+AUTH_RESULT:          [00]
+TEXT:                 [Approved]
+MERCHANT_ID:          [9351533]
+AUTH_REQ_DATE:        [20250527 00:33:25.377]
+NUMERO_BIN:           [481516]
+********************************************************************************
