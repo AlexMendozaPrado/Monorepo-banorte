@@ -1,0 +1,41 @@
+[INFO] *************************************************
+[INFO] ************** VARIABLES EN ENVIO ***************
+[INFO] *************************************************
+[INFO] Fecha y hora Servidor: 14/04/2026 02:43
+[WARN] BillTo_city: Imperial Beach
+[WARN] BillTo_country: US
+[WARN] BillTo_email: MAREACORP@GMAIL.COM
+[WARN] BillTo_firstName: RAUL ROBERTO
+[WARN] BillTo_ipAddress: 68.7.137.72
+[WARN] BillTo_lastName: FARFAN
+[WARN] BillTo_phoneNumber: 16199541338
+[WARN] BillTo_postalCode: 91932
+[WARN] BillTo_state: CA
+[WARN] BillTo_street: Imperial Beach Boulevard
+[WARN] BillTo_streetNumber: 1087
+[WARN] Card_cardType: 001
+[WARN] Comments: Grupo Aries
+[WARN] DeviceFingerprintID: F465EEC19C1941EBB114BB7981CB91
+[WARN] MerchantID: banorteixe
+[WARN] MerchantNumber: 8248847
+[WARN] MerchantReferenceCode: F465EEC19C1941EBB114BB7981CB91
+[WARN] Mode: PRD
+[WARN] Name: a8248847
+[WARN] OrderId: F465EEC19C1941EBB114BB7981CB91
+[WARN] PurchaseTotals_currency: USD
+[WARN] PurchaseTotals_grandTotalAmount: 165
+[WARN] Review: Secure3D
+[WARN] TerminalId: 82488471
+[INFO] *************************************************
+
+[INFO] *************************************************
+[INFO] ************* VARIABLES DE RETORNO **************
+[INFO] *************************************************
+[INFO] Fecha y hora Servidor: 14/04/2026 02:43
+[INFO] decision: ACCEPT
+[INFO] requestID: 7761093337886442003282
+[INFO] reasonCode: 100
+[INFO] OrderId: F465EEC19C1941EBB114BB7981CB91
+[INFO] afsReply_afsResult: 1
+[INFO] Bnte_code: 00
+[INFO] *************************************************

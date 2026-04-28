@@ -1,0 +1,82 @@
+Servlet
+********************************************************************************
+[16/12/2025 08:24:57] SE RECIBIO POST HTTP DESDE LA IP:  66.23.212.68
+CARD_NUMBER:          [542418******1734]
+GATEWAY_ID:           [00000605483]
+CMD_TRANS:            [AUTH]
+COF:                  [4]
+AMOUNT_TYPE:          [V]
+USER:                 [a9607773]
+CONTROL_NUMBER:       [6535824458]
+TERMINAL_ID:          [96077731]
+RESPONSE_LANGUAGE:    [EN]
+CUST_REF3:            []
+PAYMENT_INFO:         [2]
+AMOUNT:               [19.97]
+MERCHANT_ID:          [9607773]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [ZIGU]
+MODE:                 [PRD]
+PAYMENT_IND:          [U]
+NUMERO_BIN:           [542418]
+********************************************************************************
+
+********************************************************************************
+[16/12/2025 08:24:58] SE ENVIO RESPUESTA HTTP HACIA LA IP:  66.23.212.68
+AUTH_CODE:            [46802P]
+CUST_RSP_DATE:        [20251216 08:24:58.010]
+AUTH_RSP_DATE:        [20251216 08:24:58.007]
+CARD_TYPE:            [CREDITO   ]
+TEXT:                 [Approved]
+ISSUING_BANK:         [EXTRANJERA]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [6535824458]
+CUST_REQ_DATE:        [20251216 08:24:57.452]
+REFERENCE:            [140559968829]
+AUTH_RESULT:          [00]
+CARD_BRAND:           [MASTERCARD]
+MERCHANT_ID:          [9607773]
+AUTH_REQ_DATE:        [20251216 08:24:57.482]
+NUMERO_BIN:           [542418]
+********************************************************************************
+
+********************************************************************************
+[16/12/2025 08:27:38] SE RECIBIO POST HTTP DESDE LA IP:  66.23.212.68
+CARD_NUMBER:          [542418******0601]
+GATEWAY_ID:           [00000605483]
+CMD_TRANS:            [AUTH]
+COF:                  [4]
+AMOUNT_TYPE:          [F]
+USER:                 [APIFITXR]
+CONTROL_NUMBER:       [6535827540]
+TERMINAL_ID:          [95263671]
+RESPONSE_LANGUAGE:    [EN]
+CUST_REF3:            [6198364708]
+PAYMENT_INFO:         [2]
+AMOUNT:               [19.99]
+MERCHANT_ID:          [9526367]
+ENTRY_MODE:           [MANUAL]
+CUSTOMER_REF5:        [ZIGU]
+MODE:                 [PRD]
+PAYMENT_IND:          [R]
+NUMERO_BIN:           [542418]
+********************************************************************************
+
+********************************************************************************
+[16/12/2025 08:27:38] SE ENVIO RESPUESTA HTTP HACIA LA IP:  66.23.212.68
+AUTH_CODE:            [89228P]
+CUST_RSP_DATE:        [20251216 08:27:38.623]
+AUTH_RSP_DATE:        [20251216 08:27:38.600]
+CARD_TYPE:            [CREDITO   ]
+TEXT:                 [Approved]
+ISSUING_BANK:         [EXTRANJERA]
+PAYW_RESULT:          [A]
+CONTROL_NUMBER:       [6535827540]
+CUST_REQ_DATE:        [20251216 08:27:38.087]
+REFERENCE:            [140559970854]
+AUTH_RESULT:          [00]
+CARD_BRAND:           [MASTERCARD]
+MERCHANT_ID:          [9526367]
+AUTH_REQ_DATE:        [20251216 08:27:38.120]
+NUMERO_BIN:           [542418]
+********************************************************************************
