@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowUp, ArrowRight, Upload, FileText } from 'lucide-react';
 import { Button } from '@banorte/ui';
+import { useCertificationRun } from '@/presentation/contexts/CertificationRunContext';
 
 interface IntegrationOption {
   value: string;
@@ -36,6 +37,7 @@ const OPERATION_MODES = [
 
 export function UploadCard() {
   const router = useRouter();
+  const certRun = useCertificationRun();
   const [selectedIntegration, setSelectedIntegration] = useState(INTEGRATION_OPTIONS[0].value);
   const [selectedMode, setSelectedMode] = useState<'semi' | 'auto'>('semi');
   const [isDragging, setIsDragging] = useState(false);
@@ -80,43 +82,27 @@ export function UploadCard() {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const formData = new FormData();
-      formData.append('matriz', matrizFile);
-      formData.append('integrationType', selectedIntegration);
-      formData.append('operationMode', selectedMode);
-      if (coordinador.trim()) formData.append('coordinadorCertificacion', coordinador.trim());
-      if (lenguaje.trim()) formData.append('lenguaje', lenguaje.trim());
-      if (versionAplicacion.trim()) formData.append('versionAplicacion', versionAplicacion.trim());
-      if (urlSubdominio.trim()) formData.append('urlSubdominio', urlSubdominio.trim());
+    const formData = new FormData();
+    formData.append('matriz', matrizFile);
+    formData.append('integrationType', selectedIntegration);
+    formData.append('operationMode', selectedMode);
+    if (coordinador.trim()) formData.append('coordinadorCertificacion', coordinador.trim());
+    if (lenguaje.trim()) formData.append('lenguaje', lenguaje.trim());
+    if (versionAplicacion.trim()) formData.append('versionAplicacion', versionAplicacion.trim());
+    if (urlSubdominio.trim()) formData.append('urlSubdominio', urlSubdominio.trim());
 
-      if (selectedMode === 'semi') {
-        if (csvFile) formData.append('csvBD', csvFile);
-        if (servletLogFile) formData.append('servletLog', servletLogFile);
-        if (prosaLogFile) formData.append('prosaLog', prosaLogFile);
-      }
-      if (afiliacionesFile) formData.append('afiliaciones', afiliacionesFile);
-      if (threeDSLogFile) formData.append('threeDSLog', threeDSLogFile);
-      if (cybersourceLogFile) formData.append('cybersourceLog', cybersourceLogFile);
-
-      const res = await fetch('/api/certificacion/validar', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Error en la certificacion');
-      }
-
-      // Navegar a resultados — la pagina lee del endpoint GET /api/certificacion/[id].
-      router.push(`/resultados/${data.data.id}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setIsLoading(false);
+    if (selectedMode === 'semi') {
+      if (csvFile) formData.append('csvBD', csvFile);
+      if (servletLogFile) formData.append('servletLog', servletLogFile);
+      if (prosaLogFile) formData.append('prosaLog', prosaLogFile);
     }
+    if (afiliacionesFile) formData.append('afiliaciones', afiliacionesFile);
+    if (threeDSLogFile) formData.append('threeDSLog', threeDSLogFile);
+    if (cybersourceLogFile) formData.append('cybersourceLog', cybersourceLogFile);
+
+    const integrationLabel = currentIntegration?.label;
+    certRun.start({ formData, integrationLabel });
+    router.push('/procesamiento');
   };
 
   return (

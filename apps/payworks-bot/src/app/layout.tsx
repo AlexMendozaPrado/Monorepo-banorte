@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { CertificationRunProvider } from '@/presentation/contexts/CertificationRunContext';
 
 export const metadata: Metadata = {
   title: 'Payworks Bot - Certificacion Automatizada',
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="min-h-screen font-sans antialiased">
-        {children}
+        <CertificationRunProvider>{children}</CertificationRunProvider>
       </body>
     </html>
   );
