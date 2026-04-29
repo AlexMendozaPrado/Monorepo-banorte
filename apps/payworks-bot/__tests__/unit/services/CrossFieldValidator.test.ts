@@ -216,6 +216,17 @@ describe('CrossFieldValidator', () => {
       expect(results[0].layer).toBe(ValidationLayer.THREEDS);
     });
 
+    it('Fase F.1: value queda undefined (no muestra el mensaje de error como valor)', () => {
+      const v = new CrossFieldValidator();
+      v.validatePostAuthRequiresAuthCode('POSTAUTH', makeEntity({}), []);
+      const results = v.toFieldValidationResults();
+      expect(results).toHaveLength(1);
+      expect(results[0].field).toBe('AUTH_CODE');
+      expect(results[0].value).toBeUndefined();
+      expect(results[0].failDetail).toContain('POSTAUTH requiere AUTH_CODE');
+      expect(results[0].failDetail).toContain('No se encontró AUTH_CODE');
+    });
+
     it('respeta issue.source cuando se especifica (no hard-codea SERVLET)', () => {
       const v = new CrossFieldValidator();
       v.validateCybersourceIdAndBin(

@@ -276,10 +276,20 @@ export class CrossFieldValidator {
       field: issue.field,
       rule: 'R',
       found: true,
-      value: issue.detail,
+      // FIX (Fase F.1): los issues cross-field no tienen un valor de campo
+      // observable (la falla es sobre la relación entre dos campos). Antes
+      // poníamos `issue.detail` aquí, lo que mostraba el mensaje de error
+      // como si fuera el valor del campo en el UI — confundía al usuario
+      // (e.g. AUTH_CODE en POSTAUTH mostraba "No se encontró AUTH_CODE..."
+      // como si ese fuera el valor real del campo). El detalle pertenece a
+      // `failDetail`; el `value` queda undefined para indicar que no hay
+      // valor observable atribuible.
+      value: undefined,
       verdict: 'FAIL' as const,
       failReason: 'cross_field',
-      failDetail: issue.rule,
+      // El detalle ahora combina la regla violada y el diagnóstico
+      // específico del caso, en orden lógico para el lector.
+      failDetail: `${issue.rule} — ${issue.detail}`,
       source: issue.source ?? 'SERVLET',
       layer: issue.layer,
     }));
