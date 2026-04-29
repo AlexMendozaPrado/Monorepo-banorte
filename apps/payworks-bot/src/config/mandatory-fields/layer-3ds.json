@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "F4 — Capa 3D Secure 2 Banorte manual v1.4 (29-Oct-2024). Reestructuración CRÍTICA: los campos se separan en (a) envío al servicio 3DS y (b) retorno del servicio 3DS al comercio. Cambios principales: agregados 13 campos de envío faltantes (FORWARD_PATH, REFERENCE3D, CITY, COUNTRY, EMAIL, NAME, LAST_NAME, POSTAL_CODE, STATE, STREET, MOBILE_PHONE, CREDIT_TYPE, THREED_VERSION). Desambiguación: CERTIFICACION_3D (envío, fijo 03) vs STATUS_3D (retorno, 200=ok) son DOS campos distintos, no un campo ambiguo. ECI con validValues por marca. Soporte AMEX añadido (manual v1.4 29-Oct-2024). STATUS_3D con 40+ códigos documentados. Campos ShipTo opcionales añadidos.",
+    "note": "F4 — Capa 3D Secure 2 Banorte manual v1.4 (29-Oct-2024). Reestructuración CRÍTICA: los campos se separan en (a) envío al servicio 3DS y (b) retorno del servicio 3DS al comercio. Cambios principales: agregados 13 campos de envío faltantes (FORWARD_PATH, REFERENCE3D, CITY, COUNTRY, EMAIL, NAME, LAST_NAME, POSTAL_CODE, STATE, STREET, MOBILE_PHONE, CREDIT_TYPE, THREED_VERSION). Desambiguación: CERTIFICACION_3D (envío, fijo 03) vs STATUS_3D (retorno, 200=ok) son DOS campos distintos, no un campo ambiguo. ECI con validValues por marca. Soporte AMEX añadido (manual v1.4 29-Oct-2024). STATUS_3D con 40+ códigos documentados. Campos ShipTo opcionales añadidos. CAMBIOS feedback equipo abr-2026: (E4) 3DS NO aplica a POSTAUTORIZACIÓN — todas las reglas POSTAUTH_* son N/A. Solo aplica a VENTA, VENTA CON PROMOCIÓN, PREAUTORIZACIÓN, PREAUTORIZACIÓN CON PROMOCIÓN. (P9) Para AMEX en TNP solo DOMICILIO (STREET), CP (POSTAL_CODE), TELEFONO (MOBILE_PHONE) y CORREO (EMAIL) son R; CIUDAD/PAIS/NOMBRE/APELLIDO son O.",
     "url3DS": "https://via.banorte.com/secure3d/Solucion3DSecure.htm",
     "appliesTo": ["ECOMMERCE_TRADICIONAL", "VENTANA_COMERCIO_ELECTRONICO", "AGREGADORES_COMERCIO_ELECTRONICO"],
     "eciByBrand": {
@@ -25,7 +25,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 16,
       "mustBeMasked": true
@@ -39,7 +39,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "format": "^(0[1-9]|1[0-2])/[0-9]{2}$",
       "maxLength": 5
@@ -53,7 +53,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "format": "^\\d{1,7}(\\.\\d{1,2})?$",
       "maxLength": 10
@@ -67,7 +67,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "validValues": ["VISA", "MC", "AMEX"],
       "maxLength": 5
@@ -81,7 +81,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 7,
       "format": "^\\d{1,7}$"
@@ -95,7 +95,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 25
     },
@@ -108,7 +108,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 40
     },
@@ -121,7 +121,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 40
     },
@@ -134,7 +134,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "fixedValue": "03",
       "maxLength": 2
@@ -148,7 +148,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 30
     },
@@ -157,11 +157,11 @@
       "displayName": "Ciudad del tarjetahabiente (envío)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "CAMPO AGREGADO: Manual v1.4 pág. 19: alfanumérico 50.",
+      "note": "CAMPO AGREGADO: Manual v1.4 pág. 19: alfanumérico 50. P9 (feedback equipo abr-2026): para AMEX solo DOMICILIO/CP/TELEFONO/CORREO son R; CIUDAD pasa a O.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 50
     },
@@ -170,11 +170,11 @@
       "displayName": "País del tarjetahabiente (ISO 3166-2, 2 dígitos)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "CAMPO AGREGADO: Manual v1.4: 'Es a dos dígitos. Ejemplo: México = MX'.",
+      "note": "CAMPO AGREGADO: Manual v1.4: 'Es a dos dígitos. Ejemplo: México = MX'. P9 (feedback equipo abr-2026): para AMEX solo DOMICILIO/CP/TELEFONO/CORREO son R; PAIS pasa a O.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "format": "^[A-Z]{2}$",
       "maxLength": 2
@@ -188,7 +188,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 255
     },
@@ -197,11 +197,11 @@
       "displayName": "Nombre del tarjetahabiente (envío)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "CAMPO AGREGADO: Manual v1.4: alfanumérico 60.",
+      "note": "CAMPO AGREGADO: Manual v1.4: alfanumérico 60. P9 (feedback equipo abr-2026): para AMEX solo DOMICILIO/CP/TELEFONO/CORREO son R; NOMBRE pasa a O.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 60
     },
@@ -210,11 +210,11 @@
       "displayName": "Primer apellido del tarjetahabiente (envío)",
       "dataType": "alphanum",
       "ambiguous": false,
-      "note": "CAMPO AGREGADO: Manual v1.4: alfanumérico 60.",
+      "note": "CAMPO AGREGADO: Manual v1.4: alfanumérico 60. P9 (feedback equipo abr-2026): para AMEX solo DOMICILIO/CP/TELEFONO/CORREO son R; APELLIDO pasa a O.",
       "rules": {
-        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
-        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "O",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 60
     },
@@ -227,7 +227,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 10
     },
@@ -240,7 +240,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 2
     },
@@ -253,7 +253,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 60
     },
@@ -266,7 +266,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "fixedValue": "2",
       "maxLength": 1
@@ -280,7 +280,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "format": "^\\d{1,25}$",
       "maxLength": 25
@@ -294,7 +294,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "validValues": ["CR", "DB"],
       "maxLength": 2
@@ -308,7 +308,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 50
     },
@@ -320,7 +320,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 2
     },
@@ -332,7 +332,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 2
     },
@@ -344,7 +344,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 60
     },
@@ -356,7 +356,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 60
     },
@@ -368,7 +368,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "format": "^\\d{1,14}$",
       "maxLength": 14
@@ -381,7 +381,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 10
     },
@@ -394,7 +394,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "validValues": ["sameday", "oneday", "twoday", "threeday", "lowcost", "pickup", "other", "none"],
       "maxLength": 8
@@ -407,7 +407,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 2
     },
@@ -419,7 +419,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 40
     },
@@ -431,7 +431,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 40
     }
@@ -448,7 +448,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "validValues": [
         "102", "200", "201", "202",
@@ -470,7 +470,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "validValues": ["01", "02", "05", "06", "07"],
       "validValuesByBrand": {
@@ -489,7 +489,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "N/A", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "omitIfEmpty": true,
       "maxLength": 40
@@ -503,7 +503,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "omitIfEmpty": true,
       "maxLength": 40
@@ -517,7 +517,7 @@
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
-        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 30
     },
@@ -530,7 +530,7 @@
       "rules": {
         "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
         "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O",
-        "POSTAUTH_VISA": "O", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "O"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       },
       "maxLength": 100
     },
@@ -543,7 +543,7 @@
       "rules": {
         "AUTH_VISA": "N/A", "AUTH_MC": "O", "AUTH_AMEX": "N/A",
         "PREAUTH_VISA": "N/A", "PREAUTH_MC": "O", "PREAUTH_AMEX": "N/A",
-        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "O", "POSTAUTH_AMEX": "N/A"
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A"
       }
     }
   },
