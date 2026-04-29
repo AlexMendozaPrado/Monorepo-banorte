@@ -81,4 +81,57 @@ describe('TransactionRuleTree', () => {
     // Tras colapsar, el source ya no debe estar visible
     expect(screen.queryByText('Anexo D §3.1')).not.toBeInTheDocument();
   });
+
+  describe('Fase F.2 — Click-to-expand RuleLine', () => {
+    const failFields: FieldResultResponse[] = [
+      {
+        field: 'AUTH_CODE',
+        displayName: 'Código de Autorización',
+        rule: 'R',
+        found: false,
+        value: undefined,
+        verdict: 'FAIL',
+        failReason: 'cross_field',
+        failDetail: 'POSTAUTH requiere AUTH_CODE de PREAUTH previo — No se encontró en respuestas previas',
+        source: 'SERVLET',
+        layer: 'SERVLET',
+      },
+    ];
+
+    it('muestra panel expandible con failReason/failDetail/source para fields fallidos', () => {
+      render(<TransactionRuleTree fieldResults={failFields} />);
+      // Inicialmente colapsado: panel detalle no visible
+      expect(screen.queryByText('Categoría')).not.toBeInTheDocument();
+
+      // Click en la línea del field fallido
+      const ruleLine = screen.getByText('Código de Autorización').closest('[role="button"]')!;
+      fireEvent.click(ruleLine);
+
+      // Panel expandido: aparecen los labels estructurados
+      expect(screen.getByText('Categoría')).toBeInTheDocument();
+      expect(screen.getByText('cross_field')).toBeInTheDocument();
+      expect(screen.getByText('Detalle')).toBeInTheDocument();
+      expect(screen.getByText(/POSTAUTH requiere AUTH_CODE/)).toBeInTheDocument();
+    });
+
+    it('al re-clicar colapsa el panel', () => {
+      render(<TransactionRuleTree fieldResults={failFields} />);
+      const ruleLine = screen.getByText('Código de Autorización').closest('[role="button"]')!;
+      fireEvent.click(ruleLine);
+      expect(screen.getByText('Categoría')).toBeInTheDocument();
+
+      fireEvent.click(ruleLine);
+      expect(screen.queryByText('Categoría')).not.toBeInTheDocument();
+    });
+
+    it('NO renderiza role=button en pass/skip (no expandibles)', () => {
+      const passField: FieldResultResponse[] = [{
+        field: 'MERCHANT_ID', rule: 'R', found: true, value: '8619640',
+        verdict: 'PASS', source: 'SERVLET', layer: 'SERVLET',
+      }];
+      render(<TransactionRuleTree fieldResults={passField} />);
+      // El text del field existe, pero no debe ser un role=button
+      expect(screen.queryByRole('button', { name: /MERCHANT_ID/ })).not.toBeInTheDocument();
+    });
+  });
 });
