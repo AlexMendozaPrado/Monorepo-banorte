@@ -79,6 +79,7 @@ export interface An5822ObservedFields {
 export const AN5822_EXCLUDED_PRODUCTS: ReadonlySet<IntegrationType> = new Set([
   IntegrationType.API_PW2_SEGURO,
   IntegrationType.INTERREDES_REMOTO,
+  IntegrationType.AGREGADORES_INTEGRADORES_TP,
 ]);
 
 /**

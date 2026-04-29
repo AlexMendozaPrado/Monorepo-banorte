@@ -1,0 +1,605 @@
+{
+  "_meta": {
+    "note": "Agregadores e Integradores Tarjeta Presente — manual V2.4.2 (Diciembre 2025). Producto NUEVO entregado por equipo Banorte (abril 2026). PinPad Banorte / DLL nativa, soporta Chip + Contactless + Manual (PagoMóvil) + Banda. Hereda la mensajería base de Interredes Remoto (PinPad WiFi/LAN) y agrega los 3 esquemas de agregador (igual que CE Agregadores). Anexo E coincide con Anexo D de CE Agregadores: SUB_MERCHANT formato 7*14, mayúsculas, sin Ñ, * solo subafiliados. PENDIENTE: bundle de prueba con log real (esperar al equipo).",
+    "specSource": "Manual de Integración Agregadores e Integradores Tarjeta Presente Payworks Seguro V2.4.2 (Diciembre 2025). Tablas 9-10 (envío) p.18-25, Tabla 11 (pagos diferidos) p.26.",
+    "supportedTransactions": [
+      "VENTA/AUTH", "CASHBACK", "VENTA_FORZADA/FORCED_AUTH",
+      "PREAUTORIZACION/PREAUTH", "REAUTORIZACION/REAUTH",
+      "POSTAUTORIZACION/POSTAUTH", "DEVOLUCION/REFUND",
+      "REVERSA/REVERSAL", "CIERRE_AFILIACION/MCHNT_SETTLEMENT",
+      "CIERRE_LOTE/GROUP_SETTLEMENT", "VERIFICACION/VERIFY",
+      "SUSPENSION/LOCK", "REACTIVACION/UNLOCK", "OBTENER_LLAVE/GET_KEY"
+    ],
+    "anexoE": "Reglas de contenido SUB_MERCHANT (manual p.25) — formato 7*14, mayúsculas, sin Ñ, sin acentos. * solo para subafiliados, . solo en domicilio. Reusa AnexoDValidator del producto CE Agregadores (espec idéntico).",
+    "tokenizacion": "ADDENDUM I V1.2 NO aplica a TP (manual ADDENDUM dice 'comercio electrónico' explícito). Si en el futuro Banorte extiende tokenización a TP, agregar TOKENIZACION a supportedLayers de IntegrationType."
+  },
+  "integrationType": "AGREGADORES_INTEGRADORES_TP",
+  "manualVersion": "2.4.2",
+  "manualDate": "2025-12-01",
+  "displayName": "Agregadores e Integradores - Tarjeta Presente",
+  "servlet": {
+    "MERCHANT_ID": {
+      "manualName": "ID_AFILIACION",
+      "displayName": "ID Afiliación (cabecera del Agregador/Integrador)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      },
+      "maxLength": 7,
+      "format": "^\\d{1,7}$"
+    },
+    "USER": {
+      "manualName": "USUARIO",
+      "displayName": "Usuario",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      },
+      "maxLength": 20
+    },
+    "PASSWORD": {
+      "manualName": "CLAVE_USR",
+      "displayName": "Contraseña (R_PCI — no aparece en log)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.18: R siempre. Por PCI-DSS no se registra en logs, por eso R_PCI.",
+      "rules": {
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI", "PREAUTH_AMEX": "R_PCI",
+        "REAUTH_VISA": "R_PCI", "REAUTH_MC": "R_PCI", "REAUTH_AMEX": "R_PCI",
+        "POSTAUTH_VISA": "R_PCI", "POSTAUTH_MC": "R_PCI", "POSTAUTH_AMEX": "R_PCI",
+        "REFUND_VISA": "R_PCI", "REFUND_MC": "R_PCI", "REFUND_AMEX": "R_PCI",
+        "VOID_VISA": "R_PCI", "VOID_MC": "R_PCI", "VOID_AMEX": "R_PCI",
+        "REVERSAL_VISA": "R_PCI", "REVERSAL_MC": "R_PCI", "REVERSAL_AMEX": "R_PCI",
+        "CASHBACK_VISA": "R_PCI", "CASHBACK_MC": "R_PCI", "CASHBACK_AMEX": "R_PCI",
+        "VERIFY_VISA": "R_PCI", "VERIFY_MC": "R_PCI", "VERIFY_AMEX": "R_PCI"
+      },
+      "maxLength": 20
+    },
+    "TERMINAL_ID": {
+      "manualName": "ID_TERMINAL",
+      "displayName": "ID Terminal",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.18: R para todas las transacciones (no comandos). Identificador único de terminal.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      },
+      "maxLength": 15
+    },
+    "CMD_TRANS": {
+      "manualName": "CMD_TRANS",
+      "displayName": "Comando de Transacción",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.18: 14 valores incluyendo SUSPENSION/LOCK y REACTIVACION/UNLOCK (no presentes en CE).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      },
+      "validValues": [
+        "VENTA", "AUTH",
+        "CASHBACK",
+        "VENTA_FORZADA", "FORCED_AUTH",
+        "PREAUTORIZACION", "PREAUTH",
+        "REAUTORIZACION", "REAUTH",
+        "POSTAUTORIZACION", "POSTAUTH",
+        "DEVOLUCION", "REFUND",
+        "REVERSA", "REVERSAL",
+        "CIERRE_AFILIACION", "MCHNT_SETTLEMENT",
+        "CIERRE_LOTE", "GROUP_SETTLEMENT",
+        "VERIFICACION", "VERIFY",
+        "SUSPENSION", "LOCK",
+        "REACTIVACION", "UNLOCK",
+        "OBTENER_LLAVE", "GET_KEY"
+      ],
+      "maxLength": 20
+    },
+    "MODE": {
+      "manualName": "MODO",
+      "displayName": "Modo",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19. PRD producción, AUT/DEC/RND modos de prueba.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      },
+      "validValues": ["PRD", "AUT", "DEC", "RND"],
+      "maxLength": 3
+    },
+    "ENTRY_MODE": {
+      "manualName": "MODO_ENTRADA",
+      "displayName": "Modo de Entrada",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19: 4 valores. CONTACTLESSCHIP confirmado en bundle 02 OPENLINEA real. PagoMóvil = MANUAL.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "N/A", "REAUTH_MC": "N/A", "REAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      },
+      "validValues": ["BANDA", "MAGSTRIPE", "CHIP", "MANUAL", "CONTACTLESSCHIP"],
+      "maxLength": 20
+    },
+    "AMOUNT": {
+      "manualName": "MONTO",
+      "displayName": "Monto",
+      "dataType": "decimal",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.18: R excepto comandos y REVERSA.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A"
+      },
+      "format": "^\\d{1,18}(\\.\\d{1,2})?$",
+      "maxLength": 21
+    },
+    "CASHBACK_AMOUNT": {
+      "manualName": "MONTO_CASHBACK",
+      "displayName": "Monto Cashback",
+      "dataType": "decimal",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.18: solo para transacciones CASHBACK.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R"
+      },
+      "format": "^\\d{1,18}(\\.\\d{1,2})?$",
+      "maxLength": 21
+    },
+    "REFERENCE": {
+      "manualName": "REFERENCIA",
+      "displayName": "Referencia (de transacción previa)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19: R para REAUT/POSTAUT/DEVOLUCION/SUSPENSION/REACTIVACION. R o NUMERO_CONTROL para REVERSA y VERIFICACION.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "O", "VOID_MC": "O", "VOID_AMEX": "O",
+        "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O",
+        "VERIFY_VISA": "O", "VERIFY_MC": "O", "VERIFY_AMEX": "O"
+      },
+      "format": "^\\d{1,12}$",
+      "maxLength": 12
+    },
+    "GROUP": {
+      "manualName": "LOTE",
+      "displayName": "Lote",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19: O para PREAUTORIZACION, R para CIERRE_LOTE.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O"
+      },
+      "maxLength": 30
+    },
+    "AUTH_CODE": {
+      "manualName": "CODIGO_AUT",
+      "displayName": "Código de Autorización",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19: solo para venta forzada (FORCED_AUTH).",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
+        "FORCED_AUTH_VISA": "R", "FORCED_AUTH_MC": "R", "FORCED_AUTH_AMEX": "R"
+      },
+      "maxLength": 10
+    },
+    "CONTROL_NUMBER": {
+      "manualName": "NUMERO_CONTROL",
+      "displayName": "Número de Control",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19: R siempre. Combinación MERCHANT_ID + CONTROL_NUMBER debe ser única (regla H2 cross-field).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R",
+        "VERIFY_VISA": "R", "VERIFY_MC": "R", "VERIFY_AMEX": "R"
+      },
+      "maxLength": 30
+    },
+    "RESPONSE_LANGUAGE": {
+      "manualName": "IDIOMA_RESPUESTA",
+      "displayName": "Idioma Respuesta",
+      "dataType": "enum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
+      },
+      "validValues": ["ES", "EN"],
+      "maxLength": 2
+    },
+    "VIRTUAL_KEYBOARD": {
+      "manualName": "TECLADO_VIRTUAL",
+      "displayName": "Teclado Virtual (MPOS)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Agregado en manual v2.4 (Diciembre 2023). Solo MPOS con ENTRY_MODE CHIP/CONTACTLESSCHIP/MANUAL/BANDA.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O"
+      },
+      "validValues": ["0", "1"],
+      "maxLength": 1
+    },
+    "CUSTOMER_REF2": {
+      "manualName": "REF_CLIENTE2",
+      "displayName": "Referencia Cliente 2 (Terminal ID real)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: 'Terminal ID real del dispositivo. Este valor es único por dispositivo.' Obligatorio para cualquier transacción.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R"
+      },
+      "maxLength": 30
+    },
+    "CUSTOMER_REF5": {
+      "manualName": "REF_CLIENTE5",
+      "displayName": "Referencia Cliente 5 (ID Alianza/Integrador/Agregador)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: 'Obligatorio para alianzas, agregadores e integradores.' Identificador único del modelo.",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R",
+        "CASHBACK_VISA": "R", "CASHBACK_MC": "R", "CASHBACK_AMEX": "R"
+      },
+      "maxLength": 30
+    },
+    "BANORTE_URL": {
+      "manualName": "URL_BANORTE",
+      "displayName": "URL Banorte (https://via.pagosbanorte.com/InterredesSeguro)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R",
+        "REAUTH_VISA": "R", "REAUTH_MC": "R", "REAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "R", "POSTAUTH_MC": "R", "POSTAUTH_AMEX": "R",
+        "REFUND_VISA": "R", "REFUND_MC": "R", "REFUND_AMEX": "R",
+        "VOID_VISA": "R", "VOID_MC": "R", "VOID_AMEX": "R",
+        "REVERSAL_VISA": "R", "REVERSAL_MC": "R", "REVERSAL_AMEX": "R"
+      },
+      "maxLength": 100
+    },
+    "TRACK1": {
+      "manualName": "TRACK1",
+      "displayName": "Track 1 (R_PCI — encriptado en log)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: solo si está presente. PCI-DSS — viaja encriptado, no aparece en claro en logs.",
+      "rules": {
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI"
+      },
+      "maxLength": 79
+    },
+    "TRACK2": {
+      "manualName": "TRACK2",
+      "displayName": "Track 2 (R_PCI — encriptado en log)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: R excepto manuales (PagoMóvil). PCI-DSS.",
+      "rules": {
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI",
+        "PREAUTH_VISA": "R_PCI", "PREAUTH_MC": "R_PCI", "PREAUTH_AMEX": "R_PCI",
+        "REAUTH_VISA": "R_PCI", "REAUTH_MC": "R_PCI", "REAUTH_AMEX": "R_PCI",
+        "CASHBACK_VISA": "R_PCI", "CASHBACK_MC": "R_PCI", "CASHBACK_AMEX": "R_PCI"
+      },
+      "maxLength": 40
+    },
+    "CARD_NUMBER": {
+      "manualName": "NUMERO_TARJETA",
+      "displayName": "Número de Tarjeta (R_PCI — solo PagoMóvil)",
+      "dataType": "masked",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: solo para PagoMóvil. PCI-DSS — enmascarado en log.",
+      "rules": {
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI"
+      },
+      "maxLength": 16,
+      "mustBeMasked": true
+    },
+    "CARD_EXP": {
+      "manualName": "FECHA_EXP",
+      "displayName": "Fecha Expiración (R_PCI — solo PagoMóvil)",
+      "dataType": "date",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: AAMM. Solo PagoMóvil. PCI-DSS — no aparece en log de respuesta.",
+      "rules": {
+        "AUTH_VISA": "R_PCI", "AUTH_MC": "R_PCI", "AUTH_AMEX": "R_PCI"
+      },
+      "format": "^\\d{4}$",
+      "maxLength": 4
+    },
+    "SECURITY_CODE": {
+      "manualName": "CODIGO_SEGURIDAD",
+      "displayName": "Código de Seguridad (R_PCI)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: solo AMEX/JCB y PagoMóvil. PCI-DSS — prohibido almacenar; aparece sólo en envío.",
+      "rules": {
+        "AUTH_AMEX": "R_PCI"
+      },
+      "format": "^\\d{3,4}$",
+      "maxLength": 4
+    },
+    "EMV_TAGS": {
+      "manualName": "TAGS_EMV",
+      "displayName": "Tags EMV (TLV hex)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.20: R para CHIP/CONTACTLESSCHIP en VENTA y PREAUT. Cadena hexadecimal TLV. Para producto CAT validar notas adicionales (Tag B3-6/9F35 con valor 25).",
+      "rules": {
+        "AUTH_VISA": "R", "AUTH_MC": "R", "AUTH_AMEX": "R",
+        "PREAUTH_VISA": "R", "PREAUTH_MC": "R", "PREAUTH_AMEX": "R"
+      },
+      "format": "^[0-9A-Fa-f]+$"
+    },
+    "INITIAL_DEFERMENT": {
+      "manualName": "DIFERIMIENTO_INICIAL",
+      "displayName": "Diferimiento Inicial (Q6)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.21: solo VENTA con promoción. Si presente, también deben venir NUMERO_PAGOS y TIPO_PLAN.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^\\d{2}$",
+      "maxLength": 2
+    },
+    "PAYMENTS_NUMBER": {
+      "manualName": "NUMERO_PAGOS",
+      "displayName": "Número de Pagos (Q6)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.21: solo VENTA con promoción.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^\\d{2}$",
+      "maxLength": 2
+    },
+    "PLAN_TYPE": {
+      "manualName": "TIPO_PLAN",
+      "displayName": "Tipo de Plan (07/03/05)",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.21: 07 si hay diferimiento inicial, 03 sin intereses, 05 con intereses.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "validValues": ["07", "03", "05"],
+      "maxLength": 2
+    },
+    "QPS": {
+      "manualName": "QPS",
+      "displayName": "Quick Payment Service",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.21: 1=QPS (sin firma), 0=normal.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "validValues": ["0", "1"],
+      "maxLength": 1
+    },
+    "PAGO_MOVIL": {
+      "manualName": "PAGO_MOVIL",
+      "displayName": "Pago Móvil flag",
+      "dataType": "enum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.19: 0/1, abre teclado MPOS para captura manual de tarjeta.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "validValues": ["0", "1"],
+      "maxLength": 1
+    },
+    "SUB_MERCHANT": {
+      "manualName": "SUB_AFILIACION",
+      "displayName": "Sub-afiliación (esquemas 4 con/sin AGP)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.22-25 + Anexo E: AN(18). Esquema 4 con AGP: nombre registrado en herramienta AGP PROSA. Esquema 4 sin AGP: el comercio lo genera con formato 7*14 (Anexo E).",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O"
+      },
+      "maxLength": 18
+    },
+    "AGGREGATOR_ID": {
+      "manualName": "ID_AGREGADOR",
+      "displayName": "ID Agregador (esquemas 4)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.22-25: N(19). Esquema 4 con AGP: igual al registrado en herramienta AGP. Esquema 4 sin AGP: lo asigna el cliente, único por subafiliación.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "O", "PREAUTH_MC": "O", "PREAUTH_AMEX": "O"
+      },
+      "format": "^\\d{1,19}$",
+      "maxLength": 19
+    },
+    "MERCHANT_MCC": {
+      "manualName": "MERCHANT_MCC",
+      "displayName": "MCC del Subafiliado",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.23: N(4). Solo Esquema 4 SIN AGP. Giro del subafiliado.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^\\d{4}$",
+      "maxLength": 4
+    },
+    "DOMICILIO_COMERCIO": {
+      "manualName": "DOMICILIO_COMERCIO",
+      "displayName": "Domicilio del Subafiliado (MAYÚSCULAS)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.23: AN(25). MAYÚSCULAS sin caracteres especiales. Solo Esquema 4 SIN AGP.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^[A-Z0-9 .]+$",
+      "maxLength": 25
+    },
+    "ZIP_CODE": {
+      "manualName": "CODIGO_POSTAL",
+      "displayName": "Código Postal del Subafiliado",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.23: N(10). Solo Esquema 4 SIN AGP.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^\\d{1,10}$",
+      "maxLength": 10
+    },
+    "TERMINAL_CITY": {
+      "manualName": "CIUDAD_TERMINAL",
+      "displayName": "Ciudad de la Terminal (MAYÚSCULAS)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.23: AN(13). Ejemplo CDMX. Solo Esquema 4 SIN AGP.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^[A-Z ]+$",
+      "maxLength": 13
+    },
+    "ESTADO_TERMINAL": {
+      "manualName": "ESTADO_TERMINAL",
+      "displayName": "Estado de la Terminal (MAYÚSCULAS, ej. AGS)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.23: AN(3). Solo Esquema 4 SIN AGP.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^[A-Z]{1,3}$",
+      "maxLength": 3
+    },
+    "TERMINAL_COUNTRY": {
+      "manualName": "PAIS_TERMINAL",
+      "displayName": "País de la Terminal (MX)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual V2.4.2 p.23: AN(2). MAYÚSCULAS. Ejemplo: MX. Solo Esquema 4 SIN AGP.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O"
+      },
+      "format": "^[A-Z]{2}$",
+      "maxLength": 2
+    }
+  },
+  "subEsquemas": {
+    "ESQ_1_TASA_NATURAL": {
+      "displayName": "Esquema Natural / Por Excepción / Giro Agregador",
+      "description": "El agregador opera bajo la afiliación padre. SUB_MERCHANT y AGGREGATOR_ID = N/A (manual V2.4.2 p.22).",
+      "required": []
+    },
+    "ESQ_4_CON_AGP": {
+      "displayName": "Esquema 4 Tasa Agregador Registrado con AGP PROSA",
+      "description": "Manual V2.4.2 p.22: requiere SOLO SUB_MERCHANT (alfanum 18) y AGGREGATOR_ID (numérico 19). El subafiliado se genera mediante la herramienta AGP de PROSA.",
+      "required": ["SUB_MERCHANT", "AGGREGATOR_ID"]
+    },
+    "ESQ_4_SIN_AGP": {
+      "displayName": "Esquema 4 Tasa Agregador Sin AGP",
+      "description": "Manual V2.4.2 p.23: el comercio genera SUB_MERCHANT directamente (sin AGP). Las 8 variables adicionales son obligatorias para Venta, PreAuth, PostAuth, ReAuth, Devolución, Cancelación, Reversa.",
+      "required": [
+        "SUB_MERCHANT",
+        "AGGREGATOR_ID",
+        "MERCHANT_MCC",
+        "DOMICILIO_COMERCIO",
+        "ZIP_CODE",
+        "TERMINAL_CITY",
+        "ESTADO_TERMINAL",
+        "TERMINAL_COUNTRY"
+      ]
+    }
+  }
+}

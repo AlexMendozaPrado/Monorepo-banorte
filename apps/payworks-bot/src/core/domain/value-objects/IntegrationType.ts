@@ -11,6 +11,7 @@ export enum IntegrationType {
   AGREGADORES_CARGOS_PERIODICOS = 'AGREGADORES_CARGOS_PERIODICOS',
   API_PW2_SEGURO = 'API_PW2_SEGURO',
   INTERREDES_REMOTO = 'INTERREDES_REMOTO',
+  AGREGADORES_INTEGRADORES_TP = 'AGREGADORES_INTEGRADORES_TP',
 }
 
 interface IntegrationTypeMetadata {
@@ -138,6 +139,24 @@ const METADATA: Record<IntegrationType, IntegrationTypeMetadata> = {
     ],
     supportedLayers: [ValidationLayer.SERVLET, ValidationLayer.EMV],
     supportsAggregatorSchemes: false,
+  },
+  [IntegrationType.AGREGADORES_INTEGRADORES_TP]: {
+    displayName: 'Agregadores e Integradores - Tarjeta Presente',
+    manualVersion: '2.4.2',
+    manualDate: '2025-12-01',
+    configFileName: 'agregadores-integradores-tp',
+    isTarjetaPresente: true,
+    supportedTransactions: [
+      TransactionType.AUTH, TransactionType.PREAUTH, TransactionType.REAUTH,
+      TransactionType.POSTAUTH, TransactionType.REFUND, TransactionType.VOID,
+      TransactionType.REVERSAL, TransactionType.CASHBACK, TransactionType.VERIFY,
+    ],
+    supportedLayers: [
+      ValidationLayer.SERVLET,
+      ValidationLayer.AGREGADOR,
+      ValidationLayer.EMV,
+    ],
+    supportsAggregatorSchemes: true,
   },
 };
 
