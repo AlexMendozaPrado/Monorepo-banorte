@@ -18,6 +18,14 @@ export interface CertificationSession {
   lenguaje?: string;
   versionAplicacion?: string;
   urlSubdominio?: string;
+  /**
+   * Folio oficial de certificación generado a partir de las nomenclaturas
+   * NOMENCLATURAS FOLIOS LABS del equipo Banorte. Formato típico
+   * `CE3DS-0003652_9885405`. `undefined` cuando la nomenclatura está
+   * pendiente del equipo (e.g. Tarjeta Presente estándar) — en ese caso el
+   * generador devuelve un placeholder `PENDIENTE-...` que sí se persiste.
+   */
+  folio?: string;
 }
 
 export class CertificationSessionEntity implements CertificationSession {
@@ -35,6 +43,7 @@ export class CertificationSessionEntity implements CertificationSession {
     public readonly lenguaje?: string,
     public readonly versionAplicacion?: string,
     public readonly urlSubdominio?: string,
+    public readonly folio?: string,
   ) {
     this.validateEntity();
   }

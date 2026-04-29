@@ -4,6 +4,7 @@ import {
   CertificationLetterData,
   buildCertificateCode,
 } from '@/core/domain/value-objects/CertificationLetterData';
+import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { generateCertificationLetterPDF } from '@/presentation/utils/generateCertificationLetterPDF';
 import { IntegrationTypeValueObject } from '@/core/domain/value-objects/IntegrationType';
 import { TransactionTypeValueObject } from '@/core/domain/value-objects/TransactionType';
@@ -43,11 +44,24 @@ export async function GET(
       ? container.afiliacionRepository.findByIdAfiliacion(idAfiliacion)
       : undefined;
 
-    const codigoCertificado = buildCertificateCode(
-      session.integrationType,
-      session.id,
-      idAfiliacion,
+    // Folio oficial generado durante el run (NOMENCLATURAS FOLIOS LABS).
+    // Fallback al legado `buildCertificateCode` para sesiones creadas antes
+    // de la introducción del FolioGenerator (Fase D, abr-2026).
+    const has3DSLayer = session.results.some(r =>
+      r.fieldResults?.some(f => f.layer === ValidationLayer.THREEDS),
     );
+    const hasCSLayer = session.results.some(r =>
+      r.fieldResults?.some(f => f.layer === ValidationLayer.CYBERSOURCE),
+    );
+    const codigoCertificado = session.folio
+      ?? container.folioGenerator.generate({
+        integrationType: session.integrationType,
+        has3DS: has3DSLayer,
+        hasCybersource: hasCSLayer,
+        sequential: 1,
+        idAfiliacion,
+      }).folio
+      ?? buildCertificateCode(session.integrationType, session.id, idAfiliacion);
 
     const approved = session.results.filter(
       r => r.verdict === ValidationVerdict.APROBADO,

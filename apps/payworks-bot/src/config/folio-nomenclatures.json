@@ -1,0 +1,112 @@
+{
+  "_meta": {
+    "note": "Nomenclaturas oficiales para folios de certificación Payworks. Fuente: NOMENCLATURAS FOLIOS LABS.xlsx entregado por equipo Banorte (abril 2026). 3 hojas: VIP/CAV (Comercios Alto Valor), ECOMM (TNP estándar), Agregadores. Sufijo `R` (o `VIPR-`) marca recertificación. Padding de secuencial estándar = 7 dígitos (#######), excepto VCE-3DS = 6 dígitos. PENDIENTE EQUIPO: nomenclaturas para Tarjeta Presente estándar (no agregador) — solo agregadores TP están definidos vía `A-CTLSSINTSEG` / `A-INTERSEG`.",
+    "specSource": "NOMENCLATURAS FOLIOS LABS (v2 abril 2026), hojas CAV / ECOMM / Agregadores.",
+    "padding": {
+      "default": 7,
+      "vipPlaceholder": 6,
+      "vceCifrado3ds": 6
+    }
+  },
+  "ecomm": [
+    {
+      "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "has3DS": false, "hasCybersource": false },
+      "label": "Ecommerce Tradicional",
+      "prefix": "CE",
+      "recertPrefix": "RCE",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "has3DS": true, "hasCybersource": false },
+      "label": "Ecommerce Tradicional con 3D Secure",
+      "prefix": "CE3DS",
+      "recertPrefix": "RCE3DS",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "has3DS": true, "hasCybersource": true },
+      "label": "Ecommerce Tradicional con 3D Secure y Cybersource",
+      "prefix": "CYB3D",
+      "recertPrefix": "RCYB3D",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "modifier": "applePay" },
+      "label": "Ecommerce Apple Pay",
+      "prefix": "AP",
+      "recertPrefix": "RAP",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "modifier": "cybersourceEnterpriseManual" },
+      "label": "Ecommerce Cybersource Enterprise Manual",
+      "prefix": "CYBEM",
+      "recertPrefix": "RCYBEM",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "modifier": "cybersourceEnterprise3D" },
+      "label": "Ecommerce Cybersource Enterprise 3D",
+      "prefix": "CYBE3D",
+      "recertPrefix": "RCYBE3D",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "VENTANA_COMERCIO_ELECTRONICO", "has3DS": true, "hasCybersource": false },
+      "label": "VCE Cifrado 3D Secure",
+      "prefix": "VC3DS",
+      "recertPrefix": "RVC3DS",
+      "padding": 6
+    },
+    {
+      "match": { "integrationType": "VENTANA_COMERCIO_ELECTRONICO", "has3DS": false, "hasCybersource": true },
+      "label": "VCE Cifrado Cybersource",
+      "prefix": "VCCYB",
+      "recertPrefix": "RVCCYB",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "CARGOS_PERIODICOS_POST" },
+      "label": "Cargos Periódicos Post",
+      "prefix": "CPP",
+      "recertPrefix": "RCPP",
+      "padding": 7
+    },
+    {
+      "match": { "integrationType": "MOTO" },
+      "label": "MOTO",
+      "prefix": "M",
+      "recertPrefix": "RM",
+      "padding": 7
+    }
+  ],
+  "vip": [
+    { "match": { "integrationType": "AGREGADORES_COMERCIO_ELECTRONICO", "isVIP": true }, "label": "VIP Agregador Comercio Electrónico", "prefix": "VIP-A-CE", "recertPrefix": "VIPR-A-CE", "padding": 6 },
+    { "match": { "integrationType": "AGREGADORES_CARGOS_PERIODICOS", "isVIP": true }, "label": "VIP Agregador Cargos Periódicos", "prefix": "VIP-A-CP", "recertPrefix": "VIPR-A-CP", "padding": 6 },
+    { "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "isVIP": true, "modifier": "integrador" }, "label": "VIP Integrador Comercio Electrónico", "prefix": "VIP-I-CE", "recertPrefix": "VIPR-I-CE", "padding": 6 },
+    { "match": { "integrationType": "CARGOS_PERIODICOS_POST", "isVIP": true, "modifier": "integrador" }, "label": "VIP Integrador Cargos Periódicos", "prefix": "VIP-I-CP", "recertPrefix": "VIPR-I-CP", "padding": 6 },
+    { "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "isVIP": true }, "label": "VIP Comercio Electrónico", "prefix": "VIP-CE", "recertPrefix": "VIPR-CE", "padding": 6 },
+    { "match": { "integrationType": "CARGOS_PERIODICOS_POST", "isVIP": true }, "label": "VIP Cargos Periódicos", "prefix": "VIP-CP", "recertPrefix": "VIPR-CP", "padding": 6 },
+    { "match": { "integrationType": "MOTO", "isVIP": true }, "label": "VIP MOTO", "prefix": "VIP-MT", "recertPrefix": "VIPR-MT", "padding": 6 },
+    { "match": { "integrationType": "MOTO", "isVIP": true, "hasCybersource": true }, "label": "VIP Cybersource MOTO", "prefix": "VIP-CYB-MT", "recertPrefix": "VIPR-CYB-MT", "padding": 6 },
+    { "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "isVIP": true, "hasCybersource": true }, "label": "VIP Cybersource Comercio Electrónico", "prefix": "VIP-CYB-CE", "recertPrefix": "VIPR-CYB-CE", "padding": 6 },
+    { "match": { "integrationType": "CARGOS_PERIODICOS_POST", "isVIP": true, "hasCybersource": true }, "label": "VIP Cybersource Cargos Periódicos", "prefix": "VIP-CYB-CP", "recertPrefix": "VIPR-CYB-CP", "padding": 6 },
+    { "match": { "integrationType": "ECOMMERCE_TRADICIONAL", "isVIP": true, "has3DS": true }, "label": "VIP 3D Secure Comercio Electrónico", "prefix": "VIP-3DS-CE", "recertPrefix": "VIPR-3DS-CE", "padding": 6 },
+    { "match": { "integrationType": "INTERREDES_REMOTO", "isVIP": true, "modifier": "contactless" }, "label": "VIP Contactless Interredes Seguro", "prefix": "VIP-CTLSSINTSEG", "recertPrefix": "VIPR-CTLSSINTSEG", "padding": 6 }
+  ],
+  "agregadores": [
+    { "label": "Agregador Comercio Electrónico", "code": "A-CE" },
+    { "label": "Integrador Comercio Electrónico", "code": "I-CE" },
+    { "label": "Agregador Cargos Periódicos", "code": "A-CP" },
+    { "label": "Integrador Cargos Periódicos", "code": "I-CP" },
+    { "label": "Agregador Contactless Seguro", "code": "A-CTLSSINTSEG" },
+    { "label": "Integrador Contactless Seguro", "code": "I-CTLSSINTSEG" },
+    { "label": "Agregador Interredes Seguro", "code": "A-INTERSEG" },
+    { "label": "Integrador Interredes Seguro", "code": "I-INTERSEG" }
+  ],
+  "pendingFromTeam": [
+    "Nomenclaturas para Tarjeta Presente estándar (MOTO TP, Cargos Periódicos TP, etc. — solo agregadores TP están definidos)",
+    "Confirmación del padding real de VIP (00010X parece placeholder)",
+    "Nomenclatura del nuevo producto Agregadores e Integradores TP V2.4.2 (manual diciembre 2025)"
+  ]
+}
