@@ -118,6 +118,13 @@ export interface MandatoryFieldsMatrix {
   threeds?: Record<string, FieldSpec>;
   cybersource?: Record<string, FieldSpec>;
   /**
+   * Capa transversal Tokenización Token de Red (ADDENDUM I V1.2 dic-2025).
+   * Variables TAVV/TR_ID/AAV (+ ENVIRONMENT_TRANS/TYPE) que viajan en el log
+   * servlet del POST cuando la tx es tokenizada. Se valida sólo cuando el
+   * log contiene cualquiera de TAVV/TR_ID/AAV (activación condicional).
+   */
+  tokenizacion?: Record<string, FieldSpec>;
+  /**
    * Tags EMV de SALIDA del SDK (solo API PW2 Seguro e Interredes Remoto).
    * Documental — NO se valida contra el log. Ver {@link EmvVoucherSection}.
    */

@@ -210,6 +210,45 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * Valida que la mensajería de Tokenización Token de Red (ADDENDUM I V1.2)
+   * sea consistente con la marca: VISA usa TAVV, MC usa TR_ID + AAV. Una
+   * mezcla cruzada (e.g. VISA enviando AAV) no es semánticamente válida.
+   *
+   * Sólo activa cuando hay marcadores de tokenización presentes — para
+   * transacciones no-tokenizadas no produce issues.
+   */
+  validateTokenizacionBrandConsistency(
+    cardBrand: string,
+    servletRequest: LogEntity | undefined,
+  ): void {
+    if (!servletRequest) return;
+    const hasTAVV = servletRequest.hasField('TAVV');
+    const hasTRID = servletRequest.hasField('TR_ID');
+    const hasAAV = servletRequest.hasField('AAV');
+
+    if (!hasTAVV && !hasTRID && !hasAAV) return;
+
+    if (cardBrand === 'VISA' && (hasTRID || hasAAV)) {
+      this.issues.push({
+        field: hasTRID ? 'TR_ID' : 'AAV',
+        rule: 'Tokenización: VISA usa TAVV (no TR_ID/AAV — esos son MC)',
+        detail: `Transacción VISA tokenizada no debe enviar ${hasTRID ? 'TR_ID' : 'AAV'} (criptograma exclusivo de MC). Manual ADDENDUM I V1.2 p.4.`,
+        layer: ValidationLayer.TOKENIZACION,
+        source: 'TOKENIZACION',
+      });
+    }
+    if (cardBrand === 'MC' && hasTAVV) {
+      this.issues.push({
+        field: 'TAVV',
+        rule: 'Tokenización: MC usa TR_ID + AAV (no TAVV — ese es VISA)',
+        detail: 'Transacción MC tokenizada no debe enviar TAVV (criptograma exclusivo de VISA). Manual ADDENDUM I V1.2 p.4.',
+        layer: ValidationLayer.TOKENIZACION,
+        source: 'TOKENIZACION',
+      });
+    }
+  }
+
   validateResponseFields(
     servletResponse: LogEntity | undefined,
     expectedResults: { field: string; validValues: string[] }[],

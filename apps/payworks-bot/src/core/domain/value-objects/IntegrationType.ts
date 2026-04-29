@@ -36,7 +36,7 @@ const METADATA: Record<IntegrationType, IntegrationTypeMetadata> = {
       TransactionType.REFUND, TransactionType.VOID, TransactionType.REVERSAL,
       TransactionType.VERIFY,
     ],
-    supportedLayers: [ValidationLayer.SERVLET, ValidationLayer.THREEDS, ValidationLayer.CYBERSOURCE, ValidationLayer.AN5822],
+    supportedLayers: [ValidationLayer.SERVLET, ValidationLayer.THREEDS, ValidationLayer.CYBERSOURCE, ValidationLayer.AN5822, ValidationLayer.TOKENIZACION],
     supportsAggregatorSchemes: false,
   },
   [IntegrationType.MOTO]: {
@@ -76,7 +76,7 @@ const METADATA: Record<IntegrationType, IntegrationTypeMetadata> = {
       TransactionType.AUTH, TransactionType.PREAUTH, TransactionType.POSTAUTH,
       TransactionType.REFUND, TransactionType.VOID, TransactionType.REVERSAL,
     ],
-    supportedLayers: [ValidationLayer.SERVLET, ValidationLayer.THREEDS, ValidationLayer.CYBERSOURCE, ValidationLayer.AN5822],
+    supportedLayers: [ValidationLayer.SERVLET, ValidationLayer.THREEDS, ValidationLayer.CYBERSOURCE, ValidationLayer.AN5822, ValidationLayer.TOKENIZACION],
     supportsAggregatorSchemes: false,
   },
   [IntegrationType.AGREGADORES_COMERCIO_ELECTRONICO]: {
@@ -95,6 +95,7 @@ const METADATA: Record<IntegrationType, IntegrationTypeMetadata> = {
       ValidationLayer.THREEDS,
       ValidationLayer.CYBERSOURCE,
       ValidationLayer.AN5822,
+      ValidationLayer.TOKENIZACION,
     ],
     supportsAggregatorSchemes: true,
   },

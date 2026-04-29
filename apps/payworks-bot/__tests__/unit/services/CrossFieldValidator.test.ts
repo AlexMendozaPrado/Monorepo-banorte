@@ -349,6 +349,59 @@ describe('CrossFieldValidator', () => {
       expect(v.getIssues()).toHaveLength(0);
     });
   });
+
+  describe('Tokenización Token de Red — consistencia por marca (ADDENDUM I V1.2)', () => {
+    it('no genera issue cuando no hay marcadores de tokenización', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ AMOUNT: '100.00', MERCHANT_ID: '8619640' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('VISA con TAVV: pasa (caso correcto)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ TAVV: '/gAAAAAAjXTHmrMAmbV0gwEAAAA=' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('MC con TR_ID + AAV: pasa (caso correcto)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('MC', makeEntity({ TR_ID: '50110540444', AAV: 'AAQao7vxa6NeAAEaly6IAAADFA==' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('VISA con AAV: falla (AAV es exclusivo de MC)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ AAV: 'AAQao7vxa6NeAAEaly6IAAADFA==' }));
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('AAV');
+      expect(issues[0].layer).toBe(ValidationLayer.TOKENIZACION);
+      expect(issues[0].source).toBe('TOKENIZACION');
+    });
+
+    it('VISA con TR_ID: falla (TR_ID es exclusivo de MC)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ TR_ID: '50110540444' }));
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('TR_ID');
+    });
+
+    it('MC con TAVV: falla (TAVV es exclusivo de VISA)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('MC', makeEntity({ TAVV: '/gAAAAAAjXTHmrMAmbV0gwEAAAA=' }));
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('TAVV');
+      expect(issues[0].source).toBe('TOKENIZACION');
+    });
+
+    it('no corre sin servlet log', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', undefined);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
 });
 
 describe('UniqueValidator', () => {

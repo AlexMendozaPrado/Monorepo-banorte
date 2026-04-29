@@ -25,6 +25,7 @@ import { RateLimitValidator } from '@/core/domain/services/RateLimitValidator';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
 import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
+import layerTokenizacion from '@/config/mandatory-fields/layer-tokenizacion.json';
 import { ExcelMatrixParser } from '../matrix-parser/ExcelMatrixParser';
 import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig';
 import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
@@ -227,6 +228,7 @@ export class DIContainer {
         layerCybersource as unknown as MandatoryFieldsMatrix,
         this.preAuthPostAuthCorrelator,
         this.rateLimitValidator,
+        layerTokenizacion as unknown as MandatoryFieldsMatrix,
       );
     }
     return this._runCertificationUseCase;

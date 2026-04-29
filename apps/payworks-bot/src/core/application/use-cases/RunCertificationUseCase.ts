@@ -50,6 +50,7 @@ export class RunCertificationUseCase {
     private readonly cybersourceMatrix?: MandatoryFieldsMatrix,
     private readonly preAuthPostAuthCorrelator?: PreAuthPostAuthCorrelator,
     private readonly rateLimitValidator?: RateLimitValidator,
+    private readonly tokenizacionMatrix?: MandatoryFieldsMatrix,
   ) {}
 
   async execute(command: RunCertificationCommand): Promise<CertificationSessionEntity> {
@@ -152,6 +153,7 @@ export class RunCertificationUseCase {
           cybersourceLog,
           threeDSMatrix: this.threeDSMatrix,
           cybersourceMatrix: this.cybersourceMatrix,
+          tokenizacionMatrix: this.tokenizacionMatrix,
           declaredAn5822Flow: txn.flujoAn5822 ?? null,
         });
 

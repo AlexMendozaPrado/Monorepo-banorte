@@ -42,6 +42,11 @@ export interface ValidateFieldsCommand {
   threeDSMatrix?: MandatoryFieldsMatrix;
   cybersourceMatrix?: MandatoryFieldsMatrix;
   /**
+   * Matrix Token de Red (ADDENDUM I V1.2). Inyectada por el orquestador.
+   * Sólo activa la validación cuando el log servlet contiene TAVV/TR_ID/AAV.
+   */
+  tokenizacionMatrix?: MandatoryFieldsMatrix;
+  /**
    * Flujo AN5822 declarado por la matriz del comercio. `null` si la
    * matriz no trae columna o el valor es N/A. Se usa con prioridad
    * sobre la inferencia heurística por `PAYMENT_INFO`.
@@ -128,6 +133,9 @@ export class ValidateTransactionFieldsUseCase {
     cross.validateCybersourceDecisionFlow(command.cybersourceLog);
     cross.validateShipToCountryMatch(command.cybersourceLog, command.servletRequest);
     cross.validateCybersourceIdAndBin(command.servletRequest, command.cybersourceLog);
+    // Tokenización (ADDENDUM I V1.2): rechazar mensajería token cruzada
+    // entre marcas (VISA con AAV/TR_ID o MC con TAVV).
+    cross.validateTokenizacionBrandConsistency(command.cardBrand, command.servletRequest);
     // C12 — PinPad error codes (solo productos TP con errorCodes en su matriz).
     const productMatrix = this.mandatoryFields.getMatrix(command.integrationType);
     cross.validatePinPadErrorCode(command.servletRequest, productMatrix.errorCodes);
@@ -283,6 +291,21 @@ export class ValidateTransactionFieldsUseCase {
       'CYBERSOURCE',
     );
 
+    // --- Transversal Tokenización Token de Red (ADDENDUM I V1.2) ---
+    // Activación condicional: sólo si el log servlet tiene marcadores de
+    // tokenización (TAVV/TR_ID/AAV). Evita falsos negativos en transacciones
+    // VENTA estándar no-tokenizadas.
+    const tokenizacionResults = this.shouldActivateTokenizacion(command.servletRequest)
+      ? validateAgainstSpecMap(
+          command.tokenizacionMatrix?.tokenizacion,
+          transactionKey,
+          command.cardBrand,
+          command.servletRequest,
+          ValidationLayer.TOKENIZACION,
+          'TOKENIZACION',
+        )
+      : [];
+
     // --- Transversal AN5822 layer (MC-only; no-op for other brands/products) ---
     const an5822Results = this.buildAn5822Results(command);
 
@@ -300,10 +323,23 @@ export class ValidateTransactionFieldsUseCase {
         ...servletResults,
         ...threeDSResults,
         ...cybersourceResults,
+        ...tokenizacionResults,
         ...an5822Results,
         ...crossResults,
         ...anexoDResults,
       ],
     );
+  }
+
+  /**
+   * La capa Tokenización sólo se valida cuando el log servlet contiene al
+   * menos uno de TAVV/TR_ID/AAV. Si ninguno está presente la transacción
+   * no es tokenizada y la capa se salta — sin esto, una VENTA VISA estándar
+   * fallaría TAVV (R) artificialmente.
+   */
+  private shouldActivateTokenizacion(servletRequest: ServletLogEntity): boolean {
+    return servletRequest.hasField('TAVV')
+      || servletRequest.hasField('TR_ID')
+      || servletRequest.hasField('AAV');
   }
 }
