@@ -4,6 +4,7 @@ import { TransactionType } from '@/core/domain/value-objects/TransactionType';
 import { CardBrand } from '@/core/domain/value-objects/CardBrand';
 import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { FieldRequirementValueObject } from '@/core/domain/value-objects/FieldRequirement';
+import { ForbiddenCharsListName } from '@/core/domain/value-objects/ForbiddenCharsRegistry';
 import {
   FieldSpec,
   MandatoryFieldsMatrix,
@@ -65,6 +66,9 @@ export function buildTransactionKey(type: TransactionType, brand: CardBrand): st
 /**
  * Generic helper: given a FieldSpec map and a key/value entity, produce
  * one FieldValidationResult per field with the given `layer` and `source`.
+ *
+ * `forbiddenCharsList` selecciona la lista de caracteres prohibidos a
+ * aplicar (B4 — feedback equipo abr-2026). Default `'BASE'`.
  */
 function validateAgainstSpecMap(
   specMap: Record<string, FieldSpec> | undefined,
@@ -73,6 +77,7 @@ function validateAgainstSpecMap(
   entity: { hasField(n: string): boolean; getField(n: string): string | undefined } | undefined,
   layer: ValidationLayer,
   source: FieldValidationResult['source'],
+  forbiddenCharsList: ForbiddenCharsListName = 'BASE',
 ): FieldValidationResult[] {
   if (!specMap || !entity) return [];
   const out: FieldValidationResult[] = [];
@@ -82,7 +87,7 @@ function validateAgainstSpecMap(
     const found = entity.hasField(logName);
     const value = entity.getField(logName);
     const effectiveSpec = resolveSpecForBrand(spec, cardBrand);
-    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec);
+    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec, forbiddenCharsList);
     out.push({
       field: logName,
       manualName: spec.manualName,
@@ -243,10 +248,22 @@ export class ValidateTransactionFieldsUseCase {
     return results;
   }
 
+  /**
+   * Selecciona la lista de caracteres prohibidos por producto/capa.
+   * - Ventana CE: VENTANA_3DS (manual VCE v1.8 §7).
+   * - Resto de productos servlet: BASE.
+   */
+  private servletForbiddenList(integrationType: IntegrationType): ForbiddenCharsListName {
+    return integrationType === IntegrationType.VENTANA_COMERCIO_ELECTRONICO
+      ? 'VENTANA_3DS'
+      : 'BASE';
+  }
+
   execute(command: ValidateFieldsCommand): ValidationResultEntity {
     const transactionKey = buildTransactionKey(command.transactionType, command.cardBrand);
 
     // --- Servlet layer (always validated) ---
+    const servletForbidden = this.servletForbiddenList(command.integrationType);
     const logNames = this.mandatoryFields.getServletLogNames(command.integrationType);
     const servletResults: FieldValidationResult[] = [];
     for (const logName of logNames) {
@@ -255,7 +272,7 @@ export class ValidateTransactionFieldsUseCase {
       const found = command.servletRequest.hasField(logName);
       const value = command.servletRequest.getField(logName);
       const effectiveSpec = spec ? resolveSpecForBrand(spec, command.cardBrand) : undefined;
-      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec);
+      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec, servletForbidden);
       servletResults.push({
         field: logName,
         manualName: spec?.manualName,
@@ -271,7 +288,7 @@ export class ValidateTransactionFieldsUseCase {
       });
     }
 
-    // --- Transversal 3D Secure layer ---
+    // --- Transversal 3D Secure layer (lista de chars VENTANA_3DS) ---
     const threeDSResults = validateAgainstSpecMap(
       command.threeDSMatrix?.threeds,
       transactionKey,
@@ -279,15 +296,17 @@ export class ValidateTransactionFieldsUseCase {
       command.threeDSLog,
       ValidationLayer.THREEDS,
       'THREEDS',
+      'VENTANA_3DS',
     );
 
-    // --- Transversal Cybersource layer ---
+    // --- Transversal Cybersource layer (lista de chars CYBERSOURCE — más laxa) ---
     const cybersourceResults = validateAgainstSpecMap(
       command.cybersourceMatrix?.cybersource,
       transactionKey,
       command.cardBrand,
       command.cybersourceLog,
       ValidationLayer.CYBERSOURCE,
+      'CYBERSOURCE',
       'CYBERSOURCE',
     );
 
