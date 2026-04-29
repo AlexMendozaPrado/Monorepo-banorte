@@ -55,9 +55,8 @@ interface TransactionRuleTreeProps {
  * Componente puro: agrupa el DTO `FieldResultResponse[]` que ya emite el
  * dominio sin requerir cambios en core/application/infrastructure.
  *
- * Reemplaza la tabla plana `FieldValidationTable` dentro de
- * `TransactionAccordion`. La taxonomia de "grupos" se deriva del campo
- * `source` (seccion del manual) que el dominio ya provee.
+ * La taxonomia de "grupos" se deriva del campo `source` (seccion del
+ * manual) que el dominio ya provee.
  */
 export function TransactionRuleTree({ fieldResults }: TransactionRuleTreeProps) {
   const tree = useMemo(() => {
