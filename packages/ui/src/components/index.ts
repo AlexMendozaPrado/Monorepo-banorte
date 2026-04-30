@@ -36,6 +36,10 @@ export type { SearchInputProps } from './SearchInput';
 export { Select } from './Select';
 export type { SelectProps, SelectOption } from './Select';
 
+// TextArea
+export { TextArea } from './TextArea';
+export type { TextAreaProps } from './TextArea';
+
 // Table
 export { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from './Table';
 export type {

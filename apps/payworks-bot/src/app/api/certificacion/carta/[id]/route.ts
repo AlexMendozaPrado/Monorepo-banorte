@@ -6,6 +6,7 @@ import {
 } from '@/core/domain/value-objects/CertificationLetterData';
 import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { generateCertificationLetterPDF } from '@/presentation/utils/generateCertificationLetterPDF';
+import { generateCertificationLetterDocx } from '@/infrastructure/templates/DocxCertificationLetterRenderer';
 import { IntegrationTypeValueObject } from '@/core/domain/value-objects/IntegrationType';
 import { TransactionTypeValueObject } from '@/core/domain/value-objects/TransactionType';
 import { ValidationVerdict } from '@/core/domain/value-objects/ValidationVerdict';
@@ -18,10 +19,16 @@ function formatDate(d: Date): string {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } },
 ): Promise<Response> {
   try {
+    const format = request.nextUrl.searchParams.get('format') === 'pdf' ? 'pdf' : 'docx';
+    const notasAdicionalesParam = request.nextUrl.searchParams.get('notas');
+    const notasAdicionales = notasAdicionalesParam
+      ? notasAdicionalesParam.split('\n').map(s => s.trim()).filter(Boolean)
+      : [];
+
     const container = DIContainer.getInstance({ operationMode: 'semi' });
     const session = await container.certificationRepository.findById(params.id);
 
@@ -152,16 +159,29 @@ export async function GET(
       })),
       firmaNombre: 'Dulce María Rivera Luna',
       firmaRol: 'Soporte Técnico Payworks',
+      notasAdicionales,
     };
 
-    const blob = generateCertificationLetterPDF(data);
-    const arrayBuffer = await blob.arrayBuffer();
+    if (format === 'pdf') {
+      const blob = generateCertificationLetterPDF(data);
+      const arrayBuffer = await blob.arrayBuffer();
+      return new Response(Buffer.from(arrayBuffer), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${codigoCertificado}.pdf"`,
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
 
-    return new Response(Buffer.from(arrayBuffer), {
+    const docxBuffer = generateCertificationLetterDocx(data);
+    return new Response(new Uint8Array(docxBuffer), {
       status: 200,
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${codigoCertificado}.pdf"`,
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition': `attachment; filename="${codigoCertificado}.docx"`,
         'Cache-Control': 'no-store',
       },
     });
