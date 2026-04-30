@@ -52,6 +52,11 @@ Items pendientes para una segunda iteración:
   archivo.
 - [ ] Bundle 06 (Agregadores e Integradores TP V2.4.2) — bloqueado
   por logs reales del equipo Banorte.
+- [ ] Bundle 04 — el servlet log no incluye `CYBERSOURCE_ID` que enlace
+  los txs con `cybersource.log`. Hoy la capa Cybersource no aparece en
+  el árbol aunque el log esté presente. Fix: regenerar `servlet.log` con
+  `CYBERSOURCE_ID` poblado o agregar `MerchantReferenceCode` que coincida
+  con el `txn.referencia`.
 
 ## Notas para el desarrollador
 
