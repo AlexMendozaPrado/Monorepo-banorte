@@ -18,6 +18,7 @@ export {
   TableRow,
   TableHead,
   TableCell,
+  TextArea,
 } from './components';
 
 export type {
@@ -40,6 +41,7 @@ export type {
   TableRowProps,
   TableHeadProps,
   TableCellProps,
+  TextAreaProps,
 } from './components';
 
 // Tokens

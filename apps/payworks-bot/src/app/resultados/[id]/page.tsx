@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, FileText } from 'lucide-react';
-import { Button } from '@banorte/ui';
+import { Button, TextArea } from '@banorte/ui';
 import { Header } from '@/presentation/components/Header';
 import { TransactionAccordion } from '@/presentation/components/TransactionAccordion';
 import { CertificationResponse } from '@/shared/types/api';
@@ -49,7 +49,18 @@ export default function ResultadosPage() {
   const params = useParams();
   const id = params.id as string;
   const [filter, setFilter] = useState<'all' | 'failed'>('all');
+  const [notasAdicionales, setNotasAdicionales] = useState('');
   const state = useCertificationDetail(id);
+
+  const downloadCartaDocx = () => {
+    const trimmed = notasAdicionales
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .join('\n');
+    const query = trimmed ? `?notas=${encodeURIComponent(trimmed)}` : '';
+    window.open(`/api/certificacion/carta/${id}${query}`, '_blank');
+  };
 
   if (state.kind === 'loading') {
     return (
@@ -240,6 +251,25 @@ export default function ResultadosPage() {
           })}
         </div>
 
+        {/* ===== NOTAS ADICIONALES PARA LA CARTA ===== */}
+        <div className="bg-white rounded-card shadow-card p-6 mb-6">
+          <h3 className="text-banorte-dark font-semibold mb-1">
+            Notas adicionales para la carta oficial
+          </h3>
+          <p className="text-sm text-banorte-gray mb-3">
+            Una nota por línea. Se agregan como bullets al final de la sección
+            &quot;Notas:&quot; del documento. Opcional.
+          </p>
+          <TextArea
+            name="notasAdicionales"
+            value={notasAdicionales}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setNotasAdicionales(e.target.value)
+            }
+            placeholder="Ej.: La afiliación validada corresponde al ambiente de pruebas&#10;Se omitieron las pruebas de tokenización por solicitud del comercio"
+          />
+        </div>
+
         {/* ===== ACCIONES ===== */}
         <div className="flex justify-between items-center">
           <Link href="/nueva-certificacion">
@@ -254,11 +284,9 @@ export default function ResultadosPage() {
             variant="primary"
             size="lg"
             className="gap-2"
-            onClick={() => {
-              window.open(`/api/certificacion/carta/${data.id}`, '_blank');
-            }}
+            onClick={downloadCartaDocx}
           >
-            <FileText className="w-4 h-4" /> Descargar Carta Oficial
+            <FileText className="w-4 h-4" /> Descargar Carta Oficial (.docx)
           </Button>
         </div>
       </main>
