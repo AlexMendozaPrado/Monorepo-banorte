@@ -82,6 +82,57 @@ describe('TransactionRuleTree', () => {
     expect(screen.queryByText('Anexo D §3.1')).not.toBeInTheDocument();
   });
 
+  it('muestra failDetail del dominio cuando esta disponible (PR#19)', () => {
+    const fieldsWithDetail: FieldResultResponse[] = [
+      {
+        field: 'ENTRY_MODE',
+        displayName: 'Modo de Entrada',
+        rule: 'R',
+        found: true,
+        value: 'CONTACTLESSCHIP',
+        verdict: 'FAIL',
+        source: 'Anexo D §2.4',
+        layer: 'SERVLET',
+        failReason: 'invalid_value',
+        failDetail: 'Valor "CONTACTLESSCHIP" no permitido. Valores válidos: MANUAL, CHIP, CONTACTLESS',
+      },
+    ];
+    render(<TransactionRuleTree fieldResults={fieldsWithDetail} />);
+    expect(screen.getByText(/no permitido. Valores válidos: MANUAL, CHIP, CONTACTLESS/)).toBeInTheDocument();
+  });
+
+  it('para field con found=true sin failDetail muestra "Valor invalido" con el valor (PR#19)', () => {
+    const fields: FieldResultResponse[] = [
+      {
+        field: 'SUB_MERCHANT',
+        rule: 'R',
+        found: true,
+        value: 'ESSENTIALMASSA',
+        verdict: 'FAIL',
+        source: 'Anexo D',
+        layer: 'AGREGADOR',
+      },
+    ];
+    render(<TransactionRuleTree fieldResults={fields} />);
+    expect(screen.getByText(/Valor inválido: "ESSENTIALMASSA"/)).toBeInTheDocument();
+  });
+
+  it('para field con found=false muestra "No encontrado en el log" (PR#19)', () => {
+    const fields: FieldResultResponse[] = [
+      {
+        field: 'CARD_NUMBER',
+        rule: 'R',
+        found: false,
+        value: undefined,
+        verdict: 'FAIL',
+        source: 'SERVLET',
+        layer: 'SERVLET',
+      },
+    ];
+    render(<TransactionRuleTree fieldResults={fields} />);
+    expect(screen.getByText('No encontrado en el log')).toBeInTheDocument();
+  });
+
   describe('Fase F.2 — Click-to-expand RuleLine', () => {
     const failFields: FieldResultResponse[] = [
       {
@@ -111,7 +162,7 @@ describe('TransactionRuleTree', () => {
       expect(screen.getByText('Categoría')).toBeInTheDocument();
       expect(screen.getByText('cross_field')).toBeInTheDocument();
       expect(screen.getByText('Detalle')).toBeInTheDocument();
-      expect(screen.getByText(/POSTAUTH requiere AUTH_CODE/)).toBeInTheDocument();
+      expect(screen.getAllByText(/POSTAUTH requiere AUTH_CODE/).length).toBeGreaterThan(0);
     });
 
     it('al re-clicar colapsa el panel', () => {

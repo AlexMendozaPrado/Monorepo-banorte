@@ -44,6 +44,10 @@ export interface CertificationLetterData {
   usuarioCertificacion?: string;
   /** Lista de manuales utilizados (ej. `["Manual...Tradicional_V2.5", "Manual...3DSecure_V1.4"]`). */
   manualesUtilizados?: string[];
+  /** Notas adicionales libres a inyectar como bullets extra en la sección "Notas:" del .docx. */
+  notasAdicionales?: string[];
+  /** Sufijo del título de portada cuando aplica esquema agregador (ej. ` + AGREGADOR XYZ`). Vacío si no aplica. */
+  esquemaAgregador?: string;
 
   // ---- Resultados ----
   totalTransacciones: number;

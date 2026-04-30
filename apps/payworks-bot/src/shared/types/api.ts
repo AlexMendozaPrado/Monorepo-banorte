@@ -42,15 +42,15 @@ export interface FieldResultResponse {
   /** Validation layer: SERVLET | THREEDS | CYBERSOURCE | AGREGADOR | EMV | AN5822 | TOKENIZACION */
   layer?: string;
   /**
-   * Categoría tipada de la falla — propagada al UI para que el panel
-   * expandible (Fase F.2) pueda mostrar la razón estructurada.
-   * Ejemplos: `missing`, `forbidden_chars`, `invalid_value`,
-   * `cross_field`, `prohibited`.
+   * Razón categórica de la falla (ej. `missing`, `invalid_format`,
+   * `invalid_value`, `forbidden_chars`, `cross_field`, `prohibited`).
+   * Renderizada como pill en el panel expandible de RuleLine.
    */
   failReason?: string;
   /**
-   * Mensaje libre con el detalle del fallo. Pareja del `failReason`,
-   * destinado al panel expandible.
+   * Mensaje libre compuesto por el dominio describiendo la falla
+   * específica. Se muestra inline (truncado, con tooltip nativo en el
+   * `title`) y completo en el panel expandible al hacer click.
    */
   failDetail?: string;
 }
