@@ -161,4 +161,44 @@ describe('An5822Validator', () => {
       expect(failures).toEqual([]);
     });
   });
+
+  describe('Hint cross-producto (E.1 — feedback equipo abr-2026)', () => {
+    it('IND_PAGO=R en Ecommerce Tradicional incluye hint "aplica a Cargos Periódicos"', () => {
+      const failures = validator.validate({
+        product: IntegrationType.ECOMMERCE_TRADICIONAL,
+        flow: An5822Flow.FIRST_CIT,
+        brand: CardBrand.MASTERCARD,
+        fields: { PAYMENT_IND: 'R', AMOUNT_TYPE: 'V', PAYMENT_INFO: '0' },
+      });
+      const indPago = failures.find(f => f.field === 'PAYMENT_IND');
+      expect(indPago?.reason).toBe('invalid_value');
+      expect(indPago?.detail).toContain('Hint');
+      expect(indPago?.detail).toContain('CARGOS_PERIODICOS_POST');
+      expect(indPago?.detail).toContain('AGREGADORES_CARGOS_PERIODICOS');
+    });
+
+    it('PAYMENT_INFO=2 en firstCIT incluye hint del producto/flujo donde sí aplica', () => {
+      const failures = validator.validate({
+        product: IntegrationType.ECOMMERCE_TRADICIONAL,
+        flow: An5822Flow.FIRST_CIT,
+        brand: CardBrand.MASTERCARD,
+        fields: { PAYMENT_IND: 'U', AMOUNT_TYPE: 'V', PAYMENT_INFO: '2' },
+      });
+      const info = failures.find(f => f.field === 'PAYMENT_INFO');
+      expect(info?.detail).toContain('Hint');
+      // PAYMENT_INFO=2 aplica a varios productos en subseqMIT
+      expect(info?.detail).toMatch(/aplica a [A-Z_, ]+/);
+    });
+
+    it('valor totalmente inválido (PAYMENT_IND=Z) no genera hint', () => {
+      const failures = validator.validate({
+        product: IntegrationType.ECOMMERCE_TRADICIONAL,
+        flow: An5822Flow.FIRST_CIT,
+        brand: CardBrand.MASTERCARD,
+        fields: { PAYMENT_IND: 'Z', AMOUNT_TYPE: 'V', PAYMENT_INFO: '0' },
+      });
+      const indPago = failures.find(f => f.field === 'PAYMENT_IND');
+      expect(indPago?.detail).not.toContain('Hint');
+    });
+  });
 });

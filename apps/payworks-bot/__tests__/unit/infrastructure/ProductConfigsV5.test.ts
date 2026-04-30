@@ -167,6 +167,64 @@ describe('Product configs v5 — cambios clave', () => {
       expect(vals).toContain('CASHBACK');
     });
   });
+
+  describe('agregadores-integradores-tp (manual V2.4.2 — Fase C abr-2026)', () => {
+    const m = config.getMatrix(IntegrationType.AGREGADORES_INTEGRADORES_TP);
+
+    it('versión 2.4.2 cargada', () => {
+      expect(m.manualVersion).toBe('2.4.2');
+    });
+
+    it('CMD_TRANS incluye SUSPENSION/REACTIVACION (diferenciador vs Interredes)', () => {
+      const vals = m.servlet.CMD_TRANS?.validValues ?? [];
+      expect(vals).toContain('SUSPENSION');
+      expect(vals).toContain('REACTIVACION');
+      expect(vals).toContain('OBTENER_LLAVE');
+    });
+
+    it('ENTRY_MODE incluye CONTACTLESSCHIP (manual TP V2.4.2 p.20)', () => {
+      const vals = m.servlet.ENTRY_MODE?.validValues ?? [];
+      expect(vals).toContain('CONTACTLESSCHIP');
+      expect(vals).toContain('CHIP');
+      expect(vals).toContain('MANUAL');
+      expect(vals).toContain('BANDA');
+    });
+
+    it('VIRTUAL_KEYBOARD existe (campo nuevo v2.4 dic-2023)', () => {
+      expect(m.servlet.VIRTUAL_KEYBOARD).toBeDefined();
+      expect(m.servlet.VIRTUAL_KEYBOARD?.validValues).toEqual(['0', '1']);
+    });
+
+    it('CUSTOMER_REF5 es R (obligatorio para alianzas/agregadores/integradores)', () => {
+      expect(m.servlet.CUSTOMER_REF5?.rules.AUTH_VISA).toBe('R');
+    });
+
+    it('subEsquemas: 3 esquemas declarados', () => {
+      expect(m.subEsquemas?.ESQ_1_TASA_NATURAL).toBeDefined();
+      expect(m.subEsquemas?.ESQ_4_CON_AGP).toBeDefined();
+      expect(m.subEsquemas?.ESQ_4_SIN_AGP).toBeDefined();
+      expect(m.subEsquemas?.ESQ_4_CON_AGP.required).toEqual(['SUB_MERCHANT', 'AGGREGATOR_ID']);
+      expect(m.subEsquemas?.ESQ_4_SIN_AGP.required).toHaveLength(8);
+    });
+
+    it('PASSWORD/TRACK1/TRACK2/CARD_NUMBER son R_PCI', () => {
+      expect(m.servlet.PASSWORD?.rules.AUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.TRACK1?.rules.AUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.TRACK2?.rules.AUTH_VISA).toBe('R_PCI');
+      expect(m.servlet.CARD_NUMBER?.rules.AUTH_VISA).toBe('R_PCI');
+    });
+
+    it('IntegrationType marca es Tarjeta Presente y soporta esquemas', () => {
+      const vo = new IntegrationTypeValueObject(IntegrationType.AGREGADORES_INTEGRADORES_TP);
+      expect(vo.isTarjetaPresente()).toBe(true);
+      expect(vo.supportsAggregatorSchemes()).toBe(true);
+    });
+
+    it('NO soporta capa AN5822 (excluido por ser TP — consistente con API_PW2/Interredes)', () => {
+      const vo = new IntegrationTypeValueObject(IntegrationType.AGREGADORES_INTEGRADORES_TP);
+      expect(vo.supportsLayer(ValidationLayer.AN5822)).toBe(false);
+    });
+  });
 });
 
 describe('Layer configs v5 — cambios clave', () => {

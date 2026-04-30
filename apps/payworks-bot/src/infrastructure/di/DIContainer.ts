@@ -22,9 +22,12 @@ import { An5822Validator } from '@/core/domain/services/An5822Validator';
 import { AnexoDValidator } from '@/core/domain/services/AnexoDValidator';
 import { PreAuthPostAuthCorrelator } from '@/core/domain/services/PreAuthPostAuthCorrelator';
 import { RateLimitValidator } from '@/core/domain/services/RateLimitValidator';
+import { FolioGenerator } from '@/core/domain/services/FolioGenerator';
 import layer3ds from '@/config/mandatory-fields/layer-3ds.json';
 import layerCybersource from '@/config/mandatory-fields/layer-cybersource.json';
 import layerAn5822 from '@/config/mandatory-fields/layer-an5822.json';
+import layerTokenizacion from '@/config/mandatory-fields/layer-tokenizacion.json';
+import folioNomenclatures from '@/config/folio-nomenclatures.json';
 import { ExcelMatrixParser } from '../matrix-parser/ExcelMatrixParser';
 import { MandatoryFieldsConfig } from '../mandatory-rules/MandatoryFieldsConfig';
 import { InMemoryTransactionRepository } from '../repositories/InMemoryTransactionRepository';
@@ -61,6 +64,7 @@ export class DIContainer {
   private _anexoDValidator?: AnexoDValidator;
   private _preAuthPostAuthCorrelator?: PreAuthPostAuthCorrelator;
   private _rateLimitValidator?: RateLimitValidator;
+  private _folioGenerator?: FolioGenerator;
 
   // Use Cases
   private _validateFieldsUseCase?: ValidateTransactionFieldsUseCase;
@@ -196,6 +200,13 @@ export class DIContainer {
     return this._rateLimitValidator;
   }
 
+  get folioGenerator(): FolioGenerator {
+    if (!this._folioGenerator) {
+      this._folioGenerator = new FolioGenerator(folioNomenclatures as never);
+    }
+    return this._folioGenerator;
+  }
+
   // --- Getters de Use Cases ---
 
   get validateFieldsUseCase(): ValidateTransactionFieldsUseCase {
@@ -227,6 +238,8 @@ export class DIContainer {
         layerCybersource as unknown as MandatoryFieldsMatrix,
         this.preAuthPostAuthCorrelator,
         this.rateLimitValidator,
+        layerTokenizacion as unknown as MandatoryFieldsMatrix,
+        this.folioGenerator,
       );
     }
     return this._runCertificationUseCase;

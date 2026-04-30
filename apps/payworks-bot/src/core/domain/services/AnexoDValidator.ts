@@ -33,6 +33,7 @@ const DOUBLE_SPACE = / {2,}/;
 const AGGREGATOR_PRODUCTS: ReadonlySet<IntegrationType> = new Set([
   IntegrationType.AGREGADORES_COMERCIO_ELECTRONICO,
   IntegrationType.AGREGADORES_CARGOS_PERIODICOS,
+  IntegrationType.AGREGADORES_INTEGRADORES_TP,
 ]);
 
 /**

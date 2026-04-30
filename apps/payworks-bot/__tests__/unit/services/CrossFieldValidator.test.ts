@@ -216,6 +216,17 @@ describe('CrossFieldValidator', () => {
       expect(results[0].layer).toBe(ValidationLayer.THREEDS);
     });
 
+    it('Fase F.1: value queda undefined (no muestra el mensaje de error como valor)', () => {
+      const v = new CrossFieldValidator();
+      v.validatePostAuthRequiresAuthCode('POSTAUTH', makeEntity({}), []);
+      const results = v.toFieldValidationResults();
+      expect(results).toHaveLength(1);
+      expect(results[0].field).toBe('AUTH_CODE');
+      expect(results[0].value).toBeUndefined();
+      expect(results[0].failDetail).toContain('POSTAUTH requiere AUTH_CODE');
+      expect(results[0].failDetail).toContain('No se encontró AUTH_CODE');
+    });
+
     it('respeta issue.source cuando se especifica (no hard-codea SERVLET)', () => {
       const v = new CrossFieldValidator();
       v.validateCybersourceIdAndBin(
@@ -346,6 +357,59 @@ describe('CrossFieldValidator', () => {
     it('no corre sin servlet log', () => {
       const v = new CrossFieldValidator();
       v.validatePinPadErrorCode(undefined, codes);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
+
+  describe('Tokenización Token de Red — consistencia por marca (ADDENDUM I V1.2)', () => {
+    it('no genera issue cuando no hay marcadores de tokenización', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ AMOUNT: '100.00', MERCHANT_ID: '8619640' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('VISA con TAVV: pasa (caso correcto)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ TAVV: '/gAAAAAAjXTHmrMAmbV0gwEAAAA=' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('MC con TR_ID + AAV: pasa (caso correcto)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('MC', makeEntity({ TR_ID: '50110540444', AAV: 'AAQao7vxa6NeAAEaly6IAAADFA==' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('VISA con AAV: falla (AAV es exclusivo de MC)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ AAV: 'AAQao7vxa6NeAAEaly6IAAADFA==' }));
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('AAV');
+      expect(issues[0].layer).toBe(ValidationLayer.TOKENIZACION);
+      expect(issues[0].source).toBe('TOKENIZACION');
+    });
+
+    it('VISA con TR_ID: falla (TR_ID es exclusivo de MC)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', makeEntity({ TR_ID: '50110540444' }));
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('TR_ID');
+    });
+
+    it('MC con TAVV: falla (TAVV es exclusivo de VISA)', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('MC', makeEntity({ TAVV: '/gAAAAAAjXTHmrMAmbV0gwEAAAA=' }));
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('TAVV');
+      expect(issues[0].source).toBe('TOKENIZACION');
+    });
+
+    it('no corre sin servlet log', () => {
+      const v = new CrossFieldValidator();
+      v.validateTokenizacionBrandConsistency('VISA', undefined);
       expect(v.getIssues()).toHaveLength(0);
     });
   });

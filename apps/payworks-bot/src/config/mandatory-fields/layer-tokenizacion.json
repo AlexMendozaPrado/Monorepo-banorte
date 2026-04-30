@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "note": "Capa Tokenización Token de Red — ADDENDUM I V1.2 (Dic 2025). Variables adicionales al POST normal de Comercio Electrónico para transacciones tokenizadas. Aplica a productos de Comercio Electrónico (Tradicional, Ventana CE, Agregadores CE) en transacciones de tipo VENTA (AUTH). Cargos Recurrentes fuera de alcance (v1.2 dic-2025).",
+    "specSource": "ADDENDUM I — TOKENIZACION Token de Red V1.2 (Diciembre 2025) p.4 — variables de envío.",
+    "appliesTo": ["ECOMMERCE_TRADICIONAL", "VENTANA_COMERCIO_ELECTRONICO", "AGREGADORES_COMERCIO_ELECTRONICO"],
+    "appliesTransactions": ["AUTH"],
+    "outOfScope": ["CARGOS_PERIODICOS_POST", "AGREGADORES_CARGOS_PERIODICOS"],
+    "activationRule": "La capa se valida sólo cuando el log servlet contiene cualquiera de TAVV/TR_ID/AAV. Las transacciones no-tokenizadas no la activan, evitando falsos negativos en VENTA estándar."
+  },
+  "integrationType": "LAYER_TOKENIZACION",
+  "manualVersion": "1.2",
+  "manualDate": "2025-12-01",
+  "displayName": "Capa Tokenización Token de Red",
+  "servlet": {},
+  "tokenizacion": {
+    "TAVV": {
+      "manualName": "TAVV",
+      "displayName": "TAVV - Criptograma VISA tokenizada",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Criptograma devuelto por VISA al comercio para transacciones tokenizadas. Alfanumérico hexadecimal, max 40. Sólo VISA — no se envía en MC/AMEX. Manual ADDENDUM I V1.2 p.4 fija formato hexadecimal (clarificación v1.1 oct-2025).",
+      "rules": {
+        "AUTH_VISA": "R",
+        "AUTH_MC": "N/A", "AUTH_AMEX": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "format": "^[0-9A-Fa-f]+$",
+      "maxLength": 40
+    },
+    "TR_ID": {
+      "manualName": "TR_ID",
+      "displayName": "TR_ID - Token Requestor ID (MC tokenizada)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Token Requestor ID asignado por el Token Service Provider al Token Requestor (MC). Numérico max 11. Sólo MC — no se envía en VISA/AMEX. Manual ADDENDUM I V1.2 p.4.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_AMEX": "N/A",
+        "AUTH_MC": "R",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "format": "^\\d{1,11}$",
+      "maxLength": 11
+    },
+    "AAV": {
+      "manualName": "AAV",
+      "displayName": "AAV - Criptograma MC tokenizada",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Criptograma devuelto por MC al comercio para transacciones tokenizadas. Alfanumérico max 200. Sólo MC — no se envía en VISA/AMEX. Manual ADDENDUM I V1.2 p.4.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_AMEX": "N/A",
+        "AUTH_MC": "R",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 200
+    },
+    "ENVIRONMENT_TRANS": {
+      "manualName": "ENVIRONMENT_TRANS",
+      "displayName": "Environment de transacción (tokenizada)",
+      "dataType": "alphanum",
+      "ambiguous": true,
+      "note": "Variable observada en logs reales de transacciones tokenizadas (jul-sep 2024). Valor 'C' (probablemente 'Cardholder' o 'Commerce'). Pendiente de confirmación con equipo Banorte sobre semántica exacta y otros valores válidos. Por ahora se marca O para no generar falsos negativos.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 3
+    },
+    "ENVIRONMENT_TYPE": {
+      "manualName": "ENVIRONMENT_TYPE",
+      "displayName": "Tipo de environment (tokenizada)",
+      "dataType": "alphanum",
+      "ambiguous": true,
+      "note": "Variable observada en logs reales de transacciones tokenizadas. Valor 'C'. Pendiente de confirmación con equipo Banorte. O para no falso-negativizar.",
+      "rules": {
+        "AUTH_VISA": "O", "AUTH_MC": "O", "AUTH_AMEX": "O",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "N/A",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 3
+    }
+  }
+}

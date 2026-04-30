@@ -125,10 +125,11 @@ export class An5822Validator {
       }];
     }
     if (trimmed !== expected) {
+      const hint = this.findCompatibleProductsHint(field, trimmed);
       return [{
         field, manualName, displayName, value: observed,
         reason: 'invalid_value',
-        detail: `En ${context} debe ser '${expected}', recibido '${trimmed}'.`,
+        detail: `En ${context} debe ser '${expected}', recibido '${trimmed}'.${hint}`,
       }];
     }
     return [];
@@ -198,5 +199,36 @@ export class An5822Validator {
       }];
     }
     return [];
+  }
+
+  /**
+   * Cuando un valor recibido no coincide con la expectativa del producto/flujo
+   * actual, recorre el `productMapping` y genera una pista textual con los
+   * productos donde ese valor SÍ aplica. Ej: si en `ECOMMERCE_TRADICIONAL /
+   * firstCIT` reciben `IND_PAGO=R`, el detalle incluye " (Hint: 'R' aplica a
+   * CARGOS_PERIODICOS_POST, AGREGADORES_CARGOS_PERIODICOS)".
+   *
+   * Devuelve string vacío si el valor no aplica a ningún producto/flujo
+   * declarado (e.g. valor totalmente inválido).
+   */
+  private findCompatibleProductsHint(field: string, value: string): string {
+    const mapping = this.config._meta.productMapping;
+    const matches = new Set<string>();
+
+    for (const productKey of Object.keys(mapping) as IntegrationType[]) {
+      const product = mapping[productKey];
+      if (!product) continue;
+      for (const flow of Object.keys(product) as Array<
+        Exclude<An5822Flow, An5822Flow.NOT_APPLICABLE>
+      >) {
+        const exp = product[flow];
+        if (!exp) continue;
+        if (field === 'PAYMENT_IND' && exp.PAYMENT_IND === value) matches.add(productKey);
+        if (field === 'PAYMENT_INFO' && exp.PAYMENT_INFO === value) matches.add(productKey);
+      }
+    }
+
+    if (matches.size === 0) return '';
+    return ` (Hint: '${value}' aplica a ${[...matches].join(', ')}, no a este producto.)`;
   }
 }

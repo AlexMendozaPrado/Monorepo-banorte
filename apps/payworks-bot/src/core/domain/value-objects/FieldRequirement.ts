@@ -1,14 +1,7 @@
 import { FieldSpec } from './MandatoryFieldsMatrix';
+import { ForbiddenCharsListName, getForbiddenCharsRegex } from './ForbiddenCharsRegistry';
 
 export type FieldRule = 'R' | 'O' | 'N/A' | 'OI' | 'PROHIBITED' | 'R_PCI';
-
-// Caracteres prohibidos según Manual VCE v1.8 §7 y Ecommerce Tradicional v2.5.
-// Incluye: símbolos `< > | ¡ ! ¿ ? * + ' / \ { } [ ] ¨ ; : " , # $ % & ( ) =`,
-// vocales acentuadas `á é í ó ú` (ambas cajas) y `ñ Ñ`. NO incluye `ü` (no está
-// listado como prohibido en los manuales vigentes; listar `ü` rechazaba palabras
-// válidas como "pingüino"). La variante relajada para Agregadores (permite `*`
-// y `&` como separadores del formato 7*14) se introducirá con Anexo D.
-const FORBIDDEN_CHARS_REGEX = /[<>|¡!¿?*+'\/\\{}[\]"¨;:,#$%&()=áéíóúÁÉÍÓÚñÑ]/;
 
 export type FailReason =
   | 'missing'
@@ -55,11 +48,21 @@ export class FieldRequirementValueObject {
     return this.value === 'N/A';
   }
 
-  evaluate(fieldFound: boolean, fieldValue?: string, spec?: FieldSpec): boolean {
-    return this.evaluateDetailed(fieldFound, fieldValue, spec).passes;
+  evaluate(
+    fieldFound: boolean,
+    fieldValue?: string,
+    spec?: FieldSpec,
+    forbiddenCharsList: ForbiddenCharsListName = 'BASE',
+  ): boolean {
+    return this.evaluateDetailed(fieldFound, fieldValue, spec, forbiddenCharsList).passes;
   }
 
-  evaluateDetailed(fieldFound: boolean, fieldValue?: string, spec?: FieldSpec): EvaluationResult {
+  evaluateDetailed(
+    fieldFound: boolean,
+    fieldValue?: string,
+    spec?: FieldSpec,
+    forbiddenCharsList: ForbiddenCharsListName = 'BASE',
+  ): EvaluationResult {
     if (this.value === 'N/A') return { passes: true };
 
     // R_PCI — campo requerido por manual pero PCI-sensible, nunca
@@ -96,8 +99,9 @@ export class FieldRequirementValueObject {
 
     if (!fieldValue || trimmed === '') return { passes: true };
 
-    if (!spec?.mustBeMasked && FORBIDDEN_CHARS_REGEX.test(trimmed)) {
-      const found = trimmed.match(new RegExp(FORBIDDEN_CHARS_REGEX.source, 'g'));
+    const forbiddenRegex = getForbiddenCharsRegex(forbiddenCharsList);
+    if (!spec?.mustBeMasked && forbiddenRegex.test(trimmed)) {
+      const found = trimmed.match(new RegExp(forbiddenRegex.source, 'g'));
       return { passes: false, reason: 'forbidden_chars', detail: [...new Set(found)].join('') };
     }
 
@@ -141,11 +145,14 @@ export class FieldRequirementValueObject {
     return names[this.value];
   }
 
-  static hasForbiddenChars(value: string): boolean {
-    return FORBIDDEN_CHARS_REGEX.test(value);
+  static hasForbiddenChars(
+    value: string,
+    list: ForbiddenCharsListName = 'BASE',
+  ): boolean {
+    return getForbiddenCharsRegex(list).test(value);
   }
 
-  static getForbiddenCharsPattern(): RegExp {
-    return FORBIDDEN_CHARS_REGEX;
+  static getForbiddenCharsPattern(list: ForbiddenCharsListName = 'BASE'): RegExp {
+    return getForbiddenCharsRegex(list);
   }
 }

@@ -4,6 +4,7 @@ import { TransactionType } from '@/core/domain/value-objects/TransactionType';
 import { CardBrand } from '@/core/domain/value-objects/CardBrand';
 import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { FieldRequirementValueObject } from '@/core/domain/value-objects/FieldRequirement';
+import { ForbiddenCharsListName } from '@/core/domain/value-objects/ForbiddenCharsRegistry';
 import {
   FieldSpec,
   MandatoryFieldsMatrix,
@@ -42,6 +43,11 @@ export interface ValidateFieldsCommand {
   threeDSMatrix?: MandatoryFieldsMatrix;
   cybersourceMatrix?: MandatoryFieldsMatrix;
   /**
+   * Matrix Token de Red (ADDENDUM I V1.2). Inyectada por el orquestador.
+   * Sólo activa la validación cuando el log servlet contiene TAVV/TR_ID/AAV.
+   */
+  tokenizacionMatrix?: MandatoryFieldsMatrix;
+  /**
    * Flujo AN5822 declarado por la matriz del comercio. `null` si la
    * matriz no trae columna o el valor es N/A. Se usa con prioridad
    * sobre la inferencia heurística por `PAYMENT_INFO`.
@@ -60,6 +66,9 @@ export function buildTransactionKey(type: TransactionType, brand: CardBrand): st
 /**
  * Generic helper: given a FieldSpec map and a key/value entity, produce
  * one FieldValidationResult per field with the given `layer` and `source`.
+ *
+ * `forbiddenCharsList` selecciona la lista de caracteres prohibidos a
+ * aplicar (B4 — feedback equipo abr-2026). Default `'BASE'`.
  */
 function validateAgainstSpecMap(
   specMap: Record<string, FieldSpec> | undefined,
@@ -68,6 +77,7 @@ function validateAgainstSpecMap(
   entity: { hasField(n: string): boolean; getField(n: string): string | undefined } | undefined,
   layer: ValidationLayer,
   source: FieldValidationResult['source'],
+  forbiddenCharsList: ForbiddenCharsListName = 'BASE',
 ): FieldValidationResult[] {
   if (!specMap || !entity) return [];
   const out: FieldValidationResult[] = [];
@@ -77,7 +87,7 @@ function validateAgainstSpecMap(
     const found = entity.hasField(logName);
     const value = entity.getField(logName);
     const effectiveSpec = resolveSpecForBrand(spec, cardBrand);
-    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec);
+    const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec, forbiddenCharsList);
     out.push({
       field: logName,
       manualName: spec.manualName,
@@ -128,6 +138,9 @@ export class ValidateTransactionFieldsUseCase {
     cross.validateCybersourceDecisionFlow(command.cybersourceLog);
     cross.validateShipToCountryMatch(command.cybersourceLog, command.servletRequest);
     cross.validateCybersourceIdAndBin(command.servletRequest, command.cybersourceLog);
+    // Tokenización (ADDENDUM I V1.2): rechazar mensajería token cruzada
+    // entre marcas (VISA con AAV/TR_ID o MC con TAVV).
+    cross.validateTokenizacionBrandConsistency(command.cardBrand, command.servletRequest);
     // C12 — PinPad error codes (solo productos TP con errorCodes en su matriz).
     const productMatrix = this.mandatoryFields.getMatrix(command.integrationType);
     cross.validatePinPadErrorCode(command.servletRequest, productMatrix.errorCodes);
@@ -235,10 +248,22 @@ export class ValidateTransactionFieldsUseCase {
     return results;
   }
 
+  /**
+   * Selecciona la lista de caracteres prohibidos por producto/capa.
+   * - Ventana CE: VENTANA_3DS (manual VCE v1.8 §7).
+   * - Resto de productos servlet: BASE.
+   */
+  private servletForbiddenList(integrationType: IntegrationType): ForbiddenCharsListName {
+    return integrationType === IntegrationType.VENTANA_COMERCIO_ELECTRONICO
+      ? 'VENTANA_3DS'
+      : 'BASE';
+  }
+
   execute(command: ValidateFieldsCommand): ValidationResultEntity {
     const transactionKey = buildTransactionKey(command.transactionType, command.cardBrand);
 
     // --- Servlet layer (always validated) ---
+    const servletForbidden = this.servletForbiddenList(command.integrationType);
     const logNames = this.mandatoryFields.getServletLogNames(command.integrationType);
     const servletResults: FieldValidationResult[] = [];
     for (const logName of logNames) {
@@ -247,7 +272,7 @@ export class ValidateTransactionFieldsUseCase {
       const found = command.servletRequest.hasField(logName);
       const value = command.servletRequest.getField(logName);
       const effectiveSpec = spec ? resolveSpecForBrand(spec, command.cardBrand) : undefined;
-      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec);
+      const result = new FieldRequirementValueObject(rule).evaluateDetailed(found, value, effectiveSpec, servletForbidden);
       servletResults.push({
         field: logName,
         manualName: spec?.manualName,
@@ -263,7 +288,7 @@ export class ValidateTransactionFieldsUseCase {
       });
     }
 
-    // --- Transversal 3D Secure layer ---
+    // --- Transversal 3D Secure layer (lista de chars VENTANA_3DS) ---
     const threeDSResults = validateAgainstSpecMap(
       command.threeDSMatrix?.threeds,
       transactionKey,
@@ -271,9 +296,10 @@ export class ValidateTransactionFieldsUseCase {
       command.threeDSLog,
       ValidationLayer.THREEDS,
       'THREEDS',
+      'VENTANA_3DS',
     );
 
-    // --- Transversal Cybersource layer ---
+    // --- Transversal Cybersource layer (lista de chars CYBERSOURCE — más laxa) ---
     const cybersourceResults = validateAgainstSpecMap(
       command.cybersourceMatrix?.cybersource,
       transactionKey,
@@ -281,7 +307,23 @@ export class ValidateTransactionFieldsUseCase {
       command.cybersourceLog,
       ValidationLayer.CYBERSOURCE,
       'CYBERSOURCE',
+      'CYBERSOURCE',
     );
+
+    // --- Transversal Tokenización Token de Red (ADDENDUM I V1.2) ---
+    // Activación condicional: sólo si el log servlet tiene marcadores de
+    // tokenización (TAVV/TR_ID/AAV). Evita falsos negativos en transacciones
+    // VENTA estándar no-tokenizadas.
+    const tokenizacionResults = this.shouldActivateTokenizacion(command.servletRequest)
+      ? validateAgainstSpecMap(
+          command.tokenizacionMatrix?.tokenizacion,
+          transactionKey,
+          command.cardBrand,
+          command.servletRequest,
+          ValidationLayer.TOKENIZACION,
+          'TOKENIZACION',
+        )
+      : [];
 
     // --- Transversal AN5822 layer (MC-only; no-op for other brands/products) ---
     const an5822Results = this.buildAn5822Results(command);
@@ -300,10 +342,23 @@ export class ValidateTransactionFieldsUseCase {
         ...servletResults,
         ...threeDSResults,
         ...cybersourceResults,
+        ...tokenizacionResults,
         ...an5822Results,
         ...crossResults,
         ...anexoDResults,
       ],
     );
+  }
+
+  /**
+   * La capa Tokenización sólo se valida cuando el log servlet contiene al
+   * menos uno de TAVV/TR_ID/AAV. Si ninguno está presente la transacción
+   * no es tokenizada y la capa se salta — sin esto, una VENTA VISA estándar
+   * fallaría TAVV (R) artificialmente.
+   */
+  private shouldActivateTokenizacion(servletRequest: ServletLogEntity): boolean {
+    return servletRequest.hasField('TAVV')
+      || servletRequest.hasField('TR_ID')
+      || servletRequest.hasField('AAV');
   }
 }

@@ -210,7 +210,7 @@
       "displayName": "Modo de Entrada",
       "dataType": "enum",
       "ambiguous": false,
-      "note": "Manual v2.6.4 p.9: Alfanumérico 20. R para VENTA/PREAUT. Valor: MANUAL (Agregadores CE es tarjeta NO presente).",
+      "note": "Manual v2.6.4 p.9: Alfanumérico 20. R para VENTA/PREAUT. Valores: MANUAL | CONTACTLESSCHIP. CONTACTLESSCHIP confirmado por Manual TP V2.4.2 p.20 y observado en bundle 02 OPENLINEA real (apr-2026 feedback equipo).",
       "rules": {
         "AUTH_VISA": "R", "AUTH_MC": "R",
         "PREAUTH_VISA": "R", "PREAUTH_MC": "R",
@@ -219,7 +219,7 @@
         "VOID_VISA": "N/A", "VOID_MC": "N/A",
         "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A"
       },
-      "validValues": ["MANUAL"],
+      "validValues": ["MANUAL", "CONTACTLESSCHIP"],
       "maxLength": 20
     },
     "GROUP": {

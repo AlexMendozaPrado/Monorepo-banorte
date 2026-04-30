@@ -15,6 +15,7 @@ import agregadoresComercioElectronico from '@/config/mandatory-fields/agregadore
 import agregadoresCargosPeriodicos from '@/config/mandatory-fields/agregadores-cargos-periodicos.json';
 import apiPw2Seguro from '@/config/mandatory-fields/api-pw2-seguro.json';
 import interredesRemoto from '@/config/mandatory-fields/interredes-remoto.json';
+import agregadoresIntegradoresTp from '@/config/mandatory-fields/agregadores-integradores-tp.json';
 
 /**
  * Registry of product → matrix. Keys are logName-indexed FieldSpec maps
@@ -33,6 +34,7 @@ const MATRICES: Record<IntegrationType, MandatoryFieldsMatrix> = {
   [IntegrationType.AGREGADORES_CARGOS_PERIODICOS]: agregadoresCargosPeriodicos as unknown as MandatoryFieldsMatrix,
   [IntegrationType.API_PW2_SEGURO]: apiPw2Seguro as unknown as MandatoryFieldsMatrix,
   [IntegrationType.INTERREDES_REMOTO]: interredesRemoto as unknown as MandatoryFieldsMatrix,
+  [IntegrationType.AGREGADORES_INTEGRADORES_TP]: agregadoresIntegradoresTp as unknown as MandatoryFieldsMatrix,
 };
 
 function isMetaKey(key: string): boolean {

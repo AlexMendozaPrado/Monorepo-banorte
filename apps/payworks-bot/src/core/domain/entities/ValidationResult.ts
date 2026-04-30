@@ -17,7 +17,7 @@ export interface FieldValidationResult {
   verdict: 'PASS' | 'FAIL';
   failReason?: string;
   failDetail?: string;
-  source: 'SERVLET' | 'PROSA' | 'BD' | 'THREEDS' | 'CYBERSOURCE' | 'AN5822';
+  source: 'SERVLET' | 'PROSA' | 'BD' | 'THREEDS' | 'CYBERSOURCE' | 'AN5822' | 'TOKENIZACION';
   /**
    * Validation layer this field belongs to. Used by the UI to group
    * per-layer results (Servlet / 3DS / Cybersource / Agregador / EMV / AN5822).

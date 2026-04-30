@@ -210,6 +210,45 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * Valida que la mensajería de Tokenización Token de Red (ADDENDUM I V1.2)
+   * sea consistente con la marca: VISA usa TAVV, MC usa TR_ID + AAV. Una
+   * mezcla cruzada (e.g. VISA enviando AAV) no es semánticamente válida.
+   *
+   * Sólo activa cuando hay marcadores de tokenización presentes — para
+   * transacciones no-tokenizadas no produce issues.
+   */
+  validateTokenizacionBrandConsistency(
+    cardBrand: string,
+    servletRequest: LogEntity | undefined,
+  ): void {
+    if (!servletRequest) return;
+    const hasTAVV = servletRequest.hasField('TAVV');
+    const hasTRID = servletRequest.hasField('TR_ID');
+    const hasAAV = servletRequest.hasField('AAV');
+
+    if (!hasTAVV && !hasTRID && !hasAAV) return;
+
+    if (cardBrand === 'VISA' && (hasTRID || hasAAV)) {
+      this.issues.push({
+        field: hasTRID ? 'TR_ID' : 'AAV',
+        rule: 'Tokenización: VISA usa TAVV (no TR_ID/AAV — esos son MC)',
+        detail: `Transacción VISA tokenizada no debe enviar ${hasTRID ? 'TR_ID' : 'AAV'} (criptograma exclusivo de MC). Manual ADDENDUM I V1.2 p.4.`,
+        layer: ValidationLayer.TOKENIZACION,
+        source: 'TOKENIZACION',
+      });
+    }
+    if (cardBrand === 'MC' && hasTAVV) {
+      this.issues.push({
+        field: 'TAVV',
+        rule: 'Tokenización: MC usa TR_ID + AAV (no TAVV — ese es VISA)',
+        detail: 'Transacción MC tokenizada no debe enviar TAVV (criptograma exclusivo de VISA). Manual ADDENDUM I V1.2 p.4.',
+        layer: ValidationLayer.TOKENIZACION,
+        source: 'TOKENIZACION',
+      });
+    }
+  }
+
   validateResponseFields(
     servletResponse: LogEntity | undefined,
     expectedResults: { field: string; validValues: string[] }[],
@@ -237,10 +276,20 @@ export class CrossFieldValidator {
       field: issue.field,
       rule: 'R',
       found: true,
-      value: issue.detail,
+      // FIX (Fase F.1): los issues cross-field no tienen un valor de campo
+      // observable (la falla es sobre la relación entre dos campos). Antes
+      // poníamos `issue.detail` aquí, lo que mostraba el mensaje de error
+      // como si fuera el valor del campo en el UI — confundía al usuario
+      // (e.g. AUTH_CODE en POSTAUTH mostraba "No se encontró AUTH_CODE..."
+      // como si ese fuera el valor real del campo). El detalle pertenece a
+      // `failDetail`; el `value` queda undefined para indicar que no hay
+      // valor observable atribuible.
+      value: undefined,
       verdict: 'FAIL' as const,
       failReason: 'cross_field',
-      failDetail: issue.rule,
+      // El detalle ahora combina la regla violada y el diagnóstico
+      // específico del caso, en orden lógico para el lector.
+      failDetail: `${issue.rule} — ${issue.detail}`,
       source: issue.source ?? 'SERVLET',
       layer: issue.layer,
     }));

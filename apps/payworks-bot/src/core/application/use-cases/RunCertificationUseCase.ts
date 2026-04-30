@@ -13,6 +13,7 @@ import { CertificationSessionEntity, OperationMode } from '@/core/domain/entitie
 import { ValidationResult, FieldValidationResult } from '@/core/domain/entities/ValidationResult';
 import { PreAuthPostAuthCorrelator, CorrelationInput } from '@/core/domain/services/PreAuthPostAuthCorrelator';
 import { RateLimitValidator } from '@/core/domain/services/RateLimitValidator';
+import { FolioGenerator } from '@/core/domain/services/FolioGenerator';
 import { ThreeDSLogEntity } from '@/core/domain/entities/ThreeDSLog';
 import { CybersourceLogEntity } from '@/core/domain/entities/CybersourceLog';
 import { IntegrationType, IntegrationTypeValueObject } from '@/core/domain/value-objects/IntegrationType';
@@ -32,6 +33,12 @@ export interface RunCertificationCommand {
   lenguaje?: string;
   versionAplicacion?: string;
   urlSubdominio?: string;
+  /**
+   * Banderas opcionales que afectan el folio generado. `isVIP` distingue
+   * Comercios Alto Valor; `isRecertification` aplica el sufijo `R`.
+   */
+  isVIP?: boolean;
+  isRecertification?: boolean;
 }
 
 export class RunCertificationUseCase {
@@ -50,6 +57,8 @@ export class RunCertificationUseCase {
     private readonly cybersourceMatrix?: MandatoryFieldsMatrix,
     private readonly preAuthPostAuthCorrelator?: PreAuthPostAuthCorrelator,
     private readonly rateLimitValidator?: RateLimitValidator,
+    private readonly tokenizacionMatrix?: MandatoryFieldsMatrix,
+    private readonly folioGenerator?: FolioGenerator,
   ) {}
 
   async execute(command: RunCertificationCommand): Promise<CertificationSessionEntity> {
@@ -152,6 +161,7 @@ export class RunCertificationUseCase {
           cybersourceLog,
           threeDSMatrix: this.threeDSMatrix,
           cybersourceMatrix: this.cybersourceMatrix,
+          tokenizacionMatrix: this.tokenizacionMatrix,
           declaredAn5822Flow: txn.flujoAn5822 ?? null,
         });
 
@@ -222,6 +232,8 @@ export class RunCertificationUseCase {
       }
     }
 
+    const folio = await this.generateFolioForSession(command, results);
+
     const session = new CertificationSessionEntity(
       uuidv4(),
       merchantName || 'Comercio desconocido',
@@ -236,10 +248,51 @@ export class RunCertificationUseCase {
       command.lenguaje,
       command.versionAplicacion,
       command.urlSubdominio,
+      folio,
     );
 
     await this.certificationRepo.save(session);
 
     return session;
+  }
+
+  /**
+   * Genera el folio oficial usando NOMENCLATURAS FOLIOS LABS. Se ejecuta
+   * antes de crear la sesión para que el folio quede persistido. El
+   * secuencial usa el conteo de sesiones previas + 1 — limitación conocida
+   * para in-memory; un backend real usaría una secuencia DB atómica.
+   */
+  private async generateFolioForSession(
+    command: RunCertificationCommand,
+    results: ValidationResult[],
+  ): Promise<string | undefined> {
+    if (!this.folioGenerator) return undefined;
+
+    const has3DS = results.some(r =>
+      r.fieldResults?.some(f => f.layer === ValidationLayer.THREEDS),
+    );
+    const hasCybersource = results.some(r =>
+      r.fieldResults?.some(f => f.layer === ValidationLayer.CYBERSOURCE),
+    );
+    const previousSessions = await this.certificationRepo.findAll();
+    const sequential = previousSessions.length + 1;
+
+    // ID afiliación: tomar la del primer resultado disponible — todas las
+    // tx de una sesión son del mismo comercio (mismo MERCHANT_ID).
+    const idAfiliacion = results[0]?.fieldResults?.find(
+      f => f.field === 'MERCHANT_ID' || f.field === 'ID_AFILIACION',
+    )?.value;
+
+    const result = this.folioGenerator.generate({
+      integrationType: command.integrationType,
+      has3DS,
+      hasCybersource,
+      isVIP: command.isVIP,
+      isRecertification: command.isRecertification,
+      sequential,
+      idAfiliacion,
+    });
+
+    return result.folio;
   }
 }

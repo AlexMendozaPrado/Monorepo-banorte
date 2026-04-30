@@ -55,9 +55,8 @@ interface TransactionRuleTreeProps {
  * Componente puro: agrupa el DTO `FieldResultResponse[]` que ya emite el
  * dominio sin requerir cambios en core/application/infrastructure.
  *
- * Reemplaza la tabla plana `FieldValidationTable` dentro de
- * `TransactionAccordion`. La taxonomia de "grupos" se deriva del campo
- * `source` (seccion del manual) que el dominio ya provee.
+ * La taxonomia de "grupos" se deriva del campo `source` (seccion del
+ * manual) que el dominio ya provee.
  */
 export function TransactionRuleTree({ fieldResults }: TransactionRuleTreeProps) {
   const tree = useMemo(() => {
@@ -246,36 +245,94 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
   const label = field.displayName || field.manualName || field.field;
   const detail = describeStatus(field, status);
 
+  // Click-to-expand sólo aplica a fails (las que tienen detalle estructurado).
+  // Pass/skip no aportan info adicional al expandir.
+  const expandable = status === 'fail';
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <div
-      className={cn(
-        'flex items-center gap-2 text-[11px] rounded px-2 py-[5px]',
-        status === 'fail' && 'bg-red-50 border-l-2 border-banorte-error',
-        status === 'pass' && 'hover:bg-white/70',
-        status === 'skip' && 'opacity-60',
-      )}
-    >
-      <StatusIcon status={status} />
-      <span
-        className="font-mono text-[10px] text-banorte-secondary w-12 shrink-0 truncate"
-        title={field.field}
-      >
-        {field.field}
-      </span>
-      <span className="text-[10px] text-banorte-secondary shrink-0">·</span>
-      <span className="font-mono text-[10px] text-banorte-secondary w-7 shrink-0">{field.rule}</span>
-      <span className="text-banorte-dark truncate flex-1" title={label}>{label}</span>
-      <span
-        title={detail}
+    <div className={cn(status === 'skip' && 'opacity-60')}>
+      <div
+        role={expandable ? 'button' : undefined}
+        tabIndex={expandable ? 0 : undefined}
+        onClick={expandable ? () => setExpanded(!expanded) : undefined}
+        onKeyDown={
+          expandable
+            ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setExpanded(!expanded);
+                }
+              }
+            : undefined
+        }
         className={cn(
-          'text-[11px] truncate max-w-[260px] cursor-help',
-          status === 'pass' && 'text-banorte-secondary',
-          status === 'fail' && 'text-banorte-error font-medium',
-          status === 'skip' && 'text-banorte-secondary italic',
+          'flex items-center gap-2 text-[11px] rounded px-2 py-[5px]',
+          status === 'fail' && 'bg-red-50 border-l-2 border-banorte-error cursor-pointer hover:bg-red-100/60',
+          status === 'pass' && 'hover:bg-white/70',
         )}
       >
-        {detail}
-      </span>
+        <StatusIcon status={status} />
+        <span
+          className="font-mono text-[10px] text-banorte-secondary w-12 shrink-0 truncate"
+          title={field.field}
+        >
+          {field.field}
+        </span>
+        <span className="text-[10px] text-banorte-secondary shrink-0">·</span>
+        <span className="font-mono text-[10px] text-banorte-secondary w-7 shrink-0">{field.rule}</span>
+        <span className="text-banorte-dark truncate flex-1" title={label}>{label}</span>
+        <span
+          title={detail}
+          className={cn(
+            'text-[11px] truncate max-w-[260px] cursor-help',
+            status === 'pass' && 'text-banorte-secondary',
+            status === 'fail' && 'text-banorte-error font-medium',
+            status === 'skip' && 'text-banorte-secondary italic',
+          )}
+        >
+          {detail}
+        </span>
+        {expandable && (
+          <ChevronDown
+            className={cn(
+              'w-3 h-3 text-banorte-error transition-transform shrink-0',
+              !expanded && '-rotate-90',
+            )}
+          />
+        )}
+      </div>
+
+      {expandable && expanded && (
+        <div className="mt-1 ml-7 mr-2 mb-1 px-3 py-2 rounded bg-white border border-red-100 text-[11px] space-y-1.5">
+          {field.failReason && (
+            <div className="flex gap-2">
+              <span className="font-mono text-[10px] uppercase text-banorte-secondary w-20 shrink-0">Categoría</span>
+              <span className="font-mono text-[10px] px-1.5 py-[1px] rounded bg-red-50 text-banorte-error">
+                {field.failReason}
+              </span>
+            </div>
+          )}
+          {field.value !== undefined && field.value !== null && field.value !== '' && (
+            <div className="flex gap-2">
+              <span className="font-mono text-[10px] uppercase text-banorte-secondary w-20 shrink-0">Valor recibido</span>
+              <span className="font-mono text-[10px] text-banorte-dark break-all">{field.value}</span>
+            </div>
+          )}
+          {field.failDetail && (
+            <div className="flex gap-2">
+              <span className="font-mono text-[10px] uppercase text-banorte-secondary w-20 shrink-0">Detalle</span>
+              <span className="text-banorte-dark">{field.failDetail}</span>
+            </div>
+          )}
+          {field.source && (
+            <div className="flex gap-2">
+              <span className="font-mono text-[10px] uppercase text-banorte-secondary w-20 shrink-0">Fuente</span>
+              <span className="font-mono text-[10px] text-banorte-secondary">{field.source}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
