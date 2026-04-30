@@ -132,7 +132,7 @@ export function UploadCard() {
           onDrop={handleDrop}
           onClick={() => matrizInputRef.current?.click()}
         >
-          <input type="file" ref={matrizInputRef} className="hidden" accept=".xlsx,.xls" onChange={(e) => e.target.files?.[0] && setMatrizFile(e.target.files[0])} />
+          <input data-testid="upload-matriz" type="file" ref={matrizInputRef} className="hidden" accept=".xlsx,.xls" onChange={(e) => e.target.files?.[0] && setMatrizFile(e.target.files[0])} />
           <div className="w-[46px] h-[46px] rounded-full bg-banorte-red flex items-center justify-center mb-2">
             <ArrowUp className="text-white w-6 h-6" strokeWidth={3} />
           </div>
@@ -154,6 +154,7 @@ export function UploadCard() {
             return (
               <div
                 key={option.value}
+                data-testid={`integration-${option.value}`}
                 onClick={() => setSelectedIntegration(option.value)}
                 className={`flex items-center gap-2.5 px-4 py-3.5 rounded-input cursor-pointer transition-colors
                   ${isSelected ? 'border-2 border-banorte-red bg-[#FDF0F1]' : 'border border-[#D1D5D9] bg-white'}`}
@@ -274,7 +275,7 @@ export function UploadCard() {
               ${csvFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
             onClick={() => csvInputRef.current?.click()}
           >
-            <input type="file" ref={csvInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setCsvFile(e.target.files[0])} />
+            <input data-testid="upload-csv" type="file" ref={csvInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setCsvFile(e.target.files[0])} />
             <Upload className={`w-5 h-5 ${csvFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
             <div>
               <p className="font-medium text-sm text-banorte-dark">{csvFile ? csvFile.name : 'CSV exportado de Toad/SQLDeveloper'}</p>
@@ -289,7 +290,7 @@ export function UploadCard() {
                 ${servletLogFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
               onClick={() => servletInputRef.current?.click()}
             >
-              <input type="file" ref={servletInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setServletLogFile(e.target.files[0])} />
+              <input data-testid="upload-servlet" type="file" ref={servletInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setServletLogFile(e.target.files[0])} />
               <FileText className={`w-5 h-5 ${servletLogFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
               <div>
                 <p className="font-medium text-sm text-banorte-dark">{servletLogFile ? servletLogFile.name : 'LOG Servlet'}</p>
@@ -302,7 +303,7 @@ export function UploadCard() {
                 ${prosaLogFile ? 'border-banorte-success bg-[#E9F6E2]' : 'border-[#D1D5D9] bg-banorte-surface'}`}
               onClick={() => prosaInputRef.current?.click()}
             >
-              <input type="file" ref={prosaInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setProsaLogFile(e.target.files[0])} />
+              <input data-testid="upload-prosa" type="file" ref={prosaInputRef} className="hidden" accept="*" onChange={(e) => e.target.files?.[0] && setProsaLogFile(e.target.files[0])} />
               <FileText className={`w-5 h-5 ${prosaLogFile ? 'text-banorte-success' : 'text-banorte-secondary'}`} />
               <div>
                 <p className="font-medium text-sm text-banorte-dark">{prosaLogFile ? prosaLogFile.name : 'LOG PROSA'}</p>
@@ -325,6 +326,7 @@ export function UploadCard() {
                 onClick={() => threeDSInputRef.current?.click()}
               >
                 <input
+                  data-testid="upload-3ds"
                   type="file"
                   ref={threeDSInputRef}
                   className="hidden"
@@ -347,6 +349,7 @@ export function UploadCard() {
                 onClick={() => cybersourceInputRef.current?.click()}
               >
                 <input
+                  data-testid="upload-cybersource"
                   type="file"
                   ref={cybersourceInputRef}
                   className="hidden"
@@ -377,6 +380,7 @@ export function UploadCard() {
           onClick={() => afiliacionesInputRef.current?.click()}
         >
           <input
+            data-testid="upload-afiliaciones"
             type="file"
             ref={afiliacionesInputRef}
             className="hidden"
@@ -404,7 +408,7 @@ export function UploadCard() {
 
       {/* CTA */}
       <div className="flex justify-end mt-4">
-        <Button variant="primary" size="lg" className="gap-2" onClick={handleSubmit} disabled={isLoading}>
+        <Button data-testid="submit-certification" variant="primary" size="lg" className="gap-2" onClick={handleSubmit} disabled={isLoading}>
           {isLoading ? 'Procesando...' : 'Iniciar Certificacion'}
           {!isLoading && <ArrowRight className="w-4 h-4" strokeWidth={2.5} />}
         </Button>

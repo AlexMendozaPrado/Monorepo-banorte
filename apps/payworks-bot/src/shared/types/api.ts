@@ -39,6 +39,18 @@ export interface FieldResultResponse {
   value: string | undefined;
   verdict: 'PASS' | 'FAIL';
   source: string;
-  /** Validation layer: SERVLET | THREEDS | CYBERSOURCE | AGREGADOR | EMV | AN5822 */
+  /** Validation layer: SERVLET | THREEDS | CYBERSOURCE | AGREGADOR | EMV | AN5822 | TOKENIZACION */
   layer?: string;
+  /**
+   * Categoría tipada de la falla — propagada al UI para que el panel
+   * expandible (Fase F.2) pueda mostrar la razón estructurada.
+   * Ejemplos: `missing`, `forbidden_chars`, `invalid_value`,
+   * `cross_field`, `prohibited`.
+   */
+  failReason?: string;
+  /**
+   * Mensaje libre con el detalle del fallo. Pareja del `failReason`,
+   * destinado al panel expandible.
+   */
+  failDetail?: string;
 }
