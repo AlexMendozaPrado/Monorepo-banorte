@@ -119,6 +119,84 @@ describe('CrossFieldValidator', () => {
     });
   });
 
+  describe('C13 — REFERENCE_3D ↔ NUMERO_CONTROL (E5 revisión Ramsses)', () => {
+    it('no genera issue cuando REFERENCE3D y CONTROL_NUMBER del servlet coinciden', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ REFERENCE3D: 'OP-2026-001', CONTROL_NUMBER: 'OP-2026-001' }),
+        undefined,
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('genera issue cuando REFERENCE3D y CONTROL_NUMBER difieren', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ REFERENCE3D: 'OP-2026-001', CONTROL_NUMBER: 'CN-2026-002' }),
+        undefined,
+      );
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('REFERENCE3D↔CONTROL_NUMBER');
+      expect(issues[0].layer).toBe(ValidationLayer.THREEDS);
+      expect(issues[0].source).toBe('THREEDS');
+      expect(issues[0].rule).toContain('C13');
+      expect(issues[0].detail).toContain('OP-2026-001');
+      expect(issues[0].detail).toContain('CN-2026-002');
+    });
+
+    it('toma REFERENCE3D del log 3DS cuando el servlet no lo expone', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ CONTROL_NUMBER: 'CN-2026-001' }),
+        makeEntity({ Reference3D: 'CN-2026-001' }),
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('falla cuando 3DS log y servlet CONTROL_NUMBER difieren', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ CONTROL_NUMBER: 'CN-2026-001' }),
+        makeEntity({ Reference3D: 'OTRO-VALOR' }),
+      );
+      expect(v.getIssues()).toHaveLength(1);
+    });
+
+    it('N/A cuando la transacción no es 3DS (sin REFERENCE3D ni en servlet ni en log 3DS)', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ CONTROL_NUMBER: 'CN-2026-001' }),
+        undefined,
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('N/A cuando el servlet es undefined', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(undefined, makeEntity({ Reference3D: 'X' }));
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('acepta alias REFERENCIA3D y NUMERO_CONTROL (manuales en español)', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ REFERENCIA3D: 'OP-X', NUMERO_CONTROL: 'OP-X' }),
+        undefined,
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('compara con trim — espacios en bordes no rompen la igualdad', () => {
+      const v = new CrossFieldValidator();
+      v.validateReference3DEqualsControlNumber(
+        makeEntity({ REFERENCE3D: '  OP-2026-001  ', CONTROL_NUMBER: 'OP-2026-001' }),
+        undefined,
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
+
   describe('Cybersource Decision flow', () => {
     it('no genera issue con Decision=ACCEPT', () => {
       const v = new CrossFieldValidator();

@@ -61,6 +61,54 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * C13 — `REFERENCE_3D` y `NUMERO_CONTROL` deben coincidir.
+   *
+   * Regla E5 de la revisión Ramsses (REVISIÓN DE REGLAS DE VALIDACIÓN BOT
+   * DE CERTIFICACIÓN PAYWORKS, abr-2026):
+   *   "Siempre deben de ser iguales los valores de las variables
+   *   REFERENCE_3D y la variable NÚMERO DE CONTROL de Payworks"
+   *
+   * Aplica solo cuando la transacción incluye 3DS. La fuente de
+   * `REFERENCE_3D` puede estar en el servlet (campo `REFERENCE3D` /
+   * `REFERENCIA3D` enviado por el comercio) o en el log 3DS oficial
+   * (campo `Reference3D`). Se prefiere el del servlet porque ése es el
+   * que el comercio efectivamente envió a Payworks; el log 3DS sirve
+   * como fallback.
+   *
+   * Si ninguno de los dos identifica los campos, la regla es N/A
+   * (transacción sin 3DS).
+   */
+  validateReference3DEqualsControlNumber(
+    servletRequest: LogEntity | undefined,
+    threeDSLog: LogEntity | undefined,
+  ): void {
+    if (!servletRequest) return;
+
+    const reference3D =
+      servletRequest.getField('REFERENCE3D') ??
+      servletRequest.getField('REFERENCIA3D') ??
+      threeDSLog?.getField('Reference3D') ??
+      threeDSLog?.getField('REFERENCE3D');
+    const controlNumber =
+      servletRequest.getField('CONTROL_NUMBER') ??
+      servletRequest.getField('NUMERO_CONTROL');
+
+    // N/A: transacción sin 3DS o servlet sin CONTROL_NUMBER (el segundo
+    // caso lo cubren las reglas mandatorias del producto).
+    if (!reference3D || !controlNumber) return;
+
+    if (reference3D.trim() !== controlNumber.trim()) {
+      this.issues.push({
+        field: 'REFERENCE3D↔CONTROL_NUMBER',
+        rule: 'C13: REFERENCE_3D y NUMERO_CONTROL deben coincidir (E5 revisión Ramsses 2026)',
+        detail: `REFERENCE3D: "${reference3D.trim()}", CONTROL_NUMBER: "${controlNumber.trim()}"`,
+        layer: ValidationLayer.THREEDS,
+        source: 'THREEDS',
+      });
+    }
+  }
+
   validateProsaReferenceMatch(
     servletResponse: LogEntity | undefined,
     prosaResponse: LogEntity | undefined,
