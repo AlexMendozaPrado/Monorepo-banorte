@@ -37,6 +37,29 @@ export async function GET(
       );
     }
 
+    // Gate P8 (revisión Ramsses): la carta solo se emite cuando todas las
+    // transacciones de la matriz están correctas bajo los manuales. Si el
+    // veredicto global es RECHAZADO o PENDIENTE, no se entrega el .docx.
+    const rejectedCount = session.results.filter(
+      r => r.verdict === ValidationVerdict.RECHAZADO,
+    ).length;
+    const sessionVerdict: 'APROBADO' | 'RECHAZADO' | 'PENDIENTE' =
+      session.results.length === 0
+        ? 'PENDIENTE'
+        : rejectedCount > 0
+          ? 'RECHAZADO'
+          : 'APROBADO';
+    if (sessionVerdict !== 'APROBADO') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'No se puede emitir carta hasta que la certificación esté APROBADA',
+          verdict: sessionVerdict,
+        },
+        { status: 409 },
+      );
+    }
+
     const integrationVO = new IntegrationTypeValueObject(session.integrationType);
 
     // Try to find the affiliation record from the first transaction's merchant id.
@@ -71,16 +94,6 @@ export async function GET(
     const approved = session.results.filter(
       r => r.verdict === ValidationVerdict.APROBADO,
     ).length;
-    const rejected = session.results.filter(
-      r => r.verdict === ValidationVerdict.RECHAZADO,
-    ).length;
-
-    const globalVerdict: 'APROBADO' | 'RECHAZADO' | 'PENDIENTE' =
-      session.results.length === 0
-        ? 'PENDIENTE'
-        : rejected > 0
-          ? 'RECHAZADO'
-          : 'APROBADO';
 
     // Derivar esquema y manuales de integración según producto + capas activas
     const hasThreeDS = session.results.some(r =>
@@ -147,8 +160,8 @@ export async function GET(
       manualesUtilizados: manualesUsados,
       totalTransacciones: session.results.length,
       aprobadas: approved,
-      rechazadas: rejected,
-      veredictoGlobal: globalVerdict,
+      rechazadas: rejectedCount,
+      veredictoGlobal: sessionVerdict,
       filasMatriz: session.results.map(r => ({
         referencia: r.transactionRef,
         tipoTransaccion: new TransactionTypeValueObject(r.transactionType).getDisplayName(),

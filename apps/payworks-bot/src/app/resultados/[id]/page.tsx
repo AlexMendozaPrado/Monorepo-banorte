@@ -285,6 +285,12 @@ export default function ResultadosPage() {
             size="lg"
             className="gap-2"
             onClick={downloadCartaDocx}
+            disabled={!isApproved}
+            title={
+              isApproved
+                ? undefined
+                : 'La carta oficial solo se emite cuando la certificación esté APROBADA (todas las transacciones deben pasar). Revisa los fails para corregir antes de descargar.'
+            }
           >
             <FileText className="w-4 h-4" /> Descargar Carta Oficial (.docx)
           </Button>
