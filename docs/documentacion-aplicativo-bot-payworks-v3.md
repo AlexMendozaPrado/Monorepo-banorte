@@ -369,3 +369,58 @@ La Familia 4 (API PW2 Seguro e Interredes Remoto) aplica estrategia dual: `EMV_T
 
 *Ver Diagrama 5 en Anexo B para visualización completa del flujo Tarjeta Presente con tags EMV.*
 
+---
+
+## Sección 11 — Ventana de Comercio Electrónico (VCE)
+
+La **Ventana de Comercio Electrónico (VCE) v1.8** es la única Familia con **modelo cifrado AES/CTR**: el JSON de payment se cifra en el browser del comercio con la clave del comercio y un IV, y se envía a Payworks a través del SDK `Payment.startPayment()`. La Ventana VCE modal recibe los datos del tarjetahabiente en dominio Payworks (no en el del comercio) y dispara el servlet del autorizador. Esto introduce particularidades que el aplicativo maneja en `ventana-comercio-electronico.json`.
+
+### Reglas distintivas del modelo VCE
+
+Variables en **camelCase** (`merchantId`, `merchantName`, `customerRef1`, etc.) en lugar de las MAYÚSCULAS_SNAKE de otros manuales. Los valores más sensibles respecto al modelo TNP son:
+
+| Campo | Regla | Observación |
+|---|---|---|
+| `password` | R (no R_PCI) | Viaja cifrado AES dentro del JSON — manual v1.8 lo marca como R |
+| `merchantCity` | `maxLength 40` | Distinto de TNP directo (que usa `maxLength 30`) |
+| `mode` | `validValues [PRD, AUT]` | VCE no admite `DEC` ni `RND` (solo 2 valores) |
+| `amount` | `maxLength 15` | Numérico total incluyendo decimales |
+| `merchantId` | Numérico 7 | Igual que TNP |
+| `terminalId` | Alfanumérico 15 | Diferente del TNP directo (que usa 10) |
+| `usarTokenizacion` | O | Tokenización introducida en v1.2 |
+| `idUsrComercio` | O | Solo si `usarTokenizacion` está activo |
+| `correoUsrComercio` | O | Solo si `usarTokenizacion` está activo |
+
+> **Brecha documentada (sin cambio en v3.0)**:
+> - El aplicativo no valida la estructura interna del JSON cifrado AES/CTR: requiere credenciales privadas del comercio.
+> - Esta brecha es conocida y se documenta como aceptada en la sección 13 (cobertura actual). No bloquea certificación.
+
+*Ver Diagrama 2 en Anexo B para visualización completa del flujo VCE cifrado AES/CTR.*
+
+---
+
+## Sección 12 — Flujo del bot
+
+El bot replica el proceso manual descrito en el manual API PW2 Seguro p.5: el comercio envía Solicitud de certificación (Word) + Matriz de pruebas (Excel), el Laboratorio verifica mensajería contra manuales oficiales, y si todo es correcto, **emite la Carta de Certificación**. El bot automatiza el paso 2 con los grupos A-J de reglas y automatiza la generación de la Carta de Certificación (paso 5).
+
+### Flujo interno real del aplicativo
+
+| Paso | Componente | Descripción operativa |
+|---|---|---|
+| 1 | **Entrada** | Matriz Excel + logs (servlet, PROSA, 3DS, Cybersource) + CSV de afiliaciones. Selector de **laboratorio** (CAV/ECOMM/AGREG_AGREGADOR/AGREG_INTEGRADOR) en la UI **(nuevo v3.0)**. |
+| 2 | **Parseo** | 5 parsers especializados: `ExcelMatrixParser`, `PayworksServletLogParser`, `PayworksProsaLogParser`, `ThreeDSLogParser`, `CybersourceLogParser`, `AfiliacionFileParser`. Alineación por `CONTROL_NUMBER` (servlet) y Campo 37 (PROSA). |
+| 3 | **Validación** | Pipeline de **10 niveles** por cada campo, para cada capa activa (SERVLET siempre, THREEDS/CYBERSOURCE/EMV/AN5822/AGREGADOR/TOKENIZACION según producto y logs), por cada transacción. |
+| 4 | **Cross-field** | **14 reglas cruzadas** wired a runtime: C1-C14 + Rate Limit + Anexo D + Tokenización (en v3.0 se añadieron C13 y C14 a las 12 originales). |
+| 5 | **Emisión** | Carta de certificación en **`.docx`** desde template oficial (28 placeholders + 3 loops) — vía `docxtemplater` + `pizzip`. **Gate P8 (nuevo v3.0)**: la carta solo se emite si veredicto global es **APROBADO**. Folio determinístico derivado del laboratorio + producto + capas + secuencial (`folio-nomenclatures.json`). |
+
+### Veredicto global
+
+Si todas las transacciones pasan → **APROBADO**; si alguna falla → **RECHAZADO**; si no hay transacciones → **PENDIENTE**. La lógica "peor caso gana" invalida la certificación completa con una sola transacción rechazada.
+
+> **Cambios v3.0 en el paso 5 (Emisión)**:
+> - El generador legacy `generateCertificationLetterPDF.ts` (jsPDF, 3 páginas) **fue eliminado** en commit `e74068d`. La carta es ahora **solo `.docx`**.
+> - **Gate P8** (commit `ca83cf5`): el endpoint `GET /api/certificacion/carta/[id]` retorna **HTTP 409** con `{ success: false, error: 'No se puede emitir carta hasta que la certificación esté APROBADA' }` si el veredicto no es APROBADO. La UI desactiva el botón "Descargar Carta Oficial (.docx)" con tooltip explicativo cuando aplica.
+> - **Folio por laboratorio** (commit `77b6067`): el `FolioGenerator` ahora deriva el sufijo del JSON `folio-nomenclatures.json` según `(laboratoryType, integrationType, has3DS, hasCybersource, isRecertificacion)`. Ver Sección 18 para nomenclaturas oficiales.
+
+*Ver Diagrama 3 en Anexo B para visualización del flujo TNP directo (Familias 1 y 3).*
+
