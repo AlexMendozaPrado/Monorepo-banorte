@@ -140,6 +140,8 @@ export class ValidateTransactionFieldsUseCase {
       command.servletRequest,
       command.threeDSLog,
     );
+    // C14 (F revisión Ramsses): variables MIT/CIT no se mezclan entre productos.
+    cross.validateMitCitProductMix(command.integrationType, command.servletRequest);
     cross.validateCybersourceDecisionFlow(command.cybersourceLog);
     cross.validateShipToCountryMatch(command.cybersourceLog, command.servletRequest);
     cross.validateCybersourceIdAndBin(command.servletRequest, command.cybersourceLog);

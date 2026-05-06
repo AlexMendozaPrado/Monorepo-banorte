@@ -297,6 +297,69 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * C14 — Variables MIT/CIT no se mezclan entre productos.
+   *
+   * Regla F de la revisión Ramsses (REVISIÓN DE REGLAS DE VALIDACIÓN BOT
+   * DE CERTIFICACIÓN PAYWORKS, abr-2026):
+   *
+   *   "Se tiene que validar que no se mezclen las variables de MIT/CIT
+   *   entre los tipos de producto, (ejemplo en Comercio Electrónico no
+   *   pueden enviar la variable IND_PAGO = 'R' ya que esta es solo para
+   *   Cargos Recurrentes), otro ejemplo es que en Comercio Electrónico
+   *   no deben de enviar la variable COF = 4 por que esto es solo para
+   *   Cargos Recurrente, se rechazaría la certificación."
+   *
+   * Implementación: si el producto NO es de Cargos Recurrentes y el
+   * servlet contiene `PAYMENT_IND='R'` o `COF='4'`, emite un issue.
+   *
+   * Aceptamos alias en español (`IND_PAGO`) por compatibilidad con
+   * comercios que reusan nombres del manual en su mensajería.
+   *
+   * Productos de Cargos Recurrentes (whitelist):
+   *   - CARGOS_PERIODICOS_POST
+   *   - AGREGADORES_CARGOS_PERIODICOS
+   *
+   * No usamos el An5822FlowDetector aquí porque esto es prevención de
+   * mezcla a nivel producto-variable, no detección de flujo. Si COF=4
+   * aparece en CE, falla aunque el comercio "intentara" declarar un
+   * flujo subseqMIT — el flujo no debería existir en ese producto.
+   */
+  validateMitCitProductMix(
+    integrationType: string,
+    servletRequest: LogEntity | undefined,
+  ): void {
+    if (!servletRequest) return;
+
+    const recurringProducts = new Set([
+      'CARGOS_PERIODICOS_POST',
+      'AGREGADORES_CARGOS_PERIODICOS',
+    ]);
+    if (recurringProducts.has(integrationType)) return; // N/A: producto sí permite MIT/CIT recurrente.
+
+    const indPago =
+      servletRequest.getField('PAYMENT_IND') ??
+      servletRequest.getField('IND_PAGO');
+    if (indPago && indPago.trim() === 'R') {
+      this.issues.push({
+        field: 'PAYMENT_IND',
+        rule: `C14: PAYMENT_IND='R' (Cargo Recurrente) no debe aparecer en producto ${integrationType}`,
+        detail: `Valor 'R' es exclusivo de Cargos Recurrentes (CARGOS_PERIODICOS_POST / AGREGADORES_CARGOS_PERIODICOS). Revisión Ramsses regla F (abr-2026).`,
+        layer: ValidationLayer.AN5822,
+      });
+    }
+
+    const cof = servletRequest.getField('COF');
+    if (cof && cof.trim() === '4') {
+      this.issues.push({
+        field: 'COF',
+        rule: `C14: COF='4' (Cargo Recurrente subseqMIT) no debe aparecer en producto ${integrationType}`,
+        detail: `Valor '4' es exclusivo de Cargos Recurrentes (CARGOS_PERIODICOS_POST / AGREGADORES_CARGOS_PERIODICOS). Revisión Ramsses regla F (abr-2026).`,
+        layer: ValidationLayer.AN5822,
+      });
+    }
+  }
+
   validateResponseFields(
     servletResponse: LogEntity | undefined,
     expectedResults: { field: string; validValues: string[] }[],

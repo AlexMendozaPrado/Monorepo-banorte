@@ -197,6 +197,94 @@ describe('CrossFieldValidator', () => {
     });
   });
 
+  describe('C14 — MIT/CIT no se mezclan entre productos (F revisión Ramsses)', () => {
+    it('FAIL: PAYMENT_IND=R en ECOMMERCE_TRADICIONAL', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'ECOMMERCE_TRADICIONAL',
+        makeEntity({ PAYMENT_IND: 'R' }),
+      );
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('PAYMENT_IND');
+      expect(issues[0].layer).toBe(ValidationLayer.AN5822);
+      expect(issues[0].rule).toContain('C14');
+      expect(issues[0].rule).toContain('ECOMMERCE_TRADICIONAL');
+    });
+
+    it('FAIL: COF=4 en AGREGADORES_COMERCIO_ELECTRONICO', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'AGREGADORES_COMERCIO_ELECTRONICO',
+        makeEntity({ COF: '4' }),
+      );
+      const issues = v.getIssues();
+      expect(issues).toHaveLength(1);
+      expect(issues[0].field).toBe('COF');
+      expect(issues[0].rule).toContain('C14');
+    });
+
+    it('FAIL doble: PAYMENT_IND=R y COF=4 ambos en MOTO', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'MOTO',
+        makeEntity({ PAYMENT_IND: 'R', COF: '4' }),
+      );
+      expect(v.getIssues()).toHaveLength(2);
+    });
+
+    it('PASS: PAYMENT_IND=R en CARGOS_PERIODICOS_POST (sí está permitido)', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'CARGOS_PERIODICOS_POST',
+        makeEntity({ PAYMENT_IND: 'R', COF: '4' }),
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('PASS: PAYMENT_IND=R y COF=4 en AGREGADORES_CARGOS_PERIODICOS', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'AGREGADORES_CARGOS_PERIODICOS',
+        makeEntity({ PAYMENT_IND: 'R', COF: '4' }),
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('PASS: PAYMENT_IND=U en ECOMMERCE_TRADICIONAL (firstCIT/subseqCIT permitido)', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'ECOMMERCE_TRADICIONAL',
+        makeEntity({ PAYMENT_IND: 'U' }),
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('PASS: COF=null/undefined en CE (campo no enviado)', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'ECOMMERCE_TRADICIONAL',
+        makeEntity({ PAYMENT_IND: 'U' }), // sin COF
+      );
+      expect(v.getIssues()).toHaveLength(0);
+    });
+
+    it('acepta alias español IND_PAGO', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix(
+        'ECOMMERCE_TRADICIONAL',
+        makeEntity({ IND_PAGO: 'R' }),
+      );
+      expect(v.getIssues()).toHaveLength(1);
+    });
+
+    it('N/A: servletRequest undefined no hace nada', () => {
+      const v = new CrossFieldValidator();
+      v.validateMitCitProductMix('ECOMMERCE_TRADICIONAL', undefined);
+      expect(v.getIssues()).toHaveLength(0);
+    });
+  });
+
   describe('Cybersource Decision flow', () => {
     it('no genera issue con Decision=ACCEPT', () => {
       const v = new CrossFieldValidator();
