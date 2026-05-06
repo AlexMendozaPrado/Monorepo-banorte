@@ -1,4 +1,5 @@
 import { IntegrationType } from '../value-objects/IntegrationType';
+import { LaboratoryType } from '../value-objects/LaboratoryType';
 import { ValidationVerdict } from '../value-objects/ValidationVerdict';
 import { ValidationResult } from './ValidationResult';
 
@@ -26,6 +27,13 @@ export interface CertificationSession {
    * generador devuelve un placeholder `PENDIENTE-...` que sí se persiste.
    */
   folio?: string;
+  /**
+   * Laboratorio que ejecutó la certificación. Determina el prefijo del
+   * folio (CAV/VIP, ECOMM, Agregadores agregador/integrador). Optional
+   * para retrocompatibilidad con sesiones creadas antes de la introducción
+   * del selector (Fase C.4, may-2026).
+   */
+  laboratoryType?: LaboratoryType;
 }
 
 export class CertificationSessionEntity implements CertificationSession {
@@ -44,6 +52,7 @@ export class CertificationSessionEntity implements CertificationSession {
     public readonly versionAplicacion?: string,
     public readonly urlSubdominio?: string,
     public readonly folio?: string,
+    public readonly laboratoryType?: LaboratoryType,
   ) {
     this.validateEntity();
   }

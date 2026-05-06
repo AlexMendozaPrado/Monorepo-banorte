@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DIContainer } from '@/infrastructure/di/DIContainer';
 import { IntegrationType } from '@/core/domain/value-objects/IntegrationType';
+import { LaboratoryType } from '@/core/domain/value-objects/LaboratoryType';
 import { OperationMode } from '@/core/domain/entities/CertificationSession';
 import { ApiResponse, CertificationResponse } from '@/shared/types/api';
 import { toCertificationResponse } from '@/shared/mappers/certificationResponseMapper';
@@ -20,6 +21,11 @@ export async function POST(
     const lenguaje = (formData.get('lenguaje') as string | null)?.trim() || undefined;
     const versionAplicacion = (formData.get('versionAplicacion') as string | null)?.trim() || undefined;
     const urlSubdominio = (formData.get('urlSubdominio') as string | null)?.trim() || undefined;
+    const laboratoryTypeStr = (formData.get('laboratoryType') as string | null)?.trim() || undefined;
+    const laboratoryType: LaboratoryType | undefined =
+      laboratoryTypeStr && Object.values(LaboratoryType).includes(laboratoryTypeStr as LaboratoryType)
+        ? (laboratoryTypeStr as LaboratoryType)
+        : undefined;
 
     if (!matrizFile) {
       return NextResponse.json({ success: false, error: 'La Matriz de Pruebas es requerida' }, { status: 400 });
@@ -78,6 +84,7 @@ export async function POST(
       lenguaje,
       versionAplicacion,
       urlSubdominio,
+      laboratoryType,
     });
 
     const response: CertificationResponse = toCertificationResponse(session);
