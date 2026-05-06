@@ -152,15 +152,22 @@ export default function ResultadosPage() {
               </div>
 
               <div>
-                <div className={`text-2xl font-bold mb-1 ${isApproved ? 'text-banorte-success' : 'text-banorte-error'}`}>
+                <div
+                  data-testid="global-verdict"
+                  className={`text-2xl font-bold mb-1 ${isApproved ? 'text-banorte-success' : 'text-banorte-error'}`}
+                >
                   {data.verdict}
                 </div>
                 <div className="text-sm text-banorte-secondary">
-                  {data.approvedCount}/{data.totalTransactions} transacciones aprobadas
+                  <span data-testid="approved-count">{data.approvedCount}</span>
+                  /
+                  <span data-testid="total-count">{data.totalTransactions}</span>
+                  {' '}transacciones aprobadas
                 </div>
                 {data.rejectedCount > 0 && (
                   <div className="text-sm text-banorte-error mt-1">
-                    {data.rejectedCount} transaccion(es) requieren correccion
+                    <span data-testid="rejected-count">{data.rejectedCount}</span>
+                    {' '}transaccion(es) requieren correccion
                   </div>
                 )}
               </div>
@@ -188,7 +195,13 @@ export default function ResultadosPage() {
                   const pct = Math.round((passed / total) * 100);
                   const allPassed = passed === total;
                   return (
-                    <div key={type} className="flex items-center gap-3">
+                    <div
+                      key={type}
+                      data-testid={`type-counter-${type}`}
+                      data-passed={passed}
+                      data-total={total}
+                      className="flex items-center gap-3"
+                    >
                       <span className="text-xs text-banorte-dark w-[120px] font-medium truncate">{type}</span>
                       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
