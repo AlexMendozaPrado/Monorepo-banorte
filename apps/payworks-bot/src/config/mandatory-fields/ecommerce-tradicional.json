@@ -2,7 +2,7 @@
   "_meta": {
     "note": "Comercio Electrónico Tradicional v2.5 (19 Junio 2025). Alineado a las tablas oficiales de 'Variables de envío' (p.6-9). Cambios v5 validados contra el PDF: MERCHANT_ID maxLen 7, REFERENCE numérico 12, CUSTOMER_REF2 maxLen 16, ENTRY_MODE validValues=[MANUAL] con maxLen 20, MARKETPLACE_TX PROHIBITED para MC/AMEX (manual: 'Solo aplica VISA'). Campos 3DS (STATUS_3D, ECI, XID, CAVV, VERSION_3D) viven en layer-3ds.json como capa transversal.",
     "specSource": "Manual Comercio Electrónico Tradicional v2.5 (19-Jun-2025). Revisado contra PDF oficial el 2026-04-22. Campos que la spec v5 había agregado incorrectamente (ID_GATEWAY, GROUP, PLAN_TYPE, PAYMENT_NUMBER, INITIAL_DEFERMENT) fueron removidos — pertenecen a los manuales de Agregadores v2.6.4 y VCE v1.8.",
-    "coverageGap": "Variables adicionales para Tarjetas Amex (manual v2.5 p.9): DOMICILIO, CODIGO_POSTAL, TELEFONO, CORREO_ELECTRONICO, DOMICILIO_ENTREGA, etc. — no agregadas a la matriz aún, pendiente de alcance separado."
+    "coverageGap": "Variables AMEX cubiertas tras revisión Ramsses (P9, abr-2026): solo DOMICILIO, CODIGO_POSTAL, TELEFONO, CORREO_ELECTRONICO son R para AUTH/PREAUTH AMEX. Las ~16 variables AMEX adicionales del manual v2.5 p.9 (DOMICILIO_ENTREGA, NOMBRE_CLIENTE_FACTURA, EQUIPO_NOMBRE_CLIENTE, datos browser, items y cantidades) son TODAS opcionales — el motor las acepta sin marcar fail si están ausentes; si el comercio las envía, validamos solo forbidden chars y longitud cuando ya estén en el JSON."
   },
   "integrationType": "ECOMMERCE_TRADICIONAL",
   "manualVersion": "2.5",
@@ -354,6 +354,76 @@
         "REVERSAL_VISA": "O", "REVERSAL_MC": "O", "REVERSAL_AMEX": "O"
       },
       "maxLength": 30
+    },
+    "DOMICILIO": {
+      "manualName": "DOMICILIO",
+      "displayName": "Domicilio (AMEX)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual v2.5 p.9 + Revisión Ramsses P9 (abr-2026): Variable AMEX. Solo R en transacciones AUTH/PREAUTH con tarjeta AMEX. N/A en otras marcas y en POSTAUTH/VOID/REFUND/VERIFY/REVERSAL aunque sean AMEX (la 3DS y datos del titular se validan en autorización inicial).",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 50
+    },
+    "CODIGO_POSTAL": {
+      "manualName": "CODIGO_POSTAL",
+      "displayName": "Código Postal (AMEX)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual v2.5 p.9 + Revisión Ramsses P9 (abr-2026): R solo para AUTH/PREAUTH AMEX. CP México 5 dígitos.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 5,
+      "format": "^\\d{5}$"
+    },
+    "TELEFONO": {
+      "manualName": "TELEFONO",
+      "displayName": "Teléfono (AMEX)",
+      "dataType": "numeric",
+      "ambiguous": false,
+      "note": "Manual v2.5 p.9 + Revisión Ramsses P9 (abr-2026): R solo para AUTH/PREAUTH AMEX. Numérico hasta 15 dígitos (E.164 sin '+').",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 15
+    },
+    "CORREO_ELECTRONICO": {
+      "manualName": "CORREO_ELECTRONICO",
+      "displayName": "Correo Electrónico (AMEX)",
+      "dataType": "alphanum",
+      "ambiguous": false,
+      "note": "Manual v2.5 p.9 + Revisión Ramsses P9 (abr-2026): R solo para AUTH/PREAUTH AMEX. Alfanumérico con formato email.",
+      "rules": {
+        "AUTH_VISA": "N/A", "AUTH_MC": "N/A", "AUTH_AMEX": "R",
+        "VOID_VISA": "N/A", "VOID_MC": "N/A", "VOID_AMEX": "N/A",
+        "REFUND_VISA": "N/A", "REFUND_MC": "N/A", "REFUND_AMEX": "N/A",
+        "PREAUTH_VISA": "N/A", "PREAUTH_MC": "N/A", "PREAUTH_AMEX": "R",
+        "POSTAUTH_VISA": "N/A", "POSTAUTH_MC": "N/A", "POSTAUTH_AMEX": "N/A",
+        "VERIFY_VISA": "N/A", "VERIFY_MC": "N/A", "VERIFY_AMEX": "N/A",
+        "REVERSAL_VISA": "N/A", "REVERSAL_MC": "N/A", "REVERSAL_AMEX": "N/A"
+      },
+      "maxLength": 100,
+      "format": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
     }
   },
   "responseFields": {

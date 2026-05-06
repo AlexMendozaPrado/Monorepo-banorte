@@ -92,9 +92,12 @@ export class InMemoryTransactionRepository implements TransactionRepositoryPort 
   }
 
   private detectCardBrand(cardNumber: string): CardBrand {
-    const firstDigit = cardNumber.replace(/\*/g, '').charAt(0);
+    const cleaned = cardNumber.replace(/\*/g, '');
+    const firstDigit = cleaned.charAt(0);
+    const firstTwo = cleaned.substring(0, 2);
     if (firstDigit === '4') return CardBrand.VISA;
     if (firstDigit === '5' || firstDigit === '2') return CardBrand.MASTERCARD;
+    if (firstTwo === '34' || firstTwo === '37') return CardBrand.AMEX;
     return CardBrand.VISA;
   }
 

@@ -167,6 +167,127 @@ describe('ValidateTransactionFieldsUseCase multi-layer', () => {
     expect(result.fieldResults.every(f => f.layer === ValidationLayer.SERVLET)).toBe(true);
   });
 
+  describe('AMEX P9 (revisión Ramsses) — DOMICILIO/CP/TELEFONO/CORREO solo R en AUTH/PREAUTH AMEX', () => {
+    const amexFields = ['DOMICILIO', 'CODIGO_POSTAL', 'TELEFONO', 'CORREO_ELECTRONICO'];
+
+    function makeAmexServletRequest(overrides: Record<string, string> = {}): ServletLogEntity {
+      // Igual que makeServletRequest pero con BIN AMEX y los 4 campos AMEX completos.
+      const fields = new Map<string, string>([
+        ['MERCHANT_ID', '9607773'],
+        ['USER', 'payworks_user'],
+        ['PASSWORD', '****'],
+        ['TERMINAL_ID', '12345678'],
+        ['CMD_TRANS', 'VENTA'],
+        ['AMOUNT', '1500.00'],
+        ['MODE', 'PRD'],
+        ['CARD_NUMBER', '371111******1111'],
+        ['EXP_DATE', '1227'],
+        ['ENTRY_MODE', 'MANUAL'],
+        ['RESPONSE_LANGUAGE', 'ES'],
+        ['DOMICILIO', 'AV REFORMA 100 PISO 5'],
+        ['CODIGO_POSTAL', '06600'],
+        ['TELEFONO', '5512345678'],
+        ['CORREO_ELECTRONICO', 'juan@test.com'],
+        ...Object.entries(overrides),
+      ]);
+      return new ServletLogEntity(new Date('2026-05-05T18:02:25Z'), 'REQUEST', '1.2.3.4', fields);
+    }
+
+    it('tx AUTH AMEX con los 4 campos completos → todos PASS', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.AMEX,
+        transactionRef: 'REF-AMEX-OK',
+        servletRequest: makeAmexServletRequest(),
+        servletResponse: makeServletResponse(),
+      });
+      for (const f of amexFields) {
+        const r = result.fieldResults.find(x => x.field === f);
+        expect(r).toBeDefined();
+        expect(r?.rule).toBe('R');
+        expect(r?.verdict).toBe('PASS');
+      }
+    });
+
+    it.each(['DOMICILIO', 'CODIGO_POSTAL', 'TELEFONO', 'CORREO_ELECTRONICO'])(
+      'tx AUTH AMEX SIN %s → FAIL',
+      (missing) => {
+        // Construimos servlet con el campo ausente (Map sin esa key).
+        const overrides: Record<string, string | undefined> = {};
+        overrides[missing] = undefined;
+        const fields = new Map<string, string>([
+          ['MERCHANT_ID', '9607773'],
+          ['USER', 'payworks_user'],
+          ['PASSWORD', '****'],
+          ['TERMINAL_ID', '12345678'],
+          ['CMD_TRANS', 'VENTA'],
+          ['AMOUNT', '1500.00'],
+          ['MODE', 'PRD'],
+          ['CARD_NUMBER', '371111******1111'],
+          ['EXP_DATE', '1227'],
+          ['ENTRY_MODE', 'MANUAL'],
+          ['RESPONSE_LANGUAGE', 'ES'],
+          ['DOMICILIO', 'AV REFORMA 100 PISO 5'],
+          ['CODIGO_POSTAL', '06600'],
+          ['TELEFONO', '5512345678'],
+          ['CORREO_ELECTRONICO', 'juan@test.com'],
+        ]);
+        fields.delete(missing);
+        const servletRequest = new ServletLogEntity(
+          new Date('2026-05-05T18:02:25Z'),
+          'REQUEST',
+          '1.2.3.4',
+          fields,
+        );
+        const result = useCase.execute({
+          integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+          transactionType: TransactionType.AUTH,
+          cardBrand: CardBrand.AMEX,
+          transactionRef: 'REF-AMEX-MISSING',
+          servletRequest,
+          servletResponse: makeServletResponse(),
+        });
+        const r = result.fieldResults.find(x => x.field === missing);
+        expect(r?.rule).toBe('R');
+        expect(r?.verdict).toBe('FAIL');
+        expect(r?.failReason).toBe('missing');
+      },
+    );
+
+    it('tx AUTH VISA SIN los 4 campos AMEX → todos N/A (no genera fail)', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.AUTH,
+        cardBrand: CardBrand.VISA,
+        transactionRef: 'REF-VISA-NA',
+        servletRequest: makeServletRequest(), // sin DOMICILIO/CP/TEL/CORREO
+        servletResponse: makeServletResponse(),
+      });
+      for (const f of amexFields) {
+        const r = result.fieldResults.find(x => x.field === f);
+        expect(r?.rule).toBe('N/A');
+        expect(r?.verdict).toBe('PASS');
+      }
+    });
+
+    it('tx POSTAUTH AMEX SIN los 4 campos → todos N/A (la 3DS y datos del titular ya se validaron en PREAUTH)', () => {
+      const result = useCase.execute({
+        integrationType: IntegrationType.ECOMMERCE_TRADICIONAL,
+        transactionType: TransactionType.POSTAUTH,
+        cardBrand: CardBrand.AMEX,
+        transactionRef: 'REF-AMEX-POST',
+        servletRequest: makeServletRequest({ CARD_NUMBER: '371111******1111' }),
+        servletResponse: makeServletResponse(),
+      });
+      for (const f of amexFields) {
+        const r = result.fieldResults.find(x => x.field === f);
+        expect(r?.rule).toBe('N/A');
+        expect(r?.verdict).toBe('PASS');
+      }
+    });
+  });
+
   describe('AN5822 integration', () => {
     function makeMcServletRequest(overrides: Record<string, string> = {}): ServletLogEntity {
       const fields = new Map<string, string>([

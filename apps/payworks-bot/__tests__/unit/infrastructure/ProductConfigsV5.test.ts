@@ -88,13 +88,30 @@ describe('Product configs v5 — cambios clave', () => {
       expect(m.servlet.RESPONSE_LANGUAGE?.validValues).toEqual(['ES', 'EN']);
     });
 
-    it('servlet solo contiene los 20 campos del manual v2.5 p.6-8', () => {
+    it('servlet contiene los 20 campos del manual v2.5 p.6-8 + 4 AMEX P9 = 24', () => {
       const keys = Object.keys(m.servlet).filter(k => !k.startsWith('_'));
-      expect(keys).toHaveLength(20);
+      // 20 campos servlet base + 4 variables AMEX P9 (revisión Ramsses abr-2026):
+      // DOMICILIO, CODIGO_POSTAL, TELEFONO, CORREO_ELECTRONICO.
+      expect(keys).toHaveLength(24);
       expect(keys).not.toContain('GROUP');
       expect(keys).not.toContain('PLAN_TYPE');
       expect(keys).not.toContain('PAYMENT_NUMBER');
       expect(keys).not.toContain('INITIAL_DEFERMENT');
+      // Las 4 AMEX deben estar presentes
+      expect(keys).toContain('DOMICILIO');
+      expect(keys).toContain('CODIGO_POSTAL');
+      expect(keys).toContain('TELEFONO');
+      expect(keys).toContain('CORREO_ELECTRONICO');
+    });
+
+    it('AMEX P9: DOMICILIO/CP/TELEFONO/CORREO son R solo en AUTH/PREAUTH AMEX', () => {
+      for (const field of ['DOMICILIO', 'CODIGO_POSTAL', 'TELEFONO', 'CORREO_ELECTRONICO']) {
+        expect(m.servlet[field]?.rules.AUTH_AMEX).toBe('R');
+        expect(m.servlet[field]?.rules.PREAUTH_AMEX).toBe('R');
+        expect(m.servlet[field]?.rules.AUTH_VISA).toBe('N/A');
+        expect(m.servlet[field]?.rules.AUTH_MC).toBe('N/A');
+        expect(m.servlet[field]?.rules.POSTAUTH_AMEX).toBe('N/A');
+      }
     });
   });
 
