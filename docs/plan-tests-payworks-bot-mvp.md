@@ -35,16 +35,24 @@ Una auditoría de cobertura (subagente Plan, 2026-05-06) reveló que **ambos bug
 ## Orden de ejecución
 
 ```
-Fase 1 → Fase 2 → Fase 3 (cubren los 2 bugs reportados + bloque crítico)
-       ↓
-Fase 4 → Fase 5 → Fase 6 (cubren capa application e infrastructure críticas)
-       ↓
-Fase 7 → Fase 8 → Fase 9 (cobertura amplia de UI y dominio restante)
-       ↓
-Fase 10 (coverage gates en CI)
+P0 — Bloqueantes MVP (cubren los 2 bugs + flujo carta completo):
+  Fase 1 → Fase 2 → Fase 3 (loading state + idempotencia primer click)
+                  ↓
+  Fase 3.5 → Fase 3.6 (happy path carta .docx + RTL ResultadosPage)
+
+Alto riesgo (capas críticas):
+  Fase 4 → Fase 5 → Fase 5.5 → Fase 5.6 (use case + renderer + API carta)
+                                ↓
+                                Fase 6 (otras API routes)
+
+Cobertura amplia:
+  Fase 7 → Fase 8 → Fase 9
+
+Infraestructura:
+  Fase 10 (coverage gates en CI)
 ```
 
-**Cada fase = 1 commit autocontenido** (type-check + tests verdes antes de cerrar). Las fases 1, 2 y 3 son **bloqueantes para MVP**; las fases 4-10 se pueden priorizar según riesgo percibido.
+**Cada fase = 1 commit autocontenido** (type-check + tests verdes antes de cerrar). Las fases **1, 2, 3, 3.5, 3.6, 5.5 y 5.6** son **bloqueantes para MVP**; las demás se pueden priorizar según riesgo percibido.
 
 ---
 
@@ -116,6 +124,58 @@ Fase 10 (coverage gates en CI)
 
 ---
 
+## Fase 3.5 — E2E Cypress: Happy path de generación de carta `.docx`
+
+**Tamaño**: M · **Depende de**: Fase 3 · **Bloqueante MVP**: sí (la carta es el output principal del producto)
+
+**Por qué**: el spec actual `04-bundle-3ds-cybersource.cy.ts` solo cubre el **gate P8 negativo** (sesión RECHAZADA → botón disabled + endpoint 409). **El flujo positivo nunca se ejecuta**: con sesión APROBADA, click en botón, descarga del `.docx`, verificación de headers, validación del filename con folio. Como no existe bundle APROBADO en los fixtures, hay que mockear la respuesta del endpoint `validar` con `cy.intercept`.
+
+**Cambios**:
+- `apps/payworks-bot/__tests__/cypress/e2e/09-carta-docx-flow.cy.ts` (nuevo).
+- `apps/payworks-bot/__tests__/cypress/support/commands.ts` — extender con `cy.mockApprovedSession(sessionId)` que intercepta `POST /api/certificacion/validar` retornando un `CertificationResponse` con todas las transacciones APROBADAS y `verdict: "APROBADO"`.
+
+**Tests obligatorios**:
+
+| # | Test | Detalle |
+|---|---|---|
+| 3.5.1 | `botón Descargar Carta Oficial está habilitado cuando veredicto es APROBADO` | Mock APROBADO → assert `[data-testid="download-carta-docx"]` `.should('not.be.disabled')` |
+| 3.5.2 | `click sin notas adicionales abre /api/certificacion/carta/:id sin query param` | `cy.intercept` captura request → assert `req.url` no contiene `?notas=` |
+| 3.5.3 | `click con 2 notas en textarea abre endpoint con ?notas=...URL-encoded` | Escribir 2 líneas en textarea → click → assert `req.url` contiene `?notas=` con valores codificados |
+| 3.5.4 | `notas vacías o solo whitespace se filtran` | Escribir `\n  \n  \nnota válida\n` → query param solo trae `nota válida` |
+| 3.5.5 | `endpoint responde 200 con Content-Type wordprocessingml + filename con folio` | `cy.request` directo al endpoint → assert headers |
+| 3.5.6 | `filename del Content-Disposition matches el folio mostrado en la UI` | Capturar folio de `[data-testid="folio-label"]` y comparar con response |
+
+**Commit**: `test(payworks-bot): cypress E2E happy path de generación de carta .docx (P0)`
+
+---
+
+## Fase 3.6 — RTL para ResultadosPage flow de carta + notas adicionales
+
+**Tamaño**: M · **Depende de**: Fase 1
+
+**Por qué**: el componente `app/resultados/[id]/page.tsx` controla el flow de carta (textarea de notas, botón habilitado/deshabilitado según veredicto, construcción de query param). Hoy 0 cobertura unit y solo cobertura E2E parcial.
+
+**Cambios**:
+- `apps/payworks-bot/__tests__/unit/app/resultados-page.test.tsx` (nuevo).
+
+**Tests obligatorios**:
+
+| # | Test |
+|---|---|
+| 3.6.1 | `con session APROBADA: botón Descargar Carta Oficial está habilitado` |
+| 3.6.2 | `con session RECHAZADA: botón disabled + tooltip explicativo` |
+| 3.6.3 | `con session PENDIENTE: botón disabled` |
+| 3.6.4 | `textarea actualiza estado en cada cambio` |
+| 3.6.5 | `click en botón con notas vacías llama window.open(/api/.../carta/:id) sin ?notas=` |
+| 3.6.6 | `click con 2 notas separadas por \n llama window.open con ?notas=URL-encoded` |
+| 3.6.7 | `notas con whitespace solo se filtran antes de construir el URL` |
+| 3.6.8 | `card "Notas adicionales" no aparece si veredicto != APROBADO` (si aplica este comportamiento UX) |
+| 3.6.9 | `card de transacciones renderiza por cada result en session.results` |
+
+**Commit**: `test(payworks-bot): RTL para ResultadosPage cubre flow de carta y notas`
+
+---
+
 ## Fase 4 — Tests unit para RunCertificationUseCase
 
 **Tamaño**: L · **Depende de**: nada · **Bloqueante MVP**: alto riesgo
@@ -169,6 +229,86 @@ Fase 10 (coverage gates en CI)
 - `Buffer resultante es ZIP válido (`Zip archive data, made by v2.0`)`
 
 **Commit**: `test(payworks-bot): unit tests DocxRenderer + 3 repos in-memory`
+
+---
+
+## Fase 5.5 — Integration test del renderer `.docx` con verificación de contenido
+
+**Tamaño**: M · **Depende de**: Fase 5 (DocxRenderer básico) · **Bloqueante MVP**: sí
+
+**Por qué**: la Fase 5 valida que `DocxCertificationLetterRenderer.generateBuffer()` produce un Buffer válido. Pero **no valida el contenido sustituido**: que los 28 placeholders quedaron poblados, que el loop `filasMatriz` clonó N filas para N transacciones, que `manualesUtilizados` refleja las capas activas, que `notasAdicionales` se inyectaron en el orden correcto. Sin esto, una refactorización podría romper silenciosamente el formato del entregable legal.
+
+**Cambios**:
+- `apps/payworks-bot/__tests__/integration/regression/CartaDocxContent.test.ts` (nuevo).
+
+**Helper compartido**:
+```ts
+// __tests__/utils/inspectDocx.ts
+import PizZip from 'pizzip';
+export function extractDocxText(buffer: Buffer): string {
+  const zip = new PizZip(buffer);
+  const xml = zip.file('word/document.xml').asText();
+  return xml.replace(/<[^>]+>/g, ' '); // strip tags
+}
+export function findUnsubstitutedPlaceholders(buffer: Buffer): string[] {
+  const text = extractDocxText(buffer);
+  return [...text.matchAll(/\{[^}]{1,40}\}/g)].map(m => m[0]);
+}
+export function countTableRows(buffer: Buffer, tableMatcher: RegExp): number {
+  const zip = new PizZip(buffer);
+  const xml = zip.file('word/document.xml').asText();
+  const tables = xml.match(/<w:tbl\b[\s\S]*?<\/w:tbl>/g) || [];
+  const matriz = tables.find(t => tableMatcher.test(t));
+  return matriz ? (matriz.match(/<w:tr\b/g) || []).length : 0;
+}
+```
+
+**Tests obligatorios**:
+
+| # | Test |
+|---|---|
+| 5.5.1 | `con CertificationLetterData mínimo: 0 placeholders sin sustituir (`{xxx}` no aparece en document.xml)` |
+| 5.5.2 | `loop filasMatriz: 1 transacción → 2 rows (header + 1 data); 5 transacciones → 6 rows` |
+| 5.5.3 | `loop filasMatriz: 0 transacciones → 1 row (solo header)` |
+| 5.5.4 | `loop manualesUtilizados con 3DS+CS detectados → 3 manuales (producto + 3DSecure + Cybersource)` |
+| 5.5.5 | `loop manualesUtilizados sin capas extras → 1 manual (solo producto)` |
+| 5.5.6 | `loop notasAdicionales con array vacío → ningún bullet de nota` |
+| 5.5.7 | `loop notasAdicionales con 2 strings → 2 bullets en la sección Notas` |
+| 5.5.8 | `tabla "Matriz de pruebas" preserva bordes rojos en cada fila clonada` (verificar `<w:tcBorders>` con color `ff0000` en cada cell de cada row) |
+| 5.5.9 | `texto del folio aparece en cuerpo del documento (CERTIFICADO {codigo})` |
+| 5.5.10 | `firma hardcoded "Dulce María Rivera Luna" + "Soporte Técnico Payworks"` |
+| 5.5.11 | `título de portada incluye sufijos correctos (CON 3D SECURE, CON CYBERSOURCE) según capas detectadas` |
+
+---
+
+## Fase 5.6 — API route `/api/certificacion/carta/[id]` integration test
+
+**Tamaño**: M · **Depende de**: Fase 5.5 · **Bloqueante MVP**: sí
+
+**Por qué**: el endpoint orquesta múltiples piezas (gate P8, build de `CertificationLetterData` desde `session`, `FolioGenerator`, renderer). Hoy solo el caso 409 está cubierto E2E. Necesitamos validar:
+- 200 con sesión APROBADA → headers correctos
+- 404 si sessionId no existe
+- Query param `?notas=...` se parsea correctamente (split `\n`, trim, filter empty)
+- `?format=pdf` ya no responde (legacy eliminado)
+
+**Cambios**:
+- `apps/payworks-bot/__tests__/integration/regression/CartaApiRoute.test.ts` (nuevo).
+- Setup: helper `setupApprovedSession(container, integrationType)` que crea una sesión APROBADA en memoria con N transactions PASS.
+
+**Tests obligatorios**:
+
+| # | Test |
+|---|---|
+| 5.6.1 | `GET /api/certificacion/carta/:id con session APROBADA → 200 + Content-Type wordprocessingml + filename folio.docx` |
+| 5.6.2 | `GET /api/certificacion/carta/:id con session RECHAZADA → 409 + body { success: false, verdict: 'RECHAZADO', error: contiene "APROBADA" }` |
+| 5.6.3 | `GET /api/certificacion/carta/:id con session PENDIENTE → 409` |
+| 5.6.4 | `GET /api/certificacion/carta/no-existe-id → 404 + body { success: false, error: "Certificación no encontrada" }` |
+| 5.6.5 | `GET /api/certificacion/carta/:id?notas=Nota+1%0ANota+2 → response body contiene "Nota 1" y "Nota 2" como bullets` |
+| 5.6.6 | `GET /api/certificacion/carta/:id?notas= (vacío) → response body sin sección de notas adicionales` |
+| 5.6.7 | `GET /api/certificacion/carta/:id?format=pdf → ignora el query param y devuelve .docx` (verificar que el legacy jsPDF está realmente eliminado) |
+| 5.6.8 | `filename del Content-Disposition usa el folio generado por FolioGenerator del laboratorio + producto + capas correcto` |
+
+**Commit**: `test(payworks-bot): integration tests carta endpoint + verificación de contenido docx (P0)`
 
 ---
 
@@ -310,11 +450,20 @@ Fase 10 (coverage gates en CI)
 - (referencia, no tocar) `apps/payworks-bot/src/presentation/components/UploadCard.tsx`
 - (referencia, no tocar) `packages/ui/src/components/Button/Button.tsx`
 
+### Fases 3.5-3.6 (P0 — happy path carta `.docx`)
+- `apps/payworks-bot/__tests__/cypress/e2e/09-carta-docx-flow.cy.ts` (nuevo)
+- `apps/payworks-bot/__tests__/unit/app/resultados-page.test.tsx` (nuevo)
+- `apps/payworks-bot/__tests__/cypress/support/commands.ts` — extender con `cy.mockApprovedSession()`
+- (referencia, no tocar) `apps/payworks-bot/src/app/resultados/[id]/page.tsx`
+
 ### Fases 4-6 (capas application + infrastructure)
 - `apps/payworks-bot/__tests__/unit/use-cases/RunCertificationUseCase.test.ts` (nuevo)
 - `apps/payworks-bot/__tests__/unit/infrastructure/DocxCertificationLetterRenderer.test.ts` (nuevo)
 - `apps/payworks-bot/__tests__/unit/infrastructure/InMemory{Transaction,Certification,Afiliacion}Repository.test.ts` (nuevos)
-- `apps/payworks-bot/__tests__/unit/api/{validar,historial,carta,health}-route.test.ts` (nuevos)
+- `apps/payworks-bot/__tests__/integration/regression/CartaDocxContent.test.ts` (nuevo, P0)
+- `apps/payworks-bot/__tests__/integration/regression/CartaApiRoute.test.ts` (nuevo, P0)
+- `apps/payworks-bot/__tests__/utils/inspectDocx.ts` (helper, nuevo)
+- `apps/payworks-bot/__tests__/unit/api/{validar,historial,health}-route.test.ts` (nuevos — `carta-route` queda en F5.6 como integration)
 
 ### Fases 7-9 (UI restante + dominio)
 - 7 archivos `__tests__/unit/components/*.test.tsx`
@@ -351,5 +500,12 @@ Fase 10 (coverage gates en CI)
 1. **Crear branch desde origin/main fresh** (no desde `docs/payworks-bot`): `git checkout -b test/payworks-bot-mvp-coverage origin/main`. Idealmente trabajar en worktree dedicado con path corto (ej. `C:\Users\fluid\banorte-tests`) por el problema de Cypress screenshots de sentiment-analysis con paths >260 chars en Windows.
 2. **Confirmar primero** que las dependencias `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event` están en `apps/payworks-bot/package.json` antes de Fase 1; si faltan, agregarlas como primer paso de esa fase.
 3. **No mezclar el fix de los bugs con los tests**: este plan es solo de tests. El fix del Bug 1 (`isLoading={isLoading}`) y Bug 2 (`type="button"` o `<form onSubmit>`) van en branch/PR separado, idealmente después de que los tests rojos del Bug confirmen que el problema existe antes del fix.
-4. **Orden recomendado de PRs**: PR-A (Fases 1+2+3, P0 — los bugs) → fix de bugs en PR-B → PR-C (Fases 4+5+6, capas críticas) → PR-D (Fases 7+8+9, cobertura amplia) → PR-E (Fase 10, gates CI).
+4. **Orden recomendado de PRs**:
+   - **PR-A** = Fases 1 + 2 + 3 (P0 — los 2 bugs UI)
+   - **PR-A2** = Fases 3.5 + 3.6 (P0 — happy path carta `.docx`)
+   - **PR-B** = fix de los 2 bugs UI (separado, post tests rojos)
+   - **PR-C** = Fases 4 + 5 + 5.5 + 5.6 (capas críticas: use case + renderer + carta endpoint)
+   - **PR-D** = Fase 6 (otras API routes)
+   - **PR-E** = Fases 7 + 8 + 9 (cobertura amplia)
+   - **PR-F** = Fase 10 (gates CI)
 5. **Si se rompe algún test existente** durante alguna fase: probable que sea regresión legítima del refactor; arreglar antes de cerrar la fase.
