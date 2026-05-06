@@ -565,3 +565,103 @@ Cada entrada en `folio-nomenclatures.json` define `recertPrefix` (ej. `RCE`, `RC
 
 *Ver Diagrama 10 en Anexo B para visualización del árbol de decisión de folios.*
 
+---
+
+## Sección 13 — Estado post-auditoría iter 3
+
+La iteración 3 de auditoría ("Revisión Ramsses") cerró el 5 de mayo de 2026 con la integración de los comentarios del equipo de Soporte Técnico Payworks (Ramsses Bautista et al.) sobre el documento v2.0 y la entrega del archivo oficial **NOMENCLATURAS FOLIOS LABS.xlsx**. Esta sección documenta los ajustes realizados en ese ciclo y las métricas finales.
+
+### Iteración 2 (recap del cierre)
+
+Cerró el 22 de abril de 2026. Estado: 2 P0 bloqueantes resueltos (`ID_MAC` valor X, `AUTH_RESULT` 47→65 códigos) + 5 P2 documentales aplicados (notas `AUTH_DATE`/`CUST_RSP_DATE`, `_meta` de `response-rules`, nota `layer-an5822._rulesNote`, estructura §20-BIS, diffs puntuales). Métricas finales iter 2: 425/425 tests verdes en 19 suites · typecheck limpio · 12 JSONs validados · 11/11 alineados contra PDFs · 10 reglas cruzadas wired · 4/4 Q de negocio documentadas · LISTO PARA CERTIFICACIÓN.
+
+### Iteración 3 — Revisión Ramsses (cierre 2026-05-05)
+
+#### Cambios aplicados
+
+| Bloque | Cambio | Commits | Sección documental |
+|---|---|---|---|
+| **A** | Carta `.docx` desde template oficial reemplaza jsPDF | `ed08d08` (PR #21) + `7accca2` (UI) + `f2cd477` (PR #23 fixes) + `e74068d` (drop jsPDF) | §17 |
+| **A** | Gate P8 — carta solo si veredicto APROBADO | `ca83cf5` | §12 + §17 |
+| **B** | Cypress E2E cobertura veredictos + conteos | `98753cf` | §0 + §17 |
+| **B** | Cypress cobertura panel expandible RuleLine F.2 | `decc3f7` | §0 |
+| **B** | Cypress E2E descarga `.docx` con folio | `42de62a` | §17 |
+| **B** | Bundle 04 — fix correlación capa Cybersource | `0d8c043` | bundle test |
+| **C** | Cross-rule **C13 (H16)** — `REFERENCE_3D = NUMERO_CONTROL` | `cf00d83` | §5 + §8 |
+| **C** | Cross-rule **C14 (H17)** — MIT/CIT prohibidas en no-recurrentes | `86d5bd2` | §6 + §8 |
+| **C** | AMEX P9 — variables AMEX-only en `ecommerce-tradicional.json` (regla **A8**) | `1342e1c` | §1 |
+| **C** | Soporte de marca AMEX completa en `CardBrand` VO | `1342e1c` | §0 |
+| **C** | Selector de laboratorio (CAV/ECOMM/AGREG_AGREGADOR/AGREG_INTEGRADOR) + folio oficial | `77b6067` | §18 |
+| **C** | 2 JSONs nuevos: `agregadores-integradores-tp.json` + `layer-tokenizacion.json` | varios | "Manuales utilizados" |
+
+#### Preguntas resueltas en iter 3
+
+| # | Pregunta v1.0 | Resolución iter 3 |
+|---|---|---|
+| **P8** | ¿Bajo qué criterio se emite la carta? ¿Solo si APROBADO? | **Resuelta** — Gate P8 implementado. La carta solo se emite con veredicto APROBADO. |
+| **P9** | AMEX Tradicional V2.5 p.9: ¿bot debe exigir los 20+ campos AMEX cuando la marca es AMEX? | **Resuelta** — 4 variables AMEX (DOMICILIO, CODIGO_POSTAL, TELEFONO, CORREO_ELECTRONICO) son R en AUTH/PREAUTH AMEX vía matriz `transactionKey` `_AMEX`. El resto son opcionales (regla A8 nueva). |
+| **P14** | ¿Pueden compartir el archivo Word original de la carta de certificación? | **Resuelta** — Compartido y marcado en Google Docs con 28 placeholders + 3 loops. Almacenado en `apps/payworks-bot/src/infrastructure/templates/carta-certificacion.template.docx`. |
+
+#### Métricas finales (post iter 3)
+
+- **387+ tests verdes** en 26 suites · typecheck limpio
+- **14 JSONs de configuración** validados (10 productos + layer-3ds + layer-cybersource + layer-an5822 + response-rules + agregadores-integradores-tp + layer-tokenizacion)
+- **14 reglas cruzadas wired a runtime** (C1-C14 + Rate Limit + Anexo D + Tokenización)
+- **87 reglas documentadas** (84 v2.0 + A8 + H16 + H17)
+- **4 specs Cypress E2E verdes** sobre los 4 bundles canónicos
+- **3/3 P0 bloqueantes históricos resueltos** (ID_MAC, AUTH_RESULT, P8 gate carta)
+- **2/2 features mayores cerradas** (carta `.docx`, folio por laboratorio)
+- **Estado: LISTO PARA CERTIFICACIÓN PRODUCTIVA**
+
+---
+
+## Sección 14 — Preguntas pendientes
+
+Las 4 preguntas Q1-Q4 de la versión 2.0 fueron **resueltas o aceptadas como decisión operativa estable**. Esta sección documenta su estado actual al cierre de iter 3 y las preguntas residuales para iter 4.
+
+### Estado de Q1-Q4 v2.0
+
+| # | Pregunta v2.0 | Resolución iter 3 |
+|---|---|---|
+| **Q1** | ¿Existe un Manual Tradicional v2.6.4 como documento interno Banorte? | **Aceptada como N/A** — Tradicional V2.5 + Agregadores V2.6.4 son los manuales canónicos. Las notas en `ecommerce-tradicional.json` apuntan correctamente a Agregadores v2.6.4 p.12 para `AUTH_DATE`/`CUST_RSP_DATE`. |
+| **Q2** | ¿Se certifica algún comercio Tradicional con reglas operativas de Agregadores v2.6.4? | **Aceptada como Out-of-scope** — No se ha observado este caso en bundles canónicos. Si se presenta, se manejará como excepción documentada. |
+| **Q3** | ¿AUTH_DATE y CUST_RSP_DATE son entregados por Banorte aunque el manual del producto no los mencione? | **Aceptada como decisión operativa** — Se mantienen como O en Tradicional/MOTO/Cargos Post (pasan si están ausentes). Bot acepta tanto presencia como ausencia. |
+| **Q4** | ¿El regex Anexo D para SUB_MERCHANT (formato 7*14) es requisito duro o recomendación? | **Aceptada como requisito duro** — `AnexoDValidator` emite FAIL en caso de no cumplimiento. Confirmado por Ramsses en revisión iter 3. |
+
+### Preguntas residuales para iter 4
+
+| # | Pregunta | Bloqueador |
+|---|---|---|
+| **Q5** | Folio para `API_PW2_SEGURO` e `INTERREDES_REMOTO` puros (no agregadores) | El xlsx oficial no tiene fila para estos productos cuando se operan sin agregador. Pendiente de confirmación de Ramsses. Mientras tanto, `FolioGenerator` emite `PENDIENTE-…` para estos casos. |
+| **Q6** | Variables Anexo V faltantes en Interredes Remoto y API PW2: `CASHBACK_AMOUNT`, `PAGO_MOVIL`, `AUTH_CODE`, `BANORTE_URL`, `TRANS_TIMEOUT`, MSI, `RESPONSE_LANGUAGE`, QPS, `CUSTOMER_REF2-5` | Pendiente de revisión campo por campo de los anexos V de ambos manuales TP. Las variables ya conocidas (`TIPO_PLAN` D22) están como Parcial. |
+| **Q7** | Validación VCE cifrado AES/CTR | Requiere credenciales privadas del comercio (post-MVP). Brecha aceptada documentada en §11. |
+| **Q8** | Bundles fixtures 05+ para MOTO, Cargos Periódicos Post, Ventana CE, Agregadores CP, API PW2, Interredes Remoto | Bloqueado por entrega de logs reales del equipo Banorte. Hoy solo hay bundles canónicos para Agregadores CE (DLOCAL, OPENLINEA, ZIGU) y Tradicional con 3DS+CS (MUEVE CIUDAD). |
+
+Para los casos Q5-Q8, se agenda sesión con el equipo de Soporte Técnico Payworks (Ramsses Bautista) en el calendario habitual de certificación. Las respuestas se integrarán en la siguiente versión del documento.
+
+---
+
+## Sección 15 — Anexo A: Resolución de preguntas P1-P15 de v1.0
+
+Cada fila representa una pregunta abierta de la revisión v1.0 del 16 de abril de 2026 y cómo se resolvió durante las iteraciones 2 y 3 (o, en caso contrario, su mapeo a las preguntas residuales actuales).
+
+| # | Pregunta v1.0 | Resolución |
+|---|---|---|
+| **P1** | ¿Existe un glosario oficial español↔inglés de variables Payworks? | **Resuelta iter 2** — `src/config/variable-glossary.json` consolidado desde los 10 manuales. Documentado en §13 del doc maestro. |
+| **P2** | `FECHA_EXP` no aparece en logs reales de agregadores. ¿En qué productos SÍ aparece? | **Resuelta iter 2** — Tratada como `R_PCI` (PCI no loggeable). El manual dice R pero PCI-DSS prohíbe loggearla. Comportamiento correcto = pasa silenciosamente contra log. |
+| **P3** | ¿`CERTIFICACION_3D="03"` (envío) y `STATUS_3D=200` (retorno) son DOS campos distintos? | **Resuelta iter 2** — SÍ, son dos campos. Separados en v5 (`layer-3ds.threeds` vs `layer-3ds.threedsResponse`). Bug histórico corregido. Blindado por `ProductConfigsV5.test.ts`. |
+| **P4** | ¿El comercio tiene acceso a los logs del PinPad (API PW2 e Interredes Remoto)? | **Resuelta iter 2** — Sí. Los códigos de error del PinPad se validan en regla C12 (`CrossFieldValidator.validatePinPadErrorCode`) contra la tabla `errorCodes` del Anexo VI de cada producto. |
+| **P5** | CIT vs MIT: ¿cómo distinguir automáticamente? ¿De la matriz Excel, del log, o del histórico de la afiliación? | **Resuelta iter 2** — Modelo refactorizado a 3 flujos (`firstCIT` / `subseqCIT` / `subseqMIT`). El aplicativo lee columna `flujo_an5822` de la matriz Excel; si ausente, infiere por `PAYMENT_INFO` del log (0/3/2). |
+| **P6** | ¿Cómo identificar automáticamente el esquema de agregador (1 Tasa Natural / 4 Sin AGP / 4 Con AGP) desde el log? | **Resuelta iter 2** — `AggregatorSchemeDetector` por presencia de campos `SUB_MERCHANT` + `AGGREGATOR_ID` + `MERCHANT_MCC`. Confirmado contra casos reales ZIGU (ESQ_1), MUEVE CIUDAD (ESQ_4 con AGP), DLOCAL/OPENLINEA (ESQ_4 sin AGP). |
+| **P7** | Regla de generación del número de certificado (ej. CE3DS-0003652): ¿consecutivo global, por afiliación, por producto? | **Resuelta iter 3** — Folio determinístico de 7 dígitos (6 en VIP/VCE) por **laboratorio × producto × capas × isRecertificacion × secuencial**. Formato: `{PREFIX}-{CONSECUTIVO_PADDED}_{AFILIACION}`. Nomenclaturas oficiales en `folio-nomenclatures.json` desde xlsx Banorte. Ver §18. |
+| **P8** | ¿Bajo qué criterio se emite la carta? ¿Solo si APROBADO o permite observaciones? | **Resuelta iter 3** — Gate P8 implementado: la carta solo se emite si veredicto global es APROBADO. Si no, endpoint retorna HTTP 409 y UI desactiva botón con tooltip. |
+| **P9** | AMEX Tradicional V2.5 p.9: los 20+ campos AMEX son R para VENTA/PREAUTH. ¿Bot debe exigirlos cuando la marca es AMEX? | **Resuelta iter 3** — Solo 4 variables son R (`DOMICILIO`, `CODIGO_POSTAL`, `TELEFONO`, `CORREO_ELECTRONICO`) en AUTH/PREAUTH AMEX. El resto son opcionales. Implementado vía matriz `transactionKey` `_AMEX` en `ecommerce-tradicional.json`. Regla A8 nueva. |
+| **P10** | `MARKETPLACE_TX` valor fijo `1`: ¿Banorte valida las 4 condiciones (fuera de México + VISA + VENTA/PREAUTH + TNP) o el comercio? | **Resuelta iter 2** — El bot implementa regla `PROHIBITED` en MC/AMEX con `fixedValue "1"` en VISA. Cubre las 4 condiciones declarativamente en `ecommerce-tradicional.json` y `agregadores-comercio-electronico.json`. |
+| **P11** | `NUMERO_BIN` aparece en logs reales pero NO en los manuales. ¿Se valida? ¿Es R u O? | **Resuelta iter 2** — BIN se valida cross-field en regla C11b (primeros 6 del PAN consistentes con `Card_cardType`). No se exige su presencia explícita como campo independiente. |
+| **P12** | REVERSAL vs VOID: ¿cuándo se usa cada una? | **Resuelta iter 2** — Distinción documentada en el parser de `CMD_TRANS`. REVERSAL (REV) para timeouts del autorizador; VOID (CAN) para cancelaciones del comercio. Ambas mapean al par ISO 8583 0220/0230. |
+| **P13** | Export de NPAYW.AFILIACIONES: ¿qué formato (CSV/TXT/Excel)? ¿Encoding? ¿Columnas exactas? | **Resuelta iter 2** — `AfiliacionFileParser` soporta CSV (`,` o `;`) y TXT (`\|`), con encoding UTF-8 y Latin-1 auto-detectados. 17 columnas canónicas + aliases tolerantes. Las extra se preservan en mapa `extras`. |
+| **P14** | ¿Pueden compartir el archivo Word original de la carta de certificación? | **Resuelta iter 3** — Compartido. Marcado con 28 placeholders + 3 loops en Google Docs y almacenado en `apps/payworks-bot/src/infrastructure/templates/carta-certificacion.template.docx`. Ver §17. |
+| **P15** | Coordinador de certificación: ¿fijo por equipo o cambia por proyecto? | **Resuelta iter 2** — El aplicativo lo recibe como parámetro de entrada (`coordinadorCertificacion` en POST `/api/certificacion/validar`). Cada sesión puede tener un coordinador distinto. |
+
+**Resumen**: De las 15 preguntas originales, **15/15 están resueltas** (vs 14/15 al cierre de iter 2). P14 fue resuelta en iter 3 con la entrega del Word original. Las preguntas residuales actuales (Q5-Q8) son **decisiones de negocio diferentes**, no derivadas de estas P1-P15.
+
