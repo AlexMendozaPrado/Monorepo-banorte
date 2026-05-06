@@ -108,24 +108,17 @@ se traduce a bullets adicionales al final de la sección "Notas:".
 - Si `?notas=` se omite o está vacío, el bullet de notas adicionales desaparece
   por completo (no queda un bullet vacío)
 
-## Test 3 — `?format=pdf` preserva fallback legacy
+## Test 3 — `?format=pdf` ya no existe (rollback eliminado)
 
-**Objetivo:** Asegurar que el camino de PDF con jsPDF sigue funcionando para
-clientes que aún lo usen.
+El query param `format` fue removido. Cualquier valor pasado se ignora — el
+endpoint siempre devuelve `.docx`. Verificación rápida:
 
-**Pasos:**
 ```bash
-curl -sS -D /tmp/headers-pdf.txt -o /tmp/carta.pdf \
+curl -sS -D /tmp/headers.txt -o /tmp/carta.bin \
   "http://localhost:3006/api/certificacion/carta/<sessionId>?format=pdf"
-file /tmp/carta.pdf
+grep -i 'content-type' /tmp/headers.txt
+# Debe imprimir: application/vnd.openxmlformats-officedocument.wordprocessingml.document
 ```
-
-**Aceptación:**
-- HTTP `200 OK`
-- Header `Content-Type: application/pdf`
-- Header `Content-Disposition: attachment; filename="<folio>.pdf"`
-- `file` reporta `PDF document, version 1.3, 3 page(s)` (la implementación jsPDF
-  genera 3 páginas)
 
 ## Test 4 — Sesión inexistente devuelve 404
 
@@ -215,14 +208,10 @@ pnpm type-check
   pegar logs a mano si los necesita. Si en el futuro se requiere automatizar,
   hace falta otro loop anidado (`{#logsTransacciones}` con sub-secciones 3DS /
   Servlet / PROSA).
-- **El generador de PDF (`generateCertificationLetterPDF.ts`) sigue activo**
-  como fallback `?format=pdf`. No se eliminó para no romper consumidores
-  legacy. Si el equipo confirma que ya nadie usa PDF, se puede borrar tanto
-  el archivo del generador como el branching del endpoint.
-
-## Rollback
-
-Si el `.docx` rompe en producción y el cliente necesita PDF inmediatamente:
-- El endpoint sigue aceptando `?format=pdf` y devuelve el PDF generado por jsPDF.
-- En la UI, cambiar el `onClick` del botón "Descargar Carta Oficial" a
-  `window.open('/api/certificacion/carta/' + id + '?format=pdf', '_blank')`.
+- **El generador de PDF de la carta** (`generateCertificationLetterPDF.ts`) y
+  el fallback `?format=pdf` fueron **eliminados** en esta rama tras
+  confirmación del equipo de que ya nadie depende del flujo PDF para la carta
+  oficial. La carta ahora es exclusivamente `.docx`. El "Dictamen PDF"
+  (`generateCertificationPDF.ts`, botón "Descargar Dictamen PDF" en la página
+  de resultados) es **otro flujo distinto** y sigue activo — usa la misma dep
+  `jspdf` pero genera un resumen de validación, no la carta oficial.
