@@ -665,3 +665,313 @@ Cada fila representa una pregunta abierta de la revisión v1.0 del 16 de abril d
 
 **Resumen**: De las 15 preguntas originales, **15/15 están resueltas** (vs 14/15 al cierre de iter 2). P14 fue resuelta en iter 3 con la entrega del Word original. Las preguntas residuales actuales (Q5-Q8) son **decisiones de negocio diferentes**, no derivadas de estas P1-P15.
 
+---
+
+## Sección 16 — Anexo B: Diagramas completos
+
+Los **10 diagramas** del documento (8 originales de v2.0 + 2 nuevos en v3.0) se presentan aquí en formato Mermaid editable, para facilitar consulta y mantenimiento.
+
+### Diagrama 1 — Las 4 familias de integración Payworks
+
+Distribución de los 8 productos Payworks en 4 familias funcionales: Familia 1 (TNP directo) con Tradicional V2.5, MOTO V1.5 y Cargos Post V2.1; Familia 2 (Ventana cifrada) con VCE v1.8; Familia 3 (Agregadores) con Agregadores CE V2.6.4 y Agregadores CP V2.6.4; y Familia 4 (Tarjeta Presente) con API PW2 V2.4 e Interredes V1.7. Cada familia tiene sus propias capas transversales activas.
+
+```mermaid
+graph TB
+    F1[Familia 1<br/>TNP directo]
+    F2[Familia 2<br/>Ventana cifrada]
+    F3[Familia 3<br/>Agregadores]
+    F4[Familia 4<br/>Tarjeta Presente]
+
+    F1 --> CE[Comercio Electrónico Tradicional V2.5]
+    F1 --> MO[MOTO V1.5]
+    F1 --> CP[Cargos Periódicos Post V2.1]
+    F1 -.capas opcionales.-> L1[3DS + Cybersource + AN5822]
+
+    F2 --> VCE[Ventana CE v1.8<br/>cifrado AES/CTR]
+    F2 -.capas activas.-> L2[3DS + Cybersource + AN5822]
+
+    F3 --> ACE[Agregadores CE V2.6.4<br/>3 subesquemas]
+    F3 --> ACP[Agregadores CP V2.6.4<br/>rate limit 200 tx/min]
+    F3 -.capas activas.-> L3[3DS + Cybersource + AN5822 + Anexo D]
+
+    F4 --> APW[API PW2 Seguro V2.4]
+    F4 --> IR[Interredes Remoto V1.7]
+    F4 -.capas activas.-> L4[EMV + emvVoucher documental]
+```
+
+### Diagrama 2 — Flujo VCE cifrado AES
+
+Secuencia: Browser comercio → Cifrado AES-256/CTR → `Payment.startPayment()` → Ventana VCE modal → Servlet Payworks (autorizador). El aplicativo extrae los campos no cifrados (headers, response codes) y compara contra las reglas VCE específicas.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser comercio
+    participant C as Cifrado AES-256/CTR
+    participant SDK as Payment.startPayment()
+    participant V as Ventana VCE modal
+    participant S as Servlet Payworks
+    participant DB as PROSA / Cybersource
+
+    B->>C: paymentJson + clave + IV
+    C->>SDK: encryptedPayload
+    SDK->>V: window.open(modalUrl)
+    V->>B: captura tarjetahabiente (dominio Payworks)
+    V->>S: POST con JSON cifrado
+    S->>DB: routing por configuración
+    DB-->>S: response
+    S-->>SDK: afterPayment callback
+    SDK-->>B: notify
+
+    Note over S: Reglas VCE especiales (vce.json)<br/>password R · mode [PRD,AUT] · merchantCity 40<br/>amount 15 · terminalId 15 · merchantId 7
+    Note over C: Brecha documentada:<br/>bot no valida estructura interna del cifrado<br/>(requiere credenciales privadas)
+```
+
+### Diagrama 3 — Flujo TNP directo (Familias 1 y 3 base)
+
+Cadena: Comercio (SDK PHP/Java/.Net) → Servlet Payworks → PROSA autorizador. Logs generados: servlet (request + response key=value) + PROSA 0200/0210 (ISO 8583) + CSV NPAYW.AFILIACIONES + opcionalmente threeds (envío) + threedsResponse (retorno) + Cybersource SOAP.
+
+```mermaid
+graph LR
+    C[Comercio SDK<br/>PHP/Java/.Net]
+    S[Servlet Payworks<br/>valida sintaxis,<br/>mapea a ISO 8583]
+    P[PROSA autorizador<br/>mensaje 0200,<br/>respuesta 0210]
+
+    C -->|POST con MERCHANT_ID,<br/>CONTROL_NUMBER, ...| S
+    S -->|0200| P
+    P -->|0210 + Campo 39 código respuesta| S
+    S -->|response| C
+
+    subgraph Logs generados
+        L1[servlet request+response]
+        L2[PROSA 0200/0210]
+        L3[CSV NPAYW.AFILIACIONES]
+        L4[3DS threeds + threedsResponse]
+        L5[Cybersource SOAP Direct]
+    end
+
+    subgraph Bot — 5 pasos del CertifyCase
+        P1[1. Pipeline 10 niveles]
+        P2[2. C3 REFERENCE = Campo 37]
+        P3[3. C7 unicidad MERCHANT_ID + CONTROL_NUMBER]
+        P4[4. AN5822 si MC]
+        P5[5. Rate Limit si Cargos]
+    end
+```
+
+### Diagrama 4 — Los 3 subesquemas de Agregadores
+
+Tres columnas verticales: ESQ_1 Tasa Natural (sin campos adicionales, ejemplo ZIGU), ESQ_4 con AGP (2 campos: SUB_MERCHANT + AGGREGATOR_ID, ejemplo MUEVE CIUDAD), y ESQ_4 sin AGP (8 campos, ejemplos DLOCAL y OPENLINEA). La detección se hace por presencia de campos en el log.
+
+```mermaid
+graph TB
+    A[Detección AggregatorSchemeDetector] --> B{¿SUB_MERCHANT presente?}
+    B -- No --> C[ESQ_1 Tasa Natural<br/>ZIGU<br/>opera como Tradicional]
+    B -- Sí --> D{¿AGGREGATOR_ID presente?}
+    D -- Sí, sin MERCHANT_NAME --> E[ESQ_4 Con AGP<br/>MUEVE CIUDAD<br/>2 campos extra:<br/>SUB_MERCHANT + AGGREGATOR_ID]
+    D -- Sí, con MERCHANT_NAME --> F[ESQ_4 Sin AGP<br/>DLOCAL / OPENLINEA<br/>8 campos extra:<br/>SUB_MERCHANT + MERCHANT_MCC +<br/>MERCHANT_NAME + MERCHANT_CITY +<br/>MERCHANT_POSTAL + MERCHANT_COUNTRY +<br/>MERCHANT_STATE + MERCHANT_PHONE]
+
+    C --> G[Capas: 3DS + Cybersource opcional]
+    E --> H[Capas: 3DS obligatorio + AnexoD]
+    F --> I[Capas: 3DS + Cybersource + AnexoD]
+```
+
+### Diagrama 5 — Flujo Tarjeta Presente con tags EMV
+
+Horizontal: Chip EMV tarjeta → PinPad VeriFone → SDK Payworks → Servlet Payworks. Dos cajas paralelas: voucher físico con tags visibles (AID, TVR, TSI, APN, AL) y `EMV_TAGS` TLV hex en el servlet. Estrategia dual: `servlet.EMV_TAGS` se valida, `emvVoucher.*` es documental.
+
+```mermaid
+graph LR
+    C[Chip EMV tarjeta<br/>genera ARQC firmada<br/>con llave del emisor]
+    P[PinPad VeriFone<br/>lee chip, captura PIN,<br/>dialoga con SDK por PPGet*]
+    SDK[SDK Payworks<br/>compone EMV_TAGS<br/>TLV hex concatenado]
+    S[Servlet Payworks<br/>enruta a PROSA Interredes<br/>vía red bancaria]
+
+    C --> P --> SDK --> S
+
+    subgraph Voucher físico impreso (documental)
+        V1[AID = 0xA0000000041010<br/>TVR = 0080008000<br/>TSI = F800<br/>APN = MasterCard<br/>AL = ES · TAG 9F12]
+    end
+
+    subgraph Servlet — único campo EMV validado
+        E1[EMV_TAGS = '9F26081234...95050600...9A031234...'<br/>TLV concatenado<br/>regex: ^[0-9A-F]+$<br/>longitud 200-400]
+    end
+
+    SDK -.escribe.-> V1
+    SDK -.compone para envío.-> E1
+
+    Note1[Bot: estrategia dual<br/>servlet.EMV_TAGS validado<br/>emvVoucher.* documental sin envío]
+```
+
+### Diagrama 6 — Capa 3D Secure: Envío vs Retorno
+
+Dos paneles verticales: envío (`threeds`, 13 campos incluyendo `CERTIFICACION_3D=03`) y retorno (`threedsResponse`, 7 campos incluyendo `STATUS_3D=200`, `ECI validValuesByBrand`, `XID` solo VISA/AMEX, `CAVV omitIfEmpty`, `UCAF` solo MC).
+
+```mermaid
+graph TB
+    subgraph "Sección threeds (envío) — 13 campos"
+        T1[CERTIFICACION_3D fixedValue '03']
+        T2[VERSION_3D fixedValue '2']
+        T3[REFERENCIA3D Alfa-num 30, requerida]
+        T4[MARCA_TARJETA VISA / MC / AMEX]
+        T5[TIPO_TARJETA CR=Crédito, DB=Débito]
+        T6[FECHA_EXP MM/AA 5 chars con /]
+        T7[CARD_NUMBER Numérico 16]
+        T8[MERCHANT_ID, TERMINAL_ID, MODE, ...]
+    end
+
+    subgraph "Sección threedsResponse (retorno) — 7 campos"
+        R1[STATUS_3D 200=éxito, distinto=fallo]
+        R2[ECI validValuesByBrand]
+        R3[XID solo VISA 40 / AMEX 28]
+        R4[CAVV VISA 40 / AMEX 28 / MC 28]
+        R5[UCAF solo MC, omitIfEmpty]
+        R6[PARES respuesta estructurada]
+        R7[ERROR_CODE_3D si STATUS != 200]
+    end
+
+    T8 --> POST1[Primer POST hacia Payworks] --> R1
+
+    Note1[REFERENCIA3D del primer POST<br/>= NUMERO_CONTROL del segundo POST<br/>regla cruzada C13 H16 — nuevo iter 3]
+    Note2[ECI por marca regla E7:<br/>VISA validValues 05,06,07<br/>AMEX validValues 05,06,07<br/>MC   validValues 01,02]
+    Note3[Regla E1: omisión condicional<br/>Si XID y/o CAVV retornan Nulo o Blanco,<br/>NO enviar en el POST hacia Payworks]
+```
+
+### Diagrama 7 — Detector AN5822 con 3 flujos oficiales
+
+Árbol de decisión: raíz con detección de marca MasterCard y determinación por `PAYMENT_INFO`. Tres ramas: firstCIT (`PAYMENT_INFO=0`), subseqCIT (`PAYMENT_INFO=3`), subseqMIT (`PAYMENT_INFO=2`). Bajo cada rama se listan IND_PAGO, TIPO_MONTO y COF esperados por producto, siguiendo `productMapping` de `layer-an5822.json`.
+
+```mermaid
+graph TB
+    A[Transacción detectada<br/>MARCA_TARJETA = MC]
+    A --> B{PAYMENT_INFO}
+    B -->|0| C[firstCIT<br/>Primera compra con tarjetahabiente presente]
+    B -->|3| D[subseqCIT<br/>Compra posterior iniciada por el cliente]
+    B -->|2| E[subseqMIT<br/>Recurrente iniciada por el comerciante]
+
+    C --> C1[IND_PAGO = U<br/>TIPO_MONTO = V o F<br/>INFO_PAGO = 0<br/>COF = no aplica]
+    C --> C2[Productos: Tradicional VENTA/PREAUTH/POSTAUTH<br/>MOTO VENTA/PREAUTH/POSTAUTH<br/>Agregadores CE VENTA/PREAUTH/POSTAUTH]
+
+    D --> D1[IND_PAGO = U<br/>TIPO_MONTO = V<br/>INFO_PAGO = 3<br/>COF = no aplica]
+    D --> D2[Productos: Agregadores CE tarjetahabiente vuelve<br/>MOTO/Tradicional en flujo MIT parcial]
+
+    E --> E1[IND_PAGO = R<br/>TIPO_MONTO = F o V<br/>INFO_PAGO = 2<br/>COF = 4]
+    E --> E2[Productos: Cargos Periódicos Post solo VENTA<br/>Agregadores CP solo VENTA<br/>MOTO MIT subsecuente a CIT inicial]
+
+    Note1[Cross-rule C11 H13: coherencia entre flujo declarado y observado<br/>El bot compara matriz Excel declarada vs combinación de campos en logs inferida<br/>Si hay discrepancia, emite ERROR.]
+    Note2[Cross-rule C14 H17 nueva iter 3:<br/>variables MIT/CIT prohibidas en productos no-recurrentes]
+```
+
+### Diagrama 8 — Pipeline de evaluación de campos (10 niveles)
+
+Flujo vertical descendente con 10 niveles de short-circuit. Nivel 1: N/A. Nivel 2: PROHIBITED. Nivel 3: R_PCI. Nivel 4: R presencia obligatoria. Nivel 5: O ausente (PASS). Nivel 6: omitIfEmpty. Nivel 7: vacío rechazado. Nivel 8: FORBIDDEN_CHARS. Nivel 9: fixedValue/validValues/maxLength/regex (con `validValuesByBrand` y `requiredByBrand` v3.0). Nivel 10: mustBeMasked.
+
+```mermaid
+graph TB
+    Start[Campo X en transacción Y, capa Z]
+    Start --> N1{Nivel 1: N/A?}
+    N1 -- Sí --> Skip[OMITIR sin evaluar]
+    N1 -- No --> N2{Nivel 2: PROHIBITED?}
+    N2 -- Sí, con valor --> FAIL2[FAIL prohibited]
+    N2 -- No --> N3{Nivel 3: R_PCI?}
+    N3 -- Sí --> PassPCI[PASS silencioso PCI]
+    N3 -- No --> N4{Nivel 4: R y ausente/vacío?}
+    N4 -- Sí --> FAIL4[FAIL missing]
+    N4 -- No --> N5{Nivel 5: O y ausente?}
+    N5 -- Sí --> PassO[PASS short-circuit]
+    N5 -- No --> N6{Nivel 6: omitIfEmpty y vacío?}
+    N6 -- Sí --> PassOmit[PASS omit]
+    N6 -- No --> N7{Nivel 7: vacío rechazado?}
+    N7 -- Sí --> FAIL7[FAIL empty]
+    N7 -- No --> N8{Nivel 8: FORBIDDEN_CHARS?}
+    N8 -- Sí --> FAIL8[FAIL forbidden_chars]
+    N8 -- No --> N9{Nivel 9: validación semántica}
+    N9 -- fixedValue/validValues/maxLength/regex falla --> FAIL9[FAIL semantic]
+    N9 -- OK --> N10{Nivel 10: mustBeMasked?}
+    N10 -- En claro --> FAIL10[FAIL not_masked]
+    N10 -- OK --> PASS[PASS]
+```
+
+---
+
+### Diagrama 9 — Flujo de generación de carta `.docx` *(nuevo v3.0)*
+
+Visualiza la cadena CertificationLetterData → DocxCertificationLetterRenderer → template oficial con sustitución de 28 placeholders + 3 loops, gate P8 al inicio.
+
+```mermaid
+graph TB
+    UI[UI: Botón Descargar Carta Oficial .docx<br/>en /resultados/id]
+    UI --> URL[GET /api/certificacion/carta/id?notas=...]
+    URL --> Gate{Gate P8:<br/>session.veredicto = APROBADO?}
+    Gate -- No --> Resp409[HTTP 409 - 'No se puede emitir carta hasta APROBADA']
+    Gate -- Sí --> Build[Construir CertificationLetterData]
+
+    Build --> B1[folio = FolioGenerator laboratorio + producto + capas]
+    Build --> B2[filasMatriz = session.results map]
+    Build --> B3[manualesUtilizados según IntegrationType + capas detectadas]
+    Build --> B4[notasAdicionales desde ?notas= split por newline + trim]
+
+    Build --> Renderer[DocxCertificationLetterRenderer]
+    Renderer --> Pizzip[pizzip carga template binario]
+    Pizzip --> Docx[docxtemplater 3.x]
+    Docx --> Sub1[Sustituye 28 placeholders simples]
+    Docx --> Sub2[Loop filasMatriz - clona fila tabla]
+    Docx --> Sub3[Loop manualesUtilizados - clona sub-bullet]
+    Docx --> Sub4[Loop notasAdicionales - clona bullet]
+    Docx --> Buffer[Buffer .docx]
+
+    Buffer --> Resp200[HTTP 200<br/>Content-Type wordprocessingml<br/>Content-Disposition filename folio.docx]
+
+    Note1[Template: 28 placeholders + 3 loops<br/>en carta-certificacion.template.docx]
+    Note2[Cobertura E2E:<br/>04-bundle-ecommerce-3ds-cybersource.cy.ts<br/>asserta gate P8 + filename con folio]
+```
+
+### Diagrama 10 — Árbol de folios por laboratorio *(nuevo v3.0)*
+
+Árbol de decisión del FolioGenerator: 4 laboratorios × producto × capas activas → sufijo del JSON `folio-nomenclatures.json` (xlsx oficial Banorte abril 2026).
+
+```mermaid
+graph TB
+    Root{LaboratoryType}
+    Root -->|CAV| CAV[VIP - Comercios Alto Valor<br/>padding 6 dígitos<br/>recert: VIPR-...]
+    Root -->|ECOMM| ECOMM[E-commerce TNP estándar<br/>padding 7 dígitos]
+    Root -->|AGREGADORES_AGREGADOR| AA[Sufijo prefijo A-]
+    Root -->|AGREGADORES_INTEGRADOR| AI[Sufijo prefijo I-]
+
+    ECOMM --> E1[CE - Tradicional sin 3DS sin CS]
+    ECOMM --> E2[CE3DS - Tradicional con 3DS]
+    ECOMM --> E3[CYB3D - Tradicional con 3DS + CS]
+    ECOMM --> E4[AP - Apple Pay]
+    ECOMM --> E5[CYBEM - Cybersource Enterprise Manual]
+    ECOMM --> E6[VCE 3DS - Ventana CE cifrado, padding 6]
+
+    AA --> A1[A-CE - Agregador CE]
+    AA --> A2[A-CP - Agregador CP]
+    AA --> A3[A-CTLSSINTSEG - Contactless Seguro]
+    AA --> A4[A-INTERSEG - Interredes Seguro]
+
+    AI --> I1[I-CE - Integrador CE]
+    AI --> I2[I-CP - Integrador CP]
+    AI --> I3[I-CTLSSINTSEG]
+    AI --> I4[I-INTERSEG]
+
+    Note1[Formato: PREFIX-CONSECUTIVOPADDED_AFILIACION<br/>ej: CE3DS-0003652_9885405]
+    Note2[Recertificación: si isRecertificacion=true<br/>se usa recertPrefix RCE3DS, RCYB3D, VIPR-...]
+    Note3[Pendientes: API_PW2_SEGURO + INTERREDES_REMOTO puros<br/>FolioGenerator emite PENDIENTE-... bloqueado por Ramsses]
+```
+
+---
+
+## Cómo enviar observaciones
+
+Este documento es la evolución v3.0 del entregable de revisión de reglas. Las observaciones y comentarios sobre cualquiera de las reglas aquí listadas se reciben por correo electrónico y se integran en los siguientes ciclos de auditoría.
+
+### Importante: Cómo enviar observaciones
+
+- **Correo**: alejandro.mendozaprado@banorte.com
+- **Asunto**: `Observaciones Documentación Bot Payworks v3.0 — [su nombre]`
+- **Formato**: Indicar # de regla (ej. A1, D5, F3, **A8**, **H16**, **H17**) + observación.
+- **Ejemplo**: `"D5 — Cargos Periódicos también incluye PREAUTH en el flujo de prueba de afiliaciones 7890000"`
+- Si una regla está correcta, no es necesario mencionarla.
+
+Para los casos Q5-Q8 de decisión de negocio (Sección 14), se agenda una sesión con el equipo de Soporte Técnico Payworks (Ramsses Bautista) en el calendario habitual de certificación. Las respuestas se integrarán en la siguiente versión del documento.
+
