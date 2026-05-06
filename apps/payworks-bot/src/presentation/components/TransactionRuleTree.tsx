@@ -251,7 +251,11 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={cn(status === 'skip' && 'opacity-60')}>
+    <div
+      data-testid={status === 'fail' ? 'rule-line-fail' : `rule-line-${status}`}
+      data-rule-field={field.field}
+      className={cn(status === 'skip' && 'opacity-60')}
+    >
       <div
         role={expandable ? 'button' : undefined}
         tabIndex={expandable ? 0 : undefined}
@@ -304,11 +308,17 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
       </div>
 
       {expandable && expanded && (
-        <div className="mt-1 ml-7 mr-2 mb-1 px-3 py-2 rounded bg-white border border-red-100 text-[11px] space-y-1.5">
+        <div
+          data-testid="rule-expanded-panel"
+          className="mt-1 ml-7 mr-2 mb-1 px-3 py-2 rounded bg-white border border-red-100 text-[11px] space-y-1.5"
+        >
           {field.failReason && (
             <div className="flex gap-2">
               <span className="font-mono text-[10px] uppercase text-banorte-secondary w-20 shrink-0">Categoría</span>
-              <span className="font-mono text-[10px] px-1.5 py-[1px] rounded bg-red-50 text-banorte-error">
+              <span
+                data-testid="fail-reason"
+                className="font-mono text-[10px] px-1.5 py-[1px] rounded bg-red-50 text-banorte-error"
+              >
                 {field.failReason}
               </span>
             </div>
@@ -322,7 +332,7 @@ function RuleLine({ field }: { field: FieldResultResponse }) {
           {field.failDetail && (
             <div className="flex gap-2">
               <span className="font-mono text-[10px] uppercase text-banorte-secondary w-20 shrink-0">Detalle</span>
-              <span className="text-banorte-dark">{field.failDetail}</span>
+              <span data-testid="fail-detail" className="text-banorte-dark">{field.failDetail}</span>
             </div>
           )}
           {field.source && (

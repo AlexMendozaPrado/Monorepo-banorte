@@ -28,4 +28,20 @@ describe('E2E — Bundle 01 DLOCAL (Agregadores CE · Esquema 4 con AGP)', () =>
     // Capa SERVLET presente en al menos una transacción.
     cy.contains('Servlet').should('be.visible');
   });
+
+  it('click sobre un RuleLine fail expande el panel con failReason y failDetail', () => {
+    cy.uploadBundle('01-dlocal-esquema-4-con-agp', 'AGREGADORES_COMERCIO_ELECTRONICO');
+    cy.contains(/resultados|certificaci/i).should('be.visible');
+
+    // El bundle 01 tiene varios fails — abrimos el primer accordion
+    // de transacción para que las reglas sean visibles.
+    cy.get('button,div[role="button"]').contains(/RECHAZADO/i).first().click();
+
+    // Click en la primera RuleLine con verdict FAIL → panel expandido visible.
+    cy.get('[data-testid="rule-line-fail"]').first().click();
+    cy.get('[data-testid="rule-expanded-panel"]').should('be.visible');
+    cy.get('[data-testid="fail-reason"]').should('exist');
+    // failDetail no siempre aparece (depende del tipo de fail) pero sí
+    // failReason — failDetail lo aserta el spec del bundle 04 con cross-rules.
+  });
 });
