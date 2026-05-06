@@ -77,3 +77,91 @@ Además de los 10 manuales, el aplicativo mantiene **4 JSONs consolidados/deriva
 | 12 | `response-rules.json` | Consolidado de reglas de retorno (`RESULTADO_PAYW`, `AUTH_RESULT`, etc.) a partir de 6 fuentes — `compiled-v1.0` del 22-abril-2026. |
 | 13 | `agregadores-integradores-tp.json` *(nuevo v3.0)* | Soporte de Agregadores Integradores Tarjeta Presente (`A-CTLSSINTSEG` / `A-INTERSEG` según nomenclaturas oficiales). |
 | 14 | `layer-tokenizacion.json` *(nuevo v3.0)* | Capa transversal de tokenización — valida consistencia de marca cuando se opera con tokens (`validateTokenizacionBrandConsistency`). |
+
+---
+
+## Sección 0 — Arquitectura del aplicativo
+
+El aplicativo sigue una arquitectura **hexagonal estricta**. El dominio (entidades `Transaction`, `Field`, `Layer`, `MatrixField`, `CertificationSession`, `Afiliacion`, `ValidationResult`, logs servlet/PROSA/3DS/Cybersource) es independiente de adaptadores concretos. Los casos de uso (`RunCertificationUseCase`, `ValidateTransactionFieldsUseCase`, `GetCertificationHistoryUseCase`) coordinan el dominio con la infraestructura. Los adaptadores de entrada (parser de matriz Excel, parsers de logs servlet/PROSA/3DS/Cybersource, parser de CSV de afiliaciones) y los de salida (renderer `.docx`, repositorios in-memory, dashboard web) son reemplazables sin tocar el dominio.
+
+### Estructura de carpetas
+
+```
+apps/payworks-bot/src/
+├── core/
+│   ├── domain/
+│   │   ├── entities/             — Transaction, CertificationSession, Afiliacion, *Log
+│   │   ├── value-objects/        — IntegrationType, CardBrand, LaboratoryType, ValidationLayer, ...
+│   │   └── services/             — CrossFieldValidator, FolioGenerator, An5822Validator, AnexoDValidator, RateLimitValidator
+│   └── application/
+│       └── use-cases/            — RunCertificationUseCase, ValidateTransactionFieldsUseCase
+├── infrastructure/
+│   ├── matrix-parser/            — ExcelMatrixParser
+│   ├── log-parsers/              — PayworksServletLogParser, PayworksProsaLogParser, ThreeDSLogParser, CybersourceLogParser
+│   ├── parsers/                  — AfiliacionFileParser
+│   ├── repositories/             — In-memory (Certification, Transaction, Afiliacion)
+│   ├── templates/                — carta-certificacion.template.docx + DocxCertificationLetterRenderer
+│   ├── mandatory-rules/          — MandatoryFieldsConfig (carga de los 14 JSONs)
+│   └── di/                       — DIContainer
+├── presentation/                  — Componentes React (Header, Stepper, RuleLine, ...) + utils
+├── app/                           — Next.js 14 App Router (api routes + pages)
+├── config/
+│   ├── mandatory-fields/         — 14 JSONs runtime (10 manuales + 4 consolidados)
+│   └── folio-nomenclatures.json  — sufijos por laboratorio × producto × capas (xlsx oficial)
+└── shared/                        — types, mappers
+```
+
+### Las 4 familias de integración
+
+Los 8 productos Payworks se agrupan en cuatro familias funcionales para efectos operativos del aplicativo. *Ver Diagrama 1 en Anexo B*.
+
+| Familia | Modelo | Productos |
+|---|---|---|
+| **Familia 1 — TNP directo** | Tarjeta No Presente directa | Comercio Electrónico Tradicional · MOTO · Cargos Periódicos Post |
+| **Familia 2 — Ventana cifrada** | AES/CTR end-to-end | Ventana de Comercio Electrónico (VCE) v1.8 |
+| **Familia 3 — Agregadores** | TNP + capa Agregador (3 sub-esquemas) | Agregadores Comercio Electrónico · Agregadores Cargos Periódicos |
+| **Familia 4 — Tarjeta Presente (EMV)** | Chip + PinPad | API PW2 Seguro · Interredes Remoto |
+
+### Productos × familia × marcas × capas activas
+
+| Producto | Familia | Marcas soportadas | Capas activas |
+|---|---|---|---|
+| Comercio Electrónico Tradicional | F1 — TNP directo | VISA / MC / **AMEX** | Servlet + 3DS + Cybersource + AN5822 |
+| MOTO | F1 — TNP directo | VISA / MC | Servlet + AN5822 |
+| Cargos Periódicos Post | F1 — TNP directo | VISA / MC | Servlet + AN5822 + Rate Limit |
+| Ventana CE (VCE) | F2 — Ventana cifrada | VISA / MC / AMEX | Servlet + 3DS + Cybersource + AN5822 |
+| Agregadores CE | F3 — Agregadores | VISA / MC | Servlet + Agregador + 3DS + Cybersource + AN5822 |
+| Agregadores CP | F3 — Agregadores | VISA / MC | Servlet + Agregador + AN5822 + Rate Limit |
+| API PW2 Seguro | F4 — Tarjeta Presente | VISA / MC / AMEX | Servlet + EMV |
+| Interredes Remoto | F4 — Tarjeta Presente | VISA / MC / AMEX | Servlet + EMV |
+
+> **Cambio v3.0**: AMEX ahora es marca completa en `CardBrand` (antes solo se reconocía en 3DS para `validValuesByBrand` de ECI). Los productos TNP (Tradicional, API PW2, Interredes) admiten oficialmente AMEX según los manuales V2.5 / V2.4 / V1.7.
+
+### Pipeline de evaluación de campos — 10 niveles en `FieldRequirement.ts`
+
+Cada campo en cada transacción recorre el pipeline de arriba a abajo. El primer nivel que matchea termina la evaluación (short-circuit). Las reglas cruzadas C1-C14 se ejecutan después del pipeline por-campo como capa adicional de coherencia entre campos. El evaluador es agnóstico a la marca — la aplicación resuelve el contexto llamando a `resolveSpecForBrand` antes de invocar al evaluador.
+
+| # | Nivel | Descripción |
+|---|---|---|
+| 1 | **N/A** (Not Applicable) | Si el campo no aplica a esta combinación (tipo × marca × capa), se omite sin evaluar. |
+| 2 | **PROHIBITED** (v5) | Si el campo está marcado como prohibido y trae valor, FAIL. Ej: `IND_PAGO` en CANCELACION debe estar ausente. |
+| 3 | **R_PCI** (presencia silenciosa) | Campos PCI (PASSWORD, SECURITY_CODE, PAN completo) pasan sin loggearse — cumplimiento PCI-DSS Requirement 3. |
+| 4 | **R** (Required) — presencia obligatoria | El campo debe existir en el log y tener valor no vacío. Si está ausente o vacío: FAIL. |
+| 5 | **O** (Opcional) ausente — short-circuit | Si el campo es opcional y está ausente, se considera PASS y se termina la evaluación del pipeline. |
+| 6 | **omitIfEmpty** | Regla E1 clásica: si el campo existe pero llega en blanco, se omite del POST (XID/CAVV nulos en MC). |
+| 7 | **Vacío rechazado** | Si el campo es presente pero vacío, y no está marcado `omitIfEmpty`, el bot lo reporta como FAIL. |
+| 8 | **FORBIDDEN_CHARS** — lista unificada | Se aplica regex unificado (superset). Para Cybersource la verificación de acentos es adicional. |
+| 9 | **Validación semántica** | 9a `fixedValue` · 9b `validValues` (con variantes `byBrand` y nuevo `requiredByBrand` v3.0) · 9c `maxLength` · 9d regex específico. |
+| 10 | **mustBeMasked** | Para CARD_NUMBER en logs se exige enmascaramiento PCI (ej. `518899******7492`). FAIL si aparece en claro. |
+
+> **Cambio v3.0**: el nivel 9 (Validación semántica) ahora soporta `requiredByBrand` para reglas R/O distintas por marca, no solo `validValuesByBrand` como en v2.0. Esto resuelve P9 (revisión Ramsses) — los campos AMEX de TNP (DOMICILIO, CODIGO_POSTAL, TELEFONO, CORREO_ELECTRONICO) ahora son R cuando `CARD_BRAND=AMEX` y O para otras marcas.
+
+*Ver Diagrama 8 en Anexo B para visualización completa del pipeline.*
+
+### Cobertura de tests
+
+- **26 suites** de Jest (`apps/payworks-bot/__tests__/unit/` + `__tests__/integration/regression/`).
+- **387+ tests** unitarios verdes — short-circuit garantiza rendimiento O(1) en casos típicos.
+- **4 specs Cypress E2E** (`__tests__/cypress/e2e/0[1-4]-bundle-*.cy.ts`) cubren los 4 bundles canónicos con assertions de veredicto y conteos PASS/FAIL por capa.
+- **Type-check limpio**: `npx tsc --noEmit` sin errores.
+
