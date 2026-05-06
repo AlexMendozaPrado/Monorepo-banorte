@@ -1,6 +1,7 @@
 export enum CardBrand {
   VISA = 'VISA',
   MASTERCARD = 'MC',
+  AMEX = 'AMEX',
 }
 
 export class CardBrandValueObject {
@@ -19,7 +20,9 @@ export class CardBrandValueObject {
   }
 
   getDisplayName(): string {
-    return this.value === CardBrand.VISA ? 'VISA' : 'MasterCard';
+    if (this.value === CardBrand.VISA) return 'VISA';
+    if (this.value === CardBrand.MASTERCARD) return 'MasterCard';
+    return 'American Express';
   }
 
   static fromString(brand: string): CardBrandValueObject {
@@ -27,6 +30,9 @@ export class CardBrandValueObject {
     if (normalized === 'VISA') return new CardBrandValueObject(CardBrand.VISA);
     if (['MC', 'MASTERCARD', 'MASTER'].includes(normalized)) {
       return new CardBrandValueObject(CardBrand.MASTERCARD);
+    }
+    if (['AMEX', 'AMERICAN EXPRESS', 'AMERICANEXPRESS'].includes(normalized)) {
+      return new CardBrandValueObject(CardBrand.AMEX);
     }
     throw new Error(`Marca de tarjeta no reconocida: ${brand}`);
   }

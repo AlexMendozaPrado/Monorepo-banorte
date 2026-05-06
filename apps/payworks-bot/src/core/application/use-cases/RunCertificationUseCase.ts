@@ -17,6 +17,7 @@ import { FolioGenerator } from '@/core/domain/services/FolioGenerator';
 import { ThreeDSLogEntity } from '@/core/domain/entities/ThreeDSLog';
 import { CybersourceLogEntity } from '@/core/domain/entities/CybersourceLog';
 import { IntegrationType, IntegrationTypeValueObject } from '@/core/domain/value-objects/IntegrationType';
+import { LaboratoryType, LaboratoryTypeValueObject } from '@/core/domain/value-objects/LaboratoryType';
 import { ValidationLayer } from '@/core/domain/value-objects/ValidationLayer';
 import { TransactionTypeValueObject } from '@/core/domain/value-objects/TransactionType';
 import { MandatoryFieldsMatrix } from '@/core/domain/value-objects/MandatoryFieldsMatrix';
@@ -36,9 +37,20 @@ export interface RunCertificationCommand {
   /**
    * Banderas opcionales que afectan el folio generado. `isVIP` distingue
    * Comercios Alto Valor; `isRecertification` aplica el sufijo `R`.
+   *
+   * NOTA (Fase C.4 may-2026): preferir `laboratoryType` cuando esté
+   * disponible — deriva `isVIP` y modifier de forma canónica. `isVIP`
+   * legacy se mantiene para retrocompatibilidad de tests/scripts.
    */
   isVIP?: boolean;
   isRecertification?: boolean;
+  /**
+   * Laboratorio seleccionado por el usuario en el form de nueva
+   * certificación. Determina la nomenclatura del folio (ver
+   * `LaboratoryType.toFolioParams`). Cuando está presente sobrescribe
+   * `isVIP` y agrega `modifier` cuando aplique.
+   */
+  laboratoryType?: LaboratoryType;
 }
 
 export class RunCertificationUseCase {
@@ -135,12 +147,24 @@ export class RunCertificationUseCase {
         }
 
         // --- Optional Cybersource parsing ---
+        // El OrderId en cybersource.log NO es la `referencia` de PROSA (numérica
+        // 12 dígitos) sino el `ID_CYBERSOURCE` que el servlet envía a CS. Si el
+        // servlet expone ese campo, lo usamos para correlar; en caso contrario
+        // caemos al fallback histórico de `txn.referencia` (compat con bundles
+        // donde ambos coinciden). Fix B.4 — revisión Cypress fixtures may-2026.
         let cybersourceLog: CybersourceLogEntity | undefined;
         if (supportsCS && this.logRetrieval.getCybersourceLog) {
           const content = await this.logRetrieval.getCybersourceLog(dbRecord.fechaRecepCte);
           if (content.trim().length > 0) {
+            const cybersourceOrderId =
+              servletLogs.request.getField('ID_CYBERSOURCE') ??
+              servletLogs.request.getField('CYBERSOURCE_ID') ??
+              txn.referencia;
             try {
-              const parsed = this.cybersourceLogParser.parseByOrderId(content, txn.referencia);
+              const parsed = this.cybersourceLogParser.parseByOrderId(
+                content,
+                cybersourceOrderId,
+              );
               cybersourceLog = parsed.request;
             } catch {
               cybersourceLog = undefined;
@@ -249,6 +273,7 @@ export class RunCertificationUseCase {
       command.versionAplicacion,
       command.urlSubdominio,
       folio,
+      command.laboratoryType,
     );
 
     await this.certificationRepo.save(session);
@@ -283,11 +308,19 @@ export class RunCertificationUseCase {
       f => f.field === 'MERCHANT_ID' || f.field === 'ID_AFILIACION',
     )?.value;
 
+    // Si el comando trae laboratoryType (Fase C.4), deriva isVIP/modifier
+    // desde el VO; si no, cae al legacy command.isVIP. Esto preserva los
+    // tests/scripts que aún usan isVIP directo.
+    const labParams = command.laboratoryType
+      ? new LaboratoryTypeValueObject(command.laboratoryType).toFolioParams()
+      : { isVIP: command.isVIP, modifier: undefined as string | undefined };
+
     const result = this.folioGenerator.generate({
       integrationType: command.integrationType,
       has3DS,
       hasCybersource,
-      isVIP: command.isVIP,
+      isVIP: labParams.isVIP,
+      modifier: labParams.modifier,
       isRecertification: command.isRecertification,
       sequential,
       idAfiliacion,

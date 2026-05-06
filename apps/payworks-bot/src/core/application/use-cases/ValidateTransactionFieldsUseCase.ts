@@ -135,6 +135,13 @@ export class ValidateTransactionFieldsUseCase {
         }
       : undefined;
     cross.validateProsaReferenceMatch(command.servletResponse, prosaAsLog);
+    // C13 (E5 revisión Ramsses): REFERENCE_3D = NUMERO_CONTROL Payworks.
+    cross.validateReference3DEqualsControlNumber(
+      command.servletRequest,
+      command.threeDSLog,
+    );
+    // C14 (F revisión Ramsses): variables MIT/CIT no se mezclan entre productos.
+    cross.validateMitCitProductMix(command.integrationType, command.servletRequest);
     cross.validateCybersourceDecisionFlow(command.cybersourceLog);
     cross.validateShipToCountryMatch(command.cybersourceLog, command.servletRequest);
     cross.validateCybersourceIdAndBin(command.servletRequest, command.cybersourceLog);

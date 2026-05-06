@@ -4,6 +4,14 @@ import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowUp, ArrowRight, Upload, FileText } from 'lucide-react';
 import { Button } from '@banorte/ui';
+import { LaboratoryType } from '@/core/domain/value-objects/LaboratoryType';
+
+const LAB_OPTIONS: Array<{ value: LaboratoryType; title: string; desc: string }> = [
+  { value: LaboratoryType.ECOMM, title: 'ECOMM', desc: 'TNP estándar — folios CE, CE3DS, CYB3D, etc.' },
+  { value: LaboratoryType.CAV, title: 'CAV / VIP', desc: 'Comercios Alto Valor — folios VIP-…' },
+  { value: LaboratoryType.AGREGADORES_AGREGADOR, title: 'Agregadores — Agregador', desc: 'Folios A-CE / A-CP / A-CTLSSINTSEG / A-INTERSEG' },
+  { value: LaboratoryType.AGREGADORES_INTEGRADOR, title: 'Agregadores — Integrador', desc: 'Folios I-CE / I-CP / I-CTLSSINTSEG / I-INTERSEG' },
+];
 
 interface IntegrationOption {
   value: string;
@@ -38,6 +46,7 @@ export function UploadCard() {
   const router = useRouter();
   const [selectedIntegration, setSelectedIntegration] = useState(INTEGRATION_OPTIONS[0].value);
   const [selectedMode, setSelectedMode] = useState<'semi' | 'auto'>('semi');
+  const [laboratoryType, setLaboratoryType] = useState<LaboratoryType>(LaboratoryType.ECOMM);
   const [isDragging, setIsDragging] = useState(false);
   const [matrizFile, setMatrizFile] = useState<File | null>(null);
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -85,6 +94,7 @@ export function UploadCard() {
       formData.append('matriz', matrizFile);
       formData.append('integrationType', selectedIntegration);
       formData.append('operationMode', selectedMode);
+      formData.append('laboratoryType', laboratoryType);
       if (coordinador.trim()) formData.append('coordinadorCertificacion', coordinador.trim());
       if (lenguaje.trim()) formData.append('lenguaje', lenguaje.trim());
       if (versionAplicacion.trim()) formData.append('versionAplicacion', versionAplicacion.trim());
@@ -202,6 +212,36 @@ export function UploadCard() {
                   {mode.title}
                 </h3>
                 <p className="text-xs text-banorte-secondary">{mode.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Paso 3.5: Selector de laboratorio (NOMENCLATURAS FOLIOS LABS) */}
+      <div className="flex flex-col gap-3">
+        <h2 className="font-semibold text-base text-banorte-dark">Paso 3.5: Laboratorio</h2>
+        <p className="text-xs text-banorte-secondary">
+          Determina la nomenclatura del folio oficial. Cada laboratorio tiene su
+          propia secuencia (ver NOMENCLATURAS FOLIOS LABS, abr-2026).
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {LAB_OPTIONS.map(opt => {
+            const isSelected = laboratoryType === opt.value;
+            return (
+              <div
+                key={opt.value}
+                data-testid={`lab-${opt.value}`}
+                onClick={() => setLaboratoryType(opt.value)}
+                className={`rounded-card border cursor-pointer px-4 py-3 transition-colors
+                  ${isSelected
+                    ? 'border-banorte-red bg-[#FDF0F1]'
+                    : 'border-[#D1D5D9] bg-white hover:border-banorte-red'}`}
+              >
+                <h3 className={`font-semibold text-sm ${isSelected ? 'text-banorte-red' : 'text-banorte-dark'}`}>
+                  {opt.title}
+                </h3>
+                <p className="text-xs text-banorte-secondary">{opt.desc}</p>
               </div>
             );
           })}

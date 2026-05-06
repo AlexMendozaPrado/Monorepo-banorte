@@ -61,6 +61,54 @@ export class CrossFieldValidator {
     }
   }
 
+  /**
+   * C13 — `REFERENCE_3D` y `NUMERO_CONTROL` deben coincidir.
+   *
+   * Regla E5 de la revisión Ramsses (REVISIÓN DE REGLAS DE VALIDACIÓN BOT
+   * DE CERTIFICACIÓN PAYWORKS, abr-2026):
+   *   "Siempre deben de ser iguales los valores de las variables
+   *   REFERENCE_3D y la variable NÚMERO DE CONTROL de Payworks"
+   *
+   * Aplica solo cuando la transacción incluye 3DS. La fuente de
+   * `REFERENCE_3D` puede estar en el servlet (campo `REFERENCE3D` /
+   * `REFERENCIA3D` enviado por el comercio) o en el log 3DS oficial
+   * (campo `Reference3D`). Se prefiere el del servlet porque ése es el
+   * que el comercio efectivamente envió a Payworks; el log 3DS sirve
+   * como fallback.
+   *
+   * Si ninguno de los dos identifica los campos, la regla es N/A
+   * (transacción sin 3DS).
+   */
+  validateReference3DEqualsControlNumber(
+    servletRequest: LogEntity | undefined,
+    threeDSLog: LogEntity | undefined,
+  ): void {
+    if (!servletRequest) return;
+
+    const reference3D =
+      servletRequest.getField('REFERENCE3D') ??
+      servletRequest.getField('REFERENCIA3D') ??
+      threeDSLog?.getField('Reference3D') ??
+      threeDSLog?.getField('REFERENCE3D');
+    const controlNumber =
+      servletRequest.getField('CONTROL_NUMBER') ??
+      servletRequest.getField('NUMERO_CONTROL');
+
+    // N/A: transacción sin 3DS o servlet sin CONTROL_NUMBER (el segundo
+    // caso lo cubren las reglas mandatorias del producto).
+    if (!reference3D || !controlNumber) return;
+
+    if (reference3D.trim() !== controlNumber.trim()) {
+      this.issues.push({
+        field: 'REFERENCE3D↔CONTROL_NUMBER',
+        rule: 'C13: REFERENCE_3D y NUMERO_CONTROL deben coincidir (E5 revisión Ramsses 2026)',
+        detail: `REFERENCE3D: "${reference3D.trim()}", CONTROL_NUMBER: "${controlNumber.trim()}"`,
+        layer: ValidationLayer.THREEDS,
+        source: 'THREEDS',
+      });
+    }
+  }
+
   validateProsaReferenceMatch(
     servletResponse: LogEntity | undefined,
     prosaResponse: LogEntity | undefined,
@@ -245,6 +293,69 @@ export class CrossFieldValidator {
         detail: 'Transacción MC tokenizada no debe enviar TAVV (criptograma exclusivo de VISA). Manual ADDENDUM I V1.2 p.4.',
         layer: ValidationLayer.TOKENIZACION,
         source: 'TOKENIZACION',
+      });
+    }
+  }
+
+  /**
+   * C14 — Variables MIT/CIT no se mezclan entre productos.
+   *
+   * Regla F de la revisión Ramsses (REVISIÓN DE REGLAS DE VALIDACIÓN BOT
+   * DE CERTIFICACIÓN PAYWORKS, abr-2026):
+   *
+   *   "Se tiene que validar que no se mezclen las variables de MIT/CIT
+   *   entre los tipos de producto, (ejemplo en Comercio Electrónico no
+   *   pueden enviar la variable IND_PAGO = 'R' ya que esta es solo para
+   *   Cargos Recurrentes), otro ejemplo es que en Comercio Electrónico
+   *   no deben de enviar la variable COF = 4 por que esto es solo para
+   *   Cargos Recurrente, se rechazaría la certificación."
+   *
+   * Implementación: si el producto NO es de Cargos Recurrentes y el
+   * servlet contiene `PAYMENT_IND='R'` o `COF='4'`, emite un issue.
+   *
+   * Aceptamos alias en español (`IND_PAGO`) por compatibilidad con
+   * comercios que reusan nombres del manual en su mensajería.
+   *
+   * Productos de Cargos Recurrentes (whitelist):
+   *   - CARGOS_PERIODICOS_POST
+   *   - AGREGADORES_CARGOS_PERIODICOS
+   *
+   * No usamos el An5822FlowDetector aquí porque esto es prevención de
+   * mezcla a nivel producto-variable, no detección de flujo. Si COF=4
+   * aparece en CE, falla aunque el comercio "intentara" declarar un
+   * flujo subseqMIT — el flujo no debería existir en ese producto.
+   */
+  validateMitCitProductMix(
+    integrationType: string,
+    servletRequest: LogEntity | undefined,
+  ): void {
+    if (!servletRequest) return;
+
+    const recurringProducts = new Set([
+      'CARGOS_PERIODICOS_POST',
+      'AGREGADORES_CARGOS_PERIODICOS',
+    ]);
+    if (recurringProducts.has(integrationType)) return; // N/A: producto sí permite MIT/CIT recurrente.
+
+    const indPago =
+      servletRequest.getField('PAYMENT_IND') ??
+      servletRequest.getField('IND_PAGO');
+    if (indPago && indPago.trim() === 'R') {
+      this.issues.push({
+        field: 'PAYMENT_IND',
+        rule: `C14: PAYMENT_IND='R' (Cargo Recurrente) no debe aparecer en producto ${integrationType}`,
+        detail: `Valor 'R' es exclusivo de Cargos Recurrentes (CARGOS_PERIODICOS_POST / AGREGADORES_CARGOS_PERIODICOS). Revisión Ramsses regla F (abr-2026).`,
+        layer: ValidationLayer.AN5822,
+      });
+    }
+
+    const cof = servletRequest.getField('COF');
+    if (cof && cof.trim() === '4') {
+      this.issues.push({
+        field: 'COF',
+        rule: `C14: COF='4' (Cargo Recurrente subseqMIT) no debe aparecer en producto ${integrationType}`,
+        detail: `Valor '4' es exclusivo de Cargos Recurrentes (CARGOS_PERIODICOS_POST / AGREGADORES_CARGOS_PERIODICOS). Revisión Ramsses regla F (abr-2026).`,
+        layer: ValidationLayer.AN5822,
       });
     }
   }

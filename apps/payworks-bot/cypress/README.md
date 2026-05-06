@@ -39,24 +39,29 @@ Cada spec hoy verifica el happy path:
 
 Items pendientes para una segunda iteración:
 
-- [ ] Assertar veredictos específicos (APROBADO / RECHAZADO) por
-  bundle. Hoy el smoke no fija expectativa porque los veredictos
-  pueden cambiar al iterar reglas; conviene snapshotearlos primero.
-- [ ] Assertar conteos exactos de PASS / FAIL por capa para detectar
-  regresiones cuantitativas (ej. el bundle 04 antes generaba ~20
-  POSTAUT 3DS fails que la Fase A.1 eliminó).
-- [ ] Click en una `RuleLine` con verdict FAIL → assertar que el
-  panel expandible (Fase F.2) muestra `failReason`/`failDetail`.
-- [ ] Verificar que la carta PDF se descarga y que el folio
-  generado por `FolioGenerator` (Fase D) aparece en el nombre del
-  archivo.
+- [x] Veredictos específicos por bundle — snapshoteados en B.1
+  (may-2026). Los 4 bundles actuales son RECHAZADO con conteo total
+  esperado (3, 1, 2, 1 tx).
+- [x] Click en `RuleLine` con verdict FAIL → panel expandible con
+  `failReason`. Cubierto en B.2 (spec extra del bundle 01).
+- [x] Botón "Descargar Carta Oficial (.docx)" disabled cuando
+  RECHAZADO + endpoint /carta/:id → 409. Cubierto en B.3 (spec del
+  bundle 04 con gate P8).
+- [ ] **Falta bundle APROBADO** para verificar:
+  - Descarga real del `.docx` (Content-Type, Content-Disposition con
+    folio en filename).
+  - Folio generado por `FolioGenerator` con sufijo correcto del
+    laboratorio + capas activas.
+  - Botón habilitado.
+  Bloqueado: ningún bundle del equipo es happy-path. Cuando llegue
+  uno, el spec va en `0X-bundle-aprobado.cy.ts`.
+- [ ] Conteos exactos de PASS/FAIL **por capa** (Servlet/3DS/CS/AN5822/
+  Tokenización/Anexo D) para regresiones cuantitativas. La página
+  hoy expone `data-testid="type-counter-{TYPE}"` por tipo de
+  transacción pero no por capa. Requiere componente nuevo o
+  agregación en `useCertificationDetail`.
 - [ ] Bundle 06 (Agregadores e Integradores TP V2.4.2) — bloqueado
   por logs reales del equipo Banorte.
-- [ ] Bundle 04 — el servlet log no incluye `CYBERSOURCE_ID` que enlace
-  los txs con `cybersource.log`. Hoy la capa Cybersource no aparece en
-  el árbol aunque el log esté presente. Fix: regenerar `servlet.log` con
-  `CYBERSOURCE_ID` poblado o agregar `MerchantReferenceCode` que coincida
-  con el `txn.referencia`.
 
 ## Notas para el desarrollador
 
