@@ -294,6 +294,7 @@ export default function ResultadosPage() {
             <Download className="w-4 h-4" /> Descargar Dictamen PDF
           </Button>
           <Button
+            data-testid="download-carta-docx"
             variant="primary"
             size="lg"
             className="gap-2"
