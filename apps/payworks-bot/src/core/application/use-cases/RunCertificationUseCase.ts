@@ -147,12 +147,24 @@ export class RunCertificationUseCase {
         }
 
         // --- Optional Cybersource parsing ---
+        // El OrderId en cybersource.log NO es la `referencia` de PROSA (numérica
+        // 12 dígitos) sino el `ID_CYBERSOURCE` que el servlet envía a CS. Si el
+        // servlet expone ese campo, lo usamos para correlar; en caso contrario
+        // caemos al fallback histórico de `txn.referencia` (compat con bundles
+        // donde ambos coinciden). Fix B.4 — revisión Cypress fixtures may-2026.
         let cybersourceLog: CybersourceLogEntity | undefined;
         if (supportsCS && this.logRetrieval.getCybersourceLog) {
           const content = await this.logRetrieval.getCybersourceLog(dbRecord.fechaRecepCte);
           if (content.trim().length > 0) {
+            const cybersourceOrderId =
+              servletLogs.request.getField('ID_CYBERSOURCE') ??
+              servletLogs.request.getField('CYBERSOURCE_ID') ??
+              txn.referencia;
             try {
-              const parsed = this.cybersourceLogParser.parseByOrderId(content, txn.referencia);
+              const parsed = this.cybersourceLogParser.parseByOrderId(
+                content,
+                cybersourceOrderId,
+              );
               cybersourceLog = parsed.request;
             } catch {
               cybersourceLog = undefined;

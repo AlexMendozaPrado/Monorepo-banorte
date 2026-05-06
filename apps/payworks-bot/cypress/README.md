@@ -52,11 +52,12 @@ Items pendientes para una segunda iteración:
   archivo.
 - [ ] Bundle 06 (Agregadores e Integradores TP V2.4.2) — bloqueado
   por logs reales del equipo Banorte.
-- [ ] Bundle 04 — el servlet log no incluye `CYBERSOURCE_ID` que enlace
-  los txs con `cybersource.log`. Hoy la capa Cybersource no aparece en
-  el árbol aunque el log esté presente. Fix: regenerar `servlet.log` con
-  `CYBERSOURCE_ID` poblado o agregar `MerchantReferenceCode` que coincida
-  con el `txn.referencia`.
+- [x] Bundle 04 — capa Cybersource ahora aparece en el árbol. El
+  servlet log siempre tuvo `ID_CYBERSOURCE` poblado, pero el orquestador
+  llamaba `parseByOrderId(content, txn.referencia)` con la referencia de
+  PROSA (numérica) en lugar del OrderId real (alfanumérico = `ID_CYBERSOURCE`
+  del servlet). Fix B.4 (may-2026): `RunCertificationUseCase` ahora prefiere
+  `servletRequest.getField('ID_CYBERSOURCE')` con fallback a `txn.referencia`.
 
 ## Notas para el desarrollador
 
