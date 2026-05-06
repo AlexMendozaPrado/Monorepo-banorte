@@ -424,3 +424,144 @@ Si todas las transacciones pasan → **APROBADO**; si alguna falla → **RECHAZA
 
 *Ver Diagrama 3 en Anexo B para visualización del flujo TNP directo (Familias 1 y 3).*
 
+---
+
+## Sección 17 — Generación de Carta `.docx` desde template oficial
+
+*(Sección nueva en v3.0 — antes era apartado del paso 5 con jsPDF)*
+
+A partir de la iteración 3, el aplicativo emite la **Carta de Certificación Banorte** en formato Microsoft Word `.docx`, generada a partir del template oficial entregado por el equipo de Soporte Técnico Payworks. Esto reemplaza al generador legacy basado en jsPDF, que producía un PDF plano de 3 páginas sin estilos corporativos. El nuevo flujo permite que el certificador realice un último filtro/edición en Word antes de enviar la carta al cliente.
+
+### Componentes
+
+| Componente | Archivo | Responsabilidad |
+|---|---|---|
+| Template oficial | `apps/payworks-bot/src/infrastructure/templates/carta-certificacion.template.docx` | `.docx` Banorte con cover, headers rojos, tabla matriz con bordes rojos, **28 placeholders** + **3 loops** (`filasMatriz`, `manualesUtilizados`, `notasAdicionales`). |
+| Renderer | `apps/payworks-bot/src/infrastructure/templates/DocxCertificationLetterRenderer.ts` | Carga el template binario con `pizzip`, sustituye placeholders/loops con `docxtemplater` 3.x, devuelve un Buffer `.docx`. Capa de traducción `CertificationLetterData → TemplatePayload`. |
+| Endpoint | `apps/payworks-bot/src/app/api/certificacion/carta/[id]/route.ts` | `GET /api/certificacion/carta/[id]?notas=<bullets-newline-separados>`. Aplica gate P8 (409 si ≠ APROBADO), construye `CertificationLetterData` desde `CertificationSession` + afiliación + folio, llama al renderer, retorna `application/vnd.openxmlformats-officedocument.wordprocessingml.document` con `Content-Disposition: attachment; filename="<folio>.docx"`. |
+| UI | `apps/payworks-bot/src/app/resultados/[id]/page.tsx` | Card "Notas adicionales para la carta oficial" con `TextArea` (una nota por línea), botón "Descargar Carta Oficial (.docx)" que abre el endpoint en pestaña nueva (botón deshabilitado si veredicto ≠ APROBADO con tooltip de gate P8). |
+
+### Placeholders del template (28 simples + 3 loops)
+
+| Categoría | Placeholders |
+|---|---|
+| Identificación | `{codigoCertificado}`, `{fechaEmision}`, `{tipoProducto}`, `{esquemaAgregador}` |
+| Comercio | `{nombreComercio}`, `{nombreCliente}`, `{rfc}`, `{numeroCliente}`, `{nombreCertificadorComercio}` |
+| Afiliación | `{numeroAfiliacion}`, `{nombreAfiliacion}` |
+| Integración | `{esquemaIntegracion}`, `{modoTransmision}`, `{mensajeria}`, `{lenguaje}`, `{tarjetasProcesadas}`, `{giro}`, `{transaccionesCertificadas}`, `{modoLectura}`, `{versionAplicacion}` |
+| URL | `{urlSubdominio}` |
+| Operativa | `{transaccionesValidadas}`, `{usuarioCertificacion}` |
+| Firma | `{firmaNombre}`, `{firmaRol}` |
+| Fila matriz (loop) | `{#filasMatriz}…{/filasMatriz}` con `{tipoTransaccion}`, `{descripcion}`, `{resultado}` |
+| Manuales (loop) | `{#manualesUtilizados}{.}{/manualesUtilizados}` |
+| Notas adicionales (loop) | `{#notasAdicionales}{.}{/notasAdicionales}` |
+
+### Flujo de renderizado
+
+1. Cliente hace click en "Descargar Carta Oficial (.docx)" en `/resultados/[id]`.
+2. UI calcula `?notas=` URL-encodeado (líneas separadas por `\n`, trimmed, vacíos eliminados).
+3. Endpoint recibe `GET /api/certificacion/carta/[id]?notas=...`.
+4. **Gate P8**: si `session.getGlobalVerdict() !== APROBADO` → HTTP 409 con error.
+5. Construye `CertificationLetterData` con:
+   - Folio derivado de `FolioGenerator` (Sección 18).
+   - Filas matriz desde `session.results` (loop dinámico).
+   - Manuales utilizados según `IntegrationType` + capas detectadas (THREEDS, CYBERSOURCE).
+   - Notas adicionales desde `?notas=` (parseadas y limpiadas).
+6. Renderer carga template binario, sustituye 28 placeholders + clona filas/items de los 3 loops, genera Buffer `.docx`.
+7. Response: `Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document` + `Content-Disposition: attachment; filename="<folio>.docx"`.
+8. Browser dispara descarga automática del archivo.
+
+### Cobertura E2E
+
+`apps/payworks-bot/__tests__/cypress/e2e/04-bundle-ecommerce-3ds-cybersource.cy.ts` (commit `42de62a`):
+- Asserta que el botón "Descargar Carta Oficial (.docx)" está deshabilitado cuando el veredicto es RECHAZADO (gate P8).
+- Con sesión APROBADA, intercepta el download y valida `Content-Type` y `Content-Disposition` con folio real en el filename.
+
+> **Histórico v3.0**: El template original (PR #21, commit `ed08d08`) tenía bordes faltantes en la fila de datos de la matriz, orden invertido del bullet "Antes de salir a producción..." y el loop `{#notasAdicionales}` posicionado fuera de la sección Notas. PR #23 (commit `f2cd477`) corrigió los 3 problemas: bordes rojos completos en cada celda de fila clonada, "Antes de salir..." como cierre de la sección, y notas adicionales dentro del listado de Notas.
+
+---
+
+## Sección 18 — Folio por laboratorio
+
+*(Sección nueva en v3.0)*
+
+El bot genera folios oficiales determinísticos derivados del `(laboratoryType, integrationType, has3DS, hasCybersource, isRecertificacion, sequential)`. La fuente autoritativa es el archivo **NOMENCLATURAS FOLIOS LABS.xlsx** (v2 abril 2026) entregado por el equipo Banorte, transcrito a `apps/payworks-bot/src/config/folio-nomenclatures.json`.
+
+### Tipos de laboratorio (`LaboratoryType` VO)
+
+```typescript
+enum LaboratoryType {
+  CAV = 'CAV',                                // Comercios Alto Valor / VIP
+  ECOMM = 'ECOMM',                            // E-commerce estándar TNP
+  AGREGADORES_AGREGADOR = 'AGREGADORES_AGREGADOR',
+  AGREGADORES_INTEGRADOR = 'AGREGADORES_INTEGRADOR',
+}
+```
+
+`apps/payworks-bot/src/core/domain/value-objects/LaboratoryType.ts` define el VO. Cada laboratorio tiene su propia secuencia de folios; mezclarlos rompe la trazabilidad operativa. Es **input del usuario** al iniciar una certificación (no se infiere). El selector aparece en `/nueva-certificacion` antes del selector de IntegrationType.
+
+### Estructura de `folio-nomenclatures.json`
+
+```jsonc
+{
+  "_meta": { /* fuente xlsx, padding default 7, vipPlaceholder 6, vceCifrado3ds 6 */ },
+  "ecomm":         [ { match: {…}, label, prefix, recertPrefix, padding } ],
+  "vip":           [ /* mismo schema */ ],
+  "agregadores":   [ /* mismo schema */ ],
+  "pendingFromTeam": [ /* productos sin nomenclatura confirmada */ ]
+}
+```
+
+### Sufijos por laboratorio × producto × capas (extracto)
+
+#### Laboratorio ECOMM (TNP estándar)
+
+| Producto | Capas | Prefijo | Recert prefix | Padding |
+|---|---|---|---|---|
+| Comercio Electrónico Tradicional | (sin 3DS, sin CS) | `CE` | `RCE` | 7 |
+| Comercio Electrónico Tradicional | con 3DS | `CE3DS` | `RCE3DS` | 7 |
+| Comercio Electrónico Tradicional | con 3DS + Cybersource | `CYB3D` | `RCYB3D` | 7 |
+| Comercio Electrónico Tradicional | Apple Pay | `AP` | `RAP` | 7 |
+| Comercio Electrónico Tradicional | Cybersource Enterprise Manual | `CYBEM` | — | 7 |
+| MOTO | — | (ver `ecomm[]`) | — | 7 |
+| Cargos Periódicos Post | — | `CPP` | `RCPP` | 7 |
+| Ventana CE | con 3DS cifrado | (especial) | — | **6** |
+
+#### Laboratorio CAV (VIP / Comercios Alto Valor)
+
+Folios `VIP-…` y recertificación `VIPR-…`. Padding 6 dígitos en lugar de 7. Aplica a productos de alto volumen o estratégicos para Banorte.
+
+#### Laboratorio AGREGADORES_AGREGADOR
+
+| Producto | Sufijo | Ejemplo |
+|---|---|---|
+| Agregador Comercio Electrónico | `A-CE` | `A-CE-0000001` |
+| Agregador Cargos Periódicos | `A-CP` | `A-CP-0000001` |
+| Agregador Contactless Seguro | `A-CTLSSINTSEG` | `A-CTLSSINTSEG-0000001` |
+| Agregador Interredes Seguro | `A-INTERSEG` | `A-INTERSEG-0000001` |
+
+#### Laboratorio AGREGADORES_INTEGRADOR
+
+Mismos sufijos que AGREGADORES_AGREGADOR pero con prefijo `I-` en lugar de `A-`:
+
+| Producto | Sufijo |
+|---|---|
+| Integrador Comercio Electrónico | `I-CE` |
+| Integrador Cargos Periódicos | `I-CP` |
+| Integrador Contactless Seguro | `I-CTLSSINTSEG` |
+| Integrador Interredes Seguro | `I-INTERSEG` |
+
+### Recertificación
+
+Cada entrada en `folio-nomenclatures.json` define `recertPrefix` (ej. `RCE`, `RCE3DS`, `VIPR-…`). Cuando `isRecertificacion=true`, el `FolioGenerator` usa este prefijo en lugar del estándar.
+
+### Pendientes
+
+- **API PW2 Seguro** e **Interredes Remoto** puros (no agregadores) — el xlsx no tiene fila clara para estos productos cuando no son operados por agregador. El `FolioGenerator` emite `PENDIENTE-…` para ellos. Bloqueado por confirmación del equipo Banorte.
+
+### Tests
+
+`apps/payworks-bot/__tests__/unit/services/FolioGenerator.test.ts` valida round-trip de los 4 laboratorios contra los sufijos del xlsx.
+
+*Ver Diagrama 10 en Anexo B para visualización del árbol de decisión de folios.*
+
