@@ -448,7 +448,16 @@ export function UploadCard() {
 
       {/* CTA */}
       <div className="flex justify-end mt-4">
-        <Button data-testid="submit-certification" variant="primary" size="lg" className="gap-2" onClick={handleSubmit} disabled={isLoading}>
+        <Button
+          data-testid="submit-certification"
+          variant="primary"
+          size="lg"
+          className="gap-2"
+          type="button"
+          onClick={handleSubmit}
+          disabled={isLoading}
+          isLoading={isLoading}
+        >
           {isLoading ? 'Procesando...' : 'Iniciar Certificacion'}
           {!isLoading && <ArrowRight className="w-4 h-4" strokeWidth={2.5} />}
         </Button>
