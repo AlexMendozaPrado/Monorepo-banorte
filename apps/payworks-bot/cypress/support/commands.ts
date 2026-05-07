@@ -28,12 +28,23 @@ declare global {
         integration: string,
         options?: UploadBundleOptions,
       ): Chainable<void>;
+      /**
+       * Como `uploadBundle` pero SIN hacer click en submit ni esperar
+       * navegación. Útil para tests que quieren controlar manualmente
+       * la latencia del endpoint con `cy.intercept`, hacer click una
+       * sola vez y asertar estados intermedios (loading, error banner).
+       */
+      fillCertificationForm(
+        slug: string,
+        integration: string,
+        options?: UploadBundleOptions,
+      ): Chainable<void>;
     }
   }
 }
 
 Cypress.Commands.add(
-  'uploadBundle',
+  'fillCertificationForm',
   (
     slug: string,
     integration: string,
@@ -45,8 +56,6 @@ Cypress.Commands.add(
 
     // Selección del producto.
     cy.get(`[data-testid="integration-${integration}"]`).click();
-
-    // Modo semi por defecto.
 
     // Archivos requeridos.
     cy.get('[data-testid="upload-matriz"]').attachFile(`${base}/matriz.xlsx`);
@@ -64,6 +73,17 @@ Cypress.Commands.add(
 
     // Afiliaciones (todos los bundles canónicos la incluyen).
     cy.get('[data-testid="upload-afiliaciones"]').attachFile(`${base}/afiliaciones.csv`);
+  },
+);
+
+Cypress.Commands.add(
+  'uploadBundle',
+  (
+    slug: string,
+    integration: string,
+    options: Cypress.UploadBundleOptions = {},
+  ) => {
+    cy.fillCertificationForm(slug, integration, options);
 
     // Disparar certificación.
     cy.get('[data-testid="submit-certification"]').click();
